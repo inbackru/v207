@@ -1,0 +1,83 @@
+User-agent: *
+Allow: /
+
+# Закрытые разделы (не для индексации)
+Disallow: /admin/
+Disallow: /manager/
+Disallow: /auth/
+Disallow: /p_/
+Disallow: /uploads/
+Disallow: /static/temp/
+Disallow: /login
+Disallow: /register
+Disallow: /logout
+Disallow: /invite/
+Disallow: /wallet
+Disallow: /profile/
+Disallow: /api/
+Disallow: /debug/
+
+# Низкоценные URL-параметры — экономия crawl budget
+# (ноиндекс уже выставляется в meta-robots, здесь — для crawl budget)
+Disallow: /*?price_min=
+Disallow: /*?price_max=
+Disallow: /*?price_sqm_min=
+Disallow: /*?price_sqm_max=
+Disallow: /*?area_min=
+Disallow: /*?area_max=
+Disallow: /*?completion=
+Disallow: /*?building_status=
+Disallow: /*?print=
+Disallow: /*?floor_min=
+Disallow: /*?floor_max=
+Disallow: /*?sort=
+Disallow: /*?view=
+Disallow: /*?tab=
+Disallow: /*?modal=
+# ВАЖНО: /*?page= НЕ блокируем — боты должны обходить пагинацию
+# чтобы обнаруживать объекты на страницах 2+.
+# noindex на page>1 выставляется через meta-robots в шаблоне.
+
+# Технические страницы
+Disallow: /*?*replit*
+
+# Разрешаем важные статические ресурсы
+Allow: /static/css/
+Allow: /static/js/
+Allow: /static/images/
+Allow: /static/webfonts/
+
+# Карты сайта (глобальные директивы)
+Sitemap: https://inback.ru/sitemap-index.xml
+
+# --- Googlebot ---
+User-agent: Googlebot
+Crawl-delay: 1
+
+# --- Yandex ---
+User-agent: Yandex
+Crawl-delay: 1
+Host: inback.ru
+
+# --- Bing ---
+User-agent: Bingbot
+Crawl-delay: 2
+
+# --- Блокировка агрессивных SEO-ботов (экономия трафика) ---
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /

@@ -1,0 +1,2090 @@
+{% extends "admin/base.html" %}
+{% block title %}Управление парсером — ЦИАН{% endblock %}
+{% block content %}
+<div class="space-y-6">
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- Прокси изображений ЦИАН                                   -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="bg-white shadow rounded-lg p-5">
+    <div class="flex items-center justify-between flex-wrap gap-4">
+      <div>
+        <h2 class="text-base font-semibold text-gray-900 flex items-center gap-2">
+          🖼️ Прокси изображений ЦИАН
+          <span id="img-proxy-badge" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-400">…</span>
+        </h2>
+        <p class="text-sm text-gray-500 mt-0.5">
+          Когда включён — все <code class="bg-gray-100 px-1 rounded text-xs">cdn-cian.ru</code> ссылки в HTML/JSON заменяются на
+          <code class="bg-gray-100 px-1 rounded text-xs">/api/img-proxy?t=…</code>.
+          Отключите для ускорения тестирования — браузер будет грузить фото напрямую с ЦИАН.
+        </p>
+      </div>
+      <button id="img-proxy-toggle-btn"
+              onclick="toggleImageProxy()"
+              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition-colors duration-150 focus:outline-none">
+        <span id="img-proxy-toggle-icon">…</span>
+        <span id="img-proxy-toggle-label">Загрузка…</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- Центр управления городами                                  -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="bg-white shadow rounded-lg p-6">
+    <div class="flex items-center justify-between flex-wrap gap-3 mb-5">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">🌍 Центр управления парсером ЦИАН</h1>
+        <p class="text-gray-500 mt-1 text-sm">Запускайте сбор данных по любому городу — полный прогон, цены или обогащение ЖК.</p>
+      </div>
+      <button onclick="loadCitiesStats()" class="text-sm text-[#0088CC] hover:text-[#006699] font-medium">↺ Обновить статистику</button>
+    </div>
+
+    <!-- Cities grid -->
+    <div id="cities-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Rendered by JS -->
+      <div class="col-span-full text-center py-8 text-gray-400 text-sm">Загрузка...</div>
+    </div>
+  </div>
+
+  <!-- City log modal -->
+  <div id="city-log-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl mx-4 flex flex-col" style="max-height:85vh;">
+      <div class="flex items-center justify-between p-4 border-b">
+        <div>
+          <h3 class="font-semibold text-gray-900" id="city-log-title">Лог</h3>
+          <div class="flex items-center gap-2 mt-0.5">
+            <span id="city-log-status-badge" class="hidden items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+              <span class="inline-block w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> Выполняется
+            </span>
+          </div>
+        </div>
+        <button onclick="closeCityLog()" class="text-gray-400 hover:text-gray-600 text-xl font-bold leading-none">×</button>
+      </div>
+      <pre id="city-log-content"
+           class="bg-gray-900 text-green-400 text-xs p-4 overflow-auto flex-1 whitespace-pre-wrap font-mono leading-relaxed rounded-b-xl"
+           style="min-height:300px;">Загрузка...</pre>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- 📊 Статистика базы данных в реальном времени              -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="bg-white shadow rounded-lg p-6">
+    <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
+      <div>
+        <h2 class="text-lg font-semibold text-gray-900">📊 Статистика базы данных</h2>
+        <p class="text-gray-500 text-sm mt-0.5">Застройщики, ЖК, корпуса, квартиры — обновляется в реальном времени</p>
+      </div>
+      <button onclick="loadFullStats()" class="text-sm text-[#0088CC] hover:text-[#006699] font-medium">↺ Обновить</button>
+    </div>
+    <!-- Итого -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5" id="fs-totals">
+      <div class="rounded-xl p-4 bg-blue-50 border border-blue-100 text-center">
+        <div class="text-2xl font-bold text-[#0088CC]" id="fs-total-devs">—</div>
+        <div class="text-xs text-blue-700 mt-1 font-medium">Застройщиков</div>
+      </div>
+      <div class="rounded-xl p-4 bg-green-50 border border-green-100 text-center">
+        <div class="text-2xl font-bold text-green-700" id="fs-total-rc">—</div>
+        <div class="text-xs text-green-700 mt-1 font-medium">ЖК</div>
+      </div>
+      <div class="rounded-xl p-4 bg-amber-50 border border-amber-100 text-center">
+        <div class="text-2xl font-bold text-amber-700" id="fs-total-bld">—</div>
+        <div class="text-xs text-amber-700 mt-1 font-medium">Корпусов</div>
+      </div>
+      <div class="rounded-xl p-4 bg-purple-50 border border-purple-100 text-center">
+        <div class="text-2xl font-bold text-purple-700" id="fs-total-apt">—</div>
+        <div class="text-xs text-purple-700 mt-1 font-medium">Квартир</div>
+      </div>
+    </div>
+    <!-- По городам -->
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-left text-xs text-gray-500 border-b border-gray-200">
+            <th class="pb-2 font-semibold">Город</th>
+            <th class="pb-2 font-semibold text-right">Застройщики</th>
+            <th class="pb-2 font-semibold text-right">ЖК</th>
+            <th class="pb-2 font-semibold text-right">Корпуса</th>
+            <th class="pb-2 font-semibold text-right">Квартиры</th>
+            <th class="pb-2 font-semibold text-right">Обновлено</th>
+            <th class="pb-2 font-semibold text-center">Статус</th>
+          </tr>
+        </thead>
+        <tbody id="fs-city-rows">
+          <tr><td colspan="7" class="py-4 text-center text-gray-400 text-xs">Загрузка...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- 🔍 Поиск CIAN региона для любого города                  -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="bg-white shadow rounded-lg p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-1">🔍 Найти CIAN регион для любого города</h2>
+    <p class="text-gray-500 text-sm mb-3">Два способа найти регион:</p>
+
+    <!-- Way 1: Paste CIAN URL -->
+    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-3">
+      <div class="flex items-start gap-2 mb-2">
+        <span class="bg-[#0088CC] text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
+        <div class="flex-1">
+          <p class="text-sm font-medium text-gray-800">Вставьте URL со страницы CIAN <span class="text-[#0088CC]">(самый надёжный способ)</span></p>
+          <p class="text-xs text-gray-500 mt-0.5">На cian.ru откройте «Новостройки» → выберите нужный город/район → скопируйте URL из адресной строки</p>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <input id="cian-url-input" type="text"
+               placeholder="https://krasnodar.cian.ru/newobjects/list/?...&region=176134"
+               class="flex-1 border border-blue-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] focus:border-[#0088CC] outline-none bg-white"
+               oninput="onCianUrlInput(this.value)"
+               onkeydown="if(event.key==='Enter')findCianRegion()">
+        <button id="btn-find-region" onclick="findCianRegion()"
+                class="bg-[#0088CC] hover:bg-[#006699] text-white px-5 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">
+          🔍 Проверить
+        </button>
+      </div>
+      <div id="cian-url-parsed" class="hidden mt-2 text-xs text-green-700 font-medium"></div>
+    </div>
+
+    <!-- Way 2: City name search -->
+    <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-4">
+      <div class="flex items-start gap-2 mb-2">
+        <span class="bg-gray-400 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
+        <p class="text-sm font-medium text-gray-700">Или введите название города — система попробует найти поддомен автоматически</p>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-2">
+        <input id="cian-city-name" type="text" placeholder="Например: Ростов-на-Дону"
+               class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] outline-none"
+               onkeydown="if(event.key==='Enter')findCianRegion()">
+        <input id="cian-subdomain" type="text" placeholder="rostov-na-donu (поддомен CIAN)"
+               class="flex-1 sm:w-52 sm:flex-none border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] outline-none"
+               onkeydown="if(event.key==='Enter')findCianRegion()">
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div id="cian-lookup-result" class="hidden"></div>
+
+    <!-- Add City Modal -->
+    <div id="cian-add-city-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50">
+      <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-y-auto" style="max-height:90vh;">
+        <div class="flex items-center justify-between p-5 border-b">
+          <h3 class="font-bold text-gray-900 text-lg">➕ Добавить новый город</h3>
+          <button onclick="closeCianAddModal()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none font-bold">×</button>
+        </div>
+        <div class="p-5 space-y-3">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Название (RU) *</label>
+              <input id="cam-name" type="text" placeholder="Ростов-на-Дону"
+                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Slug (EN) *</label>
+              <input id="cam-name-en" type="text" placeholder="rostov-na-donu"
+                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] outline-none">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">CIAN Region ID *</label>
+              <input id="cam-cian-id" type="number" placeholder="4998"
+                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Макс. страниц</label>
+              <input id="cam-pages" type="number" value="30" min="1" max="200"
+                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] outline-none">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">Регион (субъект РФ)</label>
+            <input id="cam-region" type="text" placeholder="Ростовская область"
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] outline-none">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Широта (lat)</label>
+              <input id="cam-lat" type="number" step="0.0001" placeholder="47.2357"
+                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Долгота (lon)</label>
+              <input id="cam-lon" type="number" step="0.0001" placeholder="39.7015"
+                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] outline-none">
+            </div>
+          </div>
+          <p class="text-xs text-gray-500">Координаты нужны для точного определения города на карте. Найдите их на <a href="https://yandex.ru/maps" target="_blank" class="text-[#0088CC] underline">Яндекс Картах</a>.</p>
+          <div id="cam-status" class="hidden p-3 rounded-lg text-sm"></div>
+        </div>
+        <div class="flex gap-3 p-5 border-t bg-gray-50 rounded-b-xl">
+          <button onclick="closeCianAddModal()" class="flex-1 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-100">Отмена</button>
+          <button id="cam-btn-save" onclick="saveCianCity(false)"
+                  class="flex-1 bg-[#0088CC] hover:bg-[#006699] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">💾 Сохранить</button>
+          <button id="cam-btn-save-run" onclick="saveCianCity(true)"
+                  class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">▶ Сохранить и запустить</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Unified quick-run panel — picks city from selector -->
+  <div class="bg-white shadow rounded-lg p-6">
+    <div class="flex items-center justify-between flex-wrap gap-4 mb-4">
+      <div>
+        <h2 class="text-xl font-bold text-gray-900">⚡ Быстрый запуск</h2>
+        <p class="text-gray-500 mt-1 text-sm">Выберите город и режим — всё работает одинаково для любого города.</p>
+      </div>
+    </div>
+    <div class="flex flex-wrap items-center gap-3">
+      <select id="quick-city-select" class="border border-gray-300 rounded-lg px-3 py-2 text-sm font-medium bg-white focus:ring-2 focus:ring-[#0088CC] outline-none">
+        {% for cid, cfg in cities.items() %}
+        <option value="{{ cid }}">{{ cfg.name }}</option>
+        {% endfor %}
+      </select>
+      <button onclick="quickStart('full')"
+              class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg font-medium transition-colors">
+        🏗️ Полный прогон
+      </button>
+      <button onclick="quickStart('prices')"
+              class="bg-[#0088CC] hover:bg-[#006699] text-white px-5 py-2 rounded-lg font-medium transition-colors">
+        ⚡ Обновить цены
+      </button>
+      <button onclick="quickStart('jk')"
+              class="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2 rounded-lg font-medium transition-colors">
+        🖼️ Обогащение ЖК
+      </button>
+      <button id="btn-stop" onclick="stopEnrichment()"
+              class="hidden bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg font-medium transition-colors">
+        ⏹ Остановить (Краснодар)
+      </button>
+      <button id="btn-reset" onclick="resetCache()"
+              class="border border-gray-300 text-gray-600 hover:bg-gray-50 px-4 py-2 rounded-lg font-medium transition-colors text-sm">
+        🔄 Сбросить кэш Краснодар
+      </button>
+      <button id="btn-propagate" onclick="propagateAddresses()"
+              class="border border-blue-400 text-blue-700 hover:bg-blue-50 px-4 py-2 rounded-lg font-medium transition-colors text-sm">
+        📍 Синхронизировать адреса квартир
+      </button>
+    </div>
+    <p class="text-xs text-gray-400 mt-3">💡 «Синхронизировать адреса квартир» — переносит округ/микрорайон/улицу из ЖК в связанные квартиры. Запускать после обогащения ЖК.</p>
+  </div>
+
+  <!-- Live DB Stats -->
+  <div class="bg-white shadow rounded-lg p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold text-gray-800">📊 Объекты в базе данных</h2>
+      <div class="flex items-center gap-3">
+        <span id="db-live-badge" class="hidden items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-200">
+          <span class="inline-block w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> Обновляется в реальном времени
+        </span>
+        <button onclick="refreshDbStats()" class="text-sm text-blue-600 hover:text-blue-800">↺ Обновить</button>
+      </div>
+    </div>
+
+    <!-- Big live counters -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+      <div class="rounded-xl p-5 bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 text-center">
+        <div class="text-3xl font-bold text-blue-700" id="db-apt-count">—</div>
+        <div class="text-sm text-blue-600 mt-1 font-medium">Квартир в базе</div>
+        <div class="text-xs text-blue-500 mt-0.5" id="db-apt-delta"></div>
+      </div>
+      <div class="rounded-xl p-5 bg-gradient-to-br from-indigo-50 to-indigo-100 border border-indigo-200 text-center">
+        <div class="text-3xl font-bold text-indigo-700" id="db-jk-count">—</div>
+        <div class="text-sm text-indigo-600 mt-1 font-medium">ЖК в базе</div>
+      </div>
+      <div class="rounded-xl p-5 bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-200 text-center">
+        <div class="text-3xl font-bold text-emerald-700" id="db-saved-run">—</div>
+        <div class="text-sm text-emerald-600 mt-1 font-medium">Сохранено за прогон</div>
+      </div>
+      <div class="rounded-xl p-5 bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 text-center">
+        <div class="text-3xl font-bold text-amber-700" id="parse-phase">—</div>
+        <div class="text-sm text-amber-600 mt-1 font-medium">Текущая фаза</div>
+      </div>
+    </div>
+
+    <!-- Last batch save -->
+    <div id="last-batch-wrap" class="hidden mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-800 font-mono">
+      <span class="font-semibold text-green-700">💾 Последняя запись:</span>
+      <span id="last-batch-text"></span>
+    </div>
+
+    <!-- Progress bar (Phase 1b segments) -->
+    <div id="progress-wrap" class="hidden">
+      <div class="flex justify-between items-center mb-1">
+        <span class="text-sm font-medium text-gray-700" id="progress-label">Сбор данных...</span>
+        <span class="text-sm font-semibold text-gray-900" id="progress-pct">0%</span>
+      </div>
+      <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+        <div id="progress-bar"
+             class="h-4 rounded-full transition-all duration-700 ease-out bg-gradient-to-r from-blue-500 to-blue-600"
+             style="width:0%"></div>
+      </div>
+      <div class="flex justify-between text-xs text-gray-500 mt-1">
+        <span id="progress-detail"></span>
+        <span id="progress-speed"></span>
+      </div>
+    </div>
+
+    <!-- Running indicator -->
+    <div id="running-indicator" class="hidden mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+      <div class="flex items-center justify-between gap-3 flex-wrap">
+        <div class="flex items-center gap-3">
+          <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-yellow-600"></div>
+          <div>
+            <div class="font-medium text-yellow-800">Обогащение выполняется...</div>
+            <div class="text-sm text-yellow-700" id="running-detail">Запущен фоновый процесс</div>
+          </div>
+        </div>
+        <button onclick="stopEnrichment()"
+                class="text-sm bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1.5 rounded-lg font-medium transition-colors">
+          ⏹ Остановить после текущего ЖК
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase status cards (cache info) -->
+  <div class="bg-white shadow rounded-lg p-6">
+    <h2 class="text-lg font-semibold text-gray-800 mb-4">🔄 Статус текущего прогона (кэш)</h2>
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3" id="status-cards">
+      <div class="rounded-lg p-3 bg-blue-50 text-center">
+        <div class="text-xl font-bold text-blue-700" id="st-phase">—</div>
+        <div class="text-xs text-blue-600 mt-0.5">Фаза</div>
+      </div>
+      <div class="rounded-lg p-3 bg-indigo-50 text-center">
+        <div class="text-xl font-bold text-indigo-700" id="st-jk-count">—</div>
+        <div class="text-xs text-indigo-600 mt-0.5">ЖК найдено</div>
+      </div>
+      <div class="rounded-lg p-3 bg-sky-50 text-center">
+        <div class="text-xl font-bold text-sky-700" id="st-jk-done">—</div>
+        <div class="text-xs text-sky-600 mt-0.5">ЖК обработано</div>
+      </div>
+      <div class="rounded-lg p-3 bg-orange-50 text-center">
+        <div class="text-xl font-bold text-orange-700" id="st-apt-count">—</div>
+        <div class="text-xs text-orange-600 mt-0.5">Квартир в кэше</div>
+      </div>
+      <div class="rounded-lg p-3 bg-gray-50 text-center">
+        <div class="text-xl font-bold text-gray-700" id="st-db-total">—</div>
+        <div class="text-xs text-gray-600 mt-0.5">ЖК в базе всего</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- Секция: Парсинг одного ЖК по URL                         -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="bg-white shadow rounded-lg p-6">
+    <h2 class="text-lg font-semibold text-gray-800 mb-1">🔗 Парсинг конкретного ЖК по URL</h2>
+    <p class="text-sm text-gray-500 mb-4">Укажите ссылку на страницу ЖК на ЦИАН — парсер соберёт фото, описание, застройщика и квартиры.</p>
+    <div class="flex flex-col sm:flex-row gap-3 items-start">
+      <input id="single-jk-url" type="url"
+             placeholder="https://zhk-example-krasnodar-i.cian.ru/"
+             class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono">
+      <select id="single-jk-city" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 bg-white">
+        {% for cid, cfg in cities.items() %}
+        <option value="{{ cid }}">{{ cfg.name }}</option>
+        {% endfor %}
+      </select>
+      <button onclick="parseSingleJK()" id="btn-parse-single"
+              class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg font-medium transition-colors whitespace-nowrap">
+        ▶ Парсить ЖК
+      </button>
+    </div>
+    <div id="single-jk-status" class="hidden mt-3 p-3 rounded-lg text-sm"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- Секция: Обновление пустых ЖК                             -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="bg-white shadow rounded-lg p-6">
+    <div class="flex items-center justify-between flex-wrap gap-4 mb-4">
+      <div>
+        <h2 class="text-lg font-semibold text-gray-800 mb-1">🖼️ Обновить ЖК без фото / описания</h2>
+        <p class="text-sm text-gray-500">Запустить парсер только по тем ЖК у которых отсутствуют фото или описание.</p>
+      </div>
+      <button onclick="loadEmptyStats()" class="text-sm text-blue-600 hover:text-blue-800 whitespace-nowrap">↺ Обновить счётчик</button>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5" id="empty-stats">
+      <div class="rounded-lg p-3 bg-red-50 text-center">
+        <div class="text-xl font-bold text-red-700" id="es-both">—</div>
+        <div class="text-xs text-red-600 mt-0.5">Без фото И описания</div>
+      </div>
+      <div class="rounded-lg p-3 bg-orange-50 text-center">
+        <div class="text-xl font-bold text-orange-700" id="es-photo">—</div>
+        <div class="text-xs text-orange-600 mt-0.5">Без фото</div>
+      </div>
+      <div class="rounded-lg p-3 bg-yellow-50 text-center">
+        <div class="text-xl font-bold text-yellow-700" id="es-desc">—</div>
+        <div class="text-xs text-yellow-600 mt-0.5">Без описания</div>
+      </div>
+      <div class="rounded-lg p-3 bg-gray-50 text-center">
+        <div class="text-xl font-bold text-gray-700" id="es-total">—</div>
+        <div class="text-xs text-gray-600 mt-0.5">Всего активных ЖК</div>
+      </div>
+    </div>
+    <div class="flex flex-wrap gap-3">
+      <button onclick="fixEmpty('no_photo_no_desc')"
+              class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+        ▶ Без фото и описания
+      </button>
+      <button onclick="fixEmpty('no_photo')"
+              class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+        ▶ Без фото
+      </button>
+      <button onclick="fixEmpty('no_desc')"
+              class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+        ▶ Без описания
+      </button>
+    </div>
+    <p class="text-xs text-gray-400 mt-3">Процесс запускается в фоне. Прогресс виден в логе ниже.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- Лог                                                       -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="bg-white shadow rounded-lg p-6">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-3">
+        <h2 class="text-lg font-semibold text-gray-800">📋 Лог последнего запуска</h2>
+        <span id="log-live-badge" class="hidden items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+          <span class="inline-block w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> LIVE
+        </span>
+      </div>
+      <div class="flex items-center gap-3">
+        <label class="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
+          <input type="checkbox" id="log-autoscroll" checked class="rounded border-gray-300 text-blue-600">
+          Автопрокрутка
+        </label>
+        <button onclick="loadLog()" class="text-sm text-blue-600 hover:text-blue-800 transition-colors">↺ Обновить</button>
+      </div>
+    </div>
+    <pre id="run-log"
+         class="bg-gray-900 text-green-400 text-xs p-4 rounded-lg overflow-auto max-h-[520px] whitespace-pre-wrap font-mono leading-relaxed"
+    >Нажмите «Обновить» для загрузки лога</pre>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- Расписание                                                -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="bg-white shadow rounded-lg p-6">
+    <h2 class="text-lg font-semibold text-gray-800 mb-4">🕐 Расписание автозапуска</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="flex items-start gap-3 p-4 rounded-xl bg-blue-50 border border-blue-200">
+        <span class="text-2xl">⚡</span>
+        <div>
+          <div class="font-semibold text-blue-900 text-sm">Обновление цен</div>
+          <div class="text-blue-700 text-sm mt-0.5">Понедельник – Суббота, 06:00</div>
+          <div class="text-blue-600 text-xs mt-1">Только Фаза 1 + цены (~5 мин). Страницы ЖК не парсятся.</div>
+        </div>
+      </div>
+      <div class="flex items-start gap-3 p-4 rounded-xl bg-green-50 border border-green-200">
+        <span class="text-2xl">🏗️</span>
+        <div>
+          <div class="font-semibold text-green-900 text-sm">Полное обогащение</div>
+          <div class="text-green-700 text-sm mt-0.5">Воскресенье, 02:00</div>
+          <div class="text-green-600 text-xs mt-1">Все фазы: поиск → страницы ЖК → застройщики → цены + геокодинг.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- Настройки                                                 -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="bg-white shadow rounded-lg p-6">
+    <h2 class="text-lg font-semibold text-gray-800 mb-5">⚙️ Настройки парсера</h2>
+    <form id="settings-form" onsubmit="saveSettings(event)">
+      <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <label class="block text-sm font-semibold text-blue-900 mb-2">🏙️ Город / регион</label>
+        <select name="city_preset"
+                class="w-full max-w-xs border border-blue-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 bg-white">
+          {% for cid, cfg in cities.items() %}
+          <option value="{{ cid }}" {% if settings.city_preset|string == cid|string or (loop.first and not settings.city_preset) %}selected{% endif %}>{{ cfg.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Макс. страниц на группу</label>
+          <input type="number" name="total_pages" min="1" max="20"
+                 value="{{ settings.total_pages }}"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
+          <p class="text-xs text-gray-500 mt-1">ЦИАН отдаёт max ~15 стр. Рекомендуется <strong>15</strong>.</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Задержка между запросами (сек)</label>
+          <input type="number" name="request_delay" min="0.1" max="10" step="0.1"
+                 value="{{ settings.request_delay }}"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
+          <p class="text-xs text-gray-500 mt-1"><span class="text-green-700 font-medium">0.5–1.0</span> — безопасно.</p>
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-sm font-semibold text-gray-800 mb-2">🕐 Расписание автозапуска <span class="font-normal text-gray-400 text-xs">(МСК)</span></label>
+          <div class="border border-blue-100 rounded-xl bg-blue-50 p-4 space-y-3">
+            <!-- Days of week -->
+            <div>
+              <p class="text-xs text-gray-500 mb-2">Дни запуска (можно несколько):</p>
+              <div class="flex gap-2 flex-wrap" id="schedule-days-row">
+                {% set _sdays = settings.schedule_days if settings.schedule_days else [settings.schedule_day_of_week] %}
+                {% for d, label in [(0,'Пн'),(1,'Вт'),(2,'Ср'),(3,'Чт'),(4,'Пт'),(5,'Сб'),(6,'Вс')] %}
+                <label class="flex items-center gap-1.5 cursor-pointer select-none">
+                  <input type="checkbox" name="schedule_days_check" value="{{ d }}"
+                         {% if d in _sdays %}checked{% endif %}
+                         class="sched-day-cb rounded text-[#0088CC] focus:ring-[#0088CC] w-4 h-4"
+                         onchange="updateScheduleDays()">
+                  <span class="text-sm font-medium {% if d in _sdays %}text-[#0088CC]{% else %}text-gray-600{% endif %} sched-day-lbl-{{ d }}">{{ label }}</span>
+                </label>
+                {% endfor %}
+              </div>
+              <input type="hidden" name="schedule_day_of_week" id="schedule_day_of_week_hidden" value="{{ _sdays[0] if _sdays else 6 }}">
+            </div>
+            <!-- Time picker -->
+            <div class="flex items-center gap-3 flex-wrap">
+              <span class="text-xs text-gray-500 font-medium">Время запуска (МСК):</span>
+              <div class="flex items-center gap-1.5 bg-white border border-gray-300 rounded-lg px-3 py-1.5">
+                <input type="number" name="schedule_hour" id="sched_hour" min="0" max="23"
+                       value="{{ settings.schedule_hour }}"
+                       class="w-12 text-sm text-center focus:outline-none font-mono border-none p-0"
+                       oninput="updateSchedulePreview()">
+                <span class="text-gray-400 font-bold">:</span>
+                <input type="number" name="schedule_minute" id="sched_minute" min="0" max="59"
+                       value="{{ '%02d' % settings.schedule_minute }}"
+                       class="w-12 text-sm text-center focus:outline-none font-mono border-none p-0"
+                       oninput="updateSchedulePreview()">
+              </div>
+              <span class="text-xs text-gray-400" id="sched-preview-text"></span>
+            </div>
+          </div>
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">HTTP прокси <span class="text-gray-400">(основной)</span></label>
+          <input type="text" name="proxy_url"
+                 value="{{ settings.proxy_url or '' }}"
+                 placeholder="http://user:pass@host:port"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:ring-2 focus:ring-blue-500">
+          <p class="text-xs text-gray-500 mt-1">Основной прокси. Используйте «Пул прокси» ниже для нескольких потоков.</p>
+        </div>
+
+        <!-- ═══ PROXY POOL ═══ -->
+        <div class="md:col-span-2">
+          <div class="border border-gray-200 rounded-xl p-4 bg-gray-50">
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <h3 class="text-sm font-bold text-gray-800">🔀 Пул прокси (мультипоток)</h3>
+                <p class="text-xs text-gray-500 mt-0.5">Round-robin по нескольким прокси — ускоряет парсинг.</p>
+              </div>
+              <span id="pool-count-badge" class="text-xs bg-[#0088CC] text-white px-2 py-0.5 rounded-full font-bold">0</span>
+            </div>
+            <div id="proxy-pool-list" class="space-y-2 mb-3">
+              <!-- filled by JS -->
+            </div>
+            <div class="flex gap-2">
+              <input type="text" id="new-proxy-input" placeholder="http://user:pass@host:port"
+                     class="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-xs font-mono focus:ring-2 focus:ring-blue-500">
+              <button type="button" onclick="addProxyToPool()" class="px-3 py-1.5 bg-[#0088CC] text-white text-xs rounded-lg hover:bg-[#006699] font-medium">+ Добавить</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Ротация IP прокси (сек)</label>
+          <input type="number" name="proxy_rotate_seconds" min="30" max="3600" step="30"
+                 value="{{ settings.proxy_rotate_seconds or 270 }}"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
+          <p class="text-xs text-gray-500 mt-1">Сессия пересоздаётся каждые N секунд — захватывает новый IP. Ставьте чуть меньше интервала смены IP. Если IP меняется каждые 5 мин → <strong>270</strong>.</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">2Captcha / Anti-Captcha <span class="text-gray-400">(необязательно)</span></label>
+          <input type="text" name="anticaptcha_key"
+                 value="{{ settings.anticaptcha_key or '' }}"
+                 placeholder="API-ключ"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div class="flex flex-col gap-4">
+          <label class="flex items-start gap-3 cursor-pointer">
+            <input type="checkbox" name="create_new_jk" {% if settings.create_new_jk %}checked{% endif %}
+                   class="mt-0.5 rounded border-gray-300 text-blue-600">
+            <div>
+              <div class="text-sm font-medium text-gray-700">Создавать новые ЖК</div>
+              <div class="text-xs text-gray-500">Добавлять ЖК из ЦИАН которых у нас нет</div>
+            </div>
+          </label>
+          <label class="flex items-start gap-3 cursor-pointer">
+            <input type="checkbox" name="reset_on_run" {% if settings.reset_on_run %}checked{% endif %}
+                   class="mt-0.5 rounded border-gray-300 text-blue-600">
+            <div>
+              <div class="text-sm font-medium text-gray-700">Сбрасывать кэш при запуске</div>
+              <div class="text-xs text-gray-500">Начинать полный обход с нуля каждый раз</div>
+            </div>
+          </label>
+        </div>
+      </div>
+      <div class="mt-6 flex items-center gap-3">
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+          💾 Сохранить настройки
+        </button>
+        <span id="save-feedback" class="hidden text-green-600 text-sm">✅ Сохранено</span>
+      </div>
+    </form>
+  </div>
+
+  <!-- Как работает -->
+  <div class="bg-white shadow rounded-lg p-6">
+    <h2 class="text-lg font-semibold text-gray-800 mb-4">📖 Как работает полный прогон</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div class="border-l-4 border-blue-400 pl-4">
+        <div class="font-semibold text-gray-800 text-sm">Фаза 1 — Сбор ЖК и квартир</div>
+        <div class="text-xs text-gray-600 mt-1">6 подзапросов + ценовая сегментация. Batch-сохранение в БД каждые ~50 записей — квартиры появляются в поиске сразу.</div>
+      </div>
+      <div class="border-l-4 border-indigo-400 pl-4">
+        <div class="font-semibold text-gray-800 text-sm">Фаза 2 — Страницы ЖК</div>
+        <div class="text-xs text-gray-600 mt-1">Скрапинг каждой страницы ЖК: фото, описание, потолки, отделка, корпуса.</div>
+      </div>
+      <div class="border-l-4 border-purple-400 pl-4">
+        <div class="font-semibold text-gray-800 text-sm">Фаза 3 — Застройщики</div>
+        <div class="text-xs text-gray-600 mt-1">Страницы застройщиков: логотип, год основания, сайт, ИНН, проекты.</div>
+      </div>
+      <div class="border-l-4 border-green-400 pl-4">
+        <div class="font-semibold text-gray-800 text-sm">Фаза 4 — Обновление БД</div>
+        <div class="text-xs text-gray-600 mt-1">Финальная запись всех данных: квартиры, ЖК, корпуса, застройщики, геокодинг.</div>
+      </div>
+      <div class="border-l-4 border-gray-300 pl-4">
+        <div class="font-semibold text-gray-800 text-sm">Кэш и инкрементальность</div>
+        <div class="text-xs text-gray-600 mt-1">Прогресс в <code class="bg-gray-100 px-1 rounded">.enrich_cache.json</code>. Прерванный запуск продолжится с места остановки.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- Синхронизация фото ЖК ↔ Квартиры                          -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="bg-white shadow rounded-lg p-6">
+    <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
+      <div>
+        <h2 class="text-lg font-semibold text-gray-900">🖼️ Синхронизация фото: ЖК ↔ Квартиры</h2>
+        <p class="text-gray-500 text-sm mt-0.5">Копирует фото из квартир в ЖК (если у ЖК нет) и наоборот. Безопасно: без флага "перезаписать" существующие фото не трогаются.</p>
+      </div>
+    </div>
+
+    <!-- Настройки -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">Направление</label>
+        <select id="syncPhotoDirection" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] focus:outline-none">
+          <option value="both">Оба направления</option>
+          <option value="props_to_rc">Квартиры → ЖК</option>
+          <option value="rc_to_props">ЖК → Квартиры</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">ID ЖК (опционально)</label>
+        <input type="number" id="syncPhotoComplexId" placeholder="Все ЖК" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] focus:outline-none">
+      </div>
+      <div class="flex items-end">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" id="syncPhotoOverwrite" class="w-4 h-4 rounded accent-[#0088CC]">
+          <span class="text-sm text-gray-700">Перезаписывать существующие фото</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Кнопка и результат -->
+    <div class="flex items-center gap-4 flex-wrap">
+      <button id="syncPhotoBtn" onclick="runPhotoSync()"
+              class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0088CC] text-white text-sm font-semibold rounded-lg hover:bg-[#006699] transition disabled:opacity-60">
+        <span id="syncPhotoSpinner" class="hidden">⏳</span>
+        <span>▶ Запустить синхронизацию</span>
+      </button>
+      <div id="syncPhotoResult" class="hidden text-sm font-medium"></div>
+    </div>
+
+    <!-- Пояснение -->
+    <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-gray-500">
+      <div class="bg-blue-50 border border-blue-100 rounded-lg p-3">
+        <div class="font-semibold text-blue-800 mb-1">📤 Квартиры → ЖК</div>
+        Если у ЖК нет main_image — берёт первое фото из квартир этого ЖК.<br>
+        Собирает галереи всех квартир в gallery_images ЖК (до 50 фото).
+      </div>
+      <div class="bg-green-50 border border-green-100 rounded-lg p-3">
+        <div class="font-semibold text-green-800 mb-1">📥 ЖК → Квартиры</div>
+        Если у квартиры нет фото — копирует main_image и gallery_images из её ЖК.<br>
+        Полезно когда фото ЖК есть, а в квартирах — нет.
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- Наш.Дом.РФ — обогащение ЖК                                -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="bg-white shadow rounded-lg p-6">
+
+    <!-- Заголовок + кнопка обновить -->
+    <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
+      <div>
+        <h2 class="text-lg font-semibold text-gray-900">🏗️ Обогащение: Наш.Дом.РФ</h2>
+        <p class="text-gray-500 text-sm mt-0.5">Фото без водяных знаков, литеры, сроки сдачи, застройщик — из государственного реестра.</p>
+      </div>
+      <button onclick="ndLoadStats()" class="text-sm text-[#0088CC] hover:text-[#006699] font-medium flex items-center gap-1">
+        <span id="nd-refresh-spinner" class="hidden">⏳</span>↺ Обновить
+      </button>
+    </div>
+
+    <!-- Статус прокси -->
+    <div id="nd-proxy-bar" class="mb-4 px-4 py-2.5 rounded-lg border text-sm flex items-center gap-3 bg-gray-50 border-gray-200">
+      <span id="nd-proxy-dot" class="w-2.5 h-2.5 rounded-full bg-gray-300 flex-shrink-0"></span>
+      <span id="nd-proxy-label" class="text-gray-500">Проверяем настройки прокси…</span>
+      <a href="#" onclick="document.getElementById('proxy-section')?.scrollIntoView({behavior:'smooth'});return false"
+         class="ml-auto text-xs text-[#0088CC] hover:underline">⚙ настройки</a>
+    </div>
+
+    <!-- Статистика по городам -->
+    <div class="overflow-x-auto rounded-lg border border-gray-200 mb-5">
+      <table class="min-w-full text-sm">
+        <thead class="bg-gray-50 text-gray-600 text-xs uppercase tracking-wide">
+          <tr>
+            <th class="px-4 py-3 text-left">Город</th>
+            <th class="px-4 py-3 text-left">Всего ЖК</th>
+            <th class="px-4 py-3 text-left">Обогащено</th>
+            <th class="px-4 py-3 text-left">Охват</th>
+            <th class="px-4 py-3 text-left">С фото</th>
+            <th class="px-4 py-3 text-left">Литеров</th>
+            <th class="px-4 py-3 text-left">Действия</th>
+          </tr>
+        </thead>
+        <tbody id="nd-stats-body">
+          <tr><td colspan="7" class="text-center py-6 text-gray-400 text-sm">Загрузка…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Панель мониторинга (показывается при активном процессе или после запуска) -->
+    <div id="nd-monitor" class="hidden mb-4 border border-[#0088CC]/30 rounded-xl bg-blue-50/40 p-4">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+          <span id="nd-status-badge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">
+            <span class="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>Ожидание
+          </span>
+          <span id="nd-monitor-city" class="text-xs text-gray-500"></span>
+        </div>
+        <button onclick="ndHideMonitor()" class="text-xs text-gray-400 hover:text-gray-600">✕</button>
+      </div>
+      <!-- Прогресс-бар -->
+      <div class="mb-3">
+        <div class="flex justify-between text-xs text-gray-500 mb-1">
+          <span id="nd-prog-label">Обработано: <b id="nd-prog-cur">0</b> / <b id="nd-prog-tot">—</b> ЖК</span>
+          <span id="nd-prog-pct" class="font-semibold text-[#0088CC]">0%</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+          <div id="nd-prog-bar" class="h-2.5 rounded-full bg-[#0088CC] transition-all duration-500" style="width:0%"></div>
+        </div>
+        <div id="nd-prog-name" class="mt-1 text-xs text-gray-400 truncate"></div>
+      </div>
+      <!-- Счётчики -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+        <div class="bg-white rounded-lg py-2 px-1 border border-green-100">
+          <div id="nd-cnt-matched" class="text-lg font-bold text-green-600">0</div>
+          <div class="text-xs text-gray-500">Найдено</div>
+        </div>
+        <div class="bg-white rounded-lg py-2 px-1 border border-blue-100">
+          <div id="nd-cnt-updated" class="text-lg font-bold text-[#0088CC]">0</div>
+          <div class="text-xs text-gray-500">Обновлено</div>
+        </div>
+        <div class="bg-white rounded-lg py-2 px-1 border border-yellow-100">
+          <div id="nd-cnt-skipped" class="text-lg font-bold text-yellow-500">0</div>
+          <div class="text-xs text-gray-500">Пропущено</div>
+        </div>
+        <div class="bg-white rounded-lg py-2 px-1 border border-red-100">
+          <div id="nd-cnt-failed" class="text-lg font-bold text-red-500">0</div>
+          <div class="text-xs text-gray-500">Не найдено</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Блок лога -->
+    <div id="nd-log-box" class="hidden mt-2">
+      <div class="flex items-center justify-between mb-1.5">
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-medium text-gray-700">Лог процесса</span>
+          <span id="nd-log-running" class="text-xs"></span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="ndScrollLogBottom()" class="text-xs text-gray-400 hover:text-gray-600">↓ вниз</button>
+          <button onclick="ndCloseLog()" class="text-xs text-gray-400 hover:text-gray-600 px-2 py-0.5 border rounded">✕ Закрыть</button>
+        </div>
+      </div>
+      <div id="nd-log-content"
+           class="bg-gray-950 text-xs rounded-lg p-3 overflow-auto font-mono"
+           style="max-height:380px;white-space:pre-wrap;"></div>
+    </div>
+
+    <!-- Описание алгоритма -->
+    <div class="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="border-l-4 border-[#0088CC] pl-4">
+        <div class="font-semibold text-gray-800 text-sm">Сопоставление ЖК</div>
+        <div class="text-xs text-gray-500 mt-1">Нечёткое сравнение названий (порог ≥ 50%). Приоритет — точное совпадение.</div>
+      </div>
+      <div class="border-l-4 border-green-400 pl-4">
+        <div class="font-semibold text-gray-800 text-sm">Фото без водяных знаков</div>
+        <div class="text-xs text-gray-500 mt-1">Скачивает из hobjRenderPhotoUrl. Заменяет main_image только если текущее с CIAN.</div>
+      </div>
+      <div class="border-l-4 border-yellow-400 pl-4">
+        <div class="font-semibold text-gray-800 text-sm">Дедупликация литеров</div>
+        <div class="text-xs text-gray-500 mt-1">ON CONFLICT (complex_id, building_id) — повторный запуск обновляет, не дублирует.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   MULTI-CITY CONTROL PANEL
+   ═══════════════════════════════════════════════════════════════ */
+let citiesData = [];
+let cityLogInterval = null;
+let currentLogCityId = null;
+
+function fmtNum(n) { return n ? Number(n).toLocaleString('ru') : '0'; }
+
+function cityCardHTML(c) {
+  const runningBadge = c.running
+    ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-200">
+         <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse inline-block"></span>Выполняется
+       </span>`
+    : `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500">Ожидание</span>`;
+
+  const hasData = c.apartments > 0;
+  const lastUpd = c.last_updated
+    ? `<div class="text-xs text-gray-400 mt-1">Обновлено: ${c.last_updated}</div>`
+    : `<div class="text-xs text-orange-400 mt-1">Нет данных</div>`;
+
+  return `
+    <div class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow ${c.running ? 'ring-2 ring-green-400' : ''}" id="city-card-${c.id}">
+      <div class="flex items-start justify-between mb-3">
+        <div>
+          <div class="font-semibold text-gray-900 text-sm">${c.name}</div>
+          ${runningBadge}
+        </div>
+        <button onclick="openCityLog(${c.id}, '${c.name}')"
+                class="text-gray-400 hover:text-[#0088CC] text-xs transition-colors" title="Смотреть лог">
+          📋 Лог
+        </button>
+      </div>
+      <div class="grid grid-cols-2 gap-2 mb-3 text-center">
+        <div class="bg-blue-50 rounded-lg py-2">
+          <div class="text-lg font-bold text-blue-700">${fmtNum(c.complexes)}</div>
+          <div class="text-xs text-blue-600">ЖК</div>
+        </div>
+        <div class="bg-emerald-50 rounded-lg py-2">
+          <div class="text-lg font-bold text-emerald-700">${fmtNum(c.apartments)}</div>
+          <div class="text-xs text-emerald-600">Квартир</div>
+        </div>
+      </div>
+      ${lastUpd}
+      <div class="mt-3 flex flex-col gap-1.5">
+        <button onclick="startCity(${c.id}, 'prices', '${c.name}')"
+                ${c.running ? 'disabled' : ''}
+                class="w-full text-xs bg-[#0088CC] hover:bg-[#006699] disabled:opacity-50 text-white px-3 py-1.5 rounded-lg font-medium transition-colors">
+          ⚡ Цены (~5 мин)
+        </button>
+        <button onclick="startCity(${c.id}, 'full', '${c.name}')"
+                ${c.running ? 'disabled' : ''}
+                class="w-full text-xs bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white px-3 py-1.5 rounded-lg font-medium transition-colors">
+          🏗️ Полный прогон
+        </button>
+        <button onclick="startCity(${c.id}, 'jk', '${c.name}')"
+                ${c.running ? 'disabled' : ''}
+                class="w-full text-xs bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white px-3 py-1.5 rounded-lg font-medium transition-colors">
+          🖼️ Обогащение ЖК (неполные, ~30)
+        </button>
+        <button onclick="startCityForce(${c.id}, '${c.name}')"
+                ${c.running ? 'disabled' : ''}
+                class="w-full text-xs bg-orange-600 hover:bg-orange-700 disabled:opacity-50 text-white px-3 py-1.5 rounded-lg font-medium transition-colors">
+          🔄 Все ЖК ЦИАН (принудительно)
+        </button>
+        <button onclick="parseRcAddresses(${c.id}, '${c.name}')"
+                class="w-full text-xs bg-teal-600 hover:bg-teal-700 text-white px-3 py-1.5 rounded-lg font-medium transition-colors">
+          🔤 Разобрать адреса ЦИАН (быстро)
+        </button>
+        <button onclick="enrichAddressesNovostroyki(${c.id}, '${c.name}')"
+                class="w-full text-xs bg-sky-600 hover:bg-sky-700 text-white px-3 py-1.5 rounded-lg font-medium transition-colors">
+          🏙️ Округ/Мкр из ЦИАН /novostroyki/
+        </button>
+        <button onclick="geocodeRcAddresses(${c.id}, '${c.name}', false)"
+                class="w-full text-xs bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg font-medium transition-colors">
+          📍 Адреса + районы (DaData)
+        </button>
+        <button onclick="geocodeRcAddresses(${c.id}, '${c.name}', true)"
+                class="w-full text-xs bg-violet-700 hover:bg-violet-800 text-white px-3 py-1.5 rounded-lg font-medium transition-colors">
+          📍 Адреса + районы (DaData, все ЖК)
+        </button>
+        ${c.running ? `<button onclick="stopCity(${c.id}, '${c.name}')"
+                class="w-full text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg font-medium transition-colors">
+          ⏹ Остановить
+        </button>` : ''}
+      </div>
+    </div>`;
+}
+
+async function quickStart(mode) {
+  const sel = document.getElementById('quick-city-select');
+  const cityId = parseInt(sel.value);
+  const cityName = sel.options[sel.selectedIndex].text;
+  await startCity(cityId, mode, cityName);
+  loadCitiesStats();
+}
+
+// ── PROXY POOL ──────────────────────────────────────────────────────────────
+var _proxyPool = [];
+
+async function loadProxyPool() {
+  try {
+    const r = await fetch('/admin/enrichment/proxy-pool');
+    const d = await r.json();
+    _proxyPool = d.pool || [];
+    renderProxyPool();
+  } catch(e) { console.error('proxy-pool load error', e); }
+}
+
+function renderProxyPool() {
+  const list = document.getElementById('proxy-pool-list');
+  const badge = document.getElementById('pool-count-badge');
+  if (!list) return;
+  badge.textContent = _proxyPool.length;
+  if (!_proxyPool.length) {
+    list.innerHTML = '<p class="text-xs text-gray-400 italic">Пул пуст — добавьте прокси</p>';
+    return;
+  }
+  list.innerHTML = _proxyPool.map((p, i) => `
+    <div class="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 py-1.5">
+      <span class="w-5 h-5 rounded-full bg-[#0088CC] text-white text-xs flex items-center justify-center font-bold flex-shrink-0">${i+1}</span>
+      <span class="flex-1 text-xs font-mono text-gray-700 truncate">${p}</span>
+      <button onclick="removeProxyFromPool(${i})" class="text-gray-400 hover:text-red-500 text-lg leading-none">&times;</button>
+    </div>`).join('');
+}
+
+function addProxyToPool() {
+  const inp = document.getElementById('new-proxy-input');
+  const val = (inp.value || '').trim();
+  if (!val) return;
+  if (!val.startsWith('http')) { alert('Прокси должен начинаться с http'); return; }
+  _proxyPool.push(val);
+  inp.value = '';
+  renderProxyPool();
+  saveProxyPool();
+}
+
+function removeProxyFromPool(idx) {
+  _proxyPool.splice(idx, 1);
+  renderProxyPool();
+  saveProxyPool();
+}
+
+async function saveProxyPool() {
+  try {
+    await fetch('/admin/enrichment/proxy-pool', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json', 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.content || ''},
+      body: JSON.stringify({pool: _proxyPool})
+    });
+  } catch(e) { console.error('proxy-pool save error', e); }
+}
+
+async function loadFullStats() {
+  try {
+    const r = await fetch('/admin/enrichment/full-stats');
+    const d = await r.json();
+    if (d.error) { console.error(d.error); return; }
+    const t = d.totals || {};
+    document.getElementById('fs-total-devs').textContent = (t.developers || 0).toLocaleString('ru');
+    document.getElementById('fs-total-rc').textContent   = (t.complexes   || 0).toLocaleString('ru');
+    document.getElementById('fs-total-bld').textContent  = (t.buildings   || 0).toLocaleString('ru');
+    document.getElementById('fs-total-apt').textContent  = (t.apartments  || 0).toLocaleString('ru');
+    const tbody = document.getElementById('fs-city-rows');
+    if (d.cities && d.cities.length) {
+      tbody.innerHTML = d.cities.map(c => `
+        <tr class="border-b border-gray-100 hover:bg-gray-50">
+          <td class="py-2.5 font-medium text-gray-800">${c.name}</td>
+          <td class="py-2.5 text-right text-blue-700 font-semibold">${(c.developers||0).toLocaleString('ru')}</td>
+          <td class="py-2.5 text-right text-green-700 font-semibold">${(c.complexes||0).toLocaleString('ru')}</td>
+          <td class="py-2.5 text-right text-amber-700 font-semibold">${(c.buildings||0).toLocaleString('ru')}</td>
+          <td class="py-2.5 text-right text-purple-700 font-semibold">${(c.apartments||0).toLocaleString('ru')}</td>
+          <td class="py-2.5 text-right text-xs text-gray-400">${c.last_updated || '—'}</td>
+          <td class="py-2.5 text-center">${c.running
+            ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700"><span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse inline-block"></span>Работает</span>'
+            : '<span class="text-xs text-gray-400">—</span>'
+          }</td>
+        </tr>`).join('');
+    } else {
+      tbody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-gray-400 text-xs">Нет данных</td></tr>';
+    }
+  } catch(e) { console.error('full-stats error', e); }
+}
+
+// Auto-refresh stats every 10s when a city is running
+setInterval(() => {
+  if (!document.hidden) loadFullStats();
+}, 10000);
+
+async function loadCitiesStats() {
+  try {
+    const r = await fetch('/admin/enrichment/cities-stats');
+    const d = await r.json();
+    if (d.error) { console.error(d.error); return; }
+    citiesData = d.cities;
+    const grid = document.getElementById('cities-grid');
+    grid.innerHTML = citiesData.map(cityCardHTML).join('');
+  } catch(e) { console.error('cities-stats error', e); }
+}
+
+async function startCity(cityId, mode, cityName) {
+  const modeLabels = {prices: '⚡ Обновление цен', full: '🏗️ Полный прогон', jk: '🖼️ Обогащение ЖК'};
+  const confirmMsg = `${modeLabels[mode] || mode} для "${cityName}"?\n\n` +
+    (mode === 'full' ? 'Займёт несколько часов.' : mode === 'prices' ? 'Займёт ~5-15 минут.' : 'Займёт ~10-30 минут.');
+  if (!confirm(confirmMsg)) return;
+  try {
+    const r = await postJSON('/admin/enrichment/start-city', {city_id: cityId, mode});
+    const d = await r.json();
+    if (d.success) {
+      showToast('✅ ' + d.message, 'success');
+      setTimeout(loadCitiesStats, 1000);
+      // Auto-open the log modal so user can see live progress
+      openCityLog(cityId, cityName);
+    } else {
+      showToast('❌ ' + d.message, 'error');
+    }
+  } catch(e) { showToast('❌ Ошибка сети', 'error'); }
+}
+
+async function startCityForce(cityId, cityName) {
+  if (!confirm(`🔄 Обогатить ВСЕ активные ЖК через ЦИАН для "${cityName}"?\n\nЭто перезапишет данные у всех ${cityName === 'Краснодар' ? '230' : ''} ЖК, даже у тех у кого уже есть фото/описание.\n\nБез прокси ЦИАН вернёт пустые данные. Займёт 1-3 часа.`)) return;
+  try {
+    const r = await postJSON('/admin/enrichment/start-city', {city_id: cityId, mode: 'jk-force'});
+    const d = await r.json();
+    if (d.success) {
+      showToast('✅ ' + d.message, 'success');
+      setTimeout(loadCitiesStats, 1000);
+      openCityLog(cityId, cityName);
+    } else {
+      showToast('❌ ' + d.message, 'error');
+    }
+  } catch(e) { showToast('❌ Ошибка сети', 'error'); }
+}
+
+async function parseRcAddresses(cityId, cityName) {
+  if (!confirm(`🔤 Разобрать адреса ЦИАН для "${cityName}"?\n\nРазобьёт raw-адрес (улица, дом, микрорайон, округ) из поля address в структурированные поля.\nБыстро — ~10 секунд, без сети, без прокси.\n\nПродолжить?`)) return;
+  try {
+    const r = await postJSON('/admin/enrichment/parse-addresses', {city_id: cityId});
+    const d = await r.json();
+    showToast(d.success ? ('✅ ' + d.message) : ('❌ ' + d.message), d.success ? 'success' : 'error');
+  } catch(e) { showToast('❌ Ошибка сети', 'error'); }
+}
+
+async function enrichAddressesNovostroyki(cityId, cityName) {
+  if (!confirm(`🏙️ Заполнить адреса ЖК из CIAN /novostroyki/ для "${cityName}"?\n\nДостаёт полную гео-иерархию с карточек ЖК:\nОкруг → Микрорайон → Улица\n\n⚠️ Требует прокси (ENRICH_PROXY_URL).\nБез прокси CIAN вернёт пустые данные.\n\nЗапустится в фоне (~2-10 мин). Продолжить?`)) return;
+  try {
+    const r = await postJSON('/admin/enrichment/enrich-addresses-novostroyki', {city_id: cityId});
+    const d = await r.json();
+    showToast(d.success ? ('✅ ' + d.message) : ('❌ ' + d.message), d.success ? 'success' : 'error');
+  } catch(e) { showToast('❌ Ошибка сети', 'error'); }
+}
+
+async function geocodeRcAddresses(cityId, cityName, force) {
+  const label = force ? 'ВСЕ активные ЖК (перезапись)' : 'ЖК без структурированного адреса';
+  if (!confirm(`📍 DaData геокодирование адресов ЖК для "${cityName}"\n\nОбработка: ${label}\n\nЗаполнит поля: улица, дом, район, координаты.\nЗапустится в фоне — результат виден в карточках ЖК через ~1-2 мин.\n\nПродолжить?`)) return;
+  try {
+    const r = await postJSON('/admin/enrichment/geocode-rc', {city_id: cityId, force});
+    const d = await r.json();
+    showToast(d.success ? ('✅ ' + d.message) : ('❌ ' + d.message), d.success ? 'success' : 'error');
+  } catch(e) { showToast('❌ Ошибка сети', 'error'); }
+}
+
+async function stopCity(cityId, cityName) {
+  if (!confirm(`Остановить процесс для "${cityName}"?`)) return;
+  try {
+    const r = await postJSON('/admin/enrichment/stop-city', {city_id: cityId});
+    const d = await r.json();
+    showToast(d.success ? ('✅ ' + d.message) : ('❌ ' + d.message), d.success ? 'success' : 'error');
+    setTimeout(loadCitiesStats, 1000);
+  } catch(e) { showToast('❌ Ошибка сети', 'error'); }
+}
+
+function openCityLog(cityId, cityName) {
+  currentLogCityId = cityId;
+  document.getElementById('city-log-title').textContent = `Лог — ${cityName}`;
+  document.getElementById('city-log-modal').classList.remove('hidden');
+  document.getElementById('city-log-modal').classList.add('flex');
+  loadCityLog();
+  if (cityLogInterval) clearInterval(cityLogInterval);
+  cityLogInterval = setInterval(loadCityLog, 3000);
+}
+
+function closeCityLog() {
+  document.getElementById('city-log-modal').classList.add('hidden');
+  document.getElementById('city-log-modal').classList.remove('flex');
+  if (cityLogInterval) { clearInterval(cityLogInterval); cityLogInterval = null; }
+  currentLogCityId = null;
+}
+
+async function loadCityLog() {
+  if (!currentLogCityId) return;
+  try {
+    const r = await fetch(`/admin/enrichment/city-log?city_id=${currentLogCityId}`);
+    const d = await r.json();
+    const pre = document.getElementById('city-log-content');
+    pre.textContent = d.log || '(пусто)';
+    pre.scrollTop = pre.scrollHeight;
+    const badge = document.getElementById('city-log-status-badge');
+    if (d.running) {
+      badge.classList.remove('hidden'); badge.classList.add('inline-flex');
+    } else {
+      badge.classList.add('hidden'); badge.classList.remove('inline-flex');
+    }
+  } catch(e) {}
+}
+
+function showToast(msg, type='success') {
+  const t = document.createElement('div');
+  t.className = `fixed top-4 right-4 z-[9999] px-4 py-3 rounded-lg shadow-lg text-sm font-medium transition-all ${type === 'error' ? 'bg-red-600 text-white' : 'bg-green-600 text-white'}`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+
+// Auto-refresh cities every 15s when page is visible
+setInterval(() => { if (!document.hidden) loadCitiesStats(); }, 15000);
+
+/* ─── Original Krasnodар enrichment vars ─── */
+let pollInterval = null;
+let logInterval  = null;
+let dbInterval   = null;
+let isRunning    = false;
+let prevAptCount = null;
+let runStartTime = null;
+let runStartApt  = null;
+
+const CSRF = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+function postJSON(url, body) {
+  return fetch(url, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json', 'X-CSRFToken': CSRF},
+    body: body ? JSON.stringify(body) : undefined,
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadCitiesStats();
+  loadFullStats();
+  loadProxyPool();
+  refreshStatus();
+  refreshDbStats();
+  loadLog();
+  loadEmptyStats();
+});
+
+/* ─── Live DB Stats ─────────────────────────────────────────── */
+async function refreshDbStats() {
+  try {
+    const r = await fetch('/admin/enrichment/db-stats');
+    const d = await r.json();
+    if (d.error) return;
+
+    const apt = d.apt_count ?? 0;
+    document.getElementById('db-apt-count').textContent = apt.toLocaleString('ru');
+    document.getElementById('db-jk-count').textContent  = (d.jk_count ?? 0).toLocaleString('ru');
+    document.getElementById('db-saved-run').textContent = d.total_saved ? d.total_saved.toLocaleString('ru') : '—';
+
+    // Delta since last check
+    const deltaEl = document.getElementById('db-apt-delta');
+    if (prevAptCount !== null && apt > prevAptCount) {
+      const delta = apt - prevAptCount;
+      deltaEl.textContent = `▲ +${delta.toLocaleString('ru')} с последней проверки`;
+      deltaEl.className = 'text-xs text-emerald-600 mt-0.5 font-medium';
+    } else {
+      deltaEl.textContent = '';
+    }
+    prevAptCount = apt;
+
+    // Last batch save line
+    const batchWrap = document.getElementById('last-batch-wrap');
+    if (d.last_batch) {
+      document.getElementById('last-batch-text').textContent = ' ' + d.last_batch;
+      batchWrap.classList.remove('hidden');
+    } else {
+      batchWrap.classList.add('hidden');
+    }
+
+    // Speed calculation
+    if (isRunning) {
+      if (runStartTime === null) { runStartTime = Date.now(); runStartApt = apt; }
+      const elapsed = (Date.now() - runStartTime) / 1000 / 60; // minutes
+      if (elapsed > 0.5 && runStartApt !== null) {
+        const speed = Math.round((apt - runStartApt) / elapsed);
+        if (speed > 0) {
+          document.getElementById('progress-speed').textContent = `≈ ${speed.toLocaleString('ru')} кв/мин`;
+        }
+      }
+    } else {
+      runStartTime = null;
+      runStartApt  = null;
+    }
+  } catch(e) { console.error('db-stats error', e); }
+}
+
+/* ─── Status & Live mode ────────────────────────────────────── */
+async function refreshStatus() {
+  try {
+    const r = await fetch('/admin/enrichment/status');
+    const d = await r.json();
+
+    const phaseMap = {0:'1 — Сбор', 1:'1b — Сегменты', 2:'2 — ЖК', 3:'3 — Застр.', 4:'4 — БД'};
+    document.getElementById('st-phase').textContent    = phaseLabel(d.phase);
+    document.getElementById('parse-phase').textContent = phaseMap[d.phase] ?? (d.phase ?? '—');
+    document.getElementById('st-jk-count').textContent = d.jk_count ?? '—';
+    const jkDone = d.jk_done ?? 0, jkTotal = d.jk_count ?? 0;
+    document.getElementById('st-jk-done').textContent  = jkTotal > 0 ? `${jkDone}/${jkTotal}` : (jkDone || '—');
+    document.getElementById('st-apt-count').textContent = d.apt_count != null ? d.apt_count.toLocaleString('ru') : '—';
+    document.getElementById('st-db-total').textContent  = d.db_total ?? '—';
+    document.getElementById('running-detail').textContent = d.running_detail || 'Работает...';
+
+    // Progress bar for phase 1b
+    const prog = document.getElementById('progress-wrap');
+    if (d.running && d.phase === 1 && jkTotal > 0) {
+      const pct = Math.min(100, Math.round(jkDone / jkTotal * 100));
+      prog.classList.remove('hidden');
+      document.getElementById('progress-bar').style.width = pct + '%';
+      document.getElementById('progress-pct').textContent = pct + '%';
+      document.getElementById('progress-label').textContent = 'Сбор квартир (Phase 1b)';
+      document.getElementById('progress-detail').textContent =
+        `${jkDone.toLocaleString('ru')} / ${jkTotal.toLocaleString('ru')} ЖК`;
+    } else if (d.running) {
+      prog.classList.remove('hidden');
+      document.getElementById('progress-bar').style.width = '100%';
+      document.getElementById('progress-bar').className = 'h-4 rounded-full bg-gradient-to-r from-indigo-400 to-purple-500 animate-pulse';
+      document.getElementById('progress-pct').textContent = '';
+      document.getElementById('progress-label').textContent = d.running_detail || 'Обработка...';
+      document.getElementById('progress-detail').textContent = '';
+    } else {
+      prog.classList.add('hidden');
+    }
+
+    setLiveMode(!!d.running);
+  } catch(e) { console.error(e); }
+}
+
+function phaseLabel(p) {
+  const map = {0:'0', 1:'1a/b', 2:'2', 3:'3', 4:'4'};
+  return map[p] ?? (p ?? '—');
+}
+
+function setLiveMode(running) {
+  const badge      = document.getElementById('log-live-badge');
+  const dbBadge    = document.getElementById('db-live-badge');
+  const indicator  = document.getElementById('running-indicator');
+  const btnStop    = document.getElementById('btn-stop');
+
+  if (running && !isRunning) {
+    isRunning = true;
+    badge.classList.remove('hidden');   badge.classList.add('inline-flex');
+    dbBadge.classList.remove('hidden'); dbBadge.classList.add('inline-flex');
+    indicator.classList.remove('hidden');
+    btnStop.classList.remove('hidden');
+    if (!logInterval) logInterval = setInterval(loadLog,        3000);
+    if (!pollInterval) pollInterval = setInterval(refreshStatus, 5000);
+    if (!dbInterval)   dbInterval   = setInterval(refreshDbStats, 8000);
+  } else if (!running && isRunning) {
+    isRunning = false;
+    badge.classList.add('hidden');      badge.classList.remove('inline-flex');
+    dbBadge.classList.add('hidden');    dbBadge.classList.remove('inline-flex');
+    indicator.classList.add('hidden');
+    btnStop.classList.add('hidden');
+    clearInterval(logInterval);  logInterval  = null;
+    clearInterval(pollInterval); pollInterval = null;
+    clearInterval(dbInterval);   dbInterval   = null;
+    loadLog();
+    refreshDbStats();
+    loadEmptyStats();
+  }
+}
+
+/* ─── Log ───────────────────────────────────────────────────── */
+async function loadLog() {
+  try {
+    const r = await fetch('/admin/enrichment/log');
+    const d = await r.json();
+    const pre = document.getElementById('run-log');
+    const autoScroll = document.getElementById('log-autoscroll').checked;
+    const wasAtBottom = pre.scrollHeight - pre.scrollTop <= pre.clientHeight + 40;
+    pre.textContent = d.log || '(пусто)';
+    if (autoScroll && (wasAtBottom || isRunning)) pre.scrollTop = pre.scrollHeight;
+  } catch(e) { console.error(e); }
+}
+
+/* ─── Empty stats ───────────────────────────────────────────── */
+async function loadEmptyStats() {
+  try {
+    const r = await fetch('/admin/enrichment/empty-stats');
+    const d = await r.json();
+    if (d.error) { console.warn('empty-stats:', d.error); return; }
+    document.getElementById('es-both').textContent  = d.no_photo_no_desc ?? '—';
+    document.getElementById('es-photo').textContent = d.no_photo ?? '—';
+    document.getElementById('es-desc').textContent  = d.no_desc ?? '—';
+    document.getElementById('es-total').textContent = d.total ?? '—';
+  } catch(e) { console.error(e); }
+}
+
+/* ─── Actions ───────────────────────────────────────────────── */
+async function startEnrichment() {
+  if (!confirm('Запустить полное обогащение ЖК с ЦИАН?\nПроцесс может занять несколько часов.')) return;
+  document.getElementById('btn-start').disabled = true;
+  try {
+    const r = await postJSON('/admin/enrichment/start', {mode: 'full'});
+    const d = await r.json();
+    if (d.success) {
+      alert(d.message);
+      setTimeout(() => { refreshStatus(); loadLog(); }, 1500);
+    } else {
+      alert('Ошибка: ' + d.message);
+    }
+  } catch(e) { alert('Ошибка сети'); }
+  document.getElementById('btn-start').disabled = false;
+}
+
+async function startPricesUpdate() {
+  if (!confirm('Запустить быстрое обновление цен (~5 мин)?')) return;
+  document.getElementById('btn-prices').disabled = true;
+  try {
+    const r = await postJSON('/admin/enrichment/start', {mode: 'prices'});
+    const d = await r.json();
+    alert(d.success ? d.message : ('Ошибка: ' + d.message));
+    if (d.success) setTimeout(() => { refreshStatus(); loadLog(); }, 1500);
+  } catch(e) { alert('Ошибка сети'); }
+  document.getElementById('btn-prices').disabled = false;
+}
+
+async function stopEnrichment() {
+  try {
+    const r = await postJSON('/admin/enrichment/stop');
+    const d = await r.json();
+    alert(d.success ? d.message : ('Ошибка: ' + d.message));
+  } catch(e) { alert('Ошибка сети'); }
+}
+
+async function resetCache() {
+  if (!confirm('Сбросить кэш прогона? Следующий запуск начнёт с нуля.')) return;
+  try {
+    const r = await postJSON('/admin/enrichment/reset-cache');
+    const d = await r.json();
+    alert(d.success ? d.message : ('Ошибка: ' + d.message));
+    if (d.success) refreshStatus();
+  } catch(e) { alert('Ошибка сети'); }
+}
+
+async function propagateAddresses() {
+  const btn = document.getElementById('btn-propagate');
+  const force = confirm(
+    'Синхронизировать адреса квартир из ЖК?\n\n' +
+    'OK — только заполнить пустые поля\n' +
+    'Отмена — открыть настройки...'
+  );
+  const forceOverwrite = !force ? confirm('Перезаписать ВСЕ адресные поля квартир из ЖК (даже заполненные)?') : false;
+  if (!force && !forceOverwrite) return;
+
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Синхронизация...'; }
+  try {
+    const r = await postJSON('/admin/enrichment/propagate-address', { force: forceOverwrite });
+    const d = await r.json();
+    if (d.success) {
+      const c = d.coverage || {};
+      const pct = (n, t) => t ? Math.round(100*n/t) + '%' : '—';
+      alert(
+        '✅ ' + d.message + '\n\n' +
+        `Охват (активные квартиры):\n` +
+        `  Округ:       ${c.has_area||0} / ${c.total||0} (${pct(c.has_area,c.total)})\n` +
+        `  Микрорайон:  ${c.has_quarter||0} / ${c.total||0} (${pct(c.has_quarter,c.total)})\n` +
+        `  Улица:       ${c.has_street||0} / ${c.total||0} (${pct(c.has_street,c.total)})`
+      );
+    } else {
+      alert('❌ ' + d.message);
+    }
+  } catch(e) { alert('Ошибка сети: ' + e); }
+  finally {
+    if (btn) { btn.disabled = false; btn.textContent = '📍 Синхронизировать адреса квартир'; }
+  }
+}
+
+function updateScheduleDays() {
+  const cbs = document.querySelectorAll('.sched-day-cb');
+  const checked = [];
+  cbs.forEach(cb => {
+    const lbl = document.querySelector('.sched-day-lbl-' + cb.value);
+    if (cb.checked) {
+      checked.push(parseInt(cb.value));
+      if (lbl) { lbl.classList.add('text-[#0088CC]'); lbl.classList.remove('text-gray-600'); }
+    } else {
+      if (lbl) { lbl.classList.remove('text-[#0088CC]'); lbl.classList.add('text-gray-600'); }
+    }
+  });
+  const hidden = document.getElementById('schedule_day_of_week_hidden');
+  if (hidden) hidden.value = checked.length ? checked[0] : 6;
+  updateSchedulePreview();
+}
+
+function updateSchedulePreview() {
+  const h = parseInt(document.getElementById('sched_hour')?.value || 2);
+  const m = parseInt(document.getElementById('sched_minute')?.value || 0);
+  const dayNames = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+  const checked = [...document.querySelectorAll('.sched-day-cb:checked')].map(cb => dayNames[parseInt(cb.value)]);
+  const preview = document.getElementById('sched-preview-text');
+  if (!preview) return;
+  if (!checked.length) { preview.textContent = '⚠️ Выберите хотя бы один день'; preview.className='text-xs text-red-500'; return; }
+  const timeStr = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+  preview.textContent = '→ ' + checked.join(', ') + ' в ' + timeStr + ' МСК';
+  preview.className = 'text-xs text-blue-600 font-medium';
+}
+
+async function saveSettings(e) {
+  e.preventDefault();
+  const fd  = new FormData(e.target);
+  const obj = Object.fromEntries(fd.entries());
+  obj.create_new_jk = fd.has('create_new_jk') ? true : false;
+  obj.reset_on_run  = fd.has('reset_on_run')  ? true : false;
+  obj.use_vpn       = fd.has('use_vpn')        ? true : false;
+  obj.total_pages   = parseInt(obj.total_pages, 10);
+  obj.request_delay = parseFloat(obj.request_delay);
+  obj.schedule_day_of_week = parseInt(obj.schedule_day_of_week, 10);
+  obj.schedule_hour   = parseInt(obj.schedule_hour, 10);
+  obj.schedule_minute = parseInt(obj.schedule_minute, 10);
+  // Collect multi-day selection
+  obj.schedule_days = [...document.querySelectorAll('.sched-day-cb:checked')].map(cb => parseInt(cb.value));
+  if (!obj.schedule_days.length) obj.schedule_days = [obj.schedule_day_of_week];
+  try {
+    const r = await postJSON('/admin/enrichment/settings', obj);
+    const d = await r.json();
+    const fb = document.getElementById('save-feedback');
+    fb.classList.remove('hidden');
+    setTimeout(() => fb.classList.add('hidden'), 3000);
+  } catch(e) { alert('Ошибка сохранения'); }
+}
+
+// Init schedule preview on load
+document.addEventListener('DOMContentLoaded', function(){ updateSchedulePreview(); });
+
+/* ═══════════════════════════════════════════════════
+   CIAN Region Finder
+════════════════════════════════════════════════════ */
+let _lastCianResult = null;
+
+function extractRegionFromUrl(url) {
+  if (!url) return null;
+  try {
+    // Decode percent-encoded chars first (region%5B0%5D → region[0])
+    const decoded = decodeURIComponent(url);
+
+    // Format 1: region=4654  (plain)
+    let m = decoded.match(/[?&]region=(\d+)/);
+    if (m) return parseInt(m[1]);
+
+    // Format 2: region[0]=4654  (CIAN array style)
+    m = decoded.match(/[?&]region\[\d*\]=(\d+)/);
+    if (m) return parseInt(m[1]);
+
+    // Format 3: extract from path  /region4654/  or /r4654/
+    m = decoded.match(/\/(?:region|r)(\d{3,6})\//);
+    if (m) return parseInt(m[1]);
+
+    // Format 4: try URL API for query params
+    const u = new URL(url.startsWith('http') ? url : 'https://cian.ru/' + url);
+    const rp = u.searchParams.get('region');
+    if (rp && /^\d+$/.test(rp)) return parseInt(rp);
+  } catch(e) {}
+  return null;
+}
+
+function onCianUrlInput(val) {
+  const regionId = extractRegionFromUrl(val);
+  const hint = document.getElementById('cian-url-parsed');
+  if (regionId) {
+    hint.textContent = `✅ Найден region ID: ${regionId}`;
+    hint.classList.remove('hidden');
+  } else if (val.includes('cian.ru')) {
+    hint.textContent = '⚠️ В URL не найден параметр region=. Попробуйте выбрать город на странице CIAN и скопировать URL снова.';
+    hint.classList.remove('hidden');
+  } else {
+    hint.classList.add('hidden');
+  }
+}
+
+async function findCianRegion() {
+  const cianUrl   = document.getElementById('cian-url-input').value.trim();
+  const cityName  = document.getElementById('cian-city-name').value.trim();
+  const subdomain = document.getElementById('cian-subdomain').value.trim();
+
+  // Extract region ID from URL if provided
+  const regionFromUrl = cianUrl ? extractRegionFromUrl(cianUrl) : null;
+
+  if (!regionFromUrl && !cityName && !subdomain) {
+    alert('Вставьте URL со страницы CIAN или введите название города');
+    return;
+  }
+  const btn = document.getElementById('btn-find-region');
+  const res = document.getElementById('cian-lookup-result');
+  btn.disabled = true;
+  btn.textContent = '⏳ Поиск...';
+  res.innerHTML = '<div class="text-sm text-gray-500 py-2">Запрашиваем CIAN, это может занять 10-20 секунд...</div>';
+  res.classList.remove('hidden');
+  try {
+    const payload = {city_name: cityName, subdomain};
+    if (regionFromUrl) payload.region_id = regionFromUrl;
+    if (cianUrl) payload.cian_url = cianUrl;
+    const r = await postJSON('/admin/enrichment/cian-region-lookup', payload);
+    const d = await r.json();
+    if (d.success) {
+      _lastCianResult = d;
+      const cityKnown = d.city_already_exists;
+      const countColor = d.offers_count > 100 ? 'text-green-700' : d.offers_count > 10 ? 'text-yellow-700' : 'text-red-700';
+      const countBg    = d.offers_count > 100 ? 'bg-green-50 border-green-200' : d.offers_count > 10 ? 'bg-yellow-50 border-yellow-200' : 'bg-red-50 border-red-200';
+      res.innerHTML = `
+        <div class="border rounded-xl p-4 ${countBg} space-y-3">
+          <div class="flex flex-wrap items-center gap-3">
+            <div class="flex items-center gap-2">
+              <span class="text-2xl font-bold font-mono text-gray-900">${d.cian_region_id}</span>
+              <span class="text-xs bg-white border rounded-full px-2 py-0.5 text-gray-600">CIAN Region ID</span>
+            </div>
+            <div class="flex items-center gap-1.5 ${countColor}">
+              <span class="font-semibold">${d.offers_count.toLocaleString('ru')}</span>
+              <span class="text-xs">квартир от застройщика</span>
+            </div>
+            <div class="text-xs text-gray-500">поддомен: <code class="bg-white rounded px-1">${d.subdomain}.cian.ru</code></div>
+          </div>
+          ${d.sample_url ? `<div class="text-xs text-gray-600">Пример URL: <a href="${d.sample_url}" target="_blank" class="text-[#0088CC] underline hover:text-[#006699] break-all">${d.sample_url}</a></div>` : ''}
+          ${cityKnown ? `<div class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-3 py-1.5">⚠️ Город уже есть в системе (city_id=${cityKnown}). Вы можете обновить его CIAN region ID или сразу запустить парсер.</div>` : ''}
+          <div class="flex flex-wrap gap-2 pt-1">
+            ${cityKnown
+              ? `<button onclick="updateExistingCianId(${cityKnown}, ${d.cian_region_id})"
+                         class="bg-yellow-500 hover:bg-yellow-600 text-white text-sm px-4 py-1.5 rounded-lg font-medium transition-colors">
+                   ✏️ Обновить region ID в конфиге
+                 </button>
+                 <button onclick="startExistingCity(${cityKnown})"
+                         class="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-1.5 rounded-lg font-medium transition-colors">
+                   ▶ Запустить парсер для этого города
+                 </button>`
+              : `<button onclick="openCianAddModal()"
+                         class="bg-[#0088CC] hover:bg-[#006699] text-white text-sm px-4 py-1.5 rounded-lg font-medium transition-colors">
+                   ➕ Добавить город и запустить парсер
+                 </button>`
+            }
+            <a href="${d.page_url}" target="_blank"
+               class="border border-gray-300 text-gray-600 hover:bg-gray-50 text-sm px-4 py-1.5 rounded-lg font-medium transition-colors">
+              🔗 Открыть на CIAN
+            </a>
+          </div>
+        </div>`;
+    } else {
+      res.innerHTML = `<div class="border border-red-200 bg-red-50 rounded-xl p-4 text-sm text-red-800">❌ ${d.error}</div>`;
+    }
+  } catch(e) {
+    res.innerHTML = `<div class="border border-red-200 bg-red-50 rounded-xl p-4 text-sm text-red-800">❌ Ошибка сети: ${e.message}</div>`;
+  }
+  btn.disabled = false;
+  btn.textContent = '🔍 Найти';
+}
+
+function openCianAddModal() {
+  if (!_lastCianResult) return;
+  const d = _lastCianResult;
+  const cityName = document.getElementById('cian-city-name').value.trim();
+  // Pre-fill form
+  document.getElementById('cam-name').value = cityName;
+  document.getElementById('cam-name-en').value = d.subdomain;
+  document.getElementById('cam-cian-id').value = d.cian_region_id;
+  document.getElementById('cam-pages').value = d.offers_count > 500 ? 50 : d.offers_count > 100 ? 30 : 15;
+  document.getElementById('cam-region').value = '';
+  document.getElementById('cam-lat').value = '';
+  document.getElementById('cam-lon').value = '';
+  document.getElementById('cam-status').classList.add('hidden');
+  document.getElementById('cian-add-city-modal').classList.remove('hidden');
+  document.getElementById('cian-add-city-modal').classList.add('flex');
+}
+
+function closeCianAddModal() {
+  document.getElementById('cian-add-city-modal').classList.add('hidden');
+  document.getElementById('cian-add-city-modal').classList.remove('flex');
+}
+
+async function saveCianCity(andRun) {
+  const payload = {
+    name:           document.getElementById('cam-name').value.trim(),
+    name_en:        document.getElementById('cam-name-en').value.trim(),
+    cian_region_id: parseInt(document.getElementById('cam-cian-id').value),
+    total_pages:    parseInt(document.getElementById('cam-pages').value) || 30,
+    region_name:    document.getElementById('cam-region').value.trim() || 'Россия',
+    lat:            parseFloat(document.getElementById('cam-lat').value) || null,
+    lon:            parseFloat(document.getElementById('cam-lon').value) || null,
+  };
+  if (!payload.name || !payload.name_en || !payload.cian_region_id) {
+    alert('Заполните обязательные поля: название, slug, CIAN region ID'); return;
+  }
+  const status = document.getElementById('cam-status');
+  const btnS   = document.getElementById('cam-btn-save');
+  const btnSR  = document.getElementById('cam-btn-save-run');
+  btnS.disabled = btnSR.disabled = true;
+  status.className = 'p-3 rounded-lg text-sm bg-yellow-50 text-yellow-800';
+  status.textContent = '⏳ Сохраняем...';
+  status.classList.remove('hidden');
+  try {
+    const r  = await postJSON('/api/admin/cities/add', payload);
+    const d  = await r.json();
+    if (d.ok) {
+      status.className = 'p-3 rounded-lg text-sm bg-green-50 text-green-800';
+      status.textContent = `✅ ${d.message}`;
+      setTimeout(() => { loadCitiesStats(); }, 800);
+      if (andRun) {
+        setTimeout(async () => {
+          closeCianAddModal();
+          await startCity(d.city_id, 'full', payload.name);
+        }, 1200);
+      } else {
+        setTimeout(closeCianAddModal, 2500);
+      }
+    } else {
+      status.className = 'p-3 rounded-lg text-sm bg-red-50 text-red-800';
+      status.textContent = '❌ ' + (d.error || 'Ошибка');
+    }
+  } catch(e) {
+    status.className = 'p-3 rounded-lg text-sm bg-red-50 text-red-800';
+    status.textContent = '❌ Ошибка сети';
+  }
+  btnS.disabled = btnSR.disabled = false;
+}
+
+async function updateExistingCianId(cityId, cianId) {
+  if (!confirm(`Обновить CIAN region ID для города ${cityId} → ${cianId}?`)) return;
+  try {
+    const r = await postJSON('/admin/enrichment/update-city-config', {city_id: cityId, cian_region_id: cianId});
+    const d = await r.json();
+    if (d.success) {
+      showToast('✅ CIAN region ID обновлён', 'success');
+      loadCitiesStats();
+    } else {
+      showToast('❌ ' + d.message, 'error');
+    }
+  } catch(e) { showToast('❌ Ошибка сети', 'error'); }
+}
+
+async function startExistingCity(cityId) {
+  const cityName = document.getElementById('cian-city-name').value.trim() || `City ${cityId}`;
+  await startCity(cityId, 'full', cityName);
+}
+
+async function parseSingleJK() {
+  const url    = document.getElementById('single-jk-url').value.trim();
+  const cityId = document.getElementById('single-jk-city').value;
+  const status = document.getElementById('single-jk-status');
+  if (!url) { alert('Введите URL ЖК'); return; }
+  document.getElementById('btn-parse-single').disabled = true;
+  status.className = 'mt-3 p-3 rounded-lg text-sm bg-yellow-50 text-yellow-800';
+  status.textContent = '⏳ Запуск...';
+  status.classList.remove('hidden');
+  try {
+    const r = await postJSON('/admin/enrichment/parse-single', {jk_url: url, city_id: parseInt(cityId)});
+    const d = await r.json();
+    if (d.success) {
+      status.className = 'mt-3 p-3 rounded-lg text-sm bg-green-50 text-green-800';
+      status.textContent = '✅ ' + d.message;
+      setTimeout(() => { refreshStatus(); loadLog(); }, 2000);
+    } else {
+      status.className = 'mt-3 p-3 rounded-lg text-sm bg-red-50 text-red-800';
+      status.textContent = '❌ ' + d.message;
+    }
+  } catch(e) {
+    status.className = 'mt-3 p-3 rounded-lg text-sm bg-red-50 text-red-800';
+    status.textContent = '❌ Ошибка сети';
+  }
+  document.getElementById('btn-parse-single').disabled = false;
+}
+
+async function fixEmpty(mode) {
+  const labels = {
+    no_photo_no_desc: 'ЖК без фото и описания',
+    no_photo: 'ЖК без фото',
+    no_desc: 'ЖК без описания',
+  };
+  if (!confirm(`Запустить обновление: ${labels[mode]}?`)) return;
+  try {
+    const r = await postJSON('/admin/enrichment/fix-empty', {mode});
+    const d = await r.json();
+    alert(d.success ? d.message : ('Ошибка: ' + d.message));
+    if (d.success) setTimeout(() => { refreshStatus(); loadLog(); }, 1500);
+  } catch(e) { alert('Ошибка сети'); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Наш.Дом.РФ — управление обогащением (v2 — live monitor)
+═══════════════════════════════════════════════════════════════ */
+let ndLogInterval = null;
+let ndCurrentCityId = null;
+let ndAutoScroll = true;
+
+/* ── Прокси-статус ────────────────────────────────────────── */
+async function ndCheckProxy() {
+  try {
+    const r = await fetch('/admin/enrichment/proxy-pool');
+    const d = await r.json();
+    const dot   = document.getElementById('nd-proxy-dot');
+    const label = document.getElementById('nd-proxy-label');
+    const bar   = document.getElementById('nd-proxy-bar');
+    // proxy_url из настроек обогащения
+    const settR = await fetch('/admin/enrichment/status');
+    const settD = await settR.json();
+    const proxyUrl = settD.settings?.proxy_url || '';
+    const poolSize = d.pool ? d.pool.length : 0;
+    if (proxyUrl) {
+      dot.className   = 'w-2.5 h-2.5 rounded-full bg-green-500 flex-shrink-0';
+      label.className = 'text-green-700 font-medium';
+      label.textContent = `Прокси активен: ${proxyUrl}${poolSize > 0 ? ` (+${poolSize} в пуле)` : ''}`;
+      bar.className = 'mb-4 px-4 py-2.5 rounded-lg border text-sm flex items-center gap-3 bg-green-50 border-green-200';
+    } else if (poolSize > 0) {
+      dot.className   = 'w-2.5 h-2.5 rounded-full bg-yellow-400 flex-shrink-0';
+      label.className = 'text-yellow-700';
+      label.textContent = `Пул прокси: ${poolSize} адресов (одиночный URL не задан)`;
+      bar.className = 'mb-4 px-4 py-2.5 rounded-lg border text-sm flex items-center gap-3 bg-yellow-50 border-yellow-200';
+    } else {
+      dot.className   = 'w-2.5 h-2.5 rounded-full bg-gray-400 flex-shrink-0';
+      label.className = 'text-gray-500';
+      label.textContent = 'Прокси не настроен — прямое соединение с наш.дом.рф';
+      bar.className = 'mb-4 px-4 py-2.5 rounded-lg border text-sm flex items-center gap-3 bg-gray-50 border-gray-200';
+    }
+  } catch(e) {
+    document.getElementById('nd-proxy-label').textContent = 'Не удалось получить настройки прокси';
+  }
+}
+
+/* ── Статистика по городам ────────────────────────────────── */
+async function ndLoadStats() {
+  const el = document.getElementById('nd-stats-body');
+  document.getElementById('nd-refresh-spinner').classList.remove('hidden');
+  el.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-400 text-sm">Загрузка…</td></tr>';
+  try {
+    const [statsR, statusR] = await Promise.all([
+      fetch('/admin/enrichment/nashdom/stats'),
+      fetch('/admin/enrichment/nashdom/status'),
+    ]);
+    const stats  = await statsR.json();
+    const status = await statusR.json();
+    if (!stats.success) { el.innerHTML = `<tr><td colspan="7" class="text-red-600 p-3">${stats.error}</td></tr>`; return; }
+
+    el.innerHTML = stats.data.map(c => {
+      const running = status.status?.[String(c.city_id)]?.running || false;
+      const lastLine = status.status?.[String(c.city_id)]?.last_line || '';
+      const pct  = c.total_rc > 0 ? Math.round(c.enriched_rc / c.total_rc * 100) : 0;
+      const runBadge = running
+        ? `<span class="inline-flex items-center gap-1 text-xs text-green-700 font-medium">
+             <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse inline-block"></span>Работает
+           </span>` : '';
+      return `
+      <tr class="border-t hover:bg-gray-50 ${running ? 'bg-green-50/30' : ''}">
+        <td class="px-4 py-3 font-medium text-gray-900">${c.city_name} ${runBadge}</td>
+        <td class="px-4 py-3 text-gray-600">${c.total_rc}</td>
+        <td class="px-4 py-3">
+          <span class="${c.enriched_rc > 0 ? 'text-green-700 font-semibold' : 'text-gray-400'}">${c.enriched_rc}</span>
+        </td>
+        <td class="px-4 py-3">
+          <div class="flex items-center gap-2">
+            <div class="w-20 bg-gray-200 rounded-full h-1.5 overflow-hidden">
+              <div class="h-1.5 rounded-full ${pct > 0 ? 'bg-green-500' : 'bg-gray-300'}" style="width:${pct}%"></div>
+            </div>
+            <span class="text-xs text-gray-500">${pct}%</span>
+          </div>
+        </td>
+        <td class="px-4 py-3 text-gray-600">${c.with_photos}</td>
+        <td class="px-4 py-3 text-gray-600">${c.total_buildings}</td>
+        <td class="px-4 py-3">
+          <div class="flex gap-1.5 flex-wrap items-center">
+            <button onclick="ndRun(${c.city_id})"
+              class="text-xs bg-[#0088CC] text-white px-2.5 py-1 rounded hover:bg-[#006699] disabled:opacity-50 flex items-center gap-1"
+              ${running ? 'disabled' : ''}>▶ Запуск</button>
+            <button onclick="ndTest(${c.city_id}, event)"
+              class="text-xs bg-gray-100 text-gray-700 px-2.5 py-1 rounded hover:bg-gray-200">🧪 Тест</button>
+            <button onclick="ndShowLog(${c.city_id})"
+              class="text-xs ${running ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-gray-100 text-gray-700'} px-2.5 py-1 rounded hover:opacity-80">
+              ${running ? '📡 Лог (live)' : '📋 Лог'}</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+    // Авто-обновляем лог если что-то активно
+    const anyRunning = Object.values(status.status || {}).some(s => s.running);
+    if (anyRunning && !ndLogInterval && ndCurrentCityId) {
+      ndShowLog(ndCurrentCityId);
+    }
+  } catch(e) {
+    el.innerHTML = `<tr><td colspan="7" class="text-red-600 p-3">Ошибка сети: ${e.message}</td></tr>`;
+  } finally {
+    document.getElementById('nd-refresh-spinner').classList.add('hidden');
+  }
+}
+
+/* ── Запуск обогащения ────────────────────────────────────── */
+async function ndRun(cityId, dryRun=false) {
+  const limit = dryRun ? 3 : null;
+  if (!dryRun && !confirm(`Запустить обогащение наш.дом.рф для города ${cityId}?`)) return;
+  try {
+    const r = await postJSON('/admin/enrichment/nashdom/run', {city_id: cityId, dry_run: dryRun, limit});
+    const d = await r.json();
+    if (!d.success) { alert('❌ ' + d.error); return; }
+    ndCurrentCityId = cityId;
+    // Сразу открываем лог
+    ndShowLog(cityId);
+    // Обновляем таблицу через 2с
+    setTimeout(() => ndLoadStats(), 2000);
+  } catch(e) { alert('Ошибка сети: ' + e.message); }
+}
+
+/* ── Тест (3 ЖК dry-run) ─────────────────────────────────── */
+async function ndTest(cityId, evt) {
+  const btn = evt?.target;
+  if (btn) { btn.disabled = true; btn.textContent = '⏳…'; }
+  ndCurrentCityId = cityId;
+  document.getElementById('nd-log-box').classList.remove('hidden');
+  ndSetLogLine('<span style="color:#94a3b8">Запускаем тест (3 ЖК, dry-run)…</span>');
+  try {
+    const r = await postJSON('/admin/enrichment/nashdom/test', {city_id: cityId});
+    const d = await r.json();
+    ndRenderLog(d.success ? d.output : ('Ошибка: ' + d.error), null);
+  } catch(e) { ndSetLogLine('<span style="color:#f87171">Ошибка сети</span>'); }
+  if (btn) { btn.disabled = false; btn.textContent = '🧪 Тест'; }
+}
+
+/* ── Показать лог с авто-обновлением ─────────────────────── */
+async function ndShowLog(cityId) {
+  ndCurrentCityId = cityId;
+  document.getElementById('nd-log-box').classList.remove('hidden');
+  document.getElementById('nd-monitor').classList.remove('hidden');
+  clearInterval(ndLogInterval);
+  ndAutoScroll = true;
+
+  const doRefresh = async () => {
+    try {
+      const r = await fetch(`/admin/enrichment/nashdom/log?city_id=${cityId}`);
+      const d = await r.json();
+      if (!d.success) return;
+      ndRenderLog(d.log, d.progress);
+      ndUpdateMonitor(d.running, d.progress, cityId);
+      if (!d.running) {
+        clearInterval(ndLogInterval);
+        ndLogInterval = null;
+        ndLoadStats();
+      }
+    } catch(e) {}
+  };
+
+  await doRefresh();
+  ndLogInterval = setInterval(doRefresh, 2000);
+}
+
+/* ── Обновить панель мониторинга ─────────────────────────── */
+function ndUpdateMonitor(running, p, cityId) {
+  if (!p) return;
+  const badge = document.getElementById('nd-status-badge');
+  const cityEl = document.getElementById('nd-monitor-city');
+  if (running) {
+    badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse inline-block"></span>Выполняется';
+    badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700';
+  } else if (p.finished) {
+    badge.innerHTML = '✅ Завершено';
+    badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700';
+  } else {
+    badge.innerHTML = '⚫ Остановлен';
+    badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-500';
+  }
+  cityEl.textContent = `Город ID: ${cityId}`;
+  // Прогресс-бар
+  const pct = p.pct || 0;
+  document.getElementById('nd-prog-cur').textContent = p.current || 0;
+  document.getElementById('nd-prog-tot').textContent = p.total  || '—';
+  document.getElementById('nd-prog-pct').textContent = pct + '%';
+  document.getElementById('nd-prog-bar').style.width = pct + '%';
+  if (p.current_name) {
+    document.getElementById('nd-prog-name').textContent = '→ ' + p.current_name;
+  }
+  // Счётчики
+  document.getElementById('nd-cnt-matched').textContent = p.matched || 0;
+  document.getElementById('nd-cnt-updated').textContent = p.updated || 0;
+  document.getElementById('nd-cnt-skipped').textContent = p.skipped || 0;
+  document.getElementById('nd-cnt-failed').textContent  = p.failed  || 0;
+  // Статус прокси в логе
+  const runEl = document.getElementById('nd-log-running');
+  if (running) {
+    runEl.innerHTML = '<span class="inline-flex items-center gap-1 text-green-600 font-medium"><span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse inline-block"></span>Работает</span>';
+  } else {
+    runEl.innerHTML = '<span class="text-gray-400">Остановлен</span>';
+  }
+  // Прокси в панели
+  if (p.proxy_url) {
+    const dot = document.getElementById('nd-proxy-dot');
+    const label = document.getElementById('nd-proxy-label');
+    dot.className   = 'w-2.5 h-2.5 rounded-full bg-green-500 flex-shrink-0';
+    label.className = 'text-green-700 font-medium';
+    label.textContent = `Прокси: ${p.proxy_url}`;
+  }
+}
+
+/* ── Рендер лога с подсветкой ─────────────────────────────── */
+function ndRenderLog(text, progress) {
+  if (!text) return;
+  const el = document.getElementById('nd-log-content');
+  const wasAtBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 20;
+  el.innerHTML = ndColorize(text);
+  if (ndAutoScroll && wasAtBottom) el.scrollTop = el.scrollHeight;
+}
+
+function ndSetLogLine(html) {
+  document.getElementById('nd-log-content').innerHTML = html;
+}
+
+function ndColorize(text) {
+  // Экранируем HTML
+  const esc = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return esc
+    .replace(/(✅[^\n]*)/g, '<span style="color:#4ade80">$1</span>')
+    .replace(/(❌[^\n]*)/g, '<span style="color:#f87171">$1</span>')
+    .replace(/(⚠️[^\n]*)/g, '<span style="color:#fbbf24">$1</span>')
+    .replace(/(🔍[^\n]*)/g, '<span style="color:#60a5fa">$1</span>')
+    .replace(/(⏭️[^\n]*)/g, '<span style="color:#94a3b8">$1</span>')
+    .replace(/(📊[^\n]*)/g, '<span style="color:#c084fc">$1</span>')
+    .replace(/(🏠[^\n]*)/g, '<span style="color:#38bdf8;font-weight:600">$1</span>')
+    .replace(/(\[(\d+)\/(\d+)\][^\n]*)/g, '<span style="color:#e2e8f0;font-weight:500">$1</span>')
+    .replace(/(🌐[^\n]*)/g, '<span style="color:#34d399">$1</span>')
+    .replace(/(🔓[^\n]*)/g, '<span style="color:#94a3b8">$1</span>')
+    .replace(/([^\n]*)ERROR([^\n]*)/gi, '<span style="color:#f87171">$1ERROR$2</span>');
+}
+
+function ndScrollLogBottom() {
+  const el = document.getElementById('nd-log-content');
+  el.scrollTop = el.scrollHeight;
+}
+
+function ndCloseLog() {
+  clearInterval(ndLogInterval);
+  ndLogInterval = null;
+  document.getElementById('nd-log-box').classList.add('hidden');
+}
+
+function ndHideMonitor() {
+  document.getElementById('nd-monitor').classList.add('hidden');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (document.getElementById('nd-stats-body')) {
+    ndLoadStats();
+    ndCheckProxy();
+    setInterval(() => {
+      if (ndCurrentCityId) ndLoadStats();
+    }, 30000);
+  }
+  loadImageProxyStatus();
+});
+
+/* ── Прокси изображений ЦИАН ─────────────────────────────── */
+function _applyImgProxyUI(enabled) {
+  const badge = document.getElementById('img-proxy-badge');
+  const btn   = document.getElementById('img-proxy-toggle-btn');
+  const icon  = document.getElementById('img-proxy-toggle-icon');
+  const label = document.getElementById('img-proxy-toggle-label');
+  if (!badge) return;
+  if (enabled) {
+    badge.textContent = 'Включён';
+    badge.className = 'text-xs font-semibold px-2 py-0.5 rounded-full bg-green-100 text-green-700';
+    btn.className = btn.className.replace(/bg-\S+|text-\S+|border-\S+/g, '').trim()
+      + ' bg-red-50 text-red-700 border-red-200 hover:bg-red-100';
+    icon.textContent = '⏸';
+    label.textContent = 'Отключить прокси';
+  } else {
+    badge.textContent = 'Отключён';
+    badge.className = 'text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700';
+    btn.className = btn.className.replace(/bg-\S+|text-\S+|border-\S+/g, '').trim()
+      + ' bg-green-50 text-green-700 border-green-200 hover:bg-green-100';
+    icon.textContent = '▶';
+    label.textContent = 'Включить прокси';
+  }
+}
+
+async function loadImageProxyStatus() {
+  try {
+    const r = await fetch('/admin/api/image-proxy-status');
+    const d = await r.json();
+    _applyImgProxyUI(d.image_proxy_enabled);
+  } catch(e) {
+    console.error('img-proxy status error', e);
+  }
+}
+
+async function toggleImageProxy() {
+  const btn = document.getElementById('img-proxy-toggle-btn');
+  btn.disabled = true;
+  try {
+    const r = await fetch('/admin/api/toggle-image-proxy', {method: 'POST'});
+    const d = await r.json();
+    if (d.ok) {
+      _applyImgProxyUI(d.image_proxy_enabled);
+    } else {
+      alert('Ошибка: ' + (d.error || 'неизвестная ошибка'));
+    }
+  } catch(e) {
+    alert('Сетевая ошибка: ' + e);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/* ── Синхронизация фото ЖК ↔ Квартиры ────────────────────── */
+async function runPhotoSync() {
+  const btn       = document.getElementById('syncPhotoBtn');
+  const spinner   = document.getElementById('syncPhotoSpinner');
+  const resultBox = document.getElementById('syncPhotoResult');
+  const direction = document.getElementById('syncPhotoDirection').value;
+  const complexIdRaw = document.getElementById('syncPhotoComplexId').value.trim();
+  const overwrite = document.getElementById('syncPhotoOverwrite').checked;
+
+  btn.disabled = true;
+  spinner.classList.remove('hidden');
+  resultBox.classList.add('hidden');
+  resultBox.textContent = '';
+
+  const body = { direction, overwrite };
+  if (complexIdRaw) body.complex_id = parseInt(complexIdRaw, 10);
+
+  try {
+    const r = await fetch('/admin/api/sync-photos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const d = await r.json();
+    if (d.ok) {
+      const s = d.stats;
+      resultBox.className = 'text-sm font-medium text-green-700';
+      resultBox.textContent =
+        `✅ Готово: ЖК обновлено ${s.rc_updated}, квартир обновлено ${s.prop_updated}` +
+        (s.skipped  ? `, пропущено ${s.skipped}` : '') +
+        (s.errors   ? `, ошибок ${s.errors}` : '');
+    } else {
+      resultBox.className = 'text-sm font-medium text-red-600';
+      resultBox.textContent = '❌ Ошибка: ' + (d.error || 'неизвестная');
+    }
+    resultBox.classList.remove('hidden');
+  } catch(e) {
+    resultBox.className = 'text-sm font-medium text-red-600';
+    resultBox.textContent = '❌ Сетевая ошибка: ' + e;
+    resultBox.classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+    spinner.classList.add('hidden');
+  }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,1231 @@
+{% extends "base.html" %}
+
+{% block title %}Материнский капитал 2026 в {{ city_prep }}: использование для покупки квартиры | InBack{% endblock %}
+{% block description %}Материнский капитал 2026 в {{ city_prep }}: 690 266 ₽ для покупки квартиры в новостройке. Можно использовать как первый взнос или доплату. Помощь в оформлении документов.{% endblock %}
+{% block keywords %}материнский капитал 2026, материнский капитал на квартиру, материнский капитал первый взнос, материнский капитал новостройка, маткапитал сумма, использование материнского капитала, материнский капитал {{ city_name }}, маткапитал ипотека, маткапитал первоначальный взнос, материнский капитал 690 тысяч, маткапитал покупка квартиры, материнский капитал документы, маткапитал оформление, материнский капитал в {{ city_prep }}, маткапитал {{ city_region }}, материнский капитал на новостройку, маткапитал с кэшбеком, материнский капитал на второго ребенка, маткапитал и семейная ипотека, материнский капитал жилье, материнский капитал застройщик{% endblock %}
+
+{% block og_title %}Материнский капитал 2026 в {{ city_prep }}: использование для покупки квартиры | InBack{% endblock %}
+{% block og_description %}Используйте материнский капитал 690 266 ₽ для покупки квартиры в новостройке {{ city_gen }}. Как первый взнос или доплата. Помощь в оформлении.{% endblock %}
+{% block twitter_title %}Материнский капитал 2026 в {{ city_prep }}: использование для покупки квартиры | InBack{% endblock %}
+{% block twitter_description %}Материнский капитал 690 266 ₽ на покупку квартиры в {{ city_prep }}. Как первый взнос или доплата. Оформление за 1 день.{% endblock %}
+{% block twitter_image %}{{ url_for('static', filename='images/maternal-capital-og.jpg', _external=True) }}{% endblock %}
+
+{% block head %}
+<meta name="robots" content="index, follow">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ url_for('city_pages.maternal_capital_city', city_slug=current_city.slug if current_city else 'krasnodar', _external=True) }}">
+<meta property="og:site_name" content="InBack">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="{{ url_for('city_pages.maternal_capital_city', city_slug=current_city.slug if current_city else 'krasnodar', _external=True) }}">
+
+<link rel="canonical" href="{{ url_for('city_pages.maternal_capital_city', city_slug=current_city.slug if current_city else 'krasnodar', _external=True) }}" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "RealEstateAgent",
+  "name": "Inback",
+  "image": "https://inback.ru/logo.jpg",
+  "description": "Официальный сервис возврата кэшбека при покупке недвижимости в {{ city_prep }} и других городах России",
+  "areaServed": {
+    "@type": "AdministrativeArea",
+    "name": "{{ city_name }}{% if current_city and current_city.region %}, {{ current_city.region.name }}{% else %} и Краснодарский край{% endif %}"
+  },
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "ул. Красная, 32",
+    "addressLocality": "{{ city_name }}",
+    "addressRegion": {{ (current_city.region.name if current_city and current_city.region else 'Краснодарский край')|tojson }}
+  },
+  "telephone": "+78001231212",
+  "openingHoursSpecification": {
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"],
+    "opens": "09:00",
+    "closes": "19:00"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Какая сумма материнского капитала в 2026 году?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "В 2026 году размер материнского капитала составляет 690 266 рублей на первого ребёнка и 912 162 рублей на второго и последующих детей. Сумма индексируется ежегодно."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Можно ли использовать маткапитал как первоначальный взнос по ипотеке?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Да, материнский капитал можно направить на первоначальный взнос по ипотеке для покупки квартиры в новостройке. Также его можно использовать для частичного погашения уже оформленной ипотеки."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Можно ли купить квартиру в новостройке на материнский капитал?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Да, материнский капитал можно использовать для покупки квартиры в новостройке. При этом через сервис InBack вы дополнительно получите кэшбек до 5% от стоимости квартиры."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Какие документы нужны для использования маткапитала?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Для использования материнского капитала потребуются: сертификат на маткапитал, паспорт владельца сертификата, СНИЛС, договор купли-продажи или ДДУ, справка из банка об остатке задолженности (при ипотеке)."
+      }
+    }
+  ]
+}
+</script>
+
+<style>
+.matcap-hero-gradient {
+    background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 30%, #e0f2fe 60%, #f0fdf4 100%);
+}
+
+@keyframes float-cradle {
+    0%, 100% { transform: translateY(0px) rotate(-2deg); }
+    25% { transform: translateY(-10px) rotate(2deg); }
+    50% { transform: translateY(-6px) rotate(-1deg); }
+    75% { transform: translateY(-14px) rotate(3deg); }
+}
+@keyframes float-bounce {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    30% { transform: translateY(-16px) scale(1.05); }
+    60% { transform: translateY(-8px) scale(0.98); }
+}
+@keyframes float-drift {
+    0%, 100% { transform: translateY(0px) translateX(0px); }
+    33% { transform: translateY(-12px) translateX(6px); }
+    66% { transform: translateY(-6px) translateX(-4px); }
+}
+@keyframes float-sway {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(10px) rotate(-4deg); }
+}
+
+.stat-card-hover {
+    transition: all 0.3s ease;
+}
+.stat-card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 136, 204, 0.12);
+}
+
+.benefit-card {
+    transition: all 0.3s ease;
+}
+.benefit-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+}
+
+.step-line {
+    background: linear-gradient(180deg, #0088CC 0%, #e0f2fe 100%);
+}
+
+.faq-item {
+    transition: all 0.3s ease;
+}
+.faq-item:hover {
+    border-color: #0088CC;
+}
+.faq-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+.faq-content.open {
+    max-height: 500px;
+}
+
+.slider::-webkit-slider-thumb {
+    appearance: none;
+    height: 22px;
+    width: 22px;
+    border-radius: 50%;
+    background: #0088CC;
+    cursor: pointer;
+    border: 3px solid #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 136, 204, 0.3);
+}
+.slider::-moz-range-thumb {
+    height: 22px;
+    width: 22px;
+    border-radius: 50%;
+    background: #0088CC;
+    cursor: pointer;
+    border: 3px solid #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 136, 204, 0.3);
+}
+.slider::-webkit-slider-runnable-track {
+    background: linear-gradient(to right, #0088CC 0%, #e5e7eb 0%);
+    border-radius: 9999px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<section class="matcap-hero-gradient relative overflow-hidden">
+    <div class="absolute inset-0 overflow-hidden hidden md:block">
+        <div class="absolute top-[15%] left-[6%] w-3 h-3 bg-[#0088CC]/15 rounded-full"></div>
+        <div class="absolute top-[60%] right-[12%] w-2 h-2 bg-[#0088CC]/20 rounded-full"></div>
+        <div class="absolute bottom-[25%] left-[18%] w-4 h-4 bg-[#0088CC]/10 rounded-full"></div>
+        <div class="absolute top-[35%] right-[25%] w-2 h-2 bg-[#0088CC]/15 rounded-full"></div>
+    </div>
+
+    <div class="absolute top-20 left-[7%] hidden md:block" style="animation: float-cradle 5s ease-in-out infinite;">
+        <div class="w-16 h-16 bg-white rounded-2xl shadow-lg flex items-center justify-center">
+            <svg class="w-8 h-8 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m3-2.803a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        </div>
+    </div>
+    <div class="absolute top-28 right-[9%] hidden md:block" style="animation: float-bounce 6s ease-in-out infinite; animation-delay: 0.5s;">
+        <div class="w-14 h-14 bg-white rounded-2xl shadow-lg flex items-center justify-center">
+            <svg class="w-7 h-7 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        </div>
+    </div>
+    <div class="absolute bottom-44 left-[11%] hidden lg:block" style="animation: float-drift 7s ease-in-out infinite; animation-delay: 1.5s;">
+        <div class="w-12 h-12 bg-white rounded-xl shadow-md flex items-center justify-center">
+            <svg class="w-6 h-6 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+    </div>
+    <div class="absolute bottom-36 right-[7%] hidden lg:block" style="animation: float-sway 5.5s ease-in-out infinite; animation-delay: 2s;">
+        <div class="w-14 h-14 bg-white rounded-2xl shadow-lg flex items-center justify-center">
+            <svg class="w-7 h-7 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        </div>
+    </div>
+    <div class="absolute top-48 left-[28%] hidden lg:block" style="animation: float-bounce 8s ease-in-out infinite; animation-delay: 3s;">
+        <div class="w-10 h-10 bg-white rounded-xl shadow-md flex items-center justify-center">
+            <span class="text-[#0088CC] font-bold text-xs">690K</span>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-20 md:py-28 relative z-10">
+        <div class="max-w-3xl mx-auto text-center relative">
+            <span class="page-hero-badge">Материнский капитал 2026</span>
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-gray-900 leading-tight">
+                Материнский капитал <span class="text-[#0088CC]">690 266 ₽</span><br class="hidden md:block"> на покупку квартиры
+            </h1>
+            <p class="text-xl md:text-2xl mb-10 text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                Используйте маткапитал для покупки квартиры в новостройке {{ city_gen }}. Как первый взнос, доплата или погашение кредита
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="openQuizModal()" class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-[#0088CC] to-[#006699] text-white rounded-xl hover:shadow-xl transition-all duration-300 transform hover:scale-[1.03] shadow-lg font-semibold text-lg">
+                    Подобрать квартиру
+                </button>
+                <button onclick="openCertificateModal()" class="inline-flex items-center justify-center px-8 py-4 bg-white text-gray-800 rounded-xl hover:bg-gray-50 transition-all font-semibold text-lg shadow-md border border-gray-100">
+                    <svg class="w-5 h-5 mr-2 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    Проверить сертификат
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto px-4 pb-12 relative z-10">
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-5 text-center stat-card-hover border border-white/50 shadow-sm">
+            <div class="text-3xl font-bold text-[#0088CC] mb-1">690 266 ₽</div>
+            <div class="text-sm text-gray-600">За первого ребёнка</div>
+        </div>
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-5 text-center stat-card-hover border border-white/50 shadow-sm">
+            <div class="text-3xl font-bold text-[#0088CC] mb-1">912 162 ₽</div>
+            <div class="text-sm text-gray-600">За второго ребёнка</div>
+        </div>
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-5 text-center stat-card-hover border border-white/50 shadow-sm">
+            <div class="text-3xl font-bold text-[#0088CC] mb-1">с 3 лет</div>
+            <div class="text-sm text-gray-600">Использование</div>
+        </div>
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-5 text-center stat-card-hover border border-white/50 shadow-sm">
+            <div class="text-3xl font-bold text-[#0088CC] mb-1">сразу</div>
+            <div class="text-sm text-gray-600">На жильё по ипотеке</div>
+        </div>
+    </div>
+
+    <div class="w-full">
+        <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full" preserveAspectRatio="none" style="height: 60px; display: block;">
+            <path d="M0 60V30C240 5 480 50 720 30C960 10 1200 45 1440 25V60H0Z" fill="white"/>
+        </svg>
+    </div>
+</section>
+
+<section class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-14">
+                <span class="page-hero-badge">Условия программы</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Как использовать материнский капитал
+                </h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">Варианты применения при покупке квартиры в {{ city_prep }}</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100 benefit-card">
+                    <div class="w-14 h-14 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mb-5">
+                        <svg class="w-7 h-7 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 text-gray-900">Первоначальный взнос</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Использовать как первый взнос по ипотеке</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Снижает размер кредита</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Возможно с момента рождения</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100 benefit-card">
+                    <div class="w-14 h-14 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mb-5">
+                        <svg class="w-7 h-7 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 text-gray-900">Погашение кредита</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Досрочное погашение основного долга</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Уменьшает переплату по процентам</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Сокращает срок кредита</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100 benefit-card">
+                    <div class="w-14 h-14 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mb-5">
+                        <svg class="w-7 h-7 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 text-gray-900">Доплата к покупке</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Часть суммы при покупке квартиры</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Комбинация с рассрочкой</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Уменьшает нагрузку по платежам</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-14">
+                <span class="page-hero-badge">Требования</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Требования и документы
+                </h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">Что нужно для использования материнского капитала</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mr-4">
+                            <svg class="w-6 h-6 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Условия использования</h3>
+                    </div>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Гражданство РФ у ребенка и родителя</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Недвижимость должна быть в России</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Оформление в общую собственность</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Выделение долей всем детям</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Можно использовать частично</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mr-4">
+                            <svg class="w-6 h-6 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Необходимые документы</h3>
+                    </div>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Сертификат на материнский капитал</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Паспорт владельца сертификата</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Свидетельства о рождении детей</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Договор купли-продажи или ДДУ</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Справка об остатке средств</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 bg-white" id="calculator">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-14">
+                <span class="page-hero-badge">Калькулятор</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Калькулятор с материнским капиталом
+                </h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    Рассчитайте покупку квартиры с использованием маткапитала
+                </p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+                <div class="grid lg:grid-cols-2 gap-8">
+                    <div class="space-y-6">
+                        <div>
+                            <div class="flex justify-between items-center mb-3">
+                                <label class="text-gray-700 font-medium">Стоимость недвижимости</label>
+                                <div class="text-xl font-bold text-[#0088CC]" id="matPropertyPrice">5 000 000 ₽</div>
+                            </div>
+                            <input type="range" 
+                                   min="1000000" 
+                                   max="15000000" 
+                                   step="100000" 
+                                   value="5000000" 
+                                   class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                                   id="matPropertyPriceRange">
+                            <div class="flex justify-between text-sm text-gray-500 mt-1">
+                                <span>1 млн ₽</span>
+                                <span>15 млн ₽</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center mb-3">
+                                <label class="text-gray-700 font-medium">Материнский капитал</label>
+                                <div class="text-xl font-bold text-[#0088CC]" id="matCapitalAmount">690 266 ₽</div>
+                            </div>
+                            <input type="range" 
+                                   min="0" 
+                                   max="912162" 
+                                   step="1000" 
+                                   value="690266" 
+                                   class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                                   id="matCapitalAmountRange">
+                            <div class="flex justify-between text-sm text-gray-500 mt-1">
+                                <span>0 ₽</span>
+                                <span>912 162 ₽</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center mb-3">
+                                <label class="text-gray-700 font-medium">Дополнительные накопления</label>
+                                <div class="text-xl font-bold text-[#0088CC]" id="matAdditionalSavings">500 000 ₽</div>
+                            </div>
+                            <input type="range" 
+                                   min="0" 
+                                   max="5000000" 
+                                   step="50000" 
+                                   value="500000" 
+                                   class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                                   id="matAdditionalSavingsRange">
+                            <div class="flex justify-between text-sm text-gray-500 mt-1">
+                                <span>0 ₽</span>
+                                <span>5 млн ₽</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-[#0088CC] to-[#006699] rounded-2xl p-6 text-white">
+                        <div class="text-center mb-6">
+                            <h3 class="text-2xl font-bold mb-2">Расчет покупки</h3>
+                            <div class="text-4xl font-bold" id="matLoanNeeded">3 809 734 ₽</div>
+                            <p class="text-white/80">нужен кредит</p>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center py-2 border-b border-white/20">
+                                <span class="text-white/80">Стоимость:</span>
+                                <span class="font-semibold" id="matTotalPrice">5 000 000 ₽</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-white/20">
+                                <span class="text-white/80">Маткапитал:</span>
+                                <span class="font-semibold" id="matCapitalUsed">690 266 ₽</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-white/20">
+                                <span class="text-white/80">Накопления:</span>
+                                <span class="font-semibold" id="matSavingsUsed">500 000 ₽</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2">
+                                <span class="text-white/80">Кэшбек 2.5%:</span>
+                                <span class="font-semibold" id="matCashback">125 000 ₽</span>
+                            </div>
+                        </div>
+
+                        <button onclick="openApplicationModal()" class="w-full bg-white text-[#0088CC] py-3 rounded-xl font-semibold mt-6 hover:bg-gray-50 transition-colors">
+                            Подобрать квартиру
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-14">
+            <span class="page-hero-badge">Преимущества</span>
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Преимущества использования материнского капитала
+            </h2>
+        </div>
+        <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="bg-white rounded-2xl p-6 border border-gray-100 benefit-card">
+                <div class="w-12 h-12 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">690 266 ₽</h3>
+                <p class="text-gray-600">Размер материнского капитала в 2026 году</p>
+            </div>
+            <div class="bg-white rounded-2xl p-6 border border-gray-100 benefit-card">
+                <div class="w-12 h-12 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Первоначальный взнос</h3>
+                <p class="text-gray-600">Использование для покупки квартиры в ипотеку</p>
+            </div>
+            <div class="bg-white rounded-2xl p-6 border border-gray-100 benefit-card">
+                <div class="w-12 h-12 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Сразу после рождения</h3>
+                <p class="text-gray-600">Можно использовать не дожидаясь 3 лет</p>
+            </div>
+            <div class="bg-white rounded-2xl p-6 border border-gray-100 benefit-card">
+                <div class="w-12 h-12 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Государственная поддержка</h3>
+                <p class="text-gray-600">Федеральная программа помощи семьям</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-14">
+                <span class="page-hero-badge">Льготы</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Как использовать материнский капитал для покупки жилья</h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">Материнский капитал можно направить на улучшение жилищных условий несколькими способами</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 items-start">
+                <div>
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Первоначальный взнос по ипотеке (можно сразу)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Погашение основного долга или процентов</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Покупка жилья без ипотеки (через 3 года)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Строительство дома (включая ИЖС)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Участие в долевом строительстве</span>
+                        </li>
+                    </ul>
+                    <button onclick="openApplicationModal()" class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-[#0088CC] to-[#006699] text-white rounded-xl hover:shadow-xl transition-all duration-300 transform hover:scale-[1.03] shadow-lg font-semibold text-lg">
+                        Использовать маткапитал
+                    </button>
+                </div>
+
+                <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100">
+                    <h3 class="text-2xl font-bold mb-6 text-gray-900">Материнский капитал 2026</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between py-3 border-b border-gray-200">
+                            <span class="text-gray-600">За первого ребенка:</span>
+                            <span class="font-semibold text-[#0088CC]">690 266 ₽</span>
+                        </div>
+                        <div class="flex justify-between py-3 border-b border-gray-200">
+                            <span class="text-gray-600">За второго ребенка:</span>
+                            <span class="font-semibold">912 162 ₽</span>
+                        </div>
+                        <div class="flex justify-between py-3 border-b border-gray-200">
+                            <span class="text-gray-600">Индексация:</span>
+                            <span class="font-semibold">ежегодно</span>
+                        </div>
+                        <div class="flex justify-between py-3 border-b border-gray-200">
+                            <span class="text-gray-600">Срок действия:</span>
+                            <span class="font-semibold">бессрочно</span>
+                        </div>
+                        <div class="flex justify-between py-3 border-b border-gray-200">
+                            <span class="text-gray-600">Использование:</span>
+                            <span class="font-semibold">частичное возможно</span>
+                        </div>
+                        <div class="flex justify-between py-3">
+                            <span class="text-gray-600">Остаток:</span>
+                            <span class="font-semibold">переносится</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-14">
+                <span class="page-hero-badge">Документы</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Документы для использования материнского капитала
+                </h2>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
+                    <h3 class="text-xl font-bold mb-6 text-gray-900 flex items-center">
+                        <div class="w-10 h-10 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mr-3">
+                            <svg class="w-5 h-5 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        </div>
+                        Основные документы
+                    </h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Сертификат на материнский капитал</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Паспорт владельца сертификата</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">СНИЛС владельца сертификата</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Договор купли-продажи или ДДУ</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Справка об остатке долга (для ипотеки)</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
+                    <h3 class="text-xl font-bold mb-6 text-gray-900 flex items-center">
+                        <div class="w-10 h-10 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mr-3">
+                            <svg class="w-5 h-5 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
+                        </div>
+                        Дополнительные документы
+                    </h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Свидетельства о рождении детей</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Справка о составе семьи</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Обязательство о выделении долей</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Выписка из ЕГРН</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Справка из банка о реквизитах</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="text-center mt-10">
+                <p class="text-gray-600 mb-4">Поможем с оформлением всех документов</p>
+                <button onclick="openApplicationModal()" class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-[#0088CC] to-[#006699] text-white rounded-xl hover:shadow-xl transition-all duration-300 transform hover:scale-[1.03] shadow-lg font-semibold text-lg">
+                    Получить консультацию
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto">
+            <span class="page-hero-badge">Полная информация</span>
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Материнский капитал в {{ city_prep }} 2026 — как купить квартиру</h2>
+            <p class="text-lg text-gray-700 mb-8">В 2026 году размер материнского капитала составляет 690 266 ₽ за первого ребенка и 912 162 ₽ за второго. В {{ city_prep }} более 5000 семей ежегодно используют маткапитал для покупки жилья.</p>
+            
+            <h3 class="text-2xl font-bold mb-6">Покупка квартиры с материнским капиталом в {{ city_prep }}</h3>
+            <div class="bg-gray-50 rounded-2xl p-8 mb-8 border border-gray-100">
+                <p class="text-gray-700 mb-4">Материнский капитал в 2026 году можно использовать для покупки новостроек в {{ city_prep }}. Средства можно направить на первоначальный взнос, доплату или полную оплату квартиры. При выборе жилья важно учитывать:</p>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-semibold text-gray-900 mb-3 flex items-center">
+                            <svg class="w-5 h-5 text-[#0088CC] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Финансовые возможности
+                        </h4>
+                        <ul class="space-y-2 text-gray-600">
+                            <li>• Квартиры в пределах суммы маткапитала</li>
+                            <li>• Варианты с доплатой собственными средствами</li>
+                            <li>• Комбинация с семейной ипотекой</li>
+                            <li>• Рассрочка от застройщика с использованием МСК</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-900 mb-3 flex items-center">
+                            <svg class="w-5 h-5 text-[#0088CC] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m3-2.803a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                            Комфорт для семьи с детьми
+                        </h4>
+                        <ul class="space-y-2 text-gray-600">
+                            <li>• Детские сады и школы рядом</li>
+                            <li>• Безопасные дворы с площадками</li>
+                            <li>• Медицинские учреждения поблизости</li>
+                            <li>• Экологически чистые районы</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl p-4 mt-6 border-l-4 border-[#0088CC]">
+                    <p class="text-gray-700"><strong>Важно:</strong> Застройщик должен принимать материнский капитал. Мы подберем подходящие варианты квартир с возможностью использования МСК и кэшбэком до 3,5%.</p>
+                </div>
+            </div>
+
+            <h3 class="text-2xl font-bold mb-6">Как использовать материнский капитал — пошаговая инструкция</h3>
+            <div class="space-y-4 mb-8">
+                <div class="flex items-start">
+                    <div class="w-10 h-10 bg-gradient-to-br from-[#0088CC] to-[#006699] text-white rounded-xl flex items-center justify-center font-bold mr-4 mt-0.5 flex-shrink-0">1</div>
+                    <div>
+                        <h4 class="font-semibold text-gray-900">Получите справку о размере маткапитала</h4>
+                        <p class="text-gray-600">в ПФР или через Госуслуги, действительна 30 дней</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <div class="w-10 h-10 bg-gradient-to-br from-[#0088CC] to-[#006699] text-white rounded-xl flex items-center justify-center font-bold mr-4 mt-0.5 flex-shrink-0">2</div>
+                    <div>
+                        <h4 class="font-semibold text-gray-900">Выберите способ использования</h4>
+                        <p class="text-gray-600">первый взнос, доплата или полная оплата квартиры</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <div class="w-10 h-10 bg-gradient-to-br from-[#0088CC] to-[#006699] text-white rounded-xl flex items-center justify-center font-bold mr-4 mt-0.5 flex-shrink-0">3</div>
+                    <div>
+                        <h4 class="font-semibold text-gray-900">Найдите подходящую квартиру</h4>
+                        <p class="text-gray-600">поможем выбрать жилье с учетом суммы маткапитала</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <div class="w-10 h-10 bg-gradient-to-br from-[#0088CC] to-[#006699] text-white rounded-xl flex items-center justify-center font-bold mr-4 mt-0.5 flex-shrink-0">4</div>
+                    <div>
+                        <h4 class="font-semibold text-gray-900">Подайте заявление в ПФР</h4>
+                        <p class="text-gray-600">на распоряжение средствами, рассмотрение 10 дней</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <div class="w-10 h-10 bg-gradient-to-br from-[#0088CC] to-[#006699] text-white rounded-xl flex items-center justify-center font-bold mr-4 mt-0.5 flex-shrink-0">5</div>
+                    <div>
+                        <h4 class="font-semibold text-gray-900">Завершите сделку</h4>
+                        <p class="text-gray-600">средства перечислят продавцу в течение 5 рабочих дней</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-[#0088CC]/5 rounded-2xl p-6 mb-8 border border-[#0088CC]/10">
+                <p class="text-[#0088CC] font-medium"><strong>Важно:</strong> материнский капитал можно использовать сразу после рождения ребенка для первого взноса по ипотеке!</p>
+            </div>
+
+            <h3 class="text-2xl font-bold mb-6">Материнский капитал + ипотека в {{ city_prep }}</h3>
+            <div class="bg-gray-50 rounded-2xl p-8 mb-8 border border-gray-100">
+                <p class="mb-4"><strong>Банки {{ city_gen }}, работающие с материнским капиталом:</strong></p>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <ul class="space-y-2">
+                            <li>• <strong>Сбербанк</strong> — быстрое оформление, онлайн-заявка</li>
+                            <li>• <strong>ВТБ</strong> — спецпрограммы для семей</li>
+                            <li>• <strong>Газпромбанк</strong> — низкие ставки</li>
+                            <li>• <strong>Россельхозбанк</strong> — сельская ипотека</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <ul class="space-y-2">
+                            <li>• <strong>Альфа-Банк</strong> — гибкие условия</li>
+                            <li>• <strong>ДОМ.РФ</strong> — господдержка</li>
+                            <li>• <strong>Банк Открытие</strong> — семейные программы</li>
+                            <li>• <strong>Уральский банк</strong> — региональные условия</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="bg-green-50 border border-green-200 rounded-xl p-4 mt-4">
+                    <p class="text-green-800"><strong>Выгода:</strong> Используя маткапитал как первый взнос, можно сэкономить до 50 000 ₽ процентов за весь срок кредита.</p>
+                </div>
+            </div>
+
+            <h3 class="text-2xl font-bold mb-6">Варианты использования маткапитала в {{ city_prep }}</h3>
+            <div class="grid md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white border border-gray-100 rounded-2xl p-8 shadow-sm">
+                    <h4 class="text-xl font-bold mb-4 text-[#0088CC]">С ипотекой</h4>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Первоначальный взнос (можно сразу)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Погашение основного долга</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Погашение процентов</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Доплата к существующему кредиту</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-white border border-gray-100 rounded-2xl p-8 shadow-sm">
+                    <h4 class="text-xl font-bold mb-4 text-[#0088CC]">Без ипотеки</h4>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Покупка готового жилья (через 3 года)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Участие в долевом строительстве</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Строительство дома</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Компенсация затрат на постройку</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-[#0088CC] to-[#006699] rounded-2xl p-8 text-white text-center">
+                <h3 class="text-xl font-bold mb-6">Направьте материнский капитал на улучшение жилищных условий!</h3>
+                <div class="grid md:grid-cols-5 gap-4 text-sm">
+                    <div>
+                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-2 font-bold">1</div>
+                        <p>Получите справку о размере</p>
+                    </div>
+                    <div>
+                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-2 font-bold">2</div>
+                        <p>Выберите способ использования</p>
+                    </div>
+                    <div>
+                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-2 font-bold">3</div>
+                        <p>Найдите подходящую квартиру</p>
+                    </div>
+                    <div>
+                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-2 font-bold">4</div>
+                        <p>Подайте заявление в ПФР</p>
+                    </div>
+                    <div>
+                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-2 font-bold">5</div>
+                        <p>Получите кэшбэк от нас!</p>
+                    </div>
+                </div>
+                <button onclick="openApplicationModal()" class="bg-white text-[#0088CC] font-bold py-3 px-8 rounded-xl mt-6 hover:bg-gray-100 transition duration-300">Использовать маткапитал</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto text-center mb-14">
+            <span class="page-hero-badge">Вопросы и ответы</span>
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Часто задаваемые вопросы</h2>
+            <p class="text-xl text-gray-600">Найдите ответы на популярные вопросы о материнском капитале и кэшбеке за новостройки</p>
+        </div>
+        
+        <div class="max-w-3xl mx-auto space-y-4">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 faq-item">
+                <button class="flex justify-between items-center w-full text-left group" onclick="toggleFAQ(1)">
+                    <h3 class="text-lg font-medium group-hover:text-[#0088CC] transition-colors">Можно ли использовать маткапитал на первый взнос?</h3>
+                    <svg class="w-5 h-5 text-[#0088CC] transition-transform duration-200 flex-shrink-0 ml-4" id="faq-icon-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div class="mt-3 text-gray-600 hidden" id="faq-content-1">
+                    <p class="leading-relaxed">Да, материнский капитал можно использовать в качестве первоначального взноса по ипотеке на покупку или строительство жилья. Также можно направить его на погашение основного долга и процентов по уже оформленному ипотечному кредиту.</p>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 faq-item">
+                <button class="flex justify-between items-center w-full text-left group" onclick="toggleFAQ(2)">
+                    <h3 class="text-lg font-medium group-hover:text-[#0088CC] transition-colors">Какая сумма материнского капитала в 2026 году?</h3>
+                    <svg class="w-5 h-5 text-[#0088CC] transition-transform duration-200 flex-shrink-0 ml-4" id="faq-icon-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div class="mt-3 text-gray-600 hidden" id="faq-content-2">
+                    <p class="leading-relaxed">В 2026 году размер материнского капитала составляет 690 266 ₽ на первого ребенка и 912 162 ₽ на второго. При рождении двойни сразу полагается вся сумма 912 162 ₽.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+function updateMaternalCapitalCalculator() {
+    const propertyPriceEl = document.getElementById('matPropertyPrice');
+    const capitalAmountEl = document.getElementById('matCapitalAmount');
+    const additionalSavingsEl = document.getElementById('matAdditionalSavings');
+    const loanNeededEl = document.getElementById('matLoanNeeded');
+    const totalPriceEl = document.getElementById('matTotalPrice');
+    const capitalUsedEl = document.getElementById('matCapitalUsed');
+    const savingsUsedEl = document.getElementById('matSavingsUsed');
+    const cashbackEl = document.getElementById('matCashback');
+
+    const propertyPriceRange = document.getElementById('matPropertyPriceRange');
+    const capitalAmountRange = document.getElementById('matCapitalAmountRange');
+    const additionalSavingsRange = document.getElementById('matAdditionalSavingsRange');
+
+    const propertyPrice = parseInt(propertyPriceRange.value);
+    const capitalAmount = parseInt(capitalAmountRange.value);
+    const additionalSavings = parseInt(additionalSavingsRange.value);
+
+    const totalAvailable = capitalAmount + additionalSavings;
+    const loanNeeded = Math.max(0, propertyPrice - totalAvailable);
+    const cashback = propertyPrice * 0.025;
+
+    propertyPriceEl.textContent = formatNumber(propertyPrice) + ' ₽';
+    capitalAmountEl.textContent = formatNumber(capitalAmount) + ' ₽';
+    additionalSavingsEl.textContent = formatNumber(additionalSavings) + ' ₽';
+    loanNeededEl.textContent = formatNumber(loanNeeded) + ' ₽';
+    totalPriceEl.textContent = formatNumber(propertyPrice) + ' ₽';
+    capitalUsedEl.textContent = formatNumber(capitalAmount) + ' ₽';
+    savingsUsedEl.textContent = formatNumber(additionalSavings) + ' ₽';
+    cashbackEl.textContent = formatNumber(Math.round(cashback)) + ' ₽';
+}
+
+function formatNumber(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    updateMaternalCapitalCalculator();
+    
+    document.getElementById('matPropertyPriceRange').addEventListener('input', updateMaternalCapitalCalculator);
+    document.getElementById('matCapitalAmountRange').addEventListener('input', updateMaternalCapitalCalculator);
+    document.getElementById('matAdditionalSavingsRange').addEventListener('input', updateMaternalCapitalCalculator);
+});
+
+function openCertificateModal() {
+    document.getElementById('certificateModal').classList.remove('hidden');
+    if (typeof window.lockBodyScroll === 'function') window.lockBodyScroll();
+}
+
+function closeCertificateModal() {
+    document.getElementById('certificateModal').classList.add('hidden');
+    if (typeof window.unlockBodyScroll === 'function') window.unlockBodyScroll();
+}
+
+function toggleFAQ(id) {
+    const content = document.getElementById(`faq-content-${id}`);
+    const icon = document.getElementById(`faq-icon-${id}`);
+    
+    if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        icon.style.transform = 'rotate(180deg)';
+    } else {
+        content.classList.add('hidden');
+        icon.style.transform = 'rotate(0deg)';
+    }
+}
+</script>
+
+<div id="certificateModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onclick="if(event.target === this) closeCertificateModal()">
+    <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="sticky top-0 bg-gradient-to-r from-[#0088CC] to-[#006699] text-white p-6 rounded-t-2xl">
+            <div class="flex justify-between items-center">
+                <h2 class="text-2xl font-bold flex items-center">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    Как проверить сертификат материнского капитала
+                </h2>
+                <button onclick="closeCertificateModal()" class="text-white hover:bg-white/20 rounded-full p-2 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="p-8">
+            <div class="mb-8">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 bg-gradient-to-br from-[#0088CC] to-[#006699] text-white rounded-xl flex items-center justify-center font-bold mr-3">1</div>
+                    <h3 class="text-xl font-bold text-gray-900">Через портал Госуслуги</h3>
+                </div>
+                <div class="bg-gray-50 rounded-xl p-5 space-y-3">
+                    <div class="flex items-start">
+                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                            <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                        </div>
+                        <p class="text-gray-700">Войдите в личный кабинет на портале <a href="https://www.gosuslugi.ru" target="_blank" class="text-[#0088CC] font-semibold hover:underline">Госуслуги</a></p>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                            <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                        </div>
+                        <p class="text-gray-700">Перейдите: «Услуги» → «Органы власти» → «Социальный фонд России (СФР)»</p>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                            <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                        </div>
+                        <p class="text-gray-700">Найдите раздел: «Сертификат на материнский капитал»</p>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                            <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                        </div>
+                        <p class="text-gray-700">Откройте уведомление о выдаче сертификата</p>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                            <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                        </div>
+                        <p class="text-gray-700">Скачайте PDF-файл или отправьте на email</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-8">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 bg-gradient-to-br from-[#0088CC] to-[#006699] text-white rounded-xl flex items-center justify-center font-bold mr-3">2</div>
+                    <h3 class="text-xl font-bold text-gray-900">Через СберБанк Онлайн</h3>
+                </div>
+                <div class="bg-gray-50 rounded-xl p-5 space-y-3">
+                    <div class="flex items-start">
+                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                            <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                        </div>
+                        <p class="text-gray-700">Откройте приложение СберБанк Онлайн</p>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                            <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                        </div>
+                        <p class="text-gray-700">Перейдите: «Сервисы» → «Услуги» → «Маткапитал»</p>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                            <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                        </div>
+                        <p class="text-gray-700">Нажмите «Получить выписку» и авторизуйтесь через Госуслуги</p>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                            <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                        </div>
+                        <p class="text-gray-700">Выписка с электронной подписью сформируется за несколько минут</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 bg-gradient-to-br from-[#0088CC] to-[#006699] text-white rounded-xl flex items-center justify-center font-bold mr-3">3</div>
+                    <h3 class="text-xl font-bold text-gray-900">Через МФЦ или СФР</h3>
+                </div>
+                <div class="bg-gray-50 rounded-xl p-5 space-y-3">
+                    <div class="flex items-start">
+                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                            <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                        </div>
+                        <p class="text-gray-700">Обратитесь в любое отделение Социального фонда (СФР) или МФЦ</p>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                            <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                        </div>
+                        <p class="text-gray-700">Возьмите с собой паспорт</p>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                            <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                        </div>
+                        <p class="text-gray-700">Справку выдадут в течение 5 рабочих дней</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-[#0088CC]/5 border-l-4 border-[#0088CC] p-5 rounded-xl">
+                <div class="flex items-start">
+                    <svg class="w-6 h-6 text-[#0088CC] mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <div>
+                        <h4 class="font-bold text-gray-900 mb-2">Важная информация на 2026 год:</h4>
+                        <ul class="text-gray-700 space-y-1 text-sm">
+                            <li>• Размер маткапитала: 690 266 ₽ на первого ребенка, 912 162 ₽ на второго</li>
+                            <li>• Сертификат оформляется автоматически в течение 5 дней после регистрации ребенка</li>
+                            <li>• Бумажный сертификат не нужен — все операции с электронным документом</li>
+                            <li>• Справка об остатке действует до конца года выдачи</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-8">
+                <button onclick="closeCertificateModal(); openApplicationModal();" class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-[#0088CC] to-[#006699] text-white rounded-xl hover:shadow-xl transition-all duration-300 transform hover:scale-[1.03] shadow-lg font-semibold text-lg">
+                    Подобрать квартиру с маткапиталом
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

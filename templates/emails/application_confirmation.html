@@ -1,0 +1,83 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Заявка принята | InBack{% endblock %}
+
+{% block content %}
+<div style="text-align: center; margin-bottom: 24px;">
+    <div style="font-size: 48px; margin-bottom: 8px;">&#10003;</div>
+    <h1 style="margin: 0;">Заявка принята!</h1>
+</div>
+
+<p>Здравствуйте{% if user and user.first_name %}, {{ user.first_name }}{% elif user and user.full_name %}, {{ user.full_name.split()[0] }}{% endif %}!</p>
+
+<p>Мы получили вашу заявку на просмотр недвижимости. Спасибо за интерес к нашим услугам!</p>
+
+<div style="background: #f3f4f6; border-radius: 12px; padding: 24px; margin: 24px 0;">
+    <h3 style="margin: 0 0 16px 0; font-size: 18px; font-weight: 600; color: #1d1d1f;">
+        {{ application.property_name }}
+    </h3>
+    <table style="width: 100%; font-size: 15px; border-collapse: collapse;">
+        <tr>
+            <td style="padding: 6px 0; color: #6b7280;">Номер заявки:</td>
+            <td style="padding: 6px 0; color: #1d1d1f; font-weight: 500; text-align: right;">#{{ application.id }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 6px 0; color: #6b7280;">ЖК:</td>
+            <td style="padding: 6px 0; color: #1d1d1f; font-weight: 500; text-align: right;">{{ application.complex_name }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 6px 0; color: #6b7280;">Дата подачи:</td>
+            <td style="padding: 6px 0; color: #1d1d1f; font-weight: 500; text-align: right;">{{ application.created_at.strftime('%d.%m.%Y в %H:%M') }}</td>
+        </tr>
+        {% if application.message %}
+        <tr>
+            <td style="padding: 6px 0; color: #6b7280;">Комментарий:</td>
+            <td style="padding: 6px 0; color: #1d1d1f; font-weight: 500; text-align: right;">{{ application.message }}</td>
+        </tr>
+        {% endif %}
+    </table>
+</div>
+
+<div class="highlight-box" style="text-align: center;">
+    <div style="font-size: 24px; font-weight: 700; color: #0088CC; margin-bottom: 8px;">Доступен кэшбек!</div>
+    <p style="margin: 0; font-size: 15px; color: #424245;">
+        При покупке этого объекта через InBack вы можете получить кэшбек до 3% от стоимости недвижимости.
+    </p>
+</div>
+
+<div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 20px; margin: 24px 0;">
+    <h3 style="margin: 0 0 16px 0; font-size: 16px; font-weight: 600; color: #1d1d1f;">
+        Что происходит дальше?
+    </h3>
+    <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
+        <tr>
+            <td style="padding: 8px 12px 8px 0; vertical-align: top; width: 28px;">
+                <span style="display: inline-block; background: #0088CC; color: white; width: 24px; height: 24px; border-radius: 50%; text-align: center; line-height: 24px; font-size: 12px; font-weight: 600;">1</span>
+            </td>
+            <td style="padding: 8px 0; color: #424245;">Наш менеджер свяжется с вами в течение 2 часов</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px 12px 8px 0; vertical-align: top;">
+                <span style="display: inline-block; background: #0088CC; color: white; width: 24px; height: 24px; border-radius: 50%; text-align: center; line-height: 24px; font-size: 12px; font-weight: 600;">2</span>
+            </td>
+            <td style="padding: 8px 0; color: #424245;">Согласуем удобное время для показа объекта</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px 12px 8px 0; vertical-align: top;">
+                <span style="display: inline-block; background: #0088CC; color: white; width: 24px; height: 24px; border-radius: 50%; text-align: center; line-height: 24px; font-size: 12px; font-weight: 600;">3</span>
+            </td>
+            <td style="padding: 8px 0; color: #424245;">Проведем персональную экскурсию по квартире</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px 12px 8px 0; vertical-align: top;">
+                <span style="display: inline-block; background: #0088CC; color: white; width: 24px; height: 24px; border-radius: 50%; text-align: center; line-height: 24px; font-size: 12px; font-weight: 600;">4</span>
+            </td>
+            <td style="padding: 8px 0; color: #424245;">Поможем с оформлением сделки и получением кэшбека</td>
+        </tr>
+    </table>
+</div>
+
+<div style="text-align: center; margin: 32px 0;">
+    <a href="{{ base_url }}/dashboard" class="btn-primary">Отследить статус заявки</a>
+</div>
+{% endblock %}

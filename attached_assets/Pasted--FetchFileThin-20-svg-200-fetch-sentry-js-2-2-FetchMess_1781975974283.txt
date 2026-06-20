@@ -1,0 +1,65 @@
+
+FetchFileThin_20.svg	200	fetch	sentry.js:2	(кеш диска)	2 мс
+FetchMessageThin_20.svg	200	fetch	sentry.js:2	(кеш диска)	4 мс
+FetchChevronRightBigBold_30.svg	200	fetch	sentry.js:2	(кеш диска)	5 мс
+61a0a422d625d060897da15c/?auth_token=eyJhbGciOiJSU…a-ZVFOMGWA0&city=604b5243f9760700074ac345&lang=ru	304	xhr	sentry.js:2	0,4 кБ	91 мс
+61a0a422d625d060897da15c/?premiseType=apartment&au…a-ZVFOMGWA0&city=604b5243f9760700074ac345&lang=ru	304	xhr	sentry.js:2	0,4 кБ	132 мс
+types/?auth_token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpX…a-ZVFOMGWA0&city=604b5243f9760700074ac345&lang=ru	304	xhr	sentry.js:2	0,4 кБ	61 мс
+android/?auth_token=eyJhbGciOiJSUzI1NiIsInR5cCI6Ik…a-ZVFOMGWA0&city=604b5243f9760700074ac345&lang=ru	304	xhr	sentry.js:2	0,4 кБ	61 мс
+619f7c88d625d0b5aa7d3c61/?tags=regulations&auth_to…a-ZVFOMGWA0&city=604b5243f9760700074ac345&lang=ru	304	xhr	sentry.js:2	0,4 кБ	118 мс
+60c9c2585022dca64b180fa5?city=604b5243f9760700074ac345&lang=ru	304	xhr	sentry.js:2	0,4 кБ	93 мс
+settings?auth_token=eyJhbGciOiJSUzI1NiIsInR5cCI6Ik…a-ZVFOMGWA0&city=604b5243f9760700074ac345&lang=ru	200	xhr	sentry.js:2	1,0 кБ	66 мс
+619f7c88d625d0b5aa7d3c61?auth_token=eyJhbGciOiJSUz…a-ZVFOMGWA0&city=604b5243f9760700074ac345&lang=ru	200	xhr	sentry.js:2	1,4 кБ	80 мс
+legal_document_types/?auth_token=eyJhbGciOiJSUzI1N…a-ZVFOMGWA0&city=604b5243f9760700074ac345&lang=ru	304	xhr	sentry.js:2	0,4 кБ	58 мс
+transaction_types/?auth_token=eyJhbGciOiJSUzI1NiIs…a-ZVFOMGWA0&city=604b5243f9760700074ac345&lang=ru	304	xhr	sentry.js:2	0,4 кБ	65 мс
+owner_types/?auth_token=eyJhbGciOiJSUzI1NiIsInR5cC…a-ZVFOMGWA0&city=604b5243f9760700074ac345&lang=ru	304	xhr	sentry.js:2	0,4 кБ	66 мс
+61a0a422d625d060897da15c?auth_token=eyJhbGciOiJSUz…a-ZVFOMGWA0&city=604b5243f9760700074ac345&lang=ru	304	xhr	sentry.js:2	0,4 кБ	126 мс
+builder-reward-settings?block=619f7c88d625d0b5aa7d3c61&city=604b5243f9760700074ac345&lang=ru	304	xhr	sentry.js:2	0,4 кБ	72 мс
+Fetch1?page-url=goal%3A%2F%2Fkrasnodar.trendagent.ru%2F…a)eco(42272260)prs(2)wss(2)w2s(15)evt(12540)ti(1)	200	fetch	sentry.js:2	0,1 кБ	477 мс
+totals/?city=604b5243f9760700074ac345&lang=ru	200	xhr	sentry.js:2	0,8 кБ	385 мс
+Fetch1?page-url=goal%3A%2F%2Fkrasnodar.trendagent.ru%2F…a)eco(42272260)prs(2)wss(2)w2s(15)evt(12540)ti(1)	200	fetch	sentry.js:2	0,1 кБ	564 мс
+Fetch1?page-url=https%3A%2F%2Fkrasnodar.trendagent.ru%2…a)eco(42272260)prs(2)wss(2)w2s(15)evt(12540)ti(1)	200	fetch	sentry.js:2	0,1 кБ	631 мс
+unread-messages/?exclude_subtype=4&exclude_subtype…a-ZVFOMGWA0&city=604b5243f9760700074ac345&lang=ru	304	xhr	sentry.js:2	0,4 кБ	82 мс
+FetchLoader_20.svg	200	fetch	sentry.js:2	(кеш диска)	1 мс
+FetchCrossMini_20.svg	200	fetch	sentry.js:2	(кеш диска)	1 мс
+graph/?city=604b5243f9760700074ac345&lang=ru	304	xhr	sentry.js:2	0,4 кБ	111 мс
+FetchCalculatorThin_20.svg	200	fetch	sentry.js:2	(кеш диска)	1 мс
+FetchFile_20.svg	200	fetch	sentry.js:2	(кеш диска)	1 мс
+FetchChevronDown_20.svg	200	fetch	sentry.js:2	(кеш диска)	1 мс
+FetchChat_20.svg	200	fetch	sentry.js:2	(кеш диска)	1 мс
+FetchFileTextThin_20.svg	200	fetch	sentry.js:2	(кеш диска)	1 мс
+FetchInfoFilled_20.svg	200	fetch	sentry.js:2	(кеш диска)	1 мс
+FetchFilterSmallThin_20.svg	200	fetch	sentry.js:2	(кеш диска)	2 мс
+FetchFireFilled_20.svg	200	fetch	sentry.js:2	(кеш диска)	1 мс
+FetchCalculator_20.svg	200	fetch	sentry.js:2	(кеш диска)	1 мс
+FetchInfo_20.svg	200	fetch	sentry.js:2	(кеш диска)	1 мс
+floor_plan?building_id=61a09b1ad625d03fdf7d9c03&fl…a-ZVFOMGWA0&city=604b5243f9760700074ac345&lang=ru	304	xhr	sentry.js:2	0,4 кБ	78 мс
+61a0a422d625d060897da15c/?auth_token=eyJhbGciOiJSU…a-ZVFOMGWA0&city=604b5243f9760700074ac345&lang=ru	304	xhr	sentry.js:2	0,4 кБ	77 мс
+directories?city=604b5243f9760700074ac345&lang=ru	304	xhr	sentry.js:2	0,4 кБ	51 мс
+Fetch1?page-url=https%3A%2F%2Fkrasnodar.trendagent.ru%2…a)eco(42272260)prs(2)wss(2)w2s(15)evt(12540)ti(1)	200	fetch	sentry.js:2	0,1 кБ	745 мс
+Fetch1?page-url=https%3A%2F%2Fkrasnodar.trendagent.ru%2…a)eco(42272260)prs(2)wss(2)w2s(15)evt(12540)ti(1)	200	fetch	sentry.js:2	0,1 кБ	867 мс
+FetchChevronUp_20.svg	200	fetch	sentry.js:2	(кеш диска)	2 мс
+61a0a422d625d060897da15c?city=604b5243f9760700074ac345&lang=ru	304	xhr	sentry.js:2	0,4 кБ	57 мс
+Fetch1?page-url=https%3A%2F%2Fkrasnodar.trendagent.ru%2…a)eco(42272260)prs(2)wss(2)w2s(16)evt(12540)ti(1)	200	fetch	sentry.js:2	0,1 кБ	963 мс
+Fetch1?page-url=https%3A%2F%2Fkrasnodar.trendagent.ru%2…a)eco(42272260)prs(2)wss(2)w2s(16)evt(12540)ti(1)	200	fetch	sentry.js:2	0,1 кБ	150 мс
+FetchStreetPanorama_20.svg	200	fetch	sentry.js:2	(кеш диска)	2 мс
+FetchRuler_20.svg	200	fetch	sentry.js:2	(кеш диска)	2 мс
+FetchRoute_20.svg	200	fetch	sentry.js:2	(кеш диска)	2 мс
+FetchParking_20.svg	200	fetch	sentry.js:2	(кеш диска)	2 мс
+interpreter?data=[out:json]%3B(node[amenity%3Dcafe…a-ZVFOMGWA0&city=604b5243f9760700074ac345&lang=ru	(ожидает)	xhr	sentry.js:2	0,0 кБ	Ожидание
+envelope/?sentry_version=7&sentry_key=28bc791da06a…28&sentry_client=sentry.javascript.react%2F9.47.1	200	fetch	sentry.js:2	0,3 кБ	117 мс
+Fetch46009011?wv-part=1&wv-check=40262&wv-type=0&wmode=…rshzj5yg66c90wv%3Ast%3A1781971486&t=gdpr(14)ti(1)	200	fetch	sentry.js:2	0,1 кБ	76 мс
+
+FetchChevronUp_20.svg	200	fetch	sentry.js:2	(кеш диска)	2 мс
+61a0a422d625d060897da15c?city=604b5243f9760700074ac345&lang=ru	304	xhr	sentry.js:2	0,4 кБ	57 мс
+Fetch1?page-url=https%3A%2F%2Fkrasnodar.trendagent.ru%2…a)eco(42272260)prs(2)wss(2)w2s(16)evt(12540)ti(1)	200	fetch	sentry.js:2	0,1 кБ	963 мс
+Fetch1?page-url=https%3A%2F%2Fkrasnodar.trendagent.ru%2…a)eco(42272260)prs(2)wss(2)w2s(16)evt(12540)ti(1)	200	fetch	sentry.js:2	0,1 кБ	150 мс
+FetchStreetPanorama_20.svg	200	fetch	sentry.js:2	(кеш диска)	2 мс
+FetchRuler_20.svg	200	fetch	sentry.js:2	(кеш диска)	2 мс
+FetchRoute_20.svg	200	fetch	sentry.js:2	(кеш диска)	2 мс
+FetchParking_20.svg	200	fetch	sentry.js:2	(кеш диска)	2 мс
+interpreter?data=[out:json]%3B(node[amenity%3Dcafe…a-ZVFOMGWA0&city=604b5243f9760700074ac345&lang=ru	(ожидает)	xhr	sentry.js:2	0,0 кБ	Ожидание
+envelope/?sentry_version=7&sentry_key=28bc791da06a…28&sentry_client=sentry.javascript.react%2F9.47.1	200	fetch	sentry.js:2	0,3 кБ	117 мс
+
+
+Новая зацепка в env.js: fixations-interaction-api.trendagent.ru, house-api.trendagent.ru/v1, version.trendagent.ru (там был "settings" и "android" endpoint)

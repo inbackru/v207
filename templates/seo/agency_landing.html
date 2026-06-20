@@ -1,0 +1,388 @@
+{% extends "base.html" %}
+{% set city_slug = current_city.slug if current_city else 'krasnodar' %}
+
+{% block title %}{{ seo_title }}{% endblock %}
+{% block description %}{{ seo_description }}{% endblock %}
+{% block keywords %}{{ seo_keywords }}{% endblock %}
+{% block og_title %}{{ seo_title }}{% endblock %}
+{% block og_description %}{{ seo_description }}{% endblock %}
+{% block canonical_url %}<link rel="canonical" href="{{ canonical_url }}" />{% endblock %}
+
+{% block head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "RealEstateAgent",
+  "name": "InBack",
+  "url": "https://inback.ru",
+  "logo": "https://inback.ru/static/images/logo.svg",
+  "image": "https://inback.ru/static/images/social-preview.jpg",
+  "description": "Агентство недвижимости нового формата в {{ city_prep }}: покупаете новостройку напрямую от застройщика и получаете кэшбек до 500 000 ₽.",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "{{ current_city.name if current_city else 'Краснодар' }}",
+    "addressRegion": "Краснодарский край",
+    "addressCountry": "RU"
+  },
+  "areaServed": "{{ current_city.name if current_city else 'Краснодар' }}",
+  "priceRange": "0 ₽ комиссии с покупателя",
+  "telephone": "+7-900-000-00-00",
+  "openingHoursSpecification": {
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+    "opens": "09:00",
+    "closes": "21:00"
+  },
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Новостройки с кэшбеком",
+    "numberOfItems": "{% if current_city and current_city.id == 1 %}50000{% elif current_city and current_city.id == 2 %}6216{% else %}6571{% endif %}"
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.9",
+    "reviewCount": "300",
+    "bestRating": "5"
+  }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+
+<!-- HERO ─────────────────────────────────────────────────────────────────── -->
+<section class="relative overflow-hidden" style="background: linear-gradient(160deg, #e8f4fd 0%, #f0f7ff 60%, #ffffff 100%);">
+  <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+    <div class="absolute top-6 left-[8%]  w-2 h-2 rounded-full bg-[#0088CC] opacity-10"></div>
+    <div class="absolute top-10 right-[12%] w-3 h-3 rounded-full bg-[#0088CC] opacity-[0.07]"></div>
+    <div class="absolute bottom-8 left-[30%] w-2 h-2 rounded-full bg-[#0088CC] opacity-[0.09]"></div>
+  </div>
+  <div class="max-w-5xl mx-auto px-4 py-12 md:py-16 text-center relative z-10">
+    <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#0088CC] bg-[#0088CC]/10 border border-[#0088CC]/20 rounded-full px-3 py-1 mb-4">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+      Агентство недвижимости нового формата
+    </span>
+    <h1 class="text-3xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight">{{ seo_h1 }}</h1>
+    <p class="text-base md:text-xl text-gray-600 max-w-2xl mx-auto mb-8 leading-relaxed">
+      Покупаете квартиру напрямую от застройщика — и получаете кэшбек до <strong class="text-[#0088CC]">500 000 ₽</strong>.
+      Без скрытых комиссий, без посредников.
+    </p>
+    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+      <a href="/{{ city_slug }}#property-search"
+         class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#0088CC] hover:bg-[#006699] text-white font-semibold rounded-xl shadow-md transition-colors text-base">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        Выбрать квартиру
+      </a>
+      <a href="/cashback-calculator"
+         class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-gray-50 text-gray-800 font-semibold rounded-xl border border-gray-200 shadow-sm transition-colors text-base">
+        <svg class="w-5 h-5 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a1 1 0 001-1V6a1 1 0 00-1-1H4a1 1 0 00-1 1v12a1 1 0 001 1z"/></svg>
+        Рассчитать кэшбек
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- STATS ────────────────────────────────────────────────────────────────── -->
+<section class="bg-white border-b border-gray-100 py-8 px-4">
+  <div class="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+    <div>
+      <div class="text-2xl md:text-3xl font-bold text-[#0088CC] mb-1">500 000 ₽</div>
+      <div class="text-xs text-gray-500 leading-snug">максимальный кэшбек</div>
+    </div>
+    <div>
+      <div class="text-2xl md:text-3xl font-bold text-[#0088CC] mb-1">50+</div>
+      <div class="text-xs text-gray-500 leading-snug">партнёров-застройщиков</div>
+    </div>
+    <div>
+      <div class="text-2xl md:text-3xl font-bold text-[#0088CC] mb-1">300+</div>
+      <div class="text-xs text-gray-500 leading-snug">успешных сделок</div>
+    </div>
+    <div>
+      <div class="text-2xl md:text-3xl font-bold text-[#0088CC] mb-1">4%</div>
+      <div class="text-xs text-gray-500 leading-snug">средний кэшбек от цены</div>
+    </div>
+  </div>
+</section>
+
+<!-- КАК РАБОТАЕТ КЭШБЕК ────────────────────────────────────────────────── -->
+<section class="bg-gray-50 py-12 px-4">
+  <div class="max-w-4xl mx-auto">
+    <h2 class="text-xl md:text-2xl font-bold text-gray-900 text-center mb-2">Как работает кэшбек InBack</h2>
+    <p class="text-sm text-gray-500 text-center mb-8">Вы ничего не теряете — цена квартиры та же, что у застройщика</p>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="bg-white rounded-xl p-5 border border-gray-100 shadow-sm text-center">
+        <div class="w-10 h-10 bg-[#0088CC]/10 rounded-full flex items-center justify-center mx-auto mb-3">
+          <span class="text-[#0088CC] font-bold text-lg">1</span>
+        </div>
+        <h3 class="text-sm font-semibold text-gray-800 mb-1">Выбираете квартиру</h3>
+        <p class="text-xs text-gray-500">Из 200+ ЖК в Краснодаре, Сочи и других городах Юга</p>
+      </div>
+      <div class="bg-white rounded-xl p-5 border border-gray-100 shadow-sm text-center">
+        <div class="w-10 h-10 bg-[#0088CC]/10 rounded-full flex items-center justify-center mx-auto mb-3">
+          <span class="text-[#0088CC] font-bold text-lg">2</span>
+        </div>
+        <h3 class="text-sm font-semibold text-gray-800 mb-1">Покупаете у застройщика</h3>
+        <p class="text-xs text-gray-500">Напрямую, по официальному договору ДДУ — без наценок</p>
+      </div>
+      <div class="bg-white rounded-xl p-5 border border-gray-100 shadow-sm text-center">
+        <div class="w-10 h-10 bg-[#0088CC]/10 rounded-full flex items-center justify-center mx-auto mb-3">
+          <span class="text-[#0088CC] font-bold text-lg">3</span>
+        </div>
+        <h3 class="text-sm font-semibold text-gray-800 mb-1">Регистрируете ДДУ</h3>
+        <p class="text-xs text-gray-500">Застройщик выплачивает InBack агентское вознаграждение</p>
+      </div>
+      <div class="bg-white rounded-xl p-5 border border-gray-100 shadow-sm text-center">
+        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+          <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        </div>
+        <h3 class="text-sm font-semibold text-gray-800 mb-1">Получаете кэшбек</h3>
+        <p class="text-xs text-gray-500">До 500 000 ₽ на карту — в течение 10 рабочих дней</p>
+      </div>
+    </div>
+    <div class="mt-6 bg-[#0088CC]/5 border border-[#0088CC]/15 rounded-xl p-4 text-center">
+      <p class="text-sm text-gray-700">
+        <strong class="text-[#0088CC]">Важно:</strong> цена квартиры у застройщика одинакова — купите сами или через агентство.
+        В обычном агентстве разницу оставляют себе. <strong>InBack возвращает её вам.</strong>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ПРЕИМУЩЕСТВА ─────────────────────────────────────────────────────────── -->
+<section class="bg-white py-12 px-4">
+  <div class="max-w-4xl mx-auto">
+    <h2 class="text-xl md:text-2xl font-bold text-gray-900 text-center mb-8">Что входит в услуги InBack</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <div class="flex gap-3 p-4 rounded-xl border border-gray-100 bg-gray-50">
+        <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-[#0088CC]/10 flex items-center justify-center">
+          <svg class="w-4 h-4 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        </div>
+        <div>
+          <div class="text-sm font-semibold text-gray-800 mb-0.5">Подбор ЖК</div>
+          <div class="text-xs text-gray-500">200+ объектов по вашим параметрам</div>
+        </div>
+      </div>
+      <div class="flex gap-3 p-4 rounded-xl border border-gray-100 bg-gray-50">
+        <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-[#0088CC]/10 flex items-center justify-center">
+          <svg class="w-4 h-4 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <div>
+          <div class="text-sm font-semibold text-gray-800 mb-0.5">Ипотечный брокер</div>
+          <div class="text-xs text-gray-500">Одобрение в 10+ банках, лучшая ставка</div>
+        </div>
+      </div>
+      <div class="flex gap-3 p-4 rounded-xl border border-gray-100 bg-gray-50">
+        <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-[#0088CC]/10 flex items-center justify-center">
+          <svg class="w-4 h-4 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        </div>
+        <div>
+          <div class="text-sm font-semibold text-gray-800 mb-0.5">Юридическое сопровождение</div>
+          <div class="text-xs text-gray-500">Проверка ДДУ, регистрация, ключи</div>
+        </div>
+      </div>
+      <div class="flex gap-3 p-4 rounded-xl border border-gray-100 bg-gray-50">
+        <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-[#0088CC]/10 flex items-center justify-center">
+          <svg class="w-4 h-4 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+        </div>
+        <div>
+          <div class="text-sm font-semibold text-gray-800 mb-0.5">Кэшбек до 500 000 ₽</div>
+          <div class="text-xs text-gray-500">Деньгами на карту, официально</div>
+        </div>
+      </div>
+      <div class="flex gap-3 p-4 rounded-xl border border-gray-100 bg-gray-50">
+        <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-[#0088CC]/10 flex items-center justify-center">
+          <svg class="w-4 h-4 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M0 0h24v24H0z M3 5h18M3 10h18M3 15h18M3 20h18"/></svg>
+        </div>
+        <div>
+          <div class="text-sm font-semibold text-gray-800 mb-0.5">Без комиссии с вас</div>
+          <div class="text-xs text-gray-500">Платит застройщик — вы экономите</div>
+        </div>
+      </div>
+      <div class="flex gap-3 p-4 rounded-xl border border-gray-100 bg-gray-50">
+        <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-[#0088CC]/10 flex items-center justify-center">
+          <svg class="w-4 h-4 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+        </div>
+        <div>
+          <div class="text-sm font-semibold text-gray-800 mb-0.5">Персональный менеджер</div>
+          <div class="text-xs text-gray-500">Один специалист — вся сделка</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ОБЪЕКТЫ (6 featured) ────────────────────────────────────────────────── -->
+{% if featured_properties %}
+<section class="bg-gray-50 border-t border-gray-100 py-12 px-4">
+  <div class="max-w-6xl mx-auto">
+    <div class="flex items-end justify-between mb-6">
+      <div>
+        <h2 class="text-xl md:text-2xl font-bold text-gray-900">Актуальные предложения</h2>
+        <p class="text-sm text-gray-500 mt-1">Квартиры с кэшбеком в {{ current_city.name_prepositional if current_city else 'Краснодаре' }}</p>
+      </div>
+      <a href="/{{ city_slug }}" class="text-sm text-[#0088CC] hover:text-[#006699] font-medium flex items-center gap-1 flex-shrink-0">
+        Все квартиры
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for prop in featured_properties %}
+      <a href="{{ prop.url }}" class="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col">
+        <div class="relative aspect-[4/3] bg-gray-100 overflow-hidden">
+          <img src="{{ prop.main_image | crop_watermark }}" alt="{{ prop.residential_complex }} — {{ prop.rooms | int if prop.rooms else 'Студия' }}-комн." class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" onerror="this.src='/static/images/no-photo.svg'">
+          {% if prop.cashback and prop.cashback > 0 %}
+          <span class="absolute top-2 right-2 bg-[#0088CC] text-white text-xs font-bold px-2 py-1 rounded-lg shadow">
+            кэшбек {{ '{:,.0f}'.format(prop.cashback).replace(',', ' ') }} ₽
+          </span>
+          {% endif %}
+        </div>
+        <div class="p-4 flex flex-col flex-1">
+          <div class="flex items-start justify-between gap-2 mb-2">
+            <div>
+              <div class="text-xs text-gray-500 mb-0.5">{{ prop.residential_complex or 'ЖК' }}</div>
+              <div class="text-base font-bold text-gray-900">
+                {% if prop.rooms == 0 %}Студия{% else %}{{ prop.rooms }}-комн.{% endif %}
+                {% if prop.area %} · {{ prop.area }} м²{% endif %}
+              </div>
+            </div>
+            <div class="text-right flex-shrink-0">
+              {% if prop.price %}
+              <div class="text-base font-bold text-gray-900">{{ '{:,.0f}'.format(prop.price / 1000000).replace(',', ' ') }} млн ₽</div>
+              {% endif %}
+            </div>
+          </div>
+          {% if prop.developer %}
+          <div class="text-xs text-gray-400 mt-auto">{{ prop.developer }}</div>
+          {% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    <div class="text-center mt-8">
+      <a href="/{{ city_slug }}" class="inline-flex items-center gap-2 px-6 py-3 bg-[#0088CC] hover:bg-[#006699] text-white font-semibold rounded-xl shadow-md transition-colors">
+        Смотреть все квартиры в {{ current_city.name_prepositional if current_city else 'Краснодаре' }}
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- CTA ──────────────────────────────────────────────────────────────────── -->
+<section class="bg-[#0088CC] py-12 px-4">
+  <div class="max-w-2xl mx-auto text-center">
+    <h2 class="text-xl md:text-2xl font-bold text-white mb-3">Получите консультацию бесплатно</h2>
+    <p class="text-[#cce8f7] text-sm mb-6">Расскажем о подходящих ЖК, рассчитаем кэшбек и поможем с ипотекой.</p>
+    <a href="/application"
+       class="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white hover:bg-gray-50 text-[#0088CC] font-bold rounded-xl shadow-lg transition-colors text-base">
+      Оставить заявку — бесплатно
+    </a>
+    <p class="text-[#99d4ef] text-xs mt-4">Отвечаем в течение 30 минут в рабочее время</p>
+  </div>
+</section>
+
+<!-- СРАВНЕНИЕ ────────────────────────────────────────────────────────────── -->
+<section class="bg-gray-50 py-12 px-4">
+  <div class="max-w-4xl mx-auto">
+    <h2 class="text-xl md:text-2xl font-bold text-gray-900 text-center mb-2">InBack vs обычное агентство</h2>
+    <p class="text-sm text-gray-500 text-center mb-8">Почему покупатели выбирают нас</p>
+    <div class="overflow-x-auto rounded-2xl border border-gray-200 shadow-sm">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-gray-100">
+            <th class="py-3 px-4 text-left text-gray-600 font-semibold w-2/5">Параметр</th>
+            <th class="py-3 px-4 text-center text-[#0088CC] font-semibold">InBack</th>
+            <th class="py-3 px-4 text-center text-gray-500 font-semibold">Обычное агентство</th>
+            <th class="py-3 px-4 text-center text-gray-500 font-semibold">Напрямую у застройщика</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 bg-white">
+          <tr>
+            <td class="py-3 px-4 text-gray-700 font-medium">Кэшбек покупателю</td>
+            <td class="py-3 px-4 text-center"><span class="inline-flex items-center gap-1 text-[#0088CC] font-bold">до 500 000 ₽</span></td>
+            <td class="py-3 px-4 text-center text-gray-400">—</td>
+            <td class="py-3 px-4 text-center text-gray-400">—</td>
+          </tr>
+          <tr class="bg-gray-50/50">
+            <td class="py-3 px-4 text-gray-700 font-medium">Комиссия с покупателя</td>
+            <td class="py-3 px-4 text-center"><span class="text-green-600 font-semibold">0 ₽</span></td>
+            <td class="py-3 px-4 text-center text-gray-500">0–2% (скрытая)</td>
+            <td class="py-3 px-4 text-center"><span class="text-green-600 font-semibold">0 ₽</span></td>
+          </tr>
+          <tr>
+            <td class="py-3 px-4 text-gray-700 font-medium">Цена квартиры</td>
+            <td class="py-3 px-4 text-center text-gray-700">От застройщика</td>
+            <td class="py-3 px-4 text-center text-gray-700">От застройщика</td>
+            <td class="py-3 px-4 text-center text-gray-700">От застройщика</td>
+          </tr>
+          <tr class="bg-gray-50/50">
+            <td class="py-3 px-4 text-gray-700 font-medium">Выбор ЖК</td>
+            <td class="py-3 px-4 text-center text-gray-700">200+ ЖК, 50+ застройщиков</td>
+            <td class="py-3 px-4 text-center text-gray-500">Ограниченный список</td>
+            <td class="py-3 px-4 text-center text-gray-500">Только свои объекты</td>
+          </tr>
+          <tr>
+            <td class="py-3 px-4 text-gray-700 font-medium">Ипотечный брокер</td>
+            <td class="py-3 px-4 text-center"><span class="text-green-600">✓ 10+ банков</span></td>
+            <td class="py-3 px-4 text-center text-gray-500">Частично</td>
+            <td class="py-3 px-4 text-center text-gray-500">Только партнёры застройщика</td>
+          </tr>
+          <tr class="bg-gray-50/50">
+            <td class="py-3 px-4 text-gray-700 font-medium">Юридическое сопровождение</td>
+            <td class="py-3 px-4 text-center"><span class="text-green-600">✓ до ключей</span></td>
+            <td class="py-3 px-4 text-center text-gray-500">Зависит от агентства</td>
+            <td class="py-3 px-4 text-center text-gray-400">—</td>
+          </tr>
+          <tr>
+            <td class="py-3 px-4 text-gray-700 font-medium">Объектов в {{ current_city.name_prepositional if current_city else 'Краснодаре' }}</td>
+            <td class="py-3 px-4 text-center font-semibold text-gray-800">{% if current_city and current_city.id == 1 %}50 000+{% elif current_city and current_city.id == 2 %}6 200+{% else %}6 500+{% endif %}</td>
+            <td class="py-3 px-4 text-center text-gray-500">100–500</td>
+            <td class="py-3 px-4 text-center text-gray-500">Только свои</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="text-xs text-gray-400 text-center mt-3">* Данные InBack актуальны на {{ "2026" }}. Агентское вознаграждение от застройщика — 2–4%.</p>
+  </div>
+</section>
+
+<!-- FAQ ──────────────────────────────────────────────────────────────────── -->
+{% if seo_faq %}
+<section class="bg-white py-12 px-4" id="faq-section" aria-label="Частые вопросы об агентстве недвижимости">
+  <div class="max-w-3xl mx-auto">
+    <h2 class="text-xl md:text-2xl font-bold text-gray-900 text-center mb-8">Частые вопросы</h2>
+    <div class="space-y-3">
+      {% for item in seo_faq %}
+      <details class="group bg-gray-50 rounded-xl border border-gray-100 overflow-hidden">
+        <summary class="flex items-center justify-between gap-3 cursor-pointer px-5 py-4 text-sm font-semibold text-gray-800 list-none">
+          <span>{{ item.q }}</span>
+          <svg class="w-4 h-4 text-gray-400 flex-shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </summary>
+        <div class="px-5 pb-4 text-sm text-gray-600 leading-relaxed">{{ item.a }}</div>
+      </details>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {% for item in seo_faq %}
+    {
+      "@type": "Question",
+      "name": {{ item.q | tojson }},
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": {{ item.a | tojson }}
+      }
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,39 @@
+{
+  "1": {
+    "db_city_id": 1,
+    "name": "Краснодар",
+    "cian_city_id": 4820,
+    "cian_region_id": 4613,
+    "slug": "krasnodar"
+  },
+  "2": {
+    "db_city_id": 2,
+    "name": "Сочи",
+    "cian_city_id": 4894,
+    "cian_region_id": 4613,
+    "slug": "sochi"
+  },
+  "8": {
+    "db_city_id": 8,
+    "name": "Майкоп",
+    "cian_city_id": 4841,
+    "cian_region_id": 4562,
+    "slug": "maykop"
+  },
+  "9": {
+    "name": "Курск",
+    "name_en": "kursk",
+    "slug": "kursk",
+    "cian_region_id": 4835,
+    "total_pages": 15,
+    "db_city_id": 9,
+    "lat": 0,
+    "lon": 0,
+    "lat_min": 40.0,
+    "lat_max": 80.0,
+    "lon_min": 19.0,
+    "lon_max": 190.0,
+    "region_name": "Россия",
+    "region_slug": "rossiya"
+  }
+}

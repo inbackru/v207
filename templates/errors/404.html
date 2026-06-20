@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Страница не найдена | InBack</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-6">
+    <div class="relative max-w-5xl mx-auto w-full">
+        <svg class="absolute inset-0 w-full h-[50vh] opacity-[0.04] text-gray-900" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 362 145">
+            <path fill="currentColor" d="M62.6 142c-2.133 0-3.2-1.067-3.2-3.2V118h-56c-2 0-3-1-3-3V92.8c0-1.333.4-2.733 1.2-4.2L58.2 4c.8-1.333 2.067-2 3.8-2h28c2 0 3 1 3 3v85.4h11.2c.933 0 1.733.333 2.4 1 .667.533 1 1.267 1 2.2v21.2c0 .933-.333 1.733-1 2.4-.667.533-1.467.8-2.4.8H93v20.8c0 2.133-1.067 3.2-3.2 3.2H62.6zM33 90.4h26.4V51.2L33 90.4zM181.67 144.6c-7.333 0-14.333-1.333-21-4-6.666-2.667-12.866-6.733-18.6-12.2-5.733-5.467-10.266-13-13.6-22.6-3.333-9.6-5-20.667-5-33.2 0-12.533 1.667-23.6 5-33.2 3.334-9.6 7.867-17.133 13.6-22.6 5.734-5.467 11.934-9.533 18.6-12.2 6.667-2.8 13.667-4.2 21-4.2 7.467 0 14.534 1.4 21.2 4.2 6.667 2.667 12.8 6.733 18.4 12.2 5.734 5.467 10.267 13 13.6 22.6 3.334 9.6 5 20.667 5 33.2 0 12.533-1.666 23.6-5 33.2-3.333 9.6-7.866 17.133-13.6 22.6-5.6 5.467-11.733 9.533-18.4 12.2-6.666 2.667-13.733 4-21.2 4zm0-31.2c6.134 0 10.667-4.133 13.6-12.4 2.934-8.267 4.4-20.133 4.4-35.6 0-15.467-1.466-27.333-4.4-35.6-2.933-8.267-7.466-12.4-13.6-12.4-6 0-10.466 4.133-13.4 12.4-2.933 8.267-4.4 20.133-4.4 35.6 0 15.467 1.467 27.333 4.4 35.6 2.934 8.267 7.4 12.4 13.4 12.4zm93.396 31.2c-2.133 0-3.2-1.067-3.2-3.2V118h-56c-2 0-3-1-3-3V92.8c0-1.333.4-2.733 1.2-4.2L270.666 4c.8-1.333 2.067-2 3.8-2h28c2 0 3 1 3 3v85.4h11.2c.934 0 1.734.333 2.4 1 .667.533 1 1.267 1 2.2v21.2c0 .933-.333 1.733-1 2.4-.666.533-1.466.8-2.4.8h-11.2v20.8c0 2.133-1.066 3.2-3.2 3.2h-27.2zm-29.6-51.6h26.4V51.2l-26.4 39.2z"/>
+        </svg>
+        
+        <div class="relative text-center z-[1] pt-52">
+            <h1 class="mt-4 text-5xl sm:text-7xl font-bold tracking-tight text-gray-900">
+                Страница не найдена
+            </h1>
+            <p class="mt-6 text-lg sm:text-xl font-medium text-gray-600">
+                К сожалению, запрашиваемая страница не существует или была перемещена.
+            </p>
+            
+            <div class="mt-10 flex flex-col sm:flex-row gap-3 sm:gap-2 mx-auto sm:max-w-md">
+                <div class="relative flex-1">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                    <input 
+                        type="text" 
+                        id="search-input"
+                        placeholder="Поиск квартир..."
+                        class="w-full h-10 pl-10 pr-3 rounded-lg border border-gray-300 shadow-sm focus:border-[#0088CC] focus:outline-none focus:ring-2 focus:ring-[#0088CC]/20 transition-all"
+                    >
+                </div>
+                <button 
+                    onclick="performSearch()"
+                    class="h-10 px-6 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium shadow-sm hover:bg-gray-50 transition-colors"
+                >
+                    Найти
+                </button>
+            </div>
+            
+            <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6">
+                <button 
+                    onclick="history.back()"
+                    class="group h-10 px-6 bg-gray-200 text-gray-700 rounded-lg font-medium shadow-sm hover:bg-gray-300 transition-all flex items-center gap-2"
+                >
+                    <i class="fas fa-arrow-left opacity-60 transition-transform group-hover:-translate-x-0.5"></i>
+                    Назад
+                </button>
+                <a 
+                    href="/"
+                    class="order-first sm:order-none h-10 px-8 bg-gradient-to-r from-[#0088CC] to-[#006699] text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all flex items-center"
+                >
+                    На главную
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function performSearch() {
+            const query = document.getElementById('search-input').value.trim();
+            if (query) {
+                window.location.href = '/properties?search=' + encodeURIComponent(query);
+            } else {
+                window.location.href = '/properties';
+            }
+        }
+        
+        document.getElementById('search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    </script>
+</body>
+</html>

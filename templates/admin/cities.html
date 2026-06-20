@@ -1,0 +1,752 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Управление городами{% endblock %}
+
+{% block content %}
+<style>
+.city-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    transition: box-shadow 0.2s;
+}
+.city-card:hover { box-shadow: 0 4px 16px rgba(0,136,204,0.10); }
+.city-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;
+}
+.badge-active   { background: #dcfce7; color: #16a34a; }
+.badge-inactive { background: #f1f5f9; color: #64748b; }
+.badge-noparser { background: #fef9c3; color: #92400e; }
+.stat-chip {
+    background: #f0f7ff; color: #0088CC; border-radius: 8px;
+    padding: 4px 12px; font-size: 13px; font-weight: 600;
+}
+.cian-id-badge {
+    background: #f8fafc; border: 1px solid #e2e8f0;
+    border-radius: 8px; padding: 3px 10px; font-size: 12px;
+    font-family: monospace; color: #475569;
+}
+.known-city-btn {
+    padding: 6px 12px; border-radius: 8px; border: 1px solid #e2e8f0;
+    background: #f8fafc; font-size: 13px; cursor: pointer; transition: all 0.15s;
+    text-align: left;
+}
+.known-city-btn:hover { background: #e0f0fc; border-color: #0088CC; color: #0088CC; }
+.probe-result-ok   { background: #dcfce7; color: #16a34a; border-radius: 8px; padding: 10px 16px; }
+.probe-result-fail { background: #fee2e2; color: #dc2626; border-radius: 8px; padding: 10px 16px; }
+</style>
+
+<div class="p-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Управление городами</h1>
+            <p class="text-gray-500 mt-1 text-sm">Добавляйте любые российские города — парсер ЦИАН заполнит застройщиков, ЖК, корпуса и квартиры</p>
+        </div>
+        <button onclick="document.getElementById('addCityModal').classList.remove('hidden')"
+            class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-white text-sm"
+            style="background: linear-gradient(135deg, #0088CC, #006699);">
+            <i class="fas fa-plus"></i> Добавить город
+        </button>
+    </div>
+
+    <!-- Cities Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+        {% for ckey, cfg in city_configs.items() %}
+        {% set stats = city_stats.get(ckey, {}) %}
+        {% set db_city_id = cfg.get('db_city_id', ckey|int) %}
+        <div class="city-card">
+            <div class="flex items-start justify-between mb-3">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-lg font-bold text-gray-900">{{ cfg.name }}</span>
+                        <span class="city-badge badge-active">
+                            <i class="fas fa-check-circle" style="font-size:10px;"></i> Активен
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="cian-id-badge">ЦИАН: {{ cfg.cian_region_id }}</span>
+                        <span class="cian-id-badge">city_id: {{ db_city_id }}</span>
+                        <span class="cian-id-badge">стр: {{ cfg.total_pages }}</span>
+                    </div>
+                </div>
+                <div class="text-2xl text-gray-300">
+                    <i class="fas fa-city"></i>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="flex gap-3 mb-4">
+                <div class="stat-chip">
+                    <i class="fas fa-building mr-1" style="font-size:11px;"></i>
+                    {{ stats.complexes or 0 }} ЖК
+                </div>
+                <div class="stat-chip">
+                    <i class="fas fa-home mr-1" style="font-size:11px;"></i>
+                    {{ (stats.properties or 0)|int }} квартир
+                </div>
+            </div>
+
+            <!-- Declensions block -->
+            {% set city_db_id = cfg.get('db_city_id', ckey|int) %}
+            {% set decl = city_declensions.get(city_db_id, {}) %}
+            <div class="mb-3 p-2.5 rounded-lg" style="background:#f0f7ff;border:1px solid #c7e3f7;" id="decl-block-{{ city_db_id }}">
+                <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-xs font-semibold text-blue-700"><i class="fas fa-language mr-1"></i>Склонения</span>
+                    <button onclick="generateDeclensions({{ city_db_id }}, '{{ cfg.name }}')"
+                        id="btn-decl-{{ city_db_id }}"
+                        class="flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold text-white"
+                        style="background:#0088CC;">
+                        <i class="fas fa-magic"></i> AI
+                    </button>
+                </div>
+                <div class="grid grid-cols-2 gap-1.5 text-xs">
+                    <div>
+                        <span class="text-gray-500">Родит.:</span>
+                        <span class="font-medium text-gray-800" id="decl-gen-{{ city_db_id }}">{{ decl.genitive or '—' }}</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-500">Предл.:</span>
+                        <span class="font-medium text-gray-800" id="decl-prep-{{ city_db_id }}">{{ decl.prepositional or '—' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex gap-2 flex-wrap">
+                <a href="{{ url_for('adm.admin_enrichment') }}"
+                   class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-white"
+                   style="background: #0088CC;">
+                    <i class="fas fa-play"></i> Запустить парсер
+                </a>
+                <button onclick="editPages({{ ckey }}, {{ cfg.total_pages }})"
+                    class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50">
+                    <i class="fas fa-edit"></i> Страниц: {{ cfg.total_pages }}
+                </button>
+                <button onclick="probeCian({{ cfg.cian_region_id }})"
+                    class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50">
+                    <i class="fas fa-satellite-dish"></i> Проверить
+                </button>
+            </div>
+
+            <!-- Parser command hint -->
+            <div class="mt-3 p-2 bg-gray-50 rounded-lg">
+                <code class="text-xs text-gray-500">python3 scripts/run_city.py --city {{ ckey }} --mode full</code>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-span-3 text-center py-16 text-gray-400">
+            <i class="fas fa-city text-5xl mb-4 block"></i>
+            <p>Нет настроенных городов. Добавьте первый!</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- DB cities not in config (extra_cities computed in Python route) -->
+    {% if extra_cities %}
+    <div class="mt-8">
+        <h2 class="text-lg font-semibold text-gray-700 mb-3">
+            <i class="fas fa-exclamation-triangle text-yellow-500 mr-2"></i>
+            Города в БД без конфига парсера
+        </h2>
+        <div class="space-y-2">
+            {% for c in extra_cities %}
+            <div class="flex items-center gap-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <span class="font-medium text-gray-800">{{ c[1] }}</span>
+                <span class="text-xs text-gray-500">slug: {{ c[2] }} | id: {{ c[0] }}</span>
+                <span class="city-badge badge-{{ 'active' if c[3] else 'inactive' }}">
+                    {{ 'Активен' if c[3] else 'Неактивен' }}
+                </span>
+                <span class="text-xs text-yellow-700">Нет записи в city_config.json → парсер не запустить</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Scaling guide -->
+    <div class="mt-8 p-5 rounded-xl" style="background:linear-gradient(135deg,#fff7ed,#fef3c7);border:1px solid #fcd34d;">
+        <h3 class="font-bold text-amber-800 mb-3 text-base">
+            <i class="fas fa-rocket mr-2"></i>Как масштабироваться: регион с множеством городов
+        </h3>
+        <div class="grid md:grid-cols-2 gap-5 text-sm text-amber-900">
+            <div>
+                <p class="font-semibold mb-2">Краснодарский край — как устроить</p>
+                <p class="mb-2 text-amber-800">У ЦИАН <strong>каждый город — отдельный Region ID</strong>. Краснодарский край как регион тоже имеет свой ID — он охватывает все города сразу, но даёт смешанные данные без точного деления.</p>
+                <p class="text-amber-800">Правильная стратегия: <strong>добавить каждый город отдельно</strong> — Краснодар, Сочи, Анапа, Новороссийск и т.д. Каждый получит свой city_id в БД, свои страницы парсинга, и запускается независимо.</p>
+            </div>
+            <div>
+                <p class="font-semibold mb-2">Порядок масштабирования</p>
+                <ol class="space-y-1 list-decimal ml-4 text-amber-800">
+                    <li>Нажмите «Добавить город» → укажите название и CIAN ID</li>
+                    <li>Нажмите «Проверить» — узнаете сколько объявлений и рекомендуемое кол-во страниц</li>
+                    <li>Создайте город — он появится в списке и в <code class="bg-white/60 px-1 rounded">city_config.json</code></li>
+                    <li>Запустите парсер через «Обогащение данных» — он автоматически обработает новый город</li>
+                    <li>Повторите для следующего города</li>
+                </ol>
+            </div>
+        </div>
+        <div class="mt-4 pt-4 border-t border-amber-300">
+            <p class="text-xs font-bold text-amber-700 mb-2">🏖 Краснодарский край — быстрый старт:</p>
+            <div class="flex flex-wrap gap-2">
+                <button onclick="fillKnownCity('Краснодар', 4820, 'krasnodar', 'Краснодарский край')" class="known-city-btn">Краснодар <span class="text-gray-400">4820</span></button>
+                <button onclick="fillKnownCity('Сочи', 4898, 'sochi', 'Краснодарский край')" class="known-city-btn">Сочи <span class="text-gray-400">4898</span></button>
+                <button onclick="fillKnownCity('Анапа', 4857, 'anapa', 'Краснодарский край')" class="known-city-btn">Анапа <span class="text-gray-400">4857</span></button>
+                <button onclick="fillKnownCity('Новороссийск', 4863, 'novorossiysk', 'Краснодарский край')" class="known-city-btn">Новороссийск <span class="text-gray-400">4863</span></button>
+                <button onclick="fillKnownCity('Геленджик', 4861, 'gelendzhik', 'Краснодарский край')" class="known-city-btn">Геленджик <span class="text-gray-400">4861</span></button>
+                <button onclick="fillKnownCity('Армавир', 4822, 'armavir', 'Краснодарский край')" class="known-city-btn">Армавир <span class="text-gray-400">4822</span></button>
+                <button onclick="fillKnownCity('Туапсе', 4855, 'tuapse', 'Краснодарский край')" class="known-city-btn">Туапсе <span class="text-gray-400">4855</span></button>
+                <button onclick="fillKnownCity('Майкоп', 4821, 'maykop', 'Республика Адыгея')" class="known-city-btn">Майкоп <span class="text-gray-400">4821</span></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guide -->
+    <div class="mt-5 p-5 bg-blue-50 border border-blue-100 rounded-xl">
+        <h3 class="font-bold text-blue-800 mb-3"><i class="fas fa-info-circle mr-2"></i>Как найти CIAN Region ID для любого города</h3>
+        <ol class="text-sm text-blue-700 space-y-2 list-decimal ml-5">
+            <li>Откройте <a href="https://www.cian.ru/novostrojki/" target="_blank" class="underline font-medium">cian.ru/novostrojki</a></li>
+            <li>Нажмите на название города (Москва/регион) в верхней панели</li>
+            <li>Выберите нужный город и перейдите в раздел новостроек</li>
+            <li>В URL появится параметр <code class="bg-white px-1 rounded">region=XXXXX</code> — это и есть Region ID</li>
+            <li>Или нажмите «Проверить» рядом с городом ниже — кнопка сама спросит ID и покажет кол-во объявлений</li>
+        </ol>
+        <div class="mt-3 pt-3 border-t border-blue-200">
+            <p class="text-xs text-blue-600 font-semibold mb-2">Крупные города России:</p>
+            <div class="flex flex-wrap gap-2">
+                <button onclick="fillKnownCity('Москва', 1, 'moscow', 'Москва')" class="known-city-btn">Москва <span class="text-gray-400">1</span></button>
+                <button onclick="fillKnownCity('Санкт-Петербург', 2, 'saint-petersburg', 'Санкт-Петербург')" class="known-city-btn">Санкт-Петербург <span class="text-gray-400">2</span></button>
+                <button onclick="fillKnownCity('Екатеринбург', 4743, 'ekaterinburg', 'Свердловская область')" class="known-city-btn">Екатеринбург <span class="text-gray-400">4743</span></button>
+                <button onclick="fillKnownCity('Казань', 4777, 'kazan', 'Республика Татарстан')" class="known-city-btn">Казань <span class="text-gray-400">4777</span></button>
+                <button onclick="fillKnownCity('Тюмень', 4827, 'tyumen', 'Тюменская область')" class="known-city-btn">Тюмень <span class="text-gray-400">4827</span></button>
+                <button onclick="fillKnownCity('Новосибирск', 4894, 'novosibirsk', 'Новосибирская область')" class="known-city-btn">Новосибирск <span class="text-gray-400">4894</span></button>
+                <button onclick="fillKnownCity('Пермь', 4871, 'perm', 'Пермский край')" class="known-city-btn">Пермь <span class="text-gray-400">4871</span></button>
+                <button onclick="fillKnownCity('Воронеж', 4733, 'voronezh', 'Воронежская область')" class="known-city-btn">Воронеж <span class="text-gray-400">4733</span></button>
+                <button onclick="fillKnownCity('Саратов', 4885, 'saratov', 'Саратовская область')" class="known-city-btn">Саратов <span class="text-gray-400">4885</span></button>
+                <button onclick="fillKnownCity('Нижний Новгород', 4797, 'nizhny-novgorod', 'Нижегородская область')" class="known-city-btn">Нижний Новгород <span class="text-gray-400">4797</span></button>
+                <button onclick="fillKnownCity('Ростов-на-Дону', 4876, 'rostov-on-don', 'Ростовская область')" class="known-city-btn">Ростов-на-Дону <span class="text-gray-400">4876</span></button>
+                <button onclick="fillKnownCity('Уфа', 4924, 'ufa', 'Республика Башкортостан')" class="known-city-btn">Уфа <span class="text-gray-400">4924</span></button>
+                <button onclick="fillKnownCity('Красноярск', 4800, 'krasnoyarsk', 'Красноярский край')" class="known-city-btn">Красноярск <span class="text-gray-400">4800</span></button>
+                <button onclick="fillKnownCity('Хабаровск', 4935, 'khabarovsk', 'Хабаровский край')" class="known-city-btn">Хабаровск <span class="text-gray-400">4935</span></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── ADD CITY MODAL ── -->
+<div id="addCityModal" class="hidden fixed inset-0 z-50 flex items-center justify-center" style="background: rgba(0,0,0,0.5);">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between p-5 border-b">
+            <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-plus-circle text-blue-500 mr-2"></i>Добавить новый город</h2>
+            <button onclick="closeAddModal()" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+        </div>
+        <div class="p-5 space-y-4">
+
+            <!-- Step 1: City Name -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">1. Название города (на русском)</label>
+                <div class="flex gap-2">
+                    <input type="text" id="inp_name" placeholder="Например: Тюмень"
+                        class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+                        oninput="clearDadataResult()">
+                    <button onclick="lookupDadata()" id="btn_dadata"
+                        class="px-3 py-2 rounded-lg text-sm font-semibold text-white flex items-center gap-1"
+                        style="background:#0088CC;">
+                        <i class="fas fa-search"></i> Найти
+                    </button>
+                </div>
+                <div id="dadata_result" class="hidden mt-2 space-y-1"></div>
+            </div>
+
+            <!-- Step 2: English name / slug -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">2. Название на английском (для URL)</label>
+                <input type="text" id="inp_name_en" placeholder="tyumen"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400">
+                <p class="text-xs text-gray-400 mt-1">Используется в URL: /tyumen/zhilye-kompleksy/</p>
+            </div>
+
+            <!-- Step 3: CIAN Region ID -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">3. CIAN Region ID</label>
+                <div class="flex gap-2">
+                    <input type="number" id="inp_cian_id" placeholder="Например: 4827"
+                        class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400">
+                    <button onclick="probeCianModal()" id="btn_probe"
+                        class="px-3 py-2 rounded-lg text-sm font-semibold border border-gray-200 text-gray-700 hover:bg-gray-50 flex items-center gap-1">
+                        <i class="fas fa-satellite-dish"></i> Проверить
+                    </button>
+                </div>
+                <div id="probe_result" class="hidden mt-2"></div>
+                <p class="text-xs text-gray-400 mt-1">
+                    Быстрые варианты:
+                    <button onclick="document.getElementById('inp_cian_id').value=1;document.getElementById('inp_name').value='Москва';document.getElementById('inp_name_en').value='moscow'" class="text-blue-500 underline">Москва (1)</button>
+                    <button onclick="document.getElementById('inp_cian_id').value=2;document.getElementById('inp_name').value='Санкт-Петербург';document.getElementById('inp_name_en').value='saint-petersburg'" class="text-blue-500 underline ml-2">СПб (2)</button>
+                    <button onclick="document.getElementById('inp_cian_id').value=4827;document.getElementById('inp_name').value='Тюмень';document.getElementById('inp_name_en').value='tyumen'" class="text-blue-500 underline ml-2">Тюмень (4827)</button>
+                </p>
+            </div>
+
+            <!-- Step 4: Pages estimate -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">4. Страниц для парсинга (макс)</label>
+                <input type="number" id="inp_pages" value="30" min="1" max="500"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400">
+                <p class="text-xs text-gray-400 mt-1">Москва ≈ 400 стр, Тюмень ≈ 50 стр, малый город ≈ 10–20 стр</p>
+            </div>
+
+            <!-- Step 5: Region -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">5. Регион (субъект РФ)</label>
+                <input type="text" id="inp_region_name" placeholder="Краснодарский край"
+                    value="Краснодарский край"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400">
+                <p class="text-xs text-gray-400 mt-1">Будет найден или создан автоматически. Укажите точное название субъекта РФ.</p>
+                <div class="flex flex-wrap gap-1 mt-1">
+                    <button type="button" onclick="document.getElementById('inp_region_name').value='Краснодарский край'" class="text-xs text-blue-500 underline">Краснодарский край</button>
+                    <span class="text-gray-300">·</span>
+                    <button type="button" onclick="document.getElementById('inp_region_name').value='Республика Адыгея'" class="text-xs text-blue-500 underline">Республика Адыгея</button>
+                    <span class="text-gray-300">·</span>
+                    <button type="button" onclick="document.getElementById('inp_region_name').value='Тюменская область'" class="text-xs text-blue-500 underline">Тюменская область</button>
+                    <span class="text-gray-300">·</span>
+                    <button type="button" onclick="document.getElementById('inp_region_name').value='Свердловская область'" class="text-xs text-blue-500 underline">Свердловская обл.</button>
+                    <span class="text-gray-300">·</span>
+                    <button type="button" onclick="document.getElementById('inp_region_name').value='Новосибирская область'" class="text-xs text-blue-500 underline">Новосибирская обл.</button>
+                </div>
+            </div>
+
+            <!-- Optional: grammar forms -->
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <label class="block text-sm font-semibold text-gray-700">Падежные формы (для SEO)</label>
+                    <button type="button" onclick="generateDeclensionsForModal()" id="btn_decl_modal"
+                        class="flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-semibold text-white"
+                        style="background:#0088CC;">
+                        <i class="fas fa-magic"></i> Сгенерировать AI
+                    </button>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Родительный (новостройки КОГО?)</label>
+                        <input type="text" id="inp_genitive" placeholder="Тюмени"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Предложный (квартиры В ЧЁМ?)</label>
+                        <input type="text" id="inp_prepositional" placeholder="Тюмени"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                    </div>
+                </div>
+                <div id="decl_modal_status" class="hidden mt-1 text-xs text-gray-500"></div>
+            </div>
+
+            <!-- Hidden fields filled by DaData -->
+            <input type="hidden" id="inp_lat">
+            <input type="hidden" id="inp_lon">
+            <input type="hidden" id="inp_fias_id">
+
+            <!-- Coordinates display -->
+            <div id="coords_display" class="hidden p-3 bg-green-50 rounded-lg text-sm text-green-700">
+                <i class="fas fa-map-marker-alt mr-1"></i>
+                <span id="coords_text"></span>
+            </div>
+
+            <!-- Error -->
+            <div id="modal_error" class="hidden p-3 bg-red-50 text-red-700 rounded-lg text-sm"></div>
+
+            <!-- Submit -->
+            <div class="flex gap-3 pt-2">
+                <button onclick="closeAddModal()" class="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50">
+                    Отмена
+                </button>
+                <button onclick="submitAddCity()" id="btn_submit"
+                    class="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-2"
+                    style="background: linear-gradient(135deg, #0088CC, #006699);">
+                    <i class="fas fa-city"></i> Создать город
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Probe CIAN standalone modal -->
+<div id="probeModal" class="hidden fixed inset-0 z-50 flex items-center justify-center" style="background: rgba(0,0,0,0.5);">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6">
+        <h3 class="font-bold text-gray-900 mb-4"><i class="fas fa-satellite-dish text-blue-500 mr-2"></i>Проверить CIAN Region ID</h3>
+        <input type="number" id="probe_cian_input" placeholder="Введите Region ID" value=""
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-3">
+        <div id="probe_standalone_result" class="hidden mb-3"></div>
+        <div class="flex gap-3">
+            <button onclick="document.getElementById('probeModal').classList.add('hidden')"
+                class="flex-1 py-2 border border-gray-200 rounded-lg text-sm text-gray-600">Закрыть</button>
+            <button onclick="runProbeStandalone()"
+                class="flex-1 py-2 rounded-lg text-sm font-semibold text-white"
+                style="background:#0088CC;">
+                <i class="fas fa-search mr-1"></i> Проверить
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit pages modal -->
+<div id="editPagesModal" class="hidden fixed inset-0 z-50 flex items-center justify-center" style="background: rgba(0,0,0,0.5);">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-xs mx-4 p-6">
+        <h3 class="font-bold text-gray-900 mb-4">Изменить кол-во страниц</h3>
+        <input type="hidden" id="edit_city_id">
+        <input type="number" id="edit_pages_input" min="1" max="500"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-3">
+        <div class="flex gap-3">
+            <button onclick="document.getElementById('editPagesModal').classList.add('hidden')"
+                class="flex-1 py-2 border border-gray-200 rounded-lg text-sm text-gray-600">Отмена</button>
+            <button onclick="savePages()"
+                class="flex-1 py-2 rounded-lg text-sm font-semibold text-white"
+                style="background:#0088CC;">Сохранить</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const CSRF = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+function closeAddModal() {
+    document.getElementById('addCityModal').classList.add('hidden');
+    ['dadata_result','probe_result','coords_display','modal_error'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+    });
+}
+
+function clearDadataResult() {
+    document.getElementById('dadata_result').classList.add('hidden');
+}
+
+// ── DaData lookup ──
+async function lookupDadata() {
+    const name = document.getElementById('inp_name').value.trim();
+    if (!name) { alert('Введите название города'); return; }
+    const btn = document.getElementById('btn_dadata');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    btn.disabled = true;
+    try {
+        const r = await fetch('/api/admin/cities/lookup-dadata', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json','X-CSRFToken': CSRF},
+            body: JSON.stringify({name})
+        });
+        const data = await r.json();
+        if (data.ok && data.suggestions && data.suggestions.length) {
+            const box = document.getElementById('dadata_result');
+            box.classList.remove('hidden');
+            box.innerHTML = data.suggestions.map((s,i) => `
+                <button onclick="selectDadata(${i})" class="known-city-btn w-full text-left" data-idx="${i}"
+                    data-city="${escHtml(s.city||'')}" data-region="${escHtml(s.region||'')}"
+                    data-fias="${escHtml(s.fias_id||'')}" data-lat="${s.lat||''}" data-lon="${s.lon||''}">
+                    <span class="font-semibold">${escHtml(s.city||s.value)}</span>
+                    <span class="text-gray-400 text-xs ml-2">${escHtml(s.region)}</span>
+                    ${s.lat ? `<span class="text-green-600 text-xs ml-2">${parseFloat(s.lat).toFixed(4)}, ${parseFloat(s.lon).toFixed(4)}</span>` : ''}
+                </button>
+            `).join('');
+        } else {
+            document.getElementById('dadata_result').classList.remove('hidden');
+            document.getElementById('dadata_result').innerHTML = `<p class="text-sm text-gray-500">Ничего не найдено. Заполните данные вручную.</p>`;
+        }
+    } catch(e) {
+        document.getElementById('dadata_result').classList.remove('hidden');
+        document.getElementById('dadata_result').innerHTML = `<p class="text-sm text-red-500">Ошибка: ${e.message}</p>`;
+    }
+    btn.innerHTML = '<i class="fas fa-search"></i> Найти';
+    btn.disabled = false;
+}
+
+function selectDadata(idx) {
+    const btns = document.querySelectorAll('#dadata_result button[data-idx]');
+    const b = btns[idx];
+    document.getElementById('inp_name').value = b.dataset.city;
+    // Auto-generate English name
+    const translit = translitRu(b.dataset.city);
+    document.getElementById('inp_name_en').value = translit;
+    document.getElementById('inp_lat').value = b.dataset.lat;
+    document.getElementById('inp_lon').value = b.dataset.lon;
+    document.getElementById('inp_fias_id').value = b.dataset.fias;
+    if (b.dataset.lat) {
+        document.getElementById('coords_display').classList.remove('hidden');
+        document.getElementById('coords_text').textContent =
+            `Координаты: ${parseFloat(b.dataset.lat).toFixed(4)}, ${parseFloat(b.dataset.lon).toFixed(4)} | ФИАС: ${b.dataset.fias||'—'}`;
+    }
+    document.getElementById('dadata_result').classList.add('hidden');
+}
+
+function translitRu(str) {
+    const map = {
+        'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'yo','ж':'zh','з':'z',
+        'и':'i','й':'y','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r',
+        'с':'s','т':'t','у':'u','ф':'f','х':'kh','ц':'ts','ч':'ch','ш':'sh','щ':'shch',
+        'ъ':'','ы':'y','ь':'','э':'e','ю':'yu','я':'ya'
+    };
+    return str.toLowerCase().split('').map(c => map[c] !== undefined ? map[c] : (c === ' ' ? '-' : c))
+        .join('').replace(/[^a-z0-9-]/g,'').replace(/-+/g,'-').trim('-') || str.toLowerCase();
+}
+
+function escHtml(s) {
+    return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Probe CIAN (in modal) ──
+async function probeCianModal() {
+    const rid = document.getElementById('inp_cian_id').value;
+    if (!rid) { alert('Введите CIAN Region ID'); return; }
+    const btn = document.getElementById('btn_probe');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    btn.disabled = true;
+    const resBox = document.getElementById('probe_result');
+    resBox.classList.remove('hidden');
+    resBox.innerHTML = '<p class="text-sm text-gray-500"><i class="fas fa-spinner fa-spin mr-1"></i> Запрашиваем ЦИАН...</p>';
+    try {
+        const r = await fetch('/api/admin/cities/probe-cian', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json','X-CSRFToken': CSRF},
+            body: JSON.stringify({region_id: parseInt(rid)})
+        });
+        const data = await r.json();
+        if (data.ok) {
+            const pages = Math.ceil((data.offers_count || 0) / 28);
+            document.getElementById('inp_pages').value = Math.min(pages + 5, 500);
+            resBox.innerHTML = `<div class="probe-result-ok">
+                <i class="fas fa-check-circle mr-1"></i>
+                <strong>${(data.offers_count||0).toLocaleString('ru')}</strong> объявлений от застройщиков
+                · <strong>~${pages}</strong> страниц · ЖК в выборке: <strong>${data.sample_jk}</strong>
+            </div>`;
+        } else {
+            resBox.innerHTML = `<div class="probe-result-fail"><i class="fas fa-times-circle mr-1"></i>${data.error}</div>`;
+        }
+    } catch(e) {
+        resBox.innerHTML = `<div class="probe-result-fail">Ошибка: ${e.message}</div>`;
+    }
+    btn.innerHTML = '<i class="fas fa-satellite-dish"></i> Проверить';
+    btn.disabled = false;
+}
+
+// ── Probe CIAN standalone ──
+function probeCian(regionId) {
+    document.getElementById('probe_cian_input').value = regionId || '';
+    document.getElementById('probe_standalone_result').classList.add('hidden');
+    document.getElementById('probeModal').classList.remove('hidden');
+}
+
+async function runProbeStandalone() {
+    const rid = document.getElementById('probe_cian_input').value;
+    if (!rid) return;
+    const resBox = document.getElementById('probe_standalone_result');
+    resBox.classList.remove('hidden');
+    resBox.innerHTML = '<p class="text-sm text-gray-500"><i class="fas fa-spinner fa-spin mr-1"></i> Запрашиваем ЦИАН...</p>';
+    try {
+        const r = await fetch('/api/admin/cities/probe-cian', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json','X-CSRFToken': CSRF},
+            body: JSON.stringify({region_id: parseInt(rid)})
+        });
+        const data = await r.json();
+        if (data.ok) {
+            resBox.innerHTML = `<div class="probe-result-ok text-sm">
+                ✅ <strong>${(data.offers_count||0).toLocaleString('ru')}</strong> объявлений · ~${Math.ceil((data.offers_count||0)/28)} стр.
+            </div>`;
+        } else {
+            resBox.innerHTML = `<div class="probe-result-fail text-sm">❌ ${data.error}</div>`;
+        }
+    } catch(e) {
+        resBox.innerHTML = `<div class="probe-result-fail text-sm">Ошибка: ${e.message}</div>`;
+    }
+}
+
+// ── Fill from known cities ──
+function fillKnownCity(name, regionId, nameEn, regionName) {
+    document.getElementById('addCityModal').classList.remove('hidden');
+    document.getElementById('inp_name').value = name;
+    document.getElementById('inp_cian_id').value = regionId;
+    document.getElementById('inp_name_en').value = nameEn || translitRu(name);
+    if (regionName) {
+        document.getElementById('inp_region_name').value = regionName;
+    }
+}
+
+// ── Submit Add City ──
+async function submitAddCity() {
+    const name    = document.getElementById('inp_name').value.trim();
+    const name_en = document.getElementById('inp_name_en').value.trim();
+    const cian_id = parseInt(document.getElementById('inp_cian_id').value);
+    const pages   = parseInt(document.getElementById('inp_pages').value) || 30;
+    const lat     = document.getElementById('inp_lat').value || null;
+    const lon     = document.getElementById('inp_lon').value || null;
+    const fias_id = document.getElementById('inp_fias_id').value || null;
+    const name_gen  = document.getElementById('inp_genitive').value.trim() || null;
+    const name_prep = document.getElementById('inp_prepositional').value.trim() || null;
+
+    const errBox = document.getElementById('modal_error');
+    errBox.classList.add('hidden');
+
+    if (!name || !name_en || !cian_id) {
+        errBox.classList.remove('hidden');
+        errBox.textContent = 'Заполните название города, английское название и CIAN Region ID';
+        return;
+    }
+
+    const btn = document.getElementById('btn_submit');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Создаём...';
+    btn.disabled = true;
+
+    try {
+        const region_name = document.getElementById('inp_region_name').value.trim() || 'Краснодарский край';
+        const r = await fetch('/api/admin/cities/add', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json','X-CSRFToken': CSRF},
+            body: JSON.stringify({name, name_en, cian_region_id: cian_id, total_pages: pages,
+                lat, lon, fias_id, name_genitive: name_gen, name_prepositional: name_prep,
+                region_name})
+        });
+        const data = await r.json();
+        if (data.ok) {
+            // Show success and reload
+            closeAddModal();
+            showSuccessBanner(data);
+            setTimeout(() => location.reload(), 3500);
+        } else {
+            errBox.classList.remove('hidden');
+            errBox.textContent = data.error || 'Ошибка создания города';
+        }
+    } catch(e) {
+        errBox.classList.remove('hidden');
+        errBox.textContent = 'Ошибка: ' + e.message;
+    }
+    btn.innerHTML = '<i class="fas fa-city"></i> Создать город';
+    btn.disabled = false;
+}
+
+function showSuccessBanner(data) {
+    const div = document.createElement('div');
+    div.style.cssText = `position:fixed;top:20px;right:20px;z-index:9999;
+        background:#dcfce7;border:1px solid #86efac;border-radius:12px;
+        padding:16px 20px;max-width:400px;box-shadow:0 4px 20px rgba(0,0,0,0.15);`;
+    div.innerHTML = `
+        <div class="flex items-start gap-3">
+            <i class="fas fa-check-circle text-green-500 text-xl mt-0.5"></i>
+            <div>
+                <p class="font-bold text-green-800">Город «${escHtml(data.name)}» создан!</p>
+                <p class="text-green-700 text-sm mt-1">city_id = ${data.city_id}</p>
+                <p class="text-green-700 text-sm">Для запуска парсера перейдите в Центр парсера</p>
+            </div>
+        </div>`;
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 4000);
+}
+
+// ── Edit Pages ──
+function editPages(cityId, currentPages) {
+    document.getElementById('edit_city_id').value = cityId;
+    document.getElementById('edit_pages_input').value = currentPages;
+    document.getElementById('editPagesModal').classList.remove('hidden');
+}
+
+async function savePages() {
+    const cityId = document.getElementById('edit_city_id').value;
+    const pages  = parseInt(document.getElementById('edit_pages_input').value);
+    if (!pages || pages < 1) return;
+    try {
+        const r = await fetch(`/api/admin/cities/${cityId}/update-pages`, {
+            method: 'POST',
+            headers: {'Content-Type':'application/json','X-CSRFToken': CSRF},
+            body: JSON.stringify({total_pages: pages})
+        });
+        const data = await r.json();
+        if (data.ok) {
+            document.getElementById('editPagesModal').classList.add('hidden');
+            location.reload();
+        }
+    } catch(e) { alert('Ошибка: ' + e.message); }
+}
+
+// Close modals on backdrop click
+['addCityModal','probeModal','editPagesModal'].forEach(id => {
+    document.getElementById(id).addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.add('hidden');
+        }
+    });
+});
+
+// ── AI Declension Generation (existing city card) ──
+async function generateDeclensions(cityId, cityName) {
+    const btn = document.getElementById('btn-decl-' + cityId);
+    const genEl = document.getElementById('decl-gen-' + cityId);
+    const prepEl = document.getElementById('decl-prep-' + cityId);
+    if (!btn) return;
+
+    const origHtml = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    btn.disabled = true;
+
+    try {
+        const r = await fetch(`/api/admin/cities/${cityId}/generate-declensions`, {
+            method: 'POST',
+            headers: {'Content-Type':'application/json','X-CSRFToken': CSRF},
+            body: JSON.stringify({save: true})
+        });
+        const data = await r.json();
+        if (data.ok) {
+            if (genEl)  genEl.textContent  = data.genitive;
+            if (prepEl) prepEl.textContent = data.prepositional;
+            btn.innerHTML = '<i class="fas fa-check"></i> OK';
+            btn.style.background = '#16a34a';
+            setTimeout(() => {
+                btn.innerHTML = origHtml;
+                btn.style.background = '#0088CC';
+                btn.disabled = false;
+            }, 2500);
+        } else {
+            alert('Ошибка: ' + (data.error || 'неизвестная'));
+            btn.innerHTML = origHtml;
+            btn.disabled = false;
+        }
+    } catch(e) {
+        alert('Ошибка: ' + e.message);
+        btn.innerHTML = origHtml;
+        btn.disabled = false;
+    }
+}
+
+// ── AI Declension Generation (add-city modal) ──
+async function generateDeclensionsForModal() {
+    const name = document.getElementById('inp_name').value.trim();
+    if (!name) {
+        alert('Сначала введите название города');
+        return;
+    }
+    const btn = document.getElementById('btn_decl_modal');
+    const statusEl = document.getElementById('decl_modal_status');
+    const origHtml = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Генерирую...';
+    btn.disabled = true;
+    statusEl.classList.remove('hidden');
+    statusEl.textContent = 'Спрашиваю OpenAI...';
+
+    try {
+        const r = await fetch('/api/admin/cities/generate-declensions-preview', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json','X-CSRFToken': CSRF},
+            body: JSON.stringify({name})
+        });
+        const data = await r.json();
+        if (data.ok) {
+            document.getElementById('inp_genitive').value = data.genitive;
+            document.getElementById('inp_prepositional').value = data.prepositional;
+            statusEl.textContent = `✅ Сгенерировано для «${name}»`;
+        } else {
+            statusEl.textContent = '❌ ' + (data.error || 'Ошибка');
+        }
+    } catch(e) {
+        statusEl.textContent = '❌ ' + e.message;
+    }
+    btn.innerHTML = origHtml;
+    btn.disabled = false;
+}
+</script>
+{% endblock %}

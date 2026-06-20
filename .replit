@@ -1,0 +1,57 @@
+modules = ["web", "python-3.11", "nodejs-20"]
+
+[deployment]
+router = "application"
+deploymentTarget = "autoscale"
+run = ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]
+
+[deployment.postBuild]
+args = ["pnpm", "store", "prune"]
+env = { "CI" = "true" }
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start application"
+
+[[workflows.workflow]]
+name = "Start application"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "gunicorn --bind 0.0.0.0:5000 --reuse-port --reload main:app"
+waitForPort = 5000
+
+[agent]
+stack = "FLASK_VANILLA_JS"
+expertMode = true
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 20000
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[nix]
+channel = "stable-25_05"
+packages = ["fontconfig", "freetype", "ghostscript", "gitFull", "glib", "glibcLocales", "harfbuzz", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "openjpeg", "openssl", "pango", "playwright-driver", "postgresql", "tcl", "tk", "xcodebuild", "zlib"]
+
+[userenv]
+
+[userenv.shared]
+YANDEX_MAPS_API_KEY = "404cf654-41ab-426e-a2f9-3c4b031f41b2"
+TRENDAGENT_PHONE = "+79524908269"
+TRENDAGENT_PASSWORD = "m9vDhnr"

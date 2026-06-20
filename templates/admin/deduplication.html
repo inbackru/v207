@@ -1,0 +1,201 @@
+{% extends "admin/base.html" %}
+{% block title %}Дедупликация объявлений — InBack{% endblock %}
+{% block page_title %}Дедупликация объявлений{% endblock %}
+
+{% block content %}
+<div style="max-width:1200px;">
+
+  <!-- Header -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+    <div>
+      <h1 style="font-size:20px;font-weight:700;color:#1e293b;margin:0 0 4px;">Дублирующиеся объявления</h1>
+      <p style="font-size:13px;color:#64748b;margin:0;">Объявления с совпадающими адресом, площадью и ценой. Нажмите «Удалить» для каждой группы.</p>
+    </div>
+    <button onclick="scanDuplicates()" id="scanBtn"
+      style="display:flex;align-items:center;gap:7px;padding:9px 18px;background:#0088CC;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">
+      <i class="fas fa-search"></i> Найти дубли
+    </button>
+  </div>
+
+  <!-- Stats bar -->
+  <div id="statsBar" style="display:none;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px 20px;margin-bottom:20px;display:none;">
+    <div style="display:flex;gap:32px;flex-wrap:wrap;">
+      <div><span style="font-size:24px;font-weight:800;color:#ef4444;" id="statGroups">0</span><div style="font-size:12px;color:#64748b;margin-top:2px;">групп дублей</div></div>
+      <div><span style="font-size:24px;font-weight:800;color:#f59e0b;" id="statTotal">0</span><div style="font-size:12px;color:#64748b;margin-top:2px;">лишних записей</div></div>
+      <div><span style="font-size:24px;font-weight:800;color:#10b981;" id="statDeleted">0</span><div style="font-size:12px;color:#64748b;margin-top:2px;">удалено сейчас</div></div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div id="loadingBlock" style="display:none;text-align:center;padding:60px 0;color:#64748b;">
+    <i class="fas fa-spinner fa-spin" style="font-size:24px;margin-bottom:12px;display:block;"></i>
+    Сканируем базу...
+  </div>
+
+  <!-- Results -->
+  <div id="resultsBlock"></div>
+
+  <!-- Empty state -->
+  <div id="emptyState" style="display:none;text-align:center;padding:80px 0;">
+    <i class="fas fa-check-circle" style="font-size:48px;color:#10b981;margin-bottom:16px;display:block;"></i>
+    <div style="font-size:18px;font-weight:700;color:#1e293b;margin-bottom:8px;">Дублей не найдено</div>
+    <div style="font-size:14px;color:#64748b;">База данных чистая</div>
+  </div>
+
+</div>
+
+<style>
+.dup-group {
+  background:#fff; border:1px solid #e2e8f0; border-radius:12px;
+  margin-bottom:16px; overflow:hidden;
+}
+.dup-group-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 18px; background:#fef9c3; border-bottom:1px solid #fde047;
+  flex-wrap:wrap; gap:10px;
+}
+.dup-group-title { font-size:13.5px; font-weight:700; color:#854d0e; }
+.dup-group-meta  { font-size:12px; color:#a16207; margin-top:2px; }
+.dup-table { width:100%; border-collapse:collapse; }
+.dup-table th { font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; padding:10px 16px; text-align:left; background:#f8fafc; }
+.dup-table td { font-size:13px; color:#334155; padding:10px 16px; border-top:1px solid #f1f5f9; vertical-align:middle; }
+.dup-table tr:hover td { background:#f8fafc; }
+.keep-badge { display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534; }
+.del-btn { padding:5px 12px;border-radius:6px;border:1px solid #fecaca;background:#fee2e2;color:#991b1b;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s; }
+.del-btn:hover { background:#ef4444;color:#fff;border-color:#ef4444; }
+.del-all-btn { padding:7px 16px;border-radius:8px;border:none;background:#ef4444;color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s; }
+.del-all-btn:hover { background:#dc2626; }
+.deleted-row { opacity:0.4; }
+</style>
+
+<script>
+var _deletedCount = 0;
+var _csrfToken = document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').content : '';
+
+function scanDuplicates() {
+  document.getElementById('loadingBlock').style.display = 'block';
+  document.getElementById('resultsBlock').innerHTML = '';
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('statsBar').style.display = 'none';
+  document.getElementById('scanBtn').disabled = true;
+
+  fetch('/api/admin/deduplication/find', {
+    headers: { 'X-CSRFToken': _csrfToken, 'X-Requested-With': 'XMLHttpRequest' }
+  })
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('loadingBlock').style.display = 'none';
+    document.getElementById('scanBtn').disabled = false;
+    if (!data.ok) { alert('Ошибка: ' + (data.error || 'неизвестная')); return; }
+
+    var groups = data.groups || [];
+    if (groups.length === 0) {
+      document.getElementById('emptyState').style.display = 'block';
+      return;
+    }
+
+    var totalExtra = groups.reduce(function(s, g) { return s + (g.ids.length - 1); }, 0);
+    document.getElementById('statGroups').textContent = groups.length;
+    document.getElementById('statTotal').textContent = totalExtra;
+    document.getElementById('statDeleted').textContent = _deletedCount;
+    document.getElementById('statsBar').style.display = 'block';
+
+    var html = '';
+    groups.forEach(function(g, gi) {
+      html += '<div class="dup-group" id="group-' + gi + '">';
+      html += '<div class="dup-group-header">';
+      html += '<div><div class="dup-group-title"><i class="fas fa-copy" style="margin-right:6px;"></i>' + escHtml(g.address || 'Адрес не указан') + '</div>';
+      html += '<div class="dup-group-meta">Площадь: ' + (g.area || '—') + ' м² · Цена: ' + fmtPrice(g.price) + ' · ' + g.ids.length + ' записей</div></div>';
+      html += '<button class="del-all-btn" onclick="deleteGroup(' + gi + ', ' + JSON.stringify(g.ids) + ')"><i class="fas fa-trash" style="margin-right:5px;"></i>Удалить дубли (' + (g.ids.length-1) + ')</button>';
+      html += '</div>';
+      html += '<table class="dup-table"><thead><tr><th>ID</th><th>ЖК</th><th>Комнат</th><th>Этаж</th><th>Активно</th><th>Создано</th><th>Действие</th></tr></thead><tbody>';
+      g.rows.forEach(function(row, ri) {
+        var isFirst = ri === 0;
+        html += '<tr id="row-' + g.ids[ri] + '">';
+        html += '<td><code style="font-size:11px;color:#94a3b8;">#' + row.id + '</code></td>';
+        html += '<td>' + escHtml(row.complex_name || '—') + '</td>';
+        html += '<td>' + (row.rooms || '—') + '</td>';
+        html += '<td>' + (row.floor || '—') + '</td>';
+        html += '<td>' + (row.is_active ? '<span style="color:#10b981;">✓</span>' : '<span style="color:#ef4444;">✗</span>') + '</td>';
+        html += '<td style="font-size:12px;color:#94a3b8;">' + (row.created_at || '—') + '</td>';
+        html += '<td>';
+        if (isFirst) {
+          html += '<span class="keep-badge"><i class="fas fa-star"></i> Оставить</span>';
+        } else {
+          html += '<button class="del-btn" onclick="deleteSingle(' + row.id + ', this)"><i class="fas fa-trash"></i> Удалить</button>';
+        }
+        html += '</td></tr>';
+      });
+      html += '</tbody></table></div>';
+    });
+    document.getElementById('resultsBlock').innerHTML = html;
+  })
+  .catch(function(e) {
+    document.getElementById('loadingBlock').style.display = 'none';
+    document.getElementById('scanBtn').disabled = false;
+    alert('Ошибка сети: ' + e.message);
+  });
+}
+
+function deleteSingle(propId, btn) {
+  if (!confirm('Удалить объявление #' + propId + '?')) return;
+  btn.disabled = true;
+  fetch('/api/admin/deduplication/delete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': _csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
+    body: JSON.stringify({ ids: [propId] })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.ok) {
+      var row = document.getElementById('row-' + propId);
+      if (row) row.classList.add('deleted-row');
+      btn.textContent = '✓ Удалено';
+      btn.style.background = '#dcfce7'; btn.style.color = '#166534'; btn.style.borderColor = '#bbf7d0';
+      _deletedCount++;
+      document.getElementById('statDeleted').textContent = _deletedCount;
+    } else {
+      alert('Ошибка: ' + (data.error || 'неизвестная'));
+      btn.disabled = false;
+    }
+  });
+}
+
+function deleteGroup(gi, ids) {
+  var toDelete = ids.slice(1);
+  if (!confirm('Удалить ' + toDelete.length + ' дублей в этой группе (оставить только первый)?')) return;
+  fetch('/api/admin/deduplication/delete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': _csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
+    body: JSON.stringify({ ids: toDelete })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.ok) {
+      toDelete.forEach(function(id) {
+        var row = document.getElementById('row-' + id);
+        if (row) row.classList.add('deleted-row');
+      });
+      var group = document.getElementById('group-' + gi);
+      if (group) {
+        var hdr = group.querySelector('.dup-group-header');
+        if (hdr) hdr.style.background = '#dcfce7';
+        var btn = group.querySelector('.del-all-btn');
+        if (btn) { btn.textContent = '✓ Удалено'; btn.style.background = '#10b981'; btn.disabled = true; }
+      }
+      _deletedCount += toDelete.length;
+      document.getElementById('statDeleted').textContent = _deletedCount;
+    } else {
+      alert('Ошибка: ' + (data.error || 'неизвестная'));
+    }
+  });
+}
+
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmtPrice(p) {
+  if (!p) return '—';
+  if (p >= 1000000) return (p/1000000).toFixed(1).replace(/\.0$/,'') + ' млн ₽';
+  return p.toLocaleString('ru') + ' ₽';
+}
+</script>
+{% endblock %}

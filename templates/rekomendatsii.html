@@ -1,0 +1,401 @@
+{% extends "base.html" %}
+{% block title %}Рекомендации{% if current_city %} — {{ current_city.name }}{% endif %} | InBack{% endblock %}
+{% block content %}
+{% if not current_user.is_authenticated %}
+<script>window.location.href = '/login?next=' + encodeURIComponent(window.location.pathname);</script>
+{% else %}
+{% set city_slug = current_city.slug if current_city else 'krasnodar' %}
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-2 text-xs text-gray-400 mb-6">
+      <a href="/" class="hover:text-[#0088CC] transition-colors">Главная</a>
+      <span>/</span>
+      <span class="text-gray-700 font-medium">Рекомендации</span>
+    </nav>
+
+    <!-- Hero -->
+    <div class="flex items-start justify-between mb-8 gap-4">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">Рекомендации</h1>
+        <p class="text-sm text-gray-500">Персональные подборки и объекты от вашего менеджера</p>
+      </div>
+      <div id="new-badge-hero" class="hidden flex-shrink-0">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-semibold rounded-full shadow">
+          <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+          <span id="new-badge-count">0</span> новых
+        </span>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-3 gap-3 sm:gap-4 mb-8">
+      <div class="bg-gradient-to-br from-[#0088CC] to-[#006699] rounded-2xl p-4 sm:p-5 text-white">
+        <div class="text-2xl sm:text-3xl font-bold mb-1" id="stat-new">—</div>
+        <div class="text-xs opacity-80">Новых</div>
+      </div>
+      <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-4 sm:p-5 text-white">
+        <div class="text-2xl sm:text-3xl font-bold mb-1" id="stat-total">—</div>
+        <div class="text-xs opacity-80">Рекомендаций</div>
+      </div>
+      <div class="bg-gradient-to-br from-violet-500 to-purple-700 rounded-2xl p-4 sm:p-5 text-white">
+        <div class="text-2xl sm:text-3xl font-bold mb-1" id="stat-collections">—</div>
+        <div class="text-xs opacity-80">Подборок</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex gap-1 bg-gray-100 rounded-xl p-1 mb-6 w-full sm:w-auto sm:inline-flex">
+      <button id="tab-btn-recs" onclick="switchTab('recs')"
+              class="flex-1 sm:flex-none px-5 py-2 rounded-lg text-sm font-semibold transition-all bg-white text-gray-900 shadow-sm">
+        <i class="fas fa-star mr-1.5 text-amber-400"></i>Рекомендации
+      </button>
+      <button id="tab-btn-cols" onclick="switchTab('cols')"
+              class="flex-1 sm:flex-none px-5 py-2 rounded-lg text-sm font-semibold transition-all text-gray-500 hover:text-gray-700">
+        <i class="fas fa-layer-group mr-1.5"></i>Подборки
+      </button>
+    </div>
+
+    <!-- Tab: Рекомендации -->
+    <div id="tab-recs">
+      <!-- Filter chips -->
+      <div class="flex gap-2 flex-wrap mb-5" id="rec-filters">
+        <button class="filter-chip active" data-type="all" onclick="filterRecs('all')">Все</button>
+        <button class="filter-chip" data-type="property" onclick="filterRecs('property')">
+          <i class="fas fa-home text-xs mr-1"></i>Объекты
+        </button>
+        <button class="filter-chip" data-type="complex" onclick="filterRecs('complex')">
+          <i class="fas fa-building text-xs mr-1"></i>ЖК
+        </button>
+        <button class="filter-chip" data-type="search" onclick="filterRecs('search')">
+          <i class="fas fa-search text-xs mr-1"></i>Поиски
+        </button>
+      </div>
+
+      <div id="recs-list">
+        <div class="flex flex-col items-center justify-center py-16 text-gray-400">
+          <svg class="animate-spin h-8 w-8 mb-4 text-[#0088CC]" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          <p class="text-sm">Загружаем рекомендации...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Подборки -->
+    <div id="tab-cols" class="hidden">
+      <div id="cols-list">
+        <div class="flex flex-col items-center justify-center py-16 text-gray-400">
+          <svg class="animate-spin h-8 w-8 mb-4 text-[#0088CC]" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          <p class="text-sm">Загружаем подборки...</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1.5px solid #e5e7eb;
+  background: #fff;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all .15s;
+}
+.filter-chip:hover { border-color: #0088CC; color: #0088CC; }
+.filter-chip.active { background: #0088CC; border-color: #0088CC; color: #fff; }
+</style>
+
+<script>
+(function(){
+  var _allRecs = [];
+  var _activeFilter = 'all';
+
+  // ── Tab switching ──────────────────────────────────────────────────
+  window.switchTab = function(tab) {
+    var tabs = ['recs','cols'];
+    tabs.forEach(function(t) {
+      var panel = document.getElementById('tab-'+t);
+      var btn   = document.getElementById('tab-btn-'+t);
+      if (t === tab) {
+        panel.classList.remove('hidden');
+        btn.classList.add('bg-white','text-gray-900','shadow-sm');
+        btn.classList.remove('text-gray-500');
+      } else {
+        panel.classList.add('hidden');
+        btn.classList.remove('bg-white','text-gray-900','shadow-sm');
+        btn.classList.add('text-gray-500');
+      }
+    });
+  };
+
+  // ── Filter chips ──────────────────────────────────────────────────
+  window.filterRecs = function(type) {
+    _activeFilter = type;
+    document.querySelectorAll('.filter-chip').forEach(function(c){
+      c.classList.toggle('active', c.dataset.type === type);
+    });
+    renderRecs(_allRecs.filter(function(r){ return type === 'all' || r.recommendation_type === type; }));
+  };
+
+  // ── Helpers ───────────────────────────────────────────────────────
+  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  function relDate(iso) {
+    if (!iso) return '';
+    var d = new Date(iso), now = new Date();
+    var diff = Math.floor((now - d) / 1000);
+    if (diff < 60) return 'только что';
+    if (diff < 3600) return Math.floor(diff/60) + ' мин. назад';
+    if (diff < 86400) return Math.floor(diff/3600) + ' ч. назад';
+    if (diff < 86400*7) return Math.floor(diff/86400) + ' д. назад';
+    return d.toLocaleDateString('ru-RU', {day:'numeric', month:'long'});
+  }
+
+  function priorityBadge(p) {
+    if (p === 'urgent') return '<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-red-100 text-red-600 text-[10px] font-bold rounded-full uppercase tracking-wide"><span class="w-1.5 h-1.5 bg-red-500 rounded-full"></span>Срочно</span>';
+    if (p === 'high')   return '<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-full uppercase tracking-wide"><span class="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>Важно</span>';
+    return '';
+  }
+
+  function typeMeta(r) {
+    if (r.recommendation_type === 'property') return {icon:'fa-home', color:'blue', label:'Объект'};
+    if (r.recommendation_type === 'complex')  return {icon:'fa-building', color:'violet', label:'ЖК'};
+    return {icon:'fa-search', color:'teal', label:'Поиск'};
+  }
+
+  function itemLink(r) {
+    if (r.recommendation_type === 'property') return '/object/' + esc(r.item_id);
+    if (r.recommendation_type === 'complex')  return '/residential-complex/' + esc(r.item_name||r.item_id);
+    if (r.search_id) return '/{{ city_slug }}/novostrojki?saved_search=' + r.search_id;
+    return '#';
+  }
+
+  // ── Render recommendations ────────────────────────────────────────
+  function renderRecs(recs) {
+    var el = document.getElementById('recs-list');
+    if (!recs.length) {
+      el.innerHTML = '<div class="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center justify-center py-16 px-6 text-center">' +
+        '<div class="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-5"><i class="fas fa-star text-blue-300 text-3xl"></i></div>' +
+        '<h3 class="text-base font-bold text-gray-900 mb-2">Рекомендаций пока нет</h3>' +
+        '<p class="text-gray-400 text-sm max-w-xs">Ваш менеджер подготовит персональные рекомендации по объектам и комплексам</p></div>';
+      return;
+    }
+    el.innerHTML = recs.map(function(r) {
+      var isNew  = !r.viewed_at;
+      var meta   = typeMeta(r);
+      var link   = itemLink(r);
+      var pBadge = priorityBadge(r.priority_level);
+
+      var colorMap = {blue:'bg-blue-100 text-blue-600', violet:'bg-violet-100 text-violet-600', teal:'bg-teal-100 text-teal-600'};
+      var iconClass = colorMap[meta.color] || 'bg-gray-100 text-gray-500';
+
+      var features = '';
+      try {
+        var ff = r.highlighted_features ? JSON.parse(r.highlighted_features) : [];
+        if (ff.length) {
+          features = '<div class="flex flex-wrap gap-1.5 mb-3">' +
+            ff.slice(0,5).map(function(f){ return '<span class="text-[11px] px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full">'+esc(f)+'</span>'; }).join('') +
+            '</div>';
+        }
+      } catch(e){}
+
+      var actionBtn = '';
+      if (r.recommendation_type === 'search' && r.search_id) {
+        actionBtn = '<a href="'+link+'" class="inline-flex items-center gap-1.5 bg-[#0088CC] hover:bg-[#006699] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"><i class="fas fa-search text-xs"></i>Открыть поиск</a>';
+      } else if (link !== '#') {
+        actionBtn = '<a href="'+link+'" target="_blank" onclick="markRecViewed('+r.id+')" class="inline-flex items-center gap-1.5 bg-[#0088CC] hover:bg-[#006699] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"><i class="fas fa-eye text-xs"></i>Посмотреть</a>';
+      }
+
+      var responseBar = '';
+      if (!r.client_response && r.recommendation_type !== 'search') {
+        responseBar = '<div class="flex gap-2 mt-3 pt-3 border-t border-gray-100">' +
+          '<span class="text-xs text-gray-400 mr-auto self-center">Интересует?</span>' +
+          '<button onclick="respondToRec('+r.id+',\'interested\')" class="px-3 py-1.5 bg-green-50 hover:bg-green-100 text-green-700 text-xs font-semibold rounded-lg transition-colors"><i class="fas fa-thumbs-up mr-1"></i>Да</button>' +
+          '<button onclick="respondToRec('+r.id+',\'not_interested\')" class="px-3 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-500 text-xs font-semibold rounded-lg transition-colors"><i class="fas fa-thumbs-down mr-1"></i>Нет</button>' +
+          '<button onclick="respondToRec('+r.id+',\'need_more_info\')" class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-semibold rounded-lg transition-colors"><i class="fas fa-question mr-1"></i>Подробнее</button>' +
+          '</div>';
+      } else if (r.client_response === 'interested') {
+        responseBar = '<div class="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100"><span class="text-xs text-green-600 font-semibold"><i class="fas fa-check-circle mr-1"></i>Вы отметили: Интересует</span></div>';
+      } else if (r.client_response === 'not_interested') {
+        responseBar = '<div class="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100"><span class="text-xs text-gray-400 font-semibold"><i class="fas fa-times-circle mr-1"></i>Вы отметили: Не интересует</span></div>';
+      }
+
+      return '<div class="rec-card bg-white rounded-2xl border-2 ' + (isNew ? 'border-blue-200 shadow-blue-50' : 'border-gray-100') + ' shadow-sm p-5 mb-4 transition-all hover:shadow-md" data-type="'+esc(r.recommendation_type)+'" data-id="'+r.id+'">' +
+        (isNew ? '<div class="flex items-center justify-between mb-3"><div class="flex items-center gap-2">' + pBadge + '</div><span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-[10px] font-bold rounded-full"><span class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>Новое</span></div>' : (pBadge ? '<div class="mb-3">'+pBadge+'</div>' : '')) +
+        '<div class="flex items-start gap-3">' +
+          '<div class="w-10 h-10 rounded-xl '+iconClass+' flex items-center justify-center flex-shrink-0 mt-0.5">' +
+            '<i class="fas '+esc(meta.icon)+' text-base"></i>' +
+          '</div>' +
+          '<div class="flex-1 min-w-0">' +
+            '<div class="flex items-center gap-2 mb-0.5">' +
+              '<span class="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">'+esc(meta.label)+'</span>' +
+              '<span class="text-gray-200">·</span>' +
+              '<span class="text-[10px] text-gray-400">'+relDate(r.sent_at||r.created_at)+'</span>' +
+            '</div>' +
+            '<h3 class="font-bold text-gray-900 text-sm leading-snug mb-1">'+esc(r.title||r.item_name||'')+'</h3>' +
+            (r.item_name && r.title && r.title !== r.item_name ? '<p class="text-xs text-gray-500 mb-1">'+esc(r.item_name)+'</p>' : '') +
+            (r.manager_name ? '<p class="text-xs text-gray-400 mb-2"><i class="fas fa-user-tie mr-1"></i>'+esc(r.manager_name)+'</p>' : '') +
+          '</div>' +
+        '</div>' +
+        (r.description || r.manager_notes ? '<p class="text-sm text-gray-600 mt-3 mb-2 leading-relaxed">'+esc(r.description||r.manager_notes||'')+'</p>' : '') +
+        features +
+        (actionBtn ? '<div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100"><div></div>'+actionBtn+'</div>' : '') +
+        responseBar +
+        '</div>';
+    }).join('');
+  }
+
+  // ── Render collections/presentations ─────────────────────────────
+  function renderCollections(cols) {
+    var el = document.getElementById('cols-list');
+    document.getElementById('stat-collections').textContent = cols.length;
+    if (!cols.length) {
+      el.innerHTML = '<div class="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center justify-center py-16 px-6 text-center">' +
+        '<div class="w-20 h-20 bg-violet-50 rounded-2xl flex items-center justify-center mx-auto mb-5"><i class="fas fa-layer-group text-violet-300 text-3xl"></i></div>' +
+        '<h3 class="text-base font-bold text-gray-900 mb-2">Подборок пока нет</h3>' +
+        '<p class="text-gray-400 text-sm max-w-xs">Ваш менеджер подготовит персональные подборки объектов</p></div>';
+      return;
+    }
+    el.innerHTML = cols.map(function(col) {
+      var isNew = col.status === 'Отправлена';
+      var av = col.manager_avatar;
+      var validImg = av && (av.startsWith('http')||av.startsWith('/'))&&!av.includes('randomuser.me');
+      var avatarHtml = validImg
+        ? '<img src="'+esc(av)+'" alt="'+esc(col.manager_name||'')+'" class="w-11 h-11 rounded-xl object-cover shadow flex-shrink-0">'
+        : '<div class="w-11 h-11 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow flex-shrink-0"><span class="text-white font-bold text-sm">' + esc((col.manager_name||'М')[0].toUpperCase()) + '</span></div>';
+
+      var thumbsHtml = '';
+      if (col.properties && col.properties.length > 0) {
+        thumbsHtml = '<div class="flex items-center gap-1.5 mb-4">';
+        col.properties.slice(0,4).forEach(function(p){
+          thumbsHtml += '<div class="w-14 h-14 rounded-lg overflow-hidden border-2 border-white shadow-sm flex-shrink-0">';
+          if (p.image) thumbsHtml += '<img src="'+esc(p.image)+'" class="w-full h-full object-cover">';
+          else thumbsHtml += '<div class="w-full h-full bg-gray-100 flex items-center justify-center"><i class="fas fa-home text-gray-300 text-sm"></i></div>';
+          thumbsHtml += '</div>';
+        });
+        if ((col.properties_count||0) > 4) {
+          thumbsHtml += '<div class="w-14 h-14 bg-blue-50 rounded-lg flex items-center justify-center text-blue-500 font-semibold text-sm flex-shrink-0">+' + ((col.properties_count||0)-4) + '</div>';
+        }
+        thumbsHtml += '</div>';
+      }
+
+      var cnt = col.properties_count || 0;
+      var plural = cnt===1?'объект':cnt<5?'объекта':'объектов';
+
+      return '<div class="relative bg-white rounded-2xl border-2 ' + (isNew ? 'border-blue-200 shadow-blue-50' : 'border-gray-100') + ' shadow-sm p-5 mb-4 hover:shadow-md transition-all">' +
+        (isNew ? '<div class="absolute top-4 right-4"><span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-[10px] font-bold rounded-full"><span class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>Новое</span></div>' : '') +
+        '<div class="flex items-center gap-3 mb-4">' + avatarHtml +
+          '<div><p class="font-semibold text-gray-900 text-sm">'+esc(col.manager_name||'Менеджер')+'</p>' +
+          '<p class="text-xs text-gray-400">'+esc(col.created_at||'')+'</p></div></div>' +
+        '<h3 class="font-bold text-gray-900 text-base mb-1.5 leading-tight">'+esc(col.title||'')+'</h3>' +
+        (col.description ? '<p class="text-sm text-gray-500 mb-3">'+esc(col.description)+'</p>' : '') +
+        thumbsHtml +
+        '<div class="flex items-center justify-between pt-3 border-t border-gray-100">' +
+          '<span class="text-sm text-gray-500 font-medium"><i class="fas fa-home text-blue-400 mr-1.5"></i>'+cnt+' '+plural+'</span>' +
+          '<a href="/presentation/modern/'+esc(col.unique_url)+'" target="_blank" onclick="markColViewed('+col.id+','+isNew+')" class="inline-flex items-center gap-1.5 bg-[#0088CC] hover:bg-[#006699] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"><i class="fas fa-eye text-xs"></i>Смотреть</a>' +
+        '</div></div>';
+    }).join('');
+  }
+
+  // ── API calls ─────────────────────────────────────────────────────
+  function loadRecommendations() {
+    fetch('/api/user/recommendations', {headers:{'X-Requested-With':'XMLHttpRequest'}})
+      .then(function(r){ return r.json(); })
+      .then(function(data) {
+        var recs = data.recommendations || [];
+        _allRecs = recs;
+        var newCnt = recs.filter(function(r){ return !r.viewed_at; }).length;
+        document.getElementById('stat-new').textContent = newCnt;
+        document.getElementById('stat-total').textContent = recs.length;
+        if (newCnt > 0) {
+          var badge = document.getElementById('new-badge-hero');
+          badge.classList.remove('hidden');
+          document.getElementById('new-badge-count').textContent = newCnt;
+        }
+        renderRecs(_activeFilter === 'all' ? recs : recs.filter(function(r){ return r.recommendation_type === _activeFilter; }));
+      })
+      .catch(function() {
+        document.getElementById('recs-list').innerHTML =
+          '<div class="bg-white rounded-2xl border border-gray-100 shadow-sm text-center py-12 text-gray-400"><i class="fas fa-exclamation-circle text-2xl mb-3 block"></i><p class="text-sm">Не удалось загрузить рекомендации</p></div>';
+        document.getElementById('stat-new').textContent = '0';
+        document.getElementById('stat-total').textContent = '0';
+      });
+  }
+
+  function loadCollections() {
+    fetch('/api/dashboard/bootstrap', {headers:{'X-Requested-With':'XMLHttpRequest'}})
+      .then(function(r){ return r.json(); })
+      .then(function(data) {
+        renderCollections(data.collections || []);
+      })
+      .catch(function() {
+        document.getElementById('cols-list').innerHTML =
+          '<div class="bg-white rounded-2xl border border-gray-100 shadow-sm text-center py-12 text-gray-400"><i class="fas fa-exclamation-circle text-2xl mb-3 block"></i><p class="text-sm">Не удалось загрузить подборки</p></div>';
+        document.getElementById('stat-collections').textContent = '0';
+      });
+  }
+
+  // ── Mark as viewed ────────────────────────────────────────────────
+  window.markRecViewed = function(id) {
+    if (!id || String(id).startsWith('search_')) return;
+    fetch('/api/recommendations/'+id+'/viewed', {
+      method: 'POST',
+      headers: {'X-CSRFToken': (document.querySelector('meta[name="csrf-token"]')||{}).content||''}
+    });
+    var card = document.querySelector('[data-id="'+id+'"]');
+    if (card) {
+      card.classList.remove('border-blue-200','shadow-blue-50');
+      card.classList.add('border-gray-100');
+      var badge = card.querySelector('.animate-pulse');
+      if (badge) badge.closest('span') && badge.closest('.from-blue-500') && badge.closest('.from-blue-500').remove();
+    }
+  };
+
+  window.markColViewed = function(id, isNew) {
+    if (!isNew) return;
+    fetch('/api/recommendations/'+id+'/viewed', {
+      method: 'POST',
+      headers: {'X-CSRFToken': (document.querySelector('meta[name="csrf-token"]')||{}).content||''}
+    });
+  };
+
+  // ── Respond to recommendation ─────────────────────────────────────
+  window.respondToRec = function(id, response) {
+    fetch('/api/recommendations/'+id+'/respond', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': (document.querySelector('meta[name="csrf-token"]')||{}).content||''
+      },
+      body: JSON.stringify({response: response})
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      if (data.success) {
+        var rec = _allRecs.find(function(r){ return r.id === id; });
+        if (rec) rec.client_response = response;
+        renderRecs(_activeFilter === 'all' ? _allRecs : _allRecs.filter(function(r){ return r.recommendation_type === _activeFilter; }));
+      }
+    });
+  };
+
+  // ── Init ──────────────────────────────────────────────────────────
+  loadRecommendations();
+  loadCollections();
+})();
+</script>
+{% endif %}
+{% endblock %}

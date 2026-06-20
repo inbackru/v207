@@ -1,0 +1,485 @@
+{% extends "base.html" %}
+{% set city_slug = current_city.slug if current_city else 'krasnodar' %}
+{% set city_name = current_city.name if current_city else 'Краснодар' %}
+{% set city_prep = (current_city.name_prepositional or city_name) if current_city else 'Краснодаре' %}
+{% set city_gen = (current_city.name_genitive or city_name) if current_city else 'Краснодара' %}
+
+{% block title %}Калькулятор кэшбека при покупке квартиры в {{ city_prep }} 2026 | InBack{% endblock %}
+{% block description %}Бесплатный онлайн-калькулятор кэшбека: рассчитайте выгоду от покупки новостройки в {{ city_gen }} за 10 секунд. До 500 000 ₽ возврата. Без скрытых условий.{% endblock %}
+{% block keywords %}калькулятор кэшбека, кэшбек при покупке квартиры, расчёт кэшбека новостройка, кэшбек {{ city_gen }}, сколько кэшбека получу, InBack калькулятор{% endblock %}
+
+{% block og_title %}Калькулятор кэшбека за новостройку | InBack{% endblock %}
+{% block og_description %}Рассчитайте кэшбек за покупку квартиры в новостройке — до 500 000 ₽ возврата. Онлайн-калькулятор InBack.{% endblock %}
+{% block og_type %}website{% endblock %}
+{% block canonical_url %}<link rel="canonical" href="{{ url_for('city_pages.cashback_calculator_city', city_slug=city_slug, _external=True) }}" />{% endblock %}
+
+{% block head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Калькулятор кэшбека InBack",
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Web",
+  "url": "{{ url_for('city_pages.cashback_calculator_city', city_slug=city_slug, _external=True) }}",
+  "description": "Бесплатный онлайн-калькулятор кэшбека при покупке квартиры в новостройке. Рассчитайте размер возврата до 500 000 ₽ мгновенно.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "RUB"
+  },
+  "provider": {
+    "@type": "Organization",
+    "name": "InBack",
+    "url": "{{ url_for('public_api.index', _external=True) }}"
+  },
+  "featureList": [
+    "Расчёт кэшбека по стоимости квартиры",
+    "Выбор процента кэшбека от 1% до 7%",
+    "Сравнение выгоды для разных сумм",
+    "Расчёт ипотечной переплаты",
+    "Мгновенный результат без регистрации"
+  ],
+  "screenshot": "{{ url_for('static', filename='images/og-default.jpg', _external=True) }}"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type":"ListItem","position":1,"name":"Главная","item":"{{ url_for('public_api.index', _external=True) }}"},
+    {"@type":"ListItem","position":2,"name":"Новостройки {{ city_name }}","item":"{{ url_for('props.properties_city', city_slug=city_slug, _external=True) }}"},
+    {"@type":"ListItem","position":3,"name":"Калькулятор кэшбека","item":"{{ url_for('city_pages.cashback_calculator_city', city_slug=city_slug, _external=True) }}"}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Сколько кэшбека я получу при покупке квартиры?",
+      "acceptedAnswer": {"@type":"Answer","text":"Размер кэшбека составляет от 1% до 7% от стоимости квартиры в зависимости от застройщика и объекта. Максимальная сумма — до 500 000 ₽. Воспользуйтесь калькулятором, чтобы узнать точную сумму для вашей квартиры."}
+    },
+    {
+      "@type": "Question",
+      "name": "Когда выплачивается кэшбек?",
+      "acceptedAnswer": {"@type":"Answer","text":"Кэшбек выплачивается в течение 30–60 дней после регистрации права собственности и подписания акта приёма-передачи квартиры. Деньги поступают на ваш банковский счёт."}
+    },
+    {
+      "@type": "Question",
+      "name": "Нужно ли платить за расчёт кэшбека?",
+      "acceptedAnswer": {"@type":"Answer","text":"Нет. Калькулятор кэшбека InBack полностью бесплатен. Услуги InBack для покупателей также бесплатны — мы получаем комиссию от застройщика, часть которой возвращаем вам."}
+    },
+    {
+      "@type": "Question",
+      "name": "Влияет ли ипотека на получение кэшбека?",
+      "acceptedAnswer": {"@type":"Answer","text":"Нет, кэшбек начисляется независимо от способа оплаты — ипотека, рассрочка или 100% оплата. Важна итоговая стоимость квартиры по договору."}
+    }
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+  <!-- Breadcrumb -->
+  <div class="bg-white border-b border-gray-100">
+    <div class="max-w-4xl mx-auto px-4 py-3">
+      <nav class="flex items-center gap-2 text-xs text-gray-500">
+        <a href="{{ url_for('public_api.index') }}" class="hover:text-blue-600 transition-colors">Главная</a>
+        <span class="text-gray-300">›</span>
+        <a href="{{ url_for('props.properties_city', city_slug=city_slug) }}" class="hover:text-blue-600 transition-colors">Новостройки {{ city_name }}</a>
+        <span class="text-gray-300">›</span>
+        <span class="text-gray-700">Калькулятор кэшбека</span>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <div class="bg-gradient-to-br from-[#0088CC] to-[#0066AA] text-white py-12 px-4">
+    <div class="max-w-4xl mx-auto text-center">
+      <div class="inline-flex items-center gap-2 bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full mb-4">
+        <i class="fas fa-calculator text-xs"></i> БЕСПЛАТНЫЙ КАЛЬКУЛЯТОР
+      </div>
+      <h1 class="text-3xl md:text-4xl font-bold mb-3">Калькулятор кэшбека за новостройку</h1>
+      <p class="text-lg text-blue-100 max-w-2xl mx-auto">
+        Узнайте, сколько денег вы получите обратно при покупке квартиры в {{ city_prep }}. Расчёт за 10 секунд.
+      </p>
+      <div class="flex items-center justify-center gap-6 mt-6 text-sm text-blue-100">
+        <div class="flex items-center gap-1.5"><i class="fas fa-check-circle"></i> До 500 000 ₽ возврата</div>
+        <div class="flex items-center gap-1.5"><i class="fas fa-check-circle"></i> {{ total_complexes }}+ ЖК</div>
+        <div class="flex items-center gap-1.5"><i class="fas fa-check-circle"></i> Без скрытых условий</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calculator -->
+  <div class="max-w-4xl mx-auto px-4 py-10">
+    <div class="grid md:grid-cols-2 gap-6">
+
+      <!-- Inputs -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h2 class="text-lg font-bold text-gray-900 mb-5 flex items-center gap-2">
+          <span class="w-7 h-7 bg-blue-50 rounded-lg flex items-center justify-center">
+            <i class="fas fa-sliders-h text-[#0088CC] text-sm"></i>
+          </span>
+          Параметры расчёта
+        </h2>
+
+        <!-- Price input -->
+        <div class="mb-5">
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">Стоимость квартиры</label>
+          <div class="relative">
+            <input id="cb-price" type="text" inputmode="numeric"
+                   class="w-full border border-gray-200 rounded-xl px-4 py-3 pr-10 text-lg font-semibold text-gray-900 focus:ring-2 focus:ring-[#0088CC] focus:border-transparent outline-none transition-all"
+                   placeholder="6 000 000" value="{{ avg_price | int | format_number if avg_price else '6 000 000' }}">
+            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium">₽</span>
+          </div>
+          <!-- Quick buttons -->
+          <div class="flex flex-wrap gap-2 mt-2">
+            {% for label, val in [('3 млн', 3000000), ('5 млн', 5000000), ('7 млн', 7000000), ('10 млн', 10000000), ('15 млн', 15000000)] %}
+            <button onclick="setPrice({{ val }})"
+                    class="text-xs px-2.5 py-1 rounded-lg border border-gray-200 text-gray-600 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-all">
+              {{ label }}
+            </button>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Cashback rate slider -->
+        <div class="mb-5">
+          <div class="flex justify-between items-center mb-1.5">
+            <label class="text-sm font-medium text-gray-700">Процент кэшбека</label>
+            <span class="text-sm font-bold text-[#0088CC]"><span id="cb-rate-display">5</span>%</span>
+          </div>
+          <input id="cb-rate" type="range" min="1" max="7" step="0.5" value="5"
+                 class="w-full h-2 bg-gray-200 rounded-full appearance-none cursor-pointer accent-[#0088CC]"
+                 oninput="calculate()">
+          <div class="flex justify-between text-xs text-gray-400 mt-1">
+            <span>1% — минимум</span>
+            <span class="text-[#0088CC] font-medium">5% — стандарт InBack</span>
+            <span>7% — максимум</span>
+          </div>
+        </div>
+
+        <!-- Payment type -->
+        <div class="mb-5">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Способ покупки</label>
+          <div class="grid grid-cols-3 gap-2">
+            {% for val, label in [('cash','100% оплата'),('mortgage','Ипотека'),('installment','Рассрочка')] %}
+            <label class="relative cursor-pointer">
+              <input type="radio" name="payment-type" value="{{ val }}" {% if val == 'mortgage' %}checked{% endif %}
+                     class="peer sr-only" onchange="calculate()">
+              <div class="peer-checked:border-[#0088CC] peer-checked:bg-blue-50 peer-checked:text-[#0088CC] border border-gray-200 rounded-xl p-2.5 text-center text-xs font-medium text-gray-600 transition-all hover:border-gray-300">
+                {{ label }}
+              </div>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Mortgage fields (shown when mortgage selected) -->
+        <div id="mortgage-fields" class="border-t border-gray-100 pt-4">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1.5">Первый взнос, %</label>
+              <input id="cb-down" type="number" min="10" max="90" step="5" value="30"
+                     class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:ring-2 focus:ring-[#0088CC] focus:border-transparent outline-none"
+                     oninput="calculate()">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1.5">Ставка ипотеки, %</label>
+              <input id="cb-mortgage-rate" type="number" min="1" max="30" step="0.1" value="6"
+                     class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:ring-2 focus:ring-[#0088CC] focus:border-transparent outline-none"
+                     oninput="calculate()">
+            </div>
+          </div>
+          <div class="mt-3">
+            <label class="block text-xs font-medium text-gray-600 mb-1.5">Срок ипотеки, лет</label>
+            <div class="flex items-center gap-3">
+              <input id="cb-term" type="range" min="5" max="30" step="1" value="20"
+                     class="flex-1 h-2 bg-gray-200 rounded-full appearance-none cursor-pointer accent-[#0088CC]"
+                     oninput="calculate()">
+              <span id="cb-term-display" class="text-sm font-semibold text-gray-700 w-16 text-right">20 лет</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div class="flex flex-col gap-4">
+
+        <!-- Main result card -->
+        <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-6 text-white shadow-sm">
+          <div class="text-sm font-medium text-green-100 mb-1">Ваш кэшбек составит</div>
+          <div id="cb-result-amount" class="text-4xl font-black mb-1">250 000 ₽</div>
+          <div class="text-sm text-green-100">
+            <span id="cb-result-pct">5</span>% от стоимости квартиры
+          </div>
+          <div class="mt-4 pt-4 border-t border-white/20">
+            <div class="text-xs text-green-100 mb-2">Деньги поступают на ваш счёт через 30–60 дней после регистрации права</div>
+            <a href="{{ url_for('props.properties_city', city_slug=city_slug) }}"
+               class="inline-flex items-center gap-2 bg-white text-green-700 hover:text-green-800 font-semibold text-sm px-4 py-2.5 rounded-xl transition-all hover:shadow-md">
+              <i class="fas fa-home text-xs"></i> Выбрать квартиру
+            </a>
+          </div>
+        </div>
+
+        <!-- Breakdown -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+          <h3 class="text-sm font-bold text-gray-800 mb-4">Детали расчёта</h3>
+          <div class="space-y-3">
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-600">Стоимость квартиры</span>
+              <span id="bd-price" class="font-semibold text-gray-900">6 000 000 ₽</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-600">Процент кэшбека</span>
+              <span id="bd-pct" class="font-semibold text-[#0088CC]">5%</span>
+            </div>
+            <div class="flex justify-between text-sm" id="bd-mortgage-row">
+              <span class="text-gray-600">Сумма ипотеки</span>
+              <span id="bd-mortgage" class="font-semibold text-gray-900">4 200 000 ₽</span>
+            </div>
+            <div class="flex justify-between text-sm" id="bd-payment-row">
+              <span class="text-gray-600">Ежемесячный платёж</span>
+              <span id="bd-payment" class="font-semibold text-gray-900">—</span>
+            </div>
+            <div class="flex justify-between text-sm" id="bd-overpay-row">
+              <span class="text-gray-600">Переплата по ипотеке</span>
+              <span id="bd-overpay" class="font-semibold text-red-500">—</span>
+            </div>
+            <div class="border-t border-gray-100 pt-3 flex justify-between text-sm">
+              <span class="text-gray-600">Кэшбек покрывает переплату</span>
+              <span id="bd-coverage" class="font-bold text-green-600">—</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- What to do with cashback -->
+        <div class="bg-blue-50 rounded-2xl p-4">
+          <div class="text-xs font-bold text-blue-800 mb-3">На что хватит кэшбека?</div>
+          <div id="cb-ideas" class="space-y-1.5 text-xs text-blue-700">
+            <div class="flex items-center gap-2"><i class="fas fa-couch text-blue-400 w-4"></i> <span id="idea-1">Покупка мебели и техники</span></div>
+            <div class="flex items-center gap-2"><i class="fas fa-paint-roller text-blue-400 w-4"></i> <span id="idea-2">Ремонт в новой квартире</span></div>
+            <div class="flex items-center gap-2"><i class="fas fa-piggy-bank text-blue-400 w-4"></i> <span id="idea-3">Досрочное погашение ипотеки</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparison table -->
+    <div class="mt-8 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      <h2 class="text-lg font-bold text-gray-900 mb-4">Сравнение кэшбека при разных ценах</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-gray-100">
+              <th class="text-left text-gray-500 font-medium pb-3">Стоимость квартиры</th>
+              <th class="text-right text-gray-500 font-medium pb-3">3%</th>
+              <th class="text-right text-gray-500 font-medium pb-3">5%</th>
+              <th class="text-right text-[#0088CC] font-semibold pb-3">7% (макс.)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-50" id="comparison-table-body">
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="mt-8">
+      <h2 class="text-xl font-bold text-gray-900 mb-5">Частые вопросы о кэшбеке</h2>
+      <div class="space-y-3">
+        {% set faqs = [
+          ('Как работает кэшбек InBack?', 'InBack сотрудничает с застройщиками, получая агентскую комиссию. Часть этой комиссии — от 1% до 7% — InBack возвращает покупателю в виде кэшбека. Цена квартиры не меняется, вы просто получаете деньги назад после покупки.'),
+          ('Влияет ли способ оплаты на кэшбек?', 'Нет. Кэшбек начисляется на полную стоимость квартиры по договору, независимо от того, как вы платите — ипотека, рассрочка или 100% оплата. Ипотечный кэшбек особенно выгоден: сумма возврата часто покрывает несколько ипотечных платежей.'),
+          ('Когда я получу деньги?', 'Выплата кэшбека происходит в течение 30–60 дней после регистрации права собственности (для готового жилья) или после подписания акта приёма-передачи (для строящихся объектов). Деньги переводятся на ваш банковский счёт.'),
+          ('Нужно ли заключать договор с InBack?', 'Да, нужно зарегистрировать намерение о покупке через InBack ДО подписания ДДУ или договора купли-продажи с застройщиком. Это обязательное условие для получения кэшбека. Регистрация бесплатна и занимает 2 минуты.'),
+          ('Можно ли получить кэшбек на покупку от физического лица?', 'Нет. Кэшбек InBack действует только при покупке новостройки напрямую от застройщика (ДДУ) или на первичном рынке у его официального представителя.'),
+        ] %}
+        {% for q, a in faqs %}
+        <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
+          <button onclick="toggleFaq(this)"
+                  class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors">
+            <span class="font-medium text-gray-900 text-sm">{{ q }}</span>
+            <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform duration-200 ml-3 flex-shrink-0"></i>
+          </button>
+          <div class="hidden px-4 pb-4 text-sm text-gray-600 leading-relaxed">{{ a }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="mt-10 bg-gradient-to-r from-[#0088CC] to-[#0066AA] rounded-2xl p-8 text-center text-white">
+      <h2 class="text-2xl font-bold mb-2">Готовы получить кэшбек?</h2>
+      <p class="text-blue-100 mb-6">Выберите квартиру в {{ city_prep }} и зарегистрируйтесь в InBack до подписания договора</p>
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <a href="{{ url_for('props.properties_city', city_slug=city_slug) }}"
+           class="bg-white text-[#0088CC] hover:shadow-lg font-bold px-6 py-3 rounded-xl transition-all">
+          <i class="fas fa-search mr-2"></i>Выбрать квартиру
+        </a>
+        <a href="{{ url_for('city_pages.cashback_terms_city', city_slug=city_slug) }}"
+           class="border border-white/40 text-white hover:bg-white/10 font-medium px-6 py-3 rounded-xl transition-all">
+          Условия кэшбека
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  var MAX_CASHBACK = 500000;
+
+  function parseNum(str) {
+    if (typeof str === 'number') return str;
+    return parseInt((str || '0').replace(/\D/g, ''), 10) || 0;
+  }
+
+  function fmt(n) {
+    return Math.round(n).toLocaleString('ru-RU');
+  }
+
+  function getPrice() { return parseNum(document.getElementById('cb-price').value); }
+  function getRate() { return parseFloat(document.getElementById('cb-rate').value) || 5; }
+  function getDown() { return parseFloat(document.getElementById('cb-down').value) || 30; }
+  function getMortgageRate() { return parseFloat(document.getElementById('cb-mortgage-rate').value) || 6; }
+  function getTerm() { return parseInt(document.getElementById('cb-term').value) || 20; }
+  function getPaymentType() { return document.querySelector('input[name="payment-type"]:checked')?.value || 'mortgage'; }
+
+  function calcMortgagePayment(principal, annualRate, termYears) {
+    if (!principal || !annualRate || !termYears) return 0;
+    var monthlyRate = annualRate / 100 / 12;
+    var n = termYears * 12;
+    if (monthlyRate === 0) return principal / n;
+    return principal * monthlyRate * Math.pow(1 + monthlyRate, n) / (Math.pow(1 + monthlyRate, n) - 1);
+  }
+
+  window.calculate = function() {
+    var price = getPrice();
+    var rate = getRate();
+    var paymentType = getPaymentType();
+
+    document.getElementById('cb-rate-display').textContent = rate;
+    document.getElementById('cb-term-display').textContent = getTerm() + ' лет';
+
+    var cashback = Math.min(price * rate / 100, MAX_CASHBACK);
+
+    document.getElementById('cb-result-amount').textContent = fmt(cashback) + ' ₽';
+    document.getElementById('cb-result-pct').textContent = rate;
+    document.getElementById('bd-price').textContent = fmt(price) + ' ₽';
+    document.getElementById('bd-pct').textContent = rate + '%';
+
+    var mortgageRow = document.getElementById('bd-mortgage-row');
+    var paymentRow = document.getElementById('bd-payment-row');
+    var overpayRow = document.getElementById('bd-overpay-row');
+    var coverageRow = document.getElementById('bd-coverage').parentElement;
+
+    if (paymentType === 'mortgage') {
+      mortgageRow.style.display = '';
+      paymentRow.style.display = '';
+      overpayRow.style.display = '';
+      coverageRow.style.display = '';
+
+      var downPct = getDown() / 100;
+      var principal = price * (1 - downPct);
+      var mortgageRate = getMortgageRate();
+      var term = getTerm();
+      var monthly = calcMortgagePayment(principal, mortgageRate, term);
+      var totalPay = monthly * term * 12;
+      var overpay = totalPay - principal;
+
+      document.getElementById('bd-mortgage').textContent = fmt(principal) + ' ₽';
+      document.getElementById('bd-payment').textContent = fmt(monthly) + ' ₽/мес';
+      document.getElementById('bd-overpay').textContent = fmt(overpay) + ' ₽';
+
+      var coveragePct = overpay > 0 ? Math.min(100, Math.round(cashback / overpay * 100)) : 100;
+      var coverageMonths = monthly > 0 ? Math.floor(cashback / monthly) : 0;
+      document.getElementById('bd-coverage').textContent = coveragePct + '% (' + coverageMonths + ' мес. платежей)';
+    } else {
+      mortgageRow.style.display = 'none';
+      paymentRow.style.display = 'none';
+      overpayRow.style.display = 'none';
+      coverageRow.style.display = 'none';
+    }
+
+    updateIdeas(cashback);
+    updateMortgageFields();
+  };
+
+  function updateIdeas(cashback) {
+    var ideas = [];
+    if (cashback >= 500000) {
+      ideas = ['Полный ремонт 2-комнатной квартиры', 'Кухонный гарнитур + встроенная техника', 'Погасить 3–5 ипотечных платежей'];
+    } else if (cashback >= 200000) {
+      ideas = ['Ремонт санузла и кухни', 'Мебель для спальни и гостиной', 'Погасить 1–2 ипотечных платежа'];
+    } else if (cashback >= 100000) {
+      ideas = ['Кухонный гарнитур', 'Встроенные шкафы', 'Первый ипотечный платёж'];
+    } else {
+      ideas = ['Покупка мебели и техники', 'Ремонт в новой квартире', 'Досрочное погашение ипотеки'];
+    }
+    document.getElementById('idea-1').textContent = ideas[0];
+    document.getElementById('idea-2').textContent = ideas[1];
+    document.getElementById('idea-3').textContent = ideas[2];
+  }
+
+  function updateMortgageFields() {
+    var visible = getPaymentType() === 'mortgage';
+    document.getElementById('mortgage-fields').style.display = visible ? '' : 'none';
+  }
+
+  window.setPrice = function(val) {
+    document.getElementById('cb-price').value = fmt(val);
+    calculate();
+  };
+
+  document.getElementById('cb-price').addEventListener('input', function() {
+    var raw = this.value.replace(/\D/g, '');
+    var num = parseInt(raw, 10) || 0;
+    this.value = num > 0 ? fmt(num) : '';
+    calculate();
+  });
+
+  document.getElementById('cb-rate').addEventListener('input', calculate);
+  document.getElementById('cb-down').addEventListener('input', calculate);
+  document.getElementById('cb-mortgage-rate').addEventListener('input', calculate);
+  document.getElementById('cb-term').addEventListener('input', calculate);
+  document.querySelectorAll('input[name="payment-type"]').forEach(function(el) {
+    el.addEventListener('change', calculate);
+  });
+
+  function buildComparisonTable() {
+    var rows = [3000000, 5000000, 7000000, 10000000, 15000000];
+    var rates = [3, 5, 7];
+    var tbody = document.getElementById('comparison-table-body');
+    var labels = ['3 млн', '5 млн', '7 млн', '10 млн', '15 млн'];
+    tbody.innerHTML = rows.map(function(price, i) {
+      var cells = rates.map(function(rate, ri) {
+        var amount = Math.min(price * rate / 100, MAX_CASHBACK);
+        var cls = ri === 2 ? 'text-right font-bold text-[#0088CC]' : 'text-right text-gray-700';
+        return '<td class="' + cls + ' py-3">' + fmt(amount) + ' ₽</td>';
+      }).join('');
+      return '<tr class="border-b border-gray-50"><td class="py-3 text-gray-700 font-medium">' + labels[i] + '</td>' + cells + '</tr>';
+    }).join('');
+  }
+
+  window.toggleFaq = function(btn) {
+    var content = btn.nextElementSibling;
+    var icon = btn.querySelector('.fa-chevron-down');
+    content.classList.toggle('hidden');
+    icon.style.transform = content.classList.contains('hidden') ? '' : 'rotate(180deg)';
+  };
+
+  buildComparisonTable();
+  calculate();
+})();
+</script>
+{% endblock %}

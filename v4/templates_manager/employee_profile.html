@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block title %}{{ employee.full_name }} — Профиль сотрудника | InBack{% endblock %}
+
+{% block content %}
+{% if sidebar_links is defined and sidebar_links %}
+{% include 'components/sidebar.html' %}
+{% endif %}
+
+<div class="{% if sidebar_links is defined and sidebar_links %}md:ml-[70px]{% endif %} transition-all duration-300">
+<div class="max-w-5xl mx-auto px-4 py-6">
+    <div class="mb-6">
+        <a onclick="if(history.length>1){history.back()}else{location.href='{{ url_for("manager_employees") }}'};return false;" href="{{ url_for('manager_employees') }}" class="inline-flex items-center text-sm text-gray-500 hover:text-[#0088CC] transition-colors">
+            <i class="fas fa-arrow-left mr-2"></i>Назад
+        </a>
+    </div>
+
+    <div class="bg-gradient-to-r from-[#0088CC] to-[#006699] rounded-2xl p-6 mb-6 text-white">
+        <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
+            <div class="w-24 h-24 rounded-2xl overflow-hidden border-4 border-white/30 flex-shrink-0 shadow-lg">
+                {% if employee.profile_image %}
+                <img src="{{ employee.profile_image }}" alt="{{ employee.full_name }}" class="w-full h-full object-cover">
+                {% else %}
+                <div class="w-full h-full bg-white/20 flex items-center justify-center text-white font-bold text-3xl">
+                    {{ (employee.first_name or '?')[0]|upper }}
+                </div>
+                {% endif %}
+            </div>
+            <div class="flex-1">
+                <h1 class="text-2xl font-bold">{{ employee.full_name }}</h1>
+                <div class="flex flex-wrap items-center gap-3 mt-2 text-white/80 text-sm">
+                    {% if emp_role %}
+                    <span class="bg-white/20 px-3 py-1 rounded-full text-xs font-medium">{{ emp_role }}</span>
+                    {% endif %}
+                    {% if emp_department %}
+                    <span class="bg-white/20 px-3 py-1 rounded-full text-xs font-medium"><i class="fas fa-building mr-1"></i>{{ emp_department }}</span>
+                    {% endif %}
+                </div>
+                <div class="flex items-center gap-2 mt-3">
+                    {% if is_online %}
+                    <span class="inline-flex items-center gap-1.5 bg-green-500/30 px-3 py-1 rounded-full text-xs font-bold">
+                        <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                        В сети
+                    </span>
+                    {% else %}
+                    <span class="inline-flex items-center gap-1.5 bg-white/15 px-3 py-1 rounded-full text-xs font-bold">
+                        <span class="w-2 h-2 rounded-full bg-gray-400"></span>
+                        Не в сети
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="md:col-span-1 space-y-6">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+                <h3 class="text-sm font-bold text-gray-500 uppercase mb-4">Контактная информация</h3>
+                <div class="space-y-4">
+                    {% if employee.first_name %}
+                    <div>
+                        <p class="text-xs text-gray-400">Имя</p>
+                        <p class="text-sm font-medium text-gray-900">{{ employee.first_name }}</p>
+                    </div>
+                    {% endif %}
+                    {% if employee.last_name %}
+                    <div>
+                        <p class="text-xs text-gray-400">Фамилия</p>
+                        <p class="text-sm font-medium text-gray-900">{{ employee.last_name }}</p>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <p class="text-xs text-gray-400">Почта</p>
+                        <a href="mailto:{{ employee.email }}" class="text-sm font-medium text-[#0088CC] hover:underline">{{ employee.email }}</a>
+                    </div>
+                    {% if employee.phone %}
+                    <div>
+                        <p class="text-xs text-gray-400">Телефон</p>
+                        <a href="tel:{{ employee.phone }}" class="text-sm font-medium text-[#0088CC] hover:underline">{{ employee.phone }}</a>
+                    </div>
+                    {% endif %}
+                    {% if employee.position %}
+                    <div>
+                        <p class="text-xs text-gray-400">Должность</p>
+                        <p class="text-sm font-medium text-gray-900">{{ employee.position }}</p>
+                    </div>
+                    {% endif %}
+                    {% if emp_department %}
+                    <div>
+                        <p class="text-xs text-gray-400">Отдел</p>
+                        <p class="text-sm font-medium text-gray-900">{{ emp_department }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+                <h3 class="text-sm font-bold text-gray-500 uppercase mb-4">Статистика</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="text-center p-3 bg-gray-50 rounded-lg">
+                        <div class="text-2xl font-bold text-[#0088CC]">{{ stats.active_deals }}</div>
+                        <div class="text-xs text-gray-500 mt-1">Активных сделок</div>
+                    </div>
+                    <div class="text-center p-3 bg-gray-50 rounded-lg">
+                        <div class="text-2xl font-bold text-[#059669]">{{ stats.completed_deals }}</div>
+                        <div class="text-xs text-gray-500 mt-1">Завершённых</div>
+                    </div>
+                    <div class="text-center p-3 bg-gray-50 rounded-lg">
+                        <div class="text-2xl font-bold text-gray-900">{{ stats.clients }}</div>
+                        <div class="text-xs text-gray-500 mt-1">Клиентов</div>
+                    </div>
+                    <div class="text-center p-3 bg-gray-50 rounded-lg">
+                        <div class="text-2xl font-bold text-amber-600">{{ stats.pending_tasks }}</div>
+                        <div class="text-xs text-gray-500 mt-1">Задач</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md:col-span-2 space-y-6">
+            {% if subordinates %}
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+                <h3 class="text-sm font-bold text-gray-500 uppercase mb-4">Подчинённые</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {% for sub in subordinates %}
+                    <a href="{{ url_for('manager_employee_profile', manager_id=sub.id) }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100">
+                        <div class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                            {% if sub.profile_image %}
+                            <img src="{{ sub.profile_image }}" alt="" class="w-full h-full object-cover">
+                            {% else %}
+                            <div class="w-full h-full bg-gradient-to-r from-[#0088CC] to-[#006699] flex items-center justify-center text-white font-bold text-sm">
+                                {{ (sub.first_name or '?')[0]|upper }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-sm font-medium text-gray-900 truncate">{{ sub.full_name }}</p>
+                            <p class="text-xs text-gray-500">{{ sub.org_role.name if sub.org_role else sub.position or 'Менеджер' }}</p>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if supervisor %}
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+                <h3 class="text-sm font-bold text-gray-500 uppercase mb-4">Руководитель</h3>
+                <a href="{{ url_for('manager_employee_profile', manager_id=supervisor.id) }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100">
+                    <div class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                        {% if supervisor.profile_image %}
+                        <img src="{{ supervisor.profile_image }}" alt="" class="w-full h-full object-cover">
+                        {% else %}
+                        <div class="w-full h-full bg-gradient-to-r from-[#0088CC] to-[#006699] flex items-center justify-center text-white font-bold text-sm">
+                            {{ (supervisor.first_name or '?')[0]|upper }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">{{ supervisor.full_name }}</p>
+                        <p class="text-xs text-gray-500">{{ supervisor.org_role.name if supervisor.org_role else supervisor.position or 'Руководитель' }}</p>
+                    </div>
+                </a>
+            </div>
+            {% endif %}
+
+            {% if recent_activities %}
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+                <h3 class="text-sm font-bold text-gray-500 uppercase mb-4">Последняя активность</h3>
+                <div class="space-y-3">
+                    {% for act in recent_activities %}
+                    <div class="flex items-start gap-3 text-sm">
+                        <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            {% if act.action == 'stage_change' %}
+                            <i class="fas fa-exchange-alt text-[#059669] text-xs"></i>
+                            {% elif act.action == 'task_created' or act.action == 'task_completed' %}
+                            <i class="fas fa-clipboard text-[#0088CC] text-xs"></i>
+                            {% elif act.action == 'comment_added' %}
+                            <i class="fas fa-comment text-[#0088CC] text-xs"></i>
+                            {% elif act.action == 'deal_created' %}
+                            <i class="fas fa-plus-circle text-[#059669] text-xs"></i>
+                            {% elif act.action == 'field_change' or act.action == 'responsible_change' %}
+                            <i class="fas fa-pen text-amber-500 text-xs"></i>
+                            {% else %}
+                            <i class="fas fa-info-circle text-gray-400 text-xs"></i>
+                            {% endif %}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            {% set action_labels = {'stage_change': 'Изменение этапа', 'field_change': 'Изменение поля', 'field_update': 'Обновление поля', 'comment_added': 'Добавлен комментарий', 'task_created': 'Создана задача', 'task_completed': 'Задача выполнена', 'deal_created': 'Сделка создана', 'responsible_change': 'Смена ответственного', 'status_change': 'Изменение статуса'} %}
+                            <p class="text-gray-700">{{ act.description or action_labels.get(act.action, act.action) }}</p>
+                            <p class="text-xs text-gray-400 mt-0.5">{{ act.created_at|msk_time('%d.%m.%Y %H:%M') }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-8 text-center">
+                <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-clock text-gray-400"></i>
+                </div>
+                <p class="text-gray-500 text-sm">Нет активности за последнее время</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

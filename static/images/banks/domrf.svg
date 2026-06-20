@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80">
+  <rect width="200" height="80" fill="white" rx="8"/>
+  <rect x="14" y="14" width="52" height="52" rx="10" fill="#E4002B"/>
+  <path d="M28 48 L40 28 L52 48 Z" fill="none" stroke="white" stroke-width="2.5" stroke-linejoin="round"/>
+  <rect x="36" y="38" width="8" height="10" rx="1" fill="white"/>
+  <text x="78" y="34" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#E4002B">Дом</text>
+  <text x="78" y="54" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#333">.РФ</text>
+</svg>

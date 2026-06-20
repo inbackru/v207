@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Завершение регистрации - InBack</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .brand-gradient {
+            background: linear-gradient(135deg, #0088CC 0%, #006699 100%);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
+        <!-- Logo -->
+        <div class="text-center mb-8">
+            <a href="{{ url_for('index') }}" class="inline-flex items-center justify-center">
+                <div class="w-12 h-12 bg-gradient-to-r from-[#0088CC] to-[#006699] rounded-xl flex items-center justify-center text-white font-bold text-lg mr-3">In</div>
+                <span class="text-2xl font-bold bg-gradient-to-r from-[#0088CC] to-[#006699] bg-clip-text text-transparent">InBack</span>
+            </a>
+        </div>
+
+        <!-- Title -->
+        <h1 class="text-3xl font-bold text-gray-800 text-center mb-2">Завершите регистрацию</h1>
+        <p class="text-gray-500 text-center mb-8">Осталось немного, чтобы получить бонус 10 000 ₽</p>
+
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="mb-4 p-4 rounded-lg {% if category == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Step indicator -->
+        <div class="flex items-center justify-center mb-8">
+            <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <div class="text-xs font-medium text-green-600 ml-2">Телефон</div>
+            </div>
+            <div class="w-12 h-0.5 bg-[#0088CC] mx-3"></div>
+            <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full brand-gradient text-white flex items-center justify-center font-bold">2</div>
+                <div class="text-xs font-medium text-[#0088CC] ml-2">Профиль</div>
+            </div>
+        </div>
+
+        <!-- Success message about phone verification -->
+        <div class="mb-6 p-4 bg-green-50 rounded-lg border border-green-200">
+            <div class="flex items-start">
+                <svg class="w-5 h-5 text-green-600 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div>
+                    <div class="text-sm font-medium text-green-800">Телефон подтвержден!</div>
+                    <div class="text-xs text-green-600 mt-1">{{ user.phone if user else '' }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile completion form -->
+        <form action="{{ url_for('auth.register_complete_post') }}" method="POST" id="profileForm">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <!-- Full Name -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">ФИО <span class="text-red-500">*</span></label>
+                <input 
+                    type="text" 
+                    name="full_name" 
+                    placeholder="Иванов Иван Иванович"
+                    required 
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0088CC] focus:border-transparent outline-none transition-all"
+                >
+            </div>
+
+            <!-- Email (optional) -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Email (опционально)</label>
+                <input 
+                    type="email" 
+                    name="email" 
+                    placeholder="example@mail.ru"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0088CC] focus:border-transparent outline-none transition-all"
+                >
+                <p class="text-xs text-gray-500 mt-1">Для получения уведомлений на почту</p>
+            </div>
+
+            <!-- Telegram (optional) -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Telegram (опционально)</label>
+                <input 
+                    type="text" 
+                    name="telegram_id" 
+                    placeholder="@username"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0088CC] focus:border-transparent outline-none transition-all"
+                >
+                <p class="text-xs text-gray-500 mt-1">Для связи и уведомлений</p>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Пароль <span class="text-red-500">*</span></label>
+                <div class="relative">
+                    <input 
+                        type="password" 
+                        name="password" 
+                        id="password"
+                        placeholder="Минимум 8 символов"
+                        required 
+                        minlength="8"
+                        class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0088CC] focus:border-transparent outline-none transition-all"
+                    >
+                    <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none" onclick="togglePassword('password', this)">
+                        <svg class="w-5 h-5 eye-open" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        <svg class="w-5 h-5 eye-closed hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Повторите пароль <span class="text-red-500">*</span></label>
+                <div class="relative">
+                    <input 
+                        type="password" 
+                        name="confirm_password" 
+                        id="confirmPassword"
+                        placeholder="Повторите пароль"
+                        required 
+                        minlength="8"
+                        class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0088CC] focus:border-transparent outline-none transition-all"
+                    >
+                    <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none" onclick="togglePassword('confirmPassword', this)">
+                        <svg class="w-5 h-5 eye-open" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        <svg class="w-5 h-5 eye-closed hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+                        </svg>
+                    </button>
+                </div>
+                <p id="passwordError" class="text-xs text-red-500 mt-1 hidden">Пароли не совпадают</p>
+            </div>
+
+            <!-- Terms checkbox -->
+            <div class="mb-6">
+                <label class="flex items-start cursor-pointer">
+                    <input 
+                        type="checkbox" 
+                        name="terms" 
+                        required 
+                        class="mt-1 w-5 h-5 text-[#0088CC] border-gray-300 rounded focus:ring-[#0088CC]"
+                    >
+                    <span class="ml-3 text-sm text-gray-600">
+                        Я согласен с <a href="{{ url_for('legal.user_agreement') }}" target="_blank" class="text-[#0088CC] hover:underline">условиями использования</a> и <a href="{{ url_for('legal.privacy_policy') }}" target="_blank" class="text-[#0088CC] hover:underline">политикой конфиденциальности</a>
+                    </span>
+                </label>
+            </div>
+
+            <!-- Bonus info -->
+            <div class="mb-6 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border border-yellow-200">
+                <div class="flex items-start">
+                    <svg class="w-6 h-6 text-yellow-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div>
+                        <div class="text-sm font-semibold text-yellow-800">Регистрационный бонус</div>
+                        <div class="text-xs text-yellow-700 mt-1">После завершения регистрации вы получите <span class="font-bold">10 000 ₽</span> на баланс для получения кэшбека!</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit button -->
+            <button 
+                type="submit" 
+                class="w-full brand-gradient text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all"
+            >
+                Завершить регистрацию
+            </button>
+        </form>
+
+        <!-- Security note -->
+        <div class="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-100">
+            <div class="flex items-start">
+                <svg class="w-5 h-5 text-[#0088CC] mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+                <div>
+                    <div class="text-sm font-medium text-gray-800">100% безопасность</div>
+                    <div class="text-xs text-gray-600 mt-1">Все данные защищены шифрованием SSL</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle password visibility
+        function togglePassword(inputId, button) {
+            const input = document.getElementById(inputId);
+            const eyeOpen = button.querySelector('.eye-open');
+            const eyeClosed = button.querySelector('.eye-closed');
+            if (input.type === 'password') {
+                input.type = 'text';
+                eyeOpen.classList.add('hidden');
+                eyeClosed.classList.remove('hidden');
+            } else {
+                input.type = 'password';
+                eyeOpen.classList.remove('hidden');
+                eyeClosed.classList.add('hidden');
+            }
+        }
+
+        // Password validation
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('confirmPassword');
+        const passwordError = document.getElementById('passwordError');
+        const form = document.getElementById('profileForm');
+
+        function validatePasswords() {
+            if (confirmPassword.value && password.value !== confirmPassword.value) {
+                passwordError.classList.remove('hidden');
+                confirmPassword.setCustomValidity('Пароли не совпадают');
+            } else {
+                passwordError.classList.add('hidden');
+                confirmPassword.setCustomValidity('');
+            }
+        }
+
+        password.addEventListener('input', validatePasswords);
+        confirmPassword.addEventListener('input', validatePasswords);
+
+        form.addEventListener('submit', function(e) {
+            if (password.value !== confirmPassword.value) {
+                e.preventDefault();
+                passwordError.classList.remove('hidden');
+                confirmPassword.focus();
+            }
+        });
+    </script>
+</body>
+</html>

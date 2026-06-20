@@ -1,0 +1,110 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Новый объект по вашему поиску - InBack{% endblock %}
+
+{% block content %}
+<h1>🏠 Новый объект!</h1>
+
+<p>Здравствуйте{% if user and user.full_name %}, {{ user.full_name.split()[0] }}{% endif %}!</p>
+
+<p>Появился новый объект, который соответствует вашему сохранённому поиску <strong>"{{ search.name }}"</strong>.</p>
+
+<!-- Property Card -->
+<div style="border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; margin: 24px 0; background: white;">
+    {% if property.main_image %}
+    <div style="width: 100%; height: 240px; overflow: hidden; background: #f3f4f6;">
+        <img src="{{ property.main_image }}" alt="{{ property.title }}" 
+             style="width: 100%; height: 100%; object-fit: cover;">
+    </div>
+    {% endif %}
+    
+    <div style="padding: 24px;">
+        <h2 style="margin: 0 0 12px 0; font-size: 22px; font-weight: 600; color: #1d1d1f;">
+            {{ property.title }}
+        </h2>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;">
+            {% if property.rooms is not none %}
+            <span style="background: #f0f9ff; color: #0369a1; padding: 6px 12px; border-radius: 6px; font-size: 14px; font-weight: 500;">
+                {% if property.rooms == 0 %}Студия{% else %}{{ property.rooms }}-комн.{% endif %}
+            </span>
+            {% endif %}
+            
+            {% if property.area %}
+            <span style="background: #f0fdf4; color: #15803d; padding: 6px 12px; border-radius: 6px; font-size: 14px; font-weight: 500;">
+                {{ property.area|round(1) }} м²
+            </span>
+            {% endif %}
+            
+            {% if property.floor and property.total_floors %}
+            <span style="background: #fef3c7; color: #92400e; padding: 6px 12px; border-radius: 6px; font-size: 14px; font-weight: 500;">
+                {{ property.floor }}/{{ property.total_floors }} этаж
+            </span>
+            {% endif %}
+        </div>
+        
+        {% if property.price %}
+        <div style="margin: 16px 0;">
+            <div style="font-size: 32px; font-weight: 700; color: #0088CC; line-height: 1.2;">
+                {{ '{:,.0f}'.format(property.price).replace(',', ' ') }} ₽
+            </div>
+            {% if property.price_per_sqm %}
+            <div style="font-size: 14px; color: #6b7280; margin-top: 4px;">
+                {{ '{:,.0f}'.format(property.price_per_sqm).replace(',', ' ') }} ₽/м²
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        {% if property.residential_complex %}
+        <p style="margin: 12px 0; color: #424245; font-size: 15px;">
+            <strong>ЖК:</strong> {{ property.residential_complex.name }}
+        </p>
+        {% endif %}
+        
+        {% if property.developer %}
+        <p style="margin: 12px 0; color: #424245; font-size: 15px;">
+            <strong>Застройщик:</strong> {{ property.developer.name }}
+        </p>
+        {% endif %}
+        
+        {% if property.parsed_district or property.district %}
+        <p style="margin: 12px 0; color: #424245; font-size: 15px;">
+            <strong>Район:</strong> {{ property.parsed_district or property.district.name }}
+        </p>
+        {% endif %}
+        
+        <a href="{{ property_url }}" class="btn-primary" style="display: inline-block; text-align: center; margin-top: 16px;">
+            Посмотреть объект
+        </a>
+    </div>
+</div>
+
+<!-- Search Info -->
+<div class="highlight-box">
+    <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1d1d1f;">
+        О вашем поиске "{{ search.name }}"
+    </h3>
+    <p style="margin: 0; font-size: 14px; color: #6b7280;">
+        {% if search.property_type %}Тип: {{ search.property_type }}{% endif %}
+        {% if search.price_min or search.price_max %}
+        <br>Цена: {% if search.price_min %}от {{ '{:,.0f}'.format(search.price_min).replace(',', ' ') }} ₽{% endif %}
+        {% if search.price_max %}до {{ '{:,.0f}'.format(search.price_max).replace(',', ' ') }} ₽{% endif %}
+        {% endif %}
+        {% if search.size_min or search.size_max %}
+        <br>Площадь: {% if search.size_min %}от {{ search.size_min }} м²{% endif %}
+        {% if search.size_max %}до {{ search.size_max }} м²{% endif %}
+        {% endif %}
+    </p>
+</div>
+
+<!-- Unsubscribe -->
+<div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #e5e7eb; text-align: center;">
+    <p style="font-size: 13px; color: #9ca3af; margin: 0;">
+        Вы получили это письмо, потому что включили уведомления для поиска "{{ search.name }}".<br>
+        <a href="{{ unsubscribe_url }}" style="color: #6b7280; text-decoration: underline;">
+            Отписаться от уведомлений
+        </a>
+    </p>
+</div>
+{% endblock %}

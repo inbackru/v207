@@ -1,0 +1,508 @@
+{% extends "base.html" %}
+
+{% block title %}Оценка недвижимости в {{ city_prep }} - InBack{% endblock %}
+
+{% block meta_description %}Профессиональная оценка недвижимости в {{ city_prep }} с подробным отчетом. Определим рыночную стоимость квартиры, дома или коммерческого объекта. Юридически подтвержденные документы для банков и судов.{% endblock %}
+
+{% block og_title %}Оценка недвижимости в {{ city_prep }} | InBack{% endblock %}
+{% block og_description %}Профессиональная оценка недвижимости в {{ city_prep }}. Юридически подтвержденные документы для банков и судов.{% endblock %}
+{% block twitter_title %}Оценка недвижимости в {{ city_prep }} | InBack{% endblock %}
+{% block twitter_description %}Профессиональная оценка недвижимости в {{ city_prep }}. Определим рыночную стоимость квартиры, дома или коммерческого объекта.{% endblock %}
+
+{% block head %}
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ url_for('city_pages.appraisal_city', city_slug=current_city.slug if current_city else 'krasnodar', _external=True) }}">
+<meta property="og:site_name" content="InBack">
+<meta property="og:locale" content="ru_RU">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="{{ url_for('city_pages.appraisal_city', city_slug=current_city.slug if current_city else 'krasnodar', _external=True) }}">
+<link rel="canonical" href="{{ url_for('city_pages.appraisal_city', city_slug=current_city.slug if current_city else 'krasnodar', _external=True) }}" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  "name": "InBack - Оценка недвижимости",
+  "description": "Профессиональная оценка недвижимости в {{ city_prep }}. Юридически подтвержденные отчеты для банков и судов.",
+  "areaServed": {
+    "@type": "AdministrativeArea",
+    "name": "{{ city_name }} и Краснодарский край"
+  },
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "{{ city_name }}",
+    "addressRegion": "Краснодарский край"
+  },
+  "url": "{{ url_for('city_pages.appraisal_city', city_slug=current_city.slug if current_city else 'krasnodar', _external=True) }}",
+  "telephone": "+7 (861) 290-85-85"
+}
+</script>
+
+<style>
+.appraisal-hero-gradient {
+    background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 30%, #e0f2fe 60%, #f0fdf4 100%);
+}
+
+@keyframes float-gentle {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-12px) rotate(3deg); }
+}
+@keyframes float-gentle-reverse {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(12px) rotate(-3deg); }
+}
+@keyframes scan-line {
+    0% { transform: translateY(-100%); opacity: 0; }
+    20% { opacity: 0.6; }
+    80% { opacity: 0.6; }
+    100% { transform: translateY(100%); opacity: 0; }
+}
+@keyframes magnify-pulse {
+    0%, 100% { transform: scale(1) rotate(-15deg); }
+    50% { transform: scale(1.1) rotate(-10deg); }
+}
+@keyframes chart-grow {
+    0%, 100% { transform: scaleY(0.85); }
+    50% { transform: scaleY(1); }
+}
+
+.stat-card-hover {
+    transition: all 0.3s ease;
+}
+.stat-card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 136, 204, 0.12);
+}
+
+.benefit-card {
+    transition: all 0.3s ease;
+}
+.benefit-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+}
+.benefit-card:hover .benefit-icon {
+    background: #0088CC;
+}
+.benefit-card:hover .benefit-icon svg {
+    color: white;
+}
+
+.reason-card {
+    transition: all 0.3s ease;
+}
+.reason-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 136, 204, 0.12);
+    border-color: #0088CC;
+}
+</style>
+{% endblock %}
+
+{% block keywords %}оценка недвижимости {{ city_name }}, оценка квартиры, оценка дома, оценка для ипотеки, оценка для банка, рыночная стоимость недвижимости{% endblock %}
+
+{% block content %}
+
+<section class="appraisal-hero-gradient relative overflow-hidden">
+    <div class="absolute inset-0 overflow-hidden hidden md:block">
+        <div class="absolute top-[15%] left-[10%] w-32 h-40 rounded-lg border-2 border-[#0088CC]/8 bg-[#0088CC]/3" style="animation: chart-grow 4s ease-in-out infinite;">
+            <div class="absolute bottom-0 left-2 w-4 h-[40%] bg-[#0088CC]/10 rounded-t"></div>
+            <div class="absolute bottom-0 left-8 w-4 h-[65%] bg-[#0088CC]/10 rounded-t"></div>
+            <div class="absolute bottom-0 left-14 w-4 h-[50%] bg-[#0088CC]/10 rounded-t"></div>
+            <div class="absolute bottom-0 right-2 w-4 h-[80%] bg-[#0088CC]/10 rounded-t"></div>
+        </div>
+        <div class="absolute top-[20%] right-[8%] w-28 h-28 border-2 border-[#0088CC]/8 rounded-full flex items-center justify-center" style="animation: magnify-pulse 5s ease-in-out infinite;">
+            <div class="w-16 h-16 border-2 border-[#0088CC]/12 rounded-full"></div>
+            <div class="absolute bottom-0 right-0 w-3 h-10 bg-[#0088CC]/8 rounded-full transform rotate-45 origin-top"></div>
+        </div>
+        <div class="absolute bottom-[25%] right-[15%] w-24 h-32 border border-[#0088CC]/6 rounded bg-white/30" style="animation: float-gentle 6s ease-in-out infinite; animation-delay: 1s;">
+            <div class="mt-3 mx-2 space-y-2">
+                <div class="h-1.5 bg-[#0088CC]/8 rounded w-full"></div>
+                <div class="h-1.5 bg-[#0088CC]/6 rounded w-3/4"></div>
+                <div class="h-1.5 bg-[#0088CC]/8 rounded w-5/6"></div>
+                <div class="h-1.5 bg-[#0088CC]/6 rounded w-2/3"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="absolute top-20 left-[8%] hidden md:block" style="animation: float-gentle 5s ease-in-out infinite;">
+        <div class="w-16 h-16 bg-white rounded-2xl shadow-lg flex items-center justify-center">
+            <svg class="w-8 h-8 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </div>
+    </div>
+    <div class="absolute top-32 right-[10%] hidden md:block" style="animation: float-gentle-reverse 6s ease-in-out infinite; animation-delay: 0.5s;">
+        <div class="w-14 h-14 bg-white rounded-2xl shadow-lg flex items-center justify-center">
+            <svg class="w-7 h-7 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        </div>
+    </div>
+    <div class="absolute bottom-40 left-[12%] hidden lg:block" style="animation: float-gentle 7s ease-in-out infinite; animation-delay: 1.5s;">
+        <div class="w-12 h-12 bg-white rounded-xl shadow-md flex items-center justify-center">
+            <svg class="w-6 h-6 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        </div>
+    </div>
+    <div class="absolute bottom-32 right-[8%] hidden lg:block" style="animation: float-gentle-reverse 5.5s ease-in-out infinite; animation-delay: 2s;">
+        <div class="w-14 h-14 bg-white rounded-2xl shadow-lg flex items-center justify-center">
+            <svg class="w-7 h-7 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+        </div>
+    </div>
+
+    <div class="absolute top-16 left-1/4 w-2 h-2 bg-[#0088CC]/20 rounded-full hidden md:block"></div>
+    <div class="absolute top-40 right-1/3 w-3 h-3 bg-[#0088CC]/15 rounded-full hidden md:block"></div>
+    <div class="absolute bottom-28 left-1/3 w-2 h-2 bg-[#0088CC]/25 rounded-full hidden md:block"></div>
+
+    <div class="container mx-auto px-4 py-20 md:py-28 relative z-10">
+        <div class="max-w-3xl mx-auto text-center relative">
+            <span class="page-hero-badge">Оценка недвижимости</span>
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-gray-900 leading-tight">
+                Оценка <span class="text-[#0088CC]">недвижимости</span><br class="hidden md:block"> в {{ city_prep }}
+            </h1>
+            <p class="text-xl md:text-2xl mb-10 text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                Профессиональная оценка с подробным отчетом от сертифицированных специалистов. Юридически подтвержденные документы для банков и судов
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="#appraisal-form" class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-[#0088CC] to-[#006699] text-white rounded-xl hover:shadow-xl transition-all duration-300 transform hover:scale-[1.03] shadow-lg font-semibold text-lg">
+                    Оставить заявку
+                </a>
+                <a href="#benefits" class="inline-flex items-center justify-center px-8 py-4 bg-white text-gray-800 rounded-xl hover:bg-gray-50 transition-all font-semibold text-lg shadow-md border border-gray-100">
+                    <svg class="w-5 h-5 mr-2 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Подробнее
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto px-4 pb-12 relative z-10">
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-5 text-center stat-card-hover border border-white/50 shadow-sm">
+            <div class="text-3xl font-bold text-[#0088CC] mb-1">1-3 дня</div>
+            <div class="text-sm text-gray-600">Срок оценки</div>
+        </div>
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-5 text-center stat-card-hover border border-white/50 shadow-sm">
+            <div class="text-3xl font-bold text-[#0088CC] mb-1">100%</div>
+            <div class="text-sm text-gray-600">Принимают банки</div>
+        </div>
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-5 text-center stat-card-hover border border-white/50 shadow-sm">
+            <div class="text-3xl font-bold text-[#0088CC] mb-1">10+ лет</div>
+            <div class="text-sm text-gray-600">Опыт экспертов</div>
+        </div>
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-5 text-center stat-card-hover border border-white/50 shadow-sm">
+            <div class="text-3xl font-bold text-[#0088CC] mb-1">5000+</div>
+            <div class="text-sm text-gray-600">Объектов оценено</div>
+        </div>
+    </div>
+
+    <div class="w-full">
+        <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full" preserveAspectRatio="none" style="height: 60px; display: block;">
+            <path d="M0 60V30C240 5 480 50 720 30C960 10 1200 45 1440 25V60H0Z" fill="white"/>
+        </svg>
+    </div>
+</section>
+
+<section class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-14">
+                <span class="page-hero-badge">Когда нужна оценка</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Обратитесь к нам, если
+                </h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">Профессиональная оценка требуется в различных ситуациях</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100 reason-card">
+                    <div class="w-12 h-12 bg-gradient-to-br from-[#0088CC] to-[#006699] rounded-xl flex items-center justify-center mb-4">
+                        <span class="text-white font-bold text-lg">01</span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                        Сомневаетесь в цене продажи
+                    </h3>
+                    <p class="text-gray-600 text-sm">
+                        Определим реальную рыночную стоимость вашей недвижимости
+                    </p>
+                </div>
+
+                <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100 reason-card">
+                    <div class="w-12 h-12 bg-gradient-to-br from-[#0088CC] to-[#006699] rounded-xl flex items-center justify-center mb-4">
+                        <span class="text-white font-bold text-lg">02</span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                        Нужна оценка для банка
+                    </h3>
+                    <p class="text-gray-600 text-sm">
+                        Подготовим официальный отчет для ипотеки или залога
+                    </p>
+                </div>
+
+                <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100 reason-card">
+                    <div class="w-12 h-12 bg-gradient-to-br from-[#0088CC] to-[#006699] rounded-xl flex items-center justify-center mb-4">
+                        <span class="text-white font-bold text-lg">03</span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                        Оспариваете кадастровую стоимость
+                    </h3>
+                    <p class="text-gray-600 text-sm">
+                        Поможем снизить налоговую нагрузку законным способом
+                    </p>
+                </div>
+
+                <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100 reason-card">
+                    <div class="w-12 h-12 bg-gradient-to-br from-[#0088CC] to-[#006699] rounded-xl flex items-center justify-center mb-4">
+                        <span class="text-white font-bold text-lg">04</span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                        Оценка ущерба имуществу
+                    </h3>
+                    <p class="text-gray-600 text-sm">
+                        Зафиксируем повреждения для страховой или суда
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-14">
+                <span class="page-hero-badge">О нашей услуге</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Профессиональная оценка недвижимости
+                </h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-2xl p-8 border border-gray-100">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mr-4">
+                            <svg class="w-6 h-6 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Что такое оценка</h3>
+                    </div>
+                    <p class="text-gray-700 leading-relaxed mb-4">
+                        <strong>Оценка недвижимости</strong> – это тщательный анализ и исследование объекта с целью определения его рыночной стоимости. Только крупные специализированные компании могут предоставить этот комплексный сервис на должном уровне.
+                    </p>
+                    <p class="text-gray-700 leading-relaxed">
+                        Компания <strong>InBack</strong> сотрудничает с проверенными и сертифицированными организациями в области оценки недвижимости.
+                    </p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 border border-gray-100">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mr-4">
+                            <svg class="w-6 h-6 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Наши гарантии</h3>
+                    </div>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Сертифицированные оценщики с многолетним опытом</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Юридически значимые отчеты для всех инстанций</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Документы принимаются банками, судами и ФНС</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Высокая компетенция в юридических и финансовых вопросах</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mt-8 bg-white rounded-2xl p-8 border border-gray-100">
+                <div class="flex items-start">
+                    <div class="w-12 h-12 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mr-4 flex-shrink-0 mt-1">
+                        <svg class="w-6 h-6 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">Важно знать</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Специалисты проведут экспертизу вашей недвижимости, помогут определить корректную стоимость ваших активов, проанализируют рынок и дадут рекомендации по продаже или приобретению. Документы, которые выдаются клиентам, юридически подтверждают стоимость объектов оценки и могут быть использованы в банках, судах, ФНС и других организациях.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="appraisal-form" class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="max-w-2xl mx-auto">
+            <div class="text-center mb-10">
+                <span class="page-hero-badge">Заявка на оценку</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Оставьте заявку
+                </h2>
+                <p class="text-xl text-gray-600">Мы свяжемся с вами в ближайшее время</p>
+            </div>
+
+            <div class="bg-gray-50 rounded-2xl p-8 md:p-10 border border-gray-100">
+                <form id="appraisalForm" class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Тип недвижимости</label>
+                        <select name="property_type" required class="w-full px-4 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0088CC] focus:border-transparent bg-white">
+                            <option value="">Выберите тип</option>
+                            <option value="apartment">Квартира</option>
+                            <option value="house">Дом</option>
+                            <option value="commercial">Коммерческая недвижимость</option>
+                            <option value="land">Земельный участок</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Примерная стоимость</label>
+                            <input type="text" name="estimated_cost" placeholder="5 000 000 ₽" class="w-full px-4 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0088CC] focus:border-transparent bg-white">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Площадь, м²</label>
+                            <input type="text" name="area" placeholder="65" class="w-full px-4 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0088CC] focus:border-transparent bg-white">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Ваше имя</label>
+                        <input type="text" name="name" required placeholder="Иван Иванов" class="w-full px-4 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0088CC] focus:border-transparent bg-white">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Телефон</label>
+                        <input type="tel" id="phone" name="phone" required placeholder="+7 (___) ___-__-__" class="w-full px-4 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0088CC] focus:border-transparent bg-white">
+                    </div>
+
+                    <button type="submit" class="w-full bg-gradient-to-r from-[#0088CC] to-[#006699] text-white font-semibold py-4 rounded-xl hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg text-lg">
+                        Оставить заявку
+                    </button>
+
+                    <p class="text-xs text-gray-500 text-center">
+                        Нажимая на кнопку, вы даете согласие на обработку персональных данных
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="benefits" class="py-20 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-14">
+                <span class="page-hero-badge">Наши преимущества</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Почему выбирают нас
+                </h2>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white rounded-2xl p-8 border border-gray-100 benefit-card text-center">
+                    <div class="w-16 h-16 bg-[#0088CC]/10 rounded-2xl flex items-center justify-center mx-auto mb-6 benefit-icon transition-colors duration-300">
+                        <svg class="w-8 h-8 text-[#0088CC] transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Сертифицированные эксперты</h3>
+                    <p class="text-gray-600">Работаем только с аккредитованными оценщиками с многолетним опытом</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 border border-gray-100 benefit-card text-center">
+                    <div class="w-16 h-16 bg-[#0088CC]/10 rounded-2xl flex items-center justify-center mx-auto mb-6 benefit-icon transition-colors duration-300">
+                        <svg class="w-8 h-8 text-[#0088CC] transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Быстрое выполнение</h3>
+                    <p class="text-gray-600">Готовый отчет за 1-3 рабочих дня в зависимости от сложности объекта</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 border border-gray-100 benefit-card text-center">
+                    <div class="w-16 h-16 bg-[#0088CC]/10 rounded-2xl flex items-center justify-center mx-auto mb-6 benefit-icon transition-colors duration-300">
+                        <svg class="w-8 h-8 text-[#0088CC] transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Официальные документы</h3>
+                    <p class="text-gray-600">Юридически значимый отчет, признаваемый всеми инстанциями</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="relative py-20 bg-gradient-to-r from-[#0088CC] to-[#006699] overflow-hidden">
+    <div class="absolute inset-0 opacity-10">
+        <div class="absolute top-0 left-0 w-96 h-96 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+        <div class="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full translate-x-1/2 translate-y-1/2"></div>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center text-white">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">
+                Бесплатная консультация экспертов в {{ city_prep }}
+            </h2>
+            <p class="text-xl mb-8 text-blue-100">
+                Оставьте свой номер телефона, мы назначим время звонка и поможем принять решение
+            </p>
+
+            <form id="consultationForm" class="max-w-md mx-auto">
+                <div class="space-y-4">
+                    <input type="text" name="name" required placeholder="Ваше имя" class="w-full px-6 py-4 rounded-xl text-gray-900 focus:ring-2 focus:ring-white border-0">
+                    <input type="tel" id="phone-cta" name="phone" required placeholder="+7 (___) ___-__-__" class="w-full px-6 py-4 rounded-xl text-gray-900 focus:ring-2 focus:ring-white border-0">
+                    <button type="submit" class="w-full bg-white text-[#0088CC] font-bold py-4 rounded-xl hover:bg-gray-100 transition-colors duration-200 shadow-xl text-lg">
+                        Получить консультацию
+                    </button>
+                </div>
+                <p class="text-xs text-blue-100 mt-4">
+                    Нажимая на кнопку, вы даете согласие на обработку персональных данных
+                </p>
+            </form>
+        </div>
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var appraisalForm = document.getElementById('appraisalForm');
+    if (appraisalForm) {
+        appraisalForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            var formData = new FormData(this);
+            var data = Object.fromEntries(formData);
+
+            alert('Спасибо! Мы получили вашу заявку и свяжемся с вами в ближайшее время.');
+            this.reset();
+        });
+    }
+
+    var consultationForm = document.getElementById('consultationForm');
+    if (consultationForm) {
+        consultationForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            var formData = new FormData(this);
+            var data = Object.fromEntries(formData);
+
+            alert('Спасибо! Наш менеджер свяжется с вами для консультации.');
+            this.reset();
+        });
+    }
+});
+</script>
+
+{% endblock %}

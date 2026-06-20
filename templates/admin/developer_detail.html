@@ -1,0 +1,286 @@
+{% extends 'admin/base.html' %}
+{% block title %}{{ dev.name }} — Застройщик{% endblock %}
+{% block page_title %}{{ dev.name }}{% endblock %}
+
+{% block head %}
+<style>
+.tree-complex { border:1px solid #e2e8f0; border-radius:12px; margin-bottom:12px; overflow:hidden; background:#fff; }
+.tree-complex-header {
+  display:flex; align-items:center; gap:12px; padding:14px 18px;
+  cursor:pointer; transition:background .15s; user-select:none;
+  border-bottom:0 solid #e2e8f0;
+}
+.tree-complex-header:hover { background:#f8fafc; }
+.tree-complex-header.open { border-bottom:1px solid #e2e8f0; }
+.tree-complex-body { display:none; }
+.tree-complex-body.open { display:block; }
+.building-row {
+  border-bottom:1px solid #f1f5f9;
+  padding:10px 18px 10px 48px;
+}
+.building-row:last-child { border-bottom:0; }
+.room-chip {
+  display:inline-block; padding:2px 8px; border-radius:20px;
+  font-size:11px; font-weight:700; margin-right:4px;
+  background:#f1f5f9; color:#475569;
+}
+.room-chip.has { background:#dbeafe; color:#1e40af; }
+.stat-pill {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="padding:24px;">
+
+  <!-- Back -->
+  <a href="/admin/developers" style="display:inline-flex;align-items:center;gap:6px;color:#64748b;font-size:13px;text-decoration:none;margin-bottom:16px;">
+    <i class="fas fa-arrow-left"></i> Все застройщики
+  </a>
+
+  <!-- Developer card -->
+  <div style="background:#fff;border-radius:16px;border:1px solid #e2e8f0;padding:24px;margin-bottom:20px;display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;">
+    <!-- Logo -->
+    <div style="flex-shrink:0;">
+      {% if dev.logo_url %}
+      <img src="{{ dev.logo_url }}" alt="" style="width:72px;height:72px;border-radius:12px;object-fit:contain;border:1px solid #e2e8f0;padding:6px;background:#fff;">
+      {% else %}
+      <div style="width:72px;height:72px;border-radius:12px;background:linear-gradient(135deg,#0088CC,#005f99);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:26px;">
+        {{ dev.name[0] if dev.name else '?' }}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Info -->
+    <div style="flex:1;min-width:200px;">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
+        <h2 style="font-size:20px;font-weight:800;color:#0f1923;margin:0;">{{ dev.name }}</h2>
+        {% if dev.full_name and dev.full_name != dev.name %}
+        <span style="font-size:12px;color:#94a3b8;">{{ dev.full_name }}</span>
+        {% endif %}
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+        {% if dev.inn %}<span style="background:#f1f5f9;color:#475569;padding:3px 9px;border-radius:6px;font-size:12px;">ИНН: {{ dev.inn }}</span>{% endif %}
+        {% if dev.ogrn %}<span style="background:#f1f5f9;color:#475569;padding:3px 9px;border-radius:6px;font-size:12px;">ОГРН: {{ dev.ogrn }}</span>{% endif %}
+        {% if dev.established_year or dev.founded_year %}
+        <span style="background:#f1f5f9;color:#475569;padding:3px 9px;border-radius:6px;font-size:12px;">С {{ dev.established_year or dev.founded_year }} г.</span>
+        {% endif %}
+        {% if dev.website %}<a href="{{ dev.website }}" target="_blank" style="background:#dbeafe;color:#1d4ed8;padding:3px 9px;border-radius:6px;font-size:12px;text-decoration:none;"><i class="fas fa-globe fa-xs"></i> Сайт</a>{% endif %}
+        {% if dev.source_url %}<a href="{{ dev.source_url }}" target="_blank" style="background:#fce7f3;color:#9d174d;padding:3px 9px;border-radius:6px;font-size:12px;text-decoration:none;"><i class="fas fa-external-link-alt fa-xs"></i> ЦИАН</a>{% endif %}
+      </div>
+      {% if dev.description %}
+      <p style="font-size:13px;color:#475569;margin:0;line-height:1.5;max-width:600px;">{{ dev.description[:300] }}{% if dev.description|length > 300 %}…{% endif %}</p>
+      {% endif %}
+    </div>
+
+    <!-- Stats -->
+    <div style="display:flex;gap:12px;flex-wrap:wrap;flex-shrink:0;">
+      <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:12px 18px;text-align:center;min-width:80px;">
+        <div style="font-size:22px;font-weight:800;color:#0088CC;">{{ dev.jk_count }}</div>
+        <div style="font-size:11px;color:#0284c7;margin-top:2px;">ЖК</div>
+      </div>
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 18px;text-align:center;min-width:80px;">
+        <div style="font-size:22px;font-weight:800;color:#059669;">{{ dev.apt_count | int }}</div>
+        <div style="font-size:11px;color:#059669;margin-top:2px;">Квартир</div>
+      </div>
+      {% if dev.avg_ppm2 and dev.avg_ppm2 > 0 %}
+      <div style="background:#faf5ff;border:1px solid #e9d5ff;border-radius:10px;padding:12px 18px;text-align:center;min-width:80px;">
+        <div style="font-size:18px;font-weight:800;color:#7c3aed;">{{ '{:,.0f}'.format(dev.avg_ppm2).replace(',', ' ') }}</div>
+        <div style="font-size:11px;color:#7c3aed;margin-top:2px;">₽/м² ср.</div>
+      </div>
+      {% endif %}
+      {% if dev.sber_verified %}<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 14px;text-align:center;"><i class="fas fa-check-circle" style="color:#059669;font-size:18px;"></i><div style="font-size:10px;color:#059669;margin-top:3px;">Сбер ✓</div></div>{% endif %}
+    </div>
+  </div>
+
+  <!-- Complexes tree -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+    <h3 style="font-size:16px;font-weight:800;color:#0f1923;margin:0;">
+      <i class="fas fa-building" style="color:#0088CC;margin-right:6px;"></i>
+      ЖК этого застройщика ({{ complexes|length }})
+    </h3>
+    <div style="display:flex;gap:8px;">
+      <button onclick="expandAll()" style="border:1px solid #e2e8f0;background:#fff;padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;color:#475569;">
+        <i class="fas fa-expand-alt fa-xs"></i> Раскрыть все
+      </button>
+      <button onclick="collapseAll()" style="border:1px solid #e2e8f0;background:#fff;padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;color:#475569;">
+        <i class="fas fa-compress-alt fa-xs"></i> Свернуть все
+      </button>
+    </div>
+  </div>
+
+  <div id="treeContainer">
+  {% for rc in complexes %}
+  {% set buildings = buildings_by_complex.get(rc.id, []) %}
+  <div class="tree-complex" id="rc-{{ rc.id }}">
+
+    <!-- Complex header (clickable) -->
+    <div class="tree-complex-header" onclick="toggleComplex({{ rc.id }})">
+      <!-- Expand icon -->
+      <div id="icon-{{ rc.id }}" style="width:20px;flex-shrink:0;color:#94a3b8;transition:transform .2s;font-size:12px;">
+        <i class="fas fa-chevron-right"></i>
+      </div>
+
+      <!-- Photo -->
+      {% if rc.main_image %}
+      <img src="{{ rc.main_image }}" alt="" style="width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0;">
+      {% else %}
+      <div style="width:44px;height:44px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="fas fa-building" style="color:#cbd5e1;font-size:18px;"></i>
+      </div>
+      {% endif %}
+
+      <!-- Name + meta -->
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span style="font-weight:700;font-size:14px;color:#0f1923;">{{ rc.name }}</span>
+          {% if not rc.is_active %}
+          <span style="background:#fef3c7;color:#92400e;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:700;">Неактивен</span>
+          {% endif %}
+          {% if rc.object_class_display_name %}
+          <span style="background:#f1f5f9;color:#475569;padding:1px 7px;border-radius:10px;font-size:10px;">{{ rc.object_class_display_name }}</span>
+          {% endif %}
+          {% if rc.city_name %}
+          <span style="color:#94a3b8;font-size:11px;"><i class="fas fa-map-marker-alt fa-xs"></i> {{ rc.city_name }}</span>
+          {% endif %}
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:4px;flex-wrap:wrap;">
+          {% if rc.apt_active > 0 %}
+          <span class="stat-pill" style="background:#dcfce7;color:#166534;">
+            <i class="fas fa-home fa-xs"></i> {{ rc.apt_active }} в продаже
+          </span>
+          {% endif %}
+          {% if rc.apt_sold > 0 %}
+          <span class="stat-pill" style="background:#f1f5f9;color:#94a3b8;">
+            {{ rc.apt_sold }} продано
+          </span>
+          {% endif %}
+          {% if rc.buildings_count and rc.buildings_count > 1 %}
+          <span class="stat-pill" style="background:#dbeafe;color:#1e40af;">
+            <i class="fas fa-layer-group fa-xs"></i> {{ rc.buildings_count }} корп.
+          </span>
+          {% endif %}
+          {% if rc.end_build_year %}
+          <span style="font-size:11px;color:#94a3b8;"><i class="fas fa-calendar fa-xs"></i>
+            {% if rc.end_build_quarter %}{{ rc.end_build_quarter }} кв. {% endif %}{{ rc.end_build_year }}
+          </span>
+          {% endif %}
+          {% if rc.avg_ppm2 and rc.avg_ppm2 > 0 %}
+          <span style="font-size:12px;font-weight:700;color:#0f1923;">{{ '{:,.0f}'.format(rc.avg_ppm2).replace(',', ' ') }} ₽/м²</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div style="display:flex;gap:6px;flex-shrink:0;" onclick="event.stopPropagation()">
+        <a href="/{{ 'krasnodar' if rc.city_id==1 else rc.city_name|lower if rc.city_name else 'krasnodar' }}/zhilye-kompleksy/{{ rc.slug }}/"
+           target="_blank"
+           style="background:#f1f5f9;color:#475569;padding:5px 10px;border-radius:7px;font-size:11px;text-decoration:none;display:flex;align-items:center;gap:4px;">
+          <i class="fas fa-external-link-alt"></i> Открыть
+        </a>
+      </div>
+    </div>
+
+    <!-- Buildings tree (hidden by default) -->
+    <div class="tree-complex-body" id="body-{{ rc.id }}">
+      {% if buildings %}
+        {% for b in buildings %}
+        <div class="building-row">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+              <i class="fas fa-layer-group" style="color:#0088CC;font-size:12px;flex-shrink:0;"></i>
+              <div>
+                <div style="font-weight:700;font-size:13px;color:#0f1923;">{{ b.building_name }}</div>
+                <div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:3px;">
+                  {% if b.r_studio > 0 %}<span class="room-chip has">Ст {{ b.r_studio }}</span>{% endif %}
+                  {% if b.r_1 > 0 %}<span class="room-chip has">1к {{ b.r_1 }}</span>{% endif %}
+                  {% if b.r_2 > 0 %}<span class="room-chip has">2к {{ b.r_2 }}</span>{% endif %}
+                  {% if b.r_3 > 0 %}<span class="room-chip has">3к {{ b.r_3 }}</span>{% endif %}
+                  {% if b.r_4plus > 0 %}<span class="room-chip has">4к+ {{ b.r_4plus }}</span>{% endif %}
+                  {% if b.apt_sold > 0 %}<span class="room-chip" style="background:#fef3c7;color:#92400e;">Продано {{ b.apt_sold }}</span>{% endif %}
+                </div>
+              </div>
+            </div>
+            <div style="text-align:right;flex-shrink:0;">
+              <div style="font-weight:800;font-size:13px;color:#0f1923;">{{ b.apt_active }} кв.</div>
+              {% if b.price_min > 0 %}
+              <div style="font-size:11px;color:#64748b;margin-top:2px;">
+                от {{ '{:,.0f}'.format(b.price_min).replace(',', ' ') }} ₽
+              </div>
+              {% endif %}
+              {% if b.avg_ppm2 > 0 %}
+              <div style="font-size:11px;color:#0088CC;font-weight:600;">{{ '{:,.0f}'.format(b.avg_ppm2).replace(',', ' ') }} ₽/м²</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div style="padding:20px 18px 20px 48px;color:#94a3b8;font-size:13px;display:flex;align-items:center;gap:8px;">
+          <i class="fas fa-info-circle"></i>
+          {% if rc.apt_active == 0 %}Нет квартир в продаже{% else %}Квартиры без разбивки по корпусам{% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+  </div>
+
+  {% if not complexes %}
+  <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:60px;text-align:center;color:#94a3b8;">
+    <i class="fas fa-building" style="font-size:40px;margin-bottom:12px;display:block;"></i>
+    Нет ЖК у этого застройщика
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+function toggleComplex(id) {
+  const body = document.getElementById('body-' + id);
+  const header = body.previousElementSibling;
+  const icon = document.getElementById('icon-' + id).querySelector('i');
+  const isOpen = body.classList.contains('open');
+  if (isOpen) {
+    body.classList.remove('open');
+    header.classList.remove('open');
+    icon.style.transform = 'rotate(0deg)';
+  } else {
+    body.classList.add('open');
+    header.classList.add('open');
+    icon.style.transform = 'rotate(90deg)';
+  }
+}
+
+function expandAll() {
+  document.querySelectorAll('.tree-complex-body').forEach(b => {
+    b.classList.add('open');
+    b.previousElementSibling.classList.add('open');
+  });
+  document.querySelectorAll('[id^="icon-"] i').forEach(i => i.style.transform = 'rotate(90deg)');
+}
+
+function collapseAll() {
+  document.querySelectorAll('.tree-complex-body').forEach(b => {
+    b.classList.remove('open');
+    b.previousElementSibling.classList.remove('open');
+  });
+  document.querySelectorAll('[id^="icon-"] i').forEach(i => i.style.transform = 'rotate(0deg)');
+}
+
+// Auto-expand first 3 complexes
+document.addEventListener('DOMContentLoaded', function() {
+  const bodies = document.querySelectorAll('.tree-complex-body');
+  bodies.forEach(function(b, idx) {
+    if (idx < 3) {
+      b.classList.add('open');
+      b.previousElementSibling.classList.add('open');
+      const icon = b.previousElementSibling.querySelector('[id^="icon-"] i');
+      if (icon) icon.style.transform = 'rotate(90deg)';
+    }
+  });
+});
+</script>
+{% endblock %}

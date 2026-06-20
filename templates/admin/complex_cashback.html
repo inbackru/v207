@@ -1,0 +1,391 @@
+{% extends "admin/base.html" %}
+{% block title %}Настройка ЖК и кешбека{% endblock %}
+{% block page_title %}ЖК и кешбек{% endblock %}
+
+{% block content %}
+<style>
+.cb-badge { display:inline-flex;align-items:center;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700; }
+.cb-high   { background:#dcfce7;color:#166534; }
+.cb-mid    { background:#fef9c3;color:#92400e; }
+.cb-low    { background:#fee2e2;color:#dc2626; }
+.cb-zero   { background:#f1f5f9;color:#94a3b8; }
+.cb-input  { width:64px;padding:4px 6px;border:1px solid #e2e8f0;border-radius:6px;text-align:center;font-size:13px;font-weight:700; }
+.cb-input:focus { outline:none;border-color:#0088CC; }
+.cb-input.dirty { border-color:#f59e0b;background:#fffbeb; }
+.save-cb-btn { display:none;padding:4px 8px;background:#0088CC;color:#fff;border:none;border-radius:6px;font-size:11px;cursor:pointer; }
+.save-cb-btn.visible { display:inline-block; }
+.filter-chip { padding:5px 14px;border-radius:20px;border:1px solid #e2e8f0;background:#f8fafc;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s; }
+.filter-chip.active, .filter-chip:hover { background:#0088CC;color:#fff;border-color:#0088CC; }
+.sort-th { cursor:pointer;user-select:none; }
+.sort-th:hover { color:#0088CC; }
+.sort-th.asc::after  { content:' ↑';color:#0088CC; }
+.sort-th.desc::after { content:' ↓';color:#0088CC; }
+.jk-img { width:44px;height:44px;border-radius:8px;object-fit:cover;border:1px solid #e2e8f0;flex-shrink:0; }
+.jk-img-placeholder { width:44px;height:44px;border-radius:8px;background:linear-gradient(135deg,#e0f0fb,#c7e2f7);display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.stat-card { background:#fff;border-radius:12px;padding:14px 18px;border:1px solid #e2e8f0; }
+.stat-card .val { font-size:22px;font-weight:800; }
+.stat-card .lbl { font-size:11px;color:#64748b;margin-top:2px; }
+</style>
+
+<div class="p-6">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+    <div>
+      <h1 class="text-2xl font-extrabold text-gray-900">ЖК и кешбек</h1>
+      <p class="text-gray-500 text-sm mt-0.5">Все {{ total }} жилых комплексов — редактируйте кешбек прямо в таблице</p>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+    <div class="stat-card">
+      <div class="val" style="color:#0088CC;">{{ total }}</div>
+      <div class="lbl">Всего ЖК</div>
+    </div>
+    <div class="stat-card">
+      <div class="val" style="color:#059669;">{{ with_cb }}</div>
+      <div class="lbl">С кешбеком</div>
+    </div>
+    <div class="stat-card">
+      <div class="val" style="color:#f59e0b;">{{ '%.1f'|format(avg_cb) }}%</div>
+      <div class="lbl">Средний кешбек</div>
+    </div>
+    <div class="stat-card">
+      <div class="val" style="color:#dc2626;">{{ '%.1f'|format(max_cb) }}%</div>
+      <div class="lbl">Максимальный</div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="flex flex-wrap gap-3 items-center mb-4">
+    <input id="jkSearch" type="text" placeholder="🔍 Поиск по названию, застройщику, адресу..."
+      oninput="applyFilters()"
+      class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+      style="width:300px;">
+
+    <select id="cityFilter" onchange="applyFilters()"
+      class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400">
+      <option value="">Все города</option>
+      {% for c in cities %}
+      <option value="{{ c.id }}">{{ c.name }}</option>
+      {% endfor %}
+    </select>
+
+    <div class="flex gap-1 flex-wrap">
+      <button class="filter-chip active" onclick="setCbFilter('all',this)">Все</button>
+      <button class="filter-chip" onclick="setCbFilter('high',this)">Высокий ≥7%</button>
+      <button class="filter-chip" onclick="setCbFilter('mid',this)">Средний 4–7%</button>
+      <button class="filter-chip" onclick="setCbFilter('low',this)">Низкий &lt;4%</button>
+      <button class="filter-chip" onclick="setCbFilter('zero',this)">Нет кешбека</button>
+    </div>
+
+    <div class="ml-auto flex items-center gap-2 text-sm text-gray-500">
+      <span>Показано: <strong id="visibleCount">{{ total }}</strong></span>
+      <select id="sortSelect" onchange="applySort()"
+        class="border border-gray-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-blue-400">
+        <option value="cashback-desc">Кешбек ↓</option>
+        <option value="cashback-asc">Кешбек ↑</option>
+        <option value="name-asc">Название А-Я</option>
+        <option value="name-desc">Название Я-А</option>
+        <option value="apt-desc">Квартир ↓</option>
+        <option value="price-asc">Цена ↑</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full border-collapse text-sm" id="jkTable">
+        <thead>
+          <tr class="bg-gray-50 border-b border-gray-200">
+            <th class="px-4 py-3 text-left text-xs uppercase text-gray-400 font-bold tracking-wide" style="width:320px;">ЖК</th>
+            <th class="px-3 py-3 text-left text-xs uppercase text-gray-400 font-bold tracking-wide">Город / Застройщик</th>
+            <th class="px-3 py-3 text-center text-xs uppercase text-gray-400 font-bold tracking-wide sort-th" data-col="apt" style="width:90px;">Квартир</th>
+            <th class="px-3 py-3 text-right text-xs uppercase text-gray-400 font-bold tracking-wide sort-th" data-col="price" style="width:110px;">Мин.цена</th>
+            <th class="px-3 py-3 text-center text-xs uppercase text-gray-400 font-bold tracking-wide sort-th desc" data-col="cashback" style="width:130px;">Кешбек %</th>
+            <th class="px-3 py-3 text-center text-xs uppercase text-gray-400 font-bold tracking-wide" style="width:100px;">Макс.сумма</th>
+            <th class="px-3 py-3 text-center text-xs uppercase text-gray-400 font-bold tracking-wide" style="width:80px;">Статус</th>
+            <th class="px-3 py-3" style="width:60px;"></th>
+          </tr>
+        </thead>
+        <tbody id="jkTbody">
+          {% for rc in complexes %}
+          <tr class="jk-row border-b border-gray-100 hover:bg-gray-50 transition-colors"
+              data-name="{{ (rc.name or '')|lower }}"
+              data-dev="{{ (rc.dev_name or '')|lower }}"
+              data-addr="{{ (rc.address or '')|lower }}"
+              data-city="{{ rc.city_id }}"
+              data-cashback="{{ rc.cashback_rate or 0 }}"
+              data-apt="{{ rc.apt_count }}"
+              data-price="{{ rc.price_min }}">
+
+            <!-- JK name + image -->
+            <td class="px-4 py-3">
+              <div class="flex items-center gap-3">
+                {% if rc.main_image %}
+                <img src="{{ rc.main_image }}" alt=""
+                     class="jk-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                <div class="jk-img-placeholder" style="display:none;">
+                  <i class="fas fa-building text-blue-300 text-base"></i>
+                </div>
+                {% else %}
+                <div class="jk-img-placeholder">
+                  <i class="fas fa-building text-blue-300 text-base"></i>
+                </div>
+                {% endif %}
+                <div style="min-width:0;">
+                  <a href="{{ url_for('adm.admin_developer_detail', dev_id=1) if not rc.slug else '/krasnodar/zhilye-kompleksy/'~rc.slug }}"
+                     class="font-bold text-gray-900 hover:text-blue-600 transition-colors text-sm truncate block"
+                     style="max-width:210px;" target="_blank">
+                    {{ rc.name }}
+                  </a>
+                  {% if rc.object_class_display_name %}
+                  <span class="text-xs text-gray-400">{{ rc.object_class_display_name }}</span>
+                  {% endif %}
+                  {% if rc.end_build_year %}
+                  <span class="text-xs text-gray-400 ml-2">сдача {{ rc.end_build_year }}</span>
+                  {% endif %}
+                </div>
+              </div>
+            </td>
+
+            <!-- City + Developer -->
+            <td class="px-3 py-3">
+              <div class="font-semibold text-gray-800 text-xs">{{ rc.city_name }}</div>
+              <div class="text-xs text-gray-400 mt-0.5 truncate" style="max-width:160px;">{{ rc.dev_name }}</div>
+            </td>
+
+            <!-- Apartments -->
+            <td class="px-3 py-3 text-center">
+              {% if rc.apt_count > 0 %}
+              <span class="font-bold text-gray-800">{{ rc.apt_count }}</span>
+              {% else %}
+              <span class="text-gray-300">—</span>
+              {% endif %}
+            </td>
+
+            <!-- Min price -->
+            <td class="px-3 py-3 text-right text-xs text-gray-600">
+              {% if rc.price_min and rc.price_min > 0 %}
+              {{ '{:,.0f}'.format(rc.price_min / 1000000).replace(',', ' ') }} млн ₽
+              {% else %}<span class="text-gray-300">—</span>{% endif %}
+            </td>
+
+            <!-- Cashback inline edit -->
+            <td class="px-3 py-3 text-center">
+              <div class="flex items-center justify-center gap-1.5">
+                <input type="number"
+                  class="cb-input"
+                  value="{{ '%.1f'|format(rc.cashback_rate) if rc.cashback_rate else '0.0' }}"
+                  min="0" max="30" step="0.5"
+                  data-orig="{{ rc.cashback_rate or 0 }}"
+                  data-id="{{ rc.id }}"
+                  oninput="onCbChange(this)"
+                  onkeydown="if(event.key==='Enter')saveCb(this.dataset.id)">
+                <span class="text-gray-400 text-xs">%</span>
+                <button class="save-cb-btn" id="savebtn_{{ rc.id }}"
+                  onclick="saveCb({{ rc.id }})">
+                  <i class="fas fa-check"></i>
+                </button>
+              </div>
+            </td>
+
+            <!-- Max cashback amount -->
+            <td class="px-3 py-3 text-center text-xs text-gray-600">
+              {% if rc.max_cashback_amount %}
+              {{ '{:,}'.format(rc.max_cashback_amount).replace(',', ' ') }} ₽
+              {% else %}
+              <span class="text-gray-300">—</span>
+              {% endif %}
+            </td>
+
+            <!-- Status -->
+            <td class="px-3 py-3 text-center">
+              {% if rc.is_active %}
+              <span class="cb-badge" style="background:#dcfce7;color:#166534;">Акт.</span>
+              {% else %}
+              <span class="cb-badge" style="background:#f1f5f9;color:#94a3b8;">Неакт.</span>
+              {% endif %}
+            </td>
+
+            <!-- Quick actions -->
+            <td class="px-3 py-3 text-right">
+              <a href="{{ url_for('adm.admin_edit_complex_cashback', complex_id=rc.id) }}"
+                 class="text-gray-400 hover:text-blue-500 transition-colors text-sm"
+                 title="Редактировать">
+                <i class="fas fa-pen"></i>
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div id="jkEmpty" class="hidden py-12 text-center text-gray-400">
+      <i class="fas fa-search text-4xl mb-3 block"></i>
+      <p>Ничего не найдено по вашему запросу</p>
+    </div>
+  </div>
+
+  <!-- Save all hint -->
+  <div class="mt-3 text-xs text-gray-400 text-center">
+    Изменяйте % кешбека прямо в таблице — нажмите Enter или ✓ для сохранения. Всё сохраняется мгновенно без перезагрузки страницы.
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="cbToast" class="hidden fixed top-4 right-4 z-50 px-4 py-3 rounded-xl text-sm font-semibold shadow-lg"
+  style="min-width:220px;"></div>
+
+<script>
+const CSRF = document.querySelector('meta[name="csrf-token"]')?.content || '';
+let cbFilter = 'all';
+
+// ── CASHBACK INLINE EDIT ─────────────────────────────────────────────────────
+function onCbChange(input) {
+  const orig = parseFloat(input.dataset.orig) || 0;
+  const cur  = parseFloat(input.value) || 0;
+  const btn  = document.getElementById('savebtn_' + input.dataset.id);
+  if (Math.abs(cur - orig) > 0.001) {
+    input.classList.add('dirty');
+    btn.classList.add('visible');
+  } else {
+    input.classList.remove('dirty');
+    btn.classList.remove('visible');
+  }
+}
+
+async function saveCb(complexId) {
+  const input = document.querySelector(`.cb-input[data-id="${complexId}"]`);
+  const btn   = document.getElementById('savebtn_' + complexId);
+  const val   = parseFloat(input.value) || 0;
+
+  if (val < 0 || val > 30) { showToast('Кешбек должен быть 0–30%', false); return; }
+
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+  btn.disabled = true;
+
+  try {
+    const r = await fetch(`/admin/complex-cashback/${complexId}/update-cashback`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','X-CSRFToken': CSRF},
+      body: JSON.stringify({cashback_percent: val})
+    });
+    const data = await r.json();
+    if (data.success) {
+      input.dataset.orig = val;
+      input.classList.remove('dirty');
+      btn.classList.remove('visible');
+      // Update row data for filtering
+      input.closest('tr').dataset.cashback = val;
+      showToast(`✅ ${data.complex_name}: ${val}%`, true);
+    } else {
+      showToast('Ошибка: ' + (data.message || 'Неизвестная'), false);
+    }
+  } catch(e) {
+    showToast('Ошибка сети', false);
+  }
+  btn.innerHTML = '<i class="fas fa-check"></i>';
+  btn.disabled = false;
+}
+
+// ── FILTER ───────────────────────────────────────────────────────────────────
+function setCbFilter(f, btn) {
+  cbFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function applyFilters() {
+  const q    = (document.getElementById('jkSearch').value || '').toLowerCase().trim();
+  const city = document.getElementById('cityFilter').value;
+  const rows = document.querySelectorAll('.jk-row');
+  let visible = 0;
+
+  rows.forEach(r => {
+    const name  = r.dataset.name || '';
+    const dev   = r.dataset.dev  || '';
+    const addr  = r.dataset.addr || '';
+    const cb    = parseFloat(r.dataset.cashback) || 0;
+    const rcity = r.dataset.city;
+
+    const matchQ    = !q || name.includes(q) || dev.includes(q) || addr.includes(q);
+    const matchCity = !city || rcity === city;
+    const matchCb   = cbFilter === 'all'
+                   || (cbFilter === 'high' && cb >= 7)
+                   || (cbFilter === 'mid'  && cb >= 4 && cb < 7)
+                   || (cbFilter === 'low'  && cb > 0  && cb < 4)
+                   || (cbFilter === 'zero' && cb === 0);
+
+    const show = matchQ && matchCity && matchCb;
+    r.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+
+  document.getElementById('jkEmpty').classList.toggle('hidden', visible > 0);
+  document.getElementById('visibleCount').textContent = visible;
+}
+
+// ── SORT ─────────────────────────────────────────────────────────────────────
+let sortCol = 'cashback', sortDir = 'desc';
+
+document.querySelectorAll('.sort-th').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.dataset.col;
+    if (sortCol === col) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+    else { sortCol = col; sortDir = 'desc'; }
+    document.querySelectorAll('.sort-th').forEach(t => t.classList.remove('asc','desc'));
+    th.classList.add(sortDir);
+    document.getElementById('sortSelect').value = col + '-' + sortDir;
+    doSort();
+  });
+});
+
+document.getElementById('sortSelect').addEventListener('change', function() {
+  const [col, dir] = this.value.split('-');
+  sortCol = col; sortDir = dir;
+  document.querySelectorAll('.sort-th').forEach(t => t.classList.remove('asc','desc'));
+  const th = document.querySelector(`.sort-th[data-col="${col}"]`);
+  if (th) th.classList.add(sortDir);
+  doSort();
+});
+
+function doSort() {
+  const tbody = document.getElementById('jkTbody');
+  const rows  = Array.from(tbody.querySelectorAll('.jk-row'));
+  rows.sort((a, b) => {
+    let av, bv;
+    if (sortCol === 'name') {
+      av = a.dataset.name || ''; bv = b.dataset.name || '';
+      return sortDir === 'asc' ? av.localeCompare(bv,'ru') : bv.localeCompare(av,'ru');
+    }
+    av = parseFloat(a.dataset[sortCol === 'apt' ? 'apt' : sortCol === 'price' ? 'price' : 'cashback']) || 0;
+    bv = parseFloat(b.dataset[sortCol === 'apt' ? 'apt' : sortCol === 'price' ? 'price' : 'cashback']) || 0;
+    return sortDir === 'asc' ? av - bv : bv - av;
+  });
+  rows.forEach(r => tbody.appendChild(r));
+}
+
+function applySort() {
+  const [col, dir] = document.getElementById('sortSelect').value.split('-');
+  sortCol = col; sortDir = dir; doSort();
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function showToast(msg, ok) {
+  const t = document.getElementById('cbToast');
+  t.textContent = msg;
+  t.className = `fixed top-4 right-4 z-50 px-4 py-3 rounded-xl text-sm font-semibold shadow-lg`;
+  t.style.background = ok ? '#dcfce7' : '#fee2e2';
+  t.style.color      = ok ? '#166534' : '#dc2626';
+  t.style.border     = ok ? '1px solid #86efac' : '1px solid #fca5a5';
+  t.classList.remove('hidden');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.add('hidden'), 3000);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,835 @@
+{% extends 'admin/base.html' %}
+{% block title %}Застройщики — Админ{% endblock %}
+{% block page_title %}Застройщики{% endblock %}
+
+{% block content %}
+<style>
+.dev-table th.sortable { cursor:pointer; user-select:none; }
+.dev-table th.sortable:hover { color:#0088CC; }
+.dev-table th.sort-asc::after  { content:' ↑'; color:#0088CC; }
+.dev-table th.sort-desc::after { content:' ↓'; color:#0088CC; }
+.dev-table tbody tr:hover { background:#f8fafc; }
+.dev-table tbody tr { transition: background .12s; }
+.badge { display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700; }
+.badge-green  { background:#dcfce7;color:#166534; }
+.badge-blue   { background:#dbeafe;color:#1d4ed8; }
+.badge-gray   { background:#f1f5f9;color:#94a3b8; }
+.badge-yellow { background:#fef9c3;color:#92400e; }
+.badge-red    { background:#fee2e2;color:#dc2626; }
+.logo-img { width:40px;height:40px;border-radius:8px;object-fit:contain;border:1px solid #e2e8f0;padding:3px;background:#fff; }
+.logo-init { width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,#0088CC,#005f99);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:15px;flex-shrink:0; }
+.filter-btn { padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid #e2e8f0;background:#f8fafc;cursor:pointer;transition:all .15s; }
+.filter-btn.active, .filter-btn:hover { background:#0088CC;color:#fff;border-color:#0088CC; }
+.input-field { border:1px solid #e2e8f0;border-radius:8px;padding:7px 12px;font-size:13px;outline:none;transition:border .15s; }
+.input-field:focus { border-color:#0088CC; }
+.modal-overlay { position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.45); }
+.modal-box { background:#fff;border-radius:18px;box-shadow:0 8px 40px rgba(0,0,0,0.18);width:100%;max-width:600px;max-height:90vh;overflow-y:auto;margin:16px; }
+.modal-header { display:flex;align-items:center;justify-content:space-between;padding:20px 24px 0; }
+.modal-body { padding:20px 24px; }
+.modal-footer { padding:16px 24px;border-top:1px solid #f1f5f9;display:flex;gap:10px;justify-content:flex-end; }
+.form-grid { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
+.form-grid.full { grid-template-columns:1fr; }
+label.fl { display:block;font-size:12px;font-weight:600;color:#64748b;margin-bottom:4px; }
+.stat-card { background:#fff;border-radius:12px;padding:16px 18px;border:1px solid #e2e8f0; }
+.stat-card .val { font-size:24px;font-weight:800; }
+.stat-card .lbl { font-size:12px;color:#64748b;margin-top:2px; }
+.act-btn { display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:7px;font-size:12px;font-weight:600;border:none;cursor:pointer;transition:all .15s; }
+.act-btn-edit { background:#f0f7ff;color:#0088CC; }
+.act-btn-edit:hover { background:#dbeafe; }
+.act-btn-view { background:#f0fdf4;color:#16a34a; }
+.act-btn-view:hover { background:#dcfce7; }
+.act-btn-toggle { background:#f1f5f9;color:#64748b; }
+.act-btn-toggle:hover { background:#fee2e2;color:#dc2626; }
+.partner-star { color:#f59e0b;font-size:14px; }
+</style>
+
+<div class="p-6">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+    <div>
+      <h1 class="text-2xl font-extrabold text-gray-900">Застройщики</h1>
+      <p class="text-gray-500 text-sm mt-0.5">Управление карточками: логотип, контакты, статус, партнёрство</p>
+    </div>
+    <div class="flex gap-2">
+      <button onclick="startRescrapeAll()" id="btnRescrapeAll"
+        class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border border-[#0088CC] text-[#0088CC] hover:bg-blue-50 transition-colors">
+        <i class="fas fa-sync-alt"></i> Дозаполнить из CIAN
+      </button>
+      <button onclick="openCreateModal()"
+        class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white"
+        style="background:linear-gradient(135deg,#0088CC,#006699);">
+        <i class="fas fa-plus"></i> Добавить застройщика
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+    <div class="stat-card">
+      <div class="val" style="color:#0088CC;">{{ developers|length }}</div>
+      <div class="lbl">Всего застройщиков</div>
+    </div>
+    <div class="stat-card">
+      <div class="val" style="color:#059669;">{{ developers|selectattr('jk_count','gt',0)|list|length }}</div>
+      <div class="lbl">С объектами</div>
+    </div>
+    <div class="stat-card">
+      <div class="val" style="color:#7c3aed;">{{ developers|sum(attribute='apt_count')|int }}</div>
+      <div class="lbl">Квартир в продаже</div>
+    </div>
+    <div class="stat-card">
+      <div class="val" style="color:#f59e0b;">{{ developers|selectattr('is_partner')|list|length }}</div>
+      <div class="lbl">Партнёров</div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="flex flex-wrap gap-3 items-center mb-4">
+    <input id="devSearch" type="text" placeholder="🔍 Поиск по названию, ИНН, телефону..." oninput="applyFilters()"
+      class="input-field" style="width:280px;">
+
+    <div class="flex gap-1 flex-wrap">
+      <button class="filter-btn active" onclick="setFilter('all',this)">Все</button>
+      <button class="filter-btn" onclick="setFilter('has_jk',this)">С ЖК</button>
+      <button class="filter-btn" onclick="setFilter('partner',this)">Партнёры</button>
+      <button class="filter-btn" onclick="setFilter('no_logo',this)">Без логотипа</button>
+      <button class="filter-btn" onclick="setFilter('no_data',this)" title="Нет года основания или данных CIAN">Без данных CIAN</button>
+    </div>
+
+    <div class="ml-auto flex items-center gap-2 text-sm text-gray-500">
+      <span>Сортировать:</span>
+      <select id="sortSelect" onchange="applySort()" class="input-field" style="width:160px;">
+        <option value="jk_count-desc">ЖК ↓</option>
+        <option value="apt_count-desc">Квартир ↓</option>
+        <option value="name-asc">Название А-Я</option>
+        <option value="name-desc">Название Я-А</option>
+        <option value="founded_year-desc">Год основания ↓</option>
+      </select>
+      <span id="visibleCount" class="badge badge-blue">{{ developers|length }}</span>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <table class="w-full border-collapse dev-table" id="devTable">
+      <thead>
+        <tr class="bg-gray-50 border-b border-gray-200">
+          <th class="px-4 py-3 text-left text-xs uppercase text-gray-400 font-bold tracking-wide" style="width:300px;">
+            Застройщик
+          </th>
+          <th class="px-3 py-3 text-center text-xs uppercase text-gray-400 font-bold tracking-wide sortable" data-col="jk_count" style="width:70px;">
+            ЖК
+          </th>
+          <th class="px-3 py-3 text-center text-xs uppercase text-gray-400 font-bold tracking-wide sortable" data-col="apt_count" style="width:90px;">
+            Квартир
+          </th>
+          <th class="px-3 py-3 text-center text-xs uppercase text-gray-400 font-bold tracking-wide sortable" data-col="avg_ppm2" style="width:120px;">
+            Ср.цена/м²
+          </th>
+          <th class="px-3 py-3 text-left text-xs uppercase text-gray-400 font-bold tracking-wide" style="width:130px;">
+            Контакты
+          </th>
+          <th class="px-3 py-3 text-center text-xs uppercase text-gray-400 font-bold tracking-wide" style="width:90px;">
+            Статус
+          </th>
+          <th class="px-3 py-3" style="width:110px;"></th>
+        </tr>
+      </thead>
+      <tbody id="devTbody">
+        {% for d in developers %}
+        <tr class="dev-row border-b border-gray-100"
+            data-name="{{ (d.name or '')|lower }}"
+            data-inn="{{ d.inn or '' }}"
+            data-phone="{{ d.phone or '' }}"
+            data-jk="{{ d.jk_count }}"
+            data-apt="{{ d.apt_count }}"
+            data-ppm2="{{ d.avg_ppm2 }}"
+            data-founded="{{ d.founded_year or 0 }}"
+            data-partner="{{ '1' if d.is_partner else '0' }}"
+            data-has-jk="{{ '1' if d.jk_count > 0 else '0' }}"
+            data-has-logo="{{ '1' if d.logo_url else '0' }}"
+            data-has-data="{{ '1' if d.founded_year else '0' }}"
+            data-source-url="{{ d.source_url or '' }}"
+            data-dev-id="{{ d.id }}">
+
+          <!-- Developer name + logo -->
+          <td class="px-4 py-3">
+            <div class="flex items-center gap-3">
+              {% if d.logo_url %}
+              <img src="{{ d.logo_url }}" alt="{{ d.name }}"
+                   class="logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+              <div class="logo-init" style="display:none;">{{ (d.name or '?')[0] }}</div>
+              {% else %}
+              <div class="logo-init">{{ (d.name or '?')[0] }}</div>
+              {% endif %}
+              <div style="min-width:0;">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="font-bold text-gray-900 text-sm">{{ d.name }}</span>
+                  {% if d.is_partner %}<span class="partner-star" title="Партнёр InBack">★</span>{% endif %}
+                </div>
+                {% if d.full_name and d.full_name != d.name %}
+                <div class="text-xs text-gray-400 truncate" style="max-width:200px;">{{ d.full_name }}</div>
+                {% endif %}
+                <div class="flex items-center gap-2 mt-0.5">
+                  {% if d.inn %}<span class="text-xs text-gray-400">ИНН {{ d.inn }}</span>{% endif %}
+                  {% if d.founded_year %}<span class="text-xs text-gray-400">с {{ d.founded_year }}</span>{% endif %}
+                </div>
+              </div>
+            </div>
+          </td>
+
+          <!-- JK count -->
+          <td class="px-3 py-3 text-center">
+            {% if d.jk_count > 0 %}
+            <a href="{{ url_for('adm.admin_developer_detail', dev_id=d.id) }}"
+               class="font-extrabold text-gray-900 text-lg hover:text-blue-600 transition-colors"
+               onclick="event.stopPropagation();">{{ d.jk_count }}</a>
+            {% if d.jk_active < d.jk_count %}
+            <div class="text-xs text-gray-400">{{ d.jk_active }} акт.</div>
+            {% endif %}
+            {% else %}
+            <span class="text-gray-300 text-lg">—</span>
+            {% endif %}
+          </td>
+
+          <!-- Apartments -->
+          <td class="px-3 py-3 text-center">
+            {% if d.apt_count > 0 %}
+            <span class="badge badge-green">{{ '{:,}'.format(d.apt_count|int).replace(',', ' ') }}</span>
+            {% else %}
+            <span class="text-gray-300">—</span>
+            {% endif %}
+          </td>
+
+          <!-- Avg price per m² -->
+          <td class="px-3 py-3 text-center text-sm font-semibold text-gray-700">
+            {% if d.avg_ppm2 and d.avg_ppm2 > 0 %}
+            {{ '{:,.0f}'.format(d.avg_ppm2).replace(',', ' ') }} ₽
+            {% else %}<span class="text-gray-300">—</span>{% endif %}
+          </td>
+
+          <!-- Contacts -->
+          <td class="px-3 py-3">
+            <div class="space-y-1">
+              {% if d.phone %}
+              <div class="text-xs text-gray-600 flex items-center gap-1">
+                <i class="fas fa-phone text-gray-300" style="font-size:10px;"></i>
+                {{ d.phone }}
+              </div>
+              {% endif %}
+              {% if d.website %}
+              <div class="text-xs">
+                <a href="{{ d.website }}" target="_blank" class="text-blue-500 hover:underline" onclick="event.stopPropagation();">
+                  <i class="fas fa-globe" style="font-size:10px;"></i>
+                  {{ d.website|replace('https://','') |replace('http://','') |truncate(22, True, '…') }}
+                </a>
+              </div>
+              {% endif %}
+              {% if not d.phone and not d.website %}
+              <span class="text-xs text-gray-300">Не заполнено</span>
+              {% endif %}
+            </div>
+          </td>
+
+          <!-- Status -->
+          <td class="px-3 py-3 text-center">
+            <div class="flex flex-col items-center gap-1">
+              {% if d.is_active %}
+              <span class="badge badge-green"><i class="fas fa-check" style="font-size:9px;"></i> Активен</span>
+              {% else %}
+              <span class="badge badge-gray">Неактивен</span>
+              {% endif %}
+              {% if d.is_partner %}
+              <span class="badge badge-yellow"><i class="fas fa-star" style="font-size:9px;"></i> Партнёр</span>
+              {% endif %}
+            </div>
+          </td>
+
+          <!-- Actions -->
+          <td class="px-3 py-3">
+            <div class="flex items-center gap-1.5 justify-end">
+              <button class="act-btn act-btn-edit"
+                onclick="openEditModal({{ d.id }});event.stopPropagation();"
+                title="Редактировать">
+                <i class="fas fa-pen"></i>
+              </button>
+              {% if d.source_url %}
+              <button class="act-btn" style="background:#f0fdf4;color:#059669;"
+                onclick="rescrapeOne({{ d.id }}, '{{ d.name|e }}', this);event.stopPropagation();"
+                title="Обновить данные из CIAN">
+                <i class="fas fa-sync-alt"></i>
+              </button>
+              {% endif %}
+              {% if d.jk_count > 0 %}
+              <a href="{{ url_for('adm.admin_developer_detail', dev_id=d.id) }}"
+                 class="act-btn act-btn-view" title="Посмотреть ЖК" onclick="event.stopPropagation();">
+                <i class="fas fa-building"></i>
+              </a>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div id="devEmpty" class="hidden py-12 text-center text-gray-400">
+      <i class="fas fa-search text-4xl mb-3 block"></i>
+      <p>Ничего не найдено</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── RESCRAPE PROGRESS MODAL ── -->
+<div id="rescrapeModal" class="modal-overlay hidden" style="display:none">
+  <div class="modal-box" style="max-width:520px;">
+    <div class="modal-header border-b border-gray-100 pb-4">
+      <div>
+        <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-sync-alt text-[#0088CC] mr-2"></i>Дозаполнение из CIAN</h2>
+        <p class="text-xs text-gray-400 mt-0.5">Скрапинг страниц застройщиков с прокси и анти-капчей</p>
+      </div>
+      <button onclick="closeRescrapeModal()" id="btnCloseRescrape" class="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+    </div>
+    <div class="modal-body">
+      <!-- Progress bar -->
+      <div class="mb-4">
+        <div class="flex justify-between text-sm text-gray-600 mb-1">
+          <span id="rsProgress">Запуск...</span>
+          <span id="rsCount" class="font-bold text-[#0088CC]">0 / 0</span>
+        </div>
+        <div class="w-full bg-gray-100 rounded-full h-2.5">
+          <div id="rsBar" class="h-2.5 rounded-full transition-all duration-300" style="width:0%;background:linear-gradient(90deg,#0088CC,#006699);"></div>
+        </div>
+      </div>
+      <!-- Log -->
+      <div id="rsLog" class="bg-gray-50 rounded-xl border border-gray-200 p-3 text-xs font-mono text-gray-700 overflow-y-auto" style="height:220px;white-space:pre-wrap;"></div>
+    </div>
+    <div class="modal-footer">
+      <button onclick="closeRescrapeModal()" id="btnDoneRescrape" class="hidden px-5 py-2 rounded-lg text-sm font-bold text-white" style="background:linear-gradient(135deg,#0088CC,#006699);">
+        <i class="fas fa-check mr-1"></i> Готово — обновить страницу
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── EDIT MODAL ── -->
+<div id="editModal" class="modal-overlay hidden" style="display:none">
+  <div class="modal-box">
+    <div class="modal-header border-b border-gray-100 pb-4">
+      <div>
+        <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-pen text-blue-500 mr-2"></i>Редактировать застройщика</h2>
+        <p id="editModalSubtitle" class="text-xs text-gray-400 mt-0.5"></p>
+      </div>
+      <button onclick="closeModal('editModal')" class="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+    </div>
+    <div class="modal-body space-y-4">
+      <input type="hidden" id="edit_dev_id">
+
+      <!-- Logo preview + URL -->
+      <div>
+        <label class="fl">Логотип</label>
+        <div class="flex items-center gap-3 mb-2">
+          <img id="edit_logo_preview" src="" alt="" class="logo-img" style="width:56px;height:56px;"
+               onerror="this.style.opacity=0.2;">
+          <div class="logo-init" id="edit_logo_init" style="display:none;width:56px;height:56px;font-size:20px;"></div>
+        </div>
+        <input type="text" id="edit_logo_url" class="input-field w-full" placeholder="https://cian.ru/api/get-company-logo/?id=..."
+          oninput="previewLogo()">
+      </div>
+
+      <div class="form-grid">
+        <div>
+          <label class="fl">Название (краткое) *</label>
+          <input type="text" id="edit_name" class="input-field w-full" placeholder="DOGMA">
+        </div>
+        <div>
+          <label class="fl">Полное название</label>
+          <input type="text" id="edit_full_name" class="input-field w-full" placeholder='ООО "DOGMA"'>
+        </div>
+        <div>
+          <label class="fl">Телефон</label>
+          <input type="text" id="edit_phone" class="input-field w-full" placeholder="+7 861 *** **-**">
+        </div>
+        <div>
+          <label class="fl">Email</label>
+          <input type="email" id="edit_email" class="input-field w-full" placeholder="info@company.ru">
+        </div>
+        <div>
+          <label class="fl">Сайт</label>
+          <input type="url" id="edit_website" class="input-field w-full" placeholder="https://company.ru">
+        </div>
+        <div>
+          <label class="fl">ИНН</label>
+          <input type="text" id="edit_inn" class="input-field w-full" placeholder="2308123456">
+        </div>
+        <div>
+          <label class="fl">Год основания</label>
+          <input type="number" id="edit_founded_year" class="input-field w-full" placeholder="2010" min="1900" max="2030">
+        </div>
+        <div>
+          <label class="fl">Рейтинг (1–5)</label>
+          <input type="number" id="edit_rating" class="input-field w-full" placeholder="4.5" min="1" max="5" step="0.1">
+        </div>
+      </div>
+
+      <div>
+        <label class="fl">Описание</label>
+        <textarea id="edit_description" class="input-field w-full" rows="3" placeholder="Краткое описание застройщика..."></textarea>
+      </div>
+
+      <div class="flex gap-4 pt-1">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" id="edit_is_active" class="w-4 h-4 rounded" style="accent-color:#0088CC;">
+          <span class="text-sm font-medium text-gray-700">Активен на сайте</span>
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" id="edit_is_partner" class="w-4 h-4 rounded" style="accent-color:#f59e0b;">
+          <span class="text-sm font-medium text-gray-700">⭐ Партнёр InBack</span>
+        </label>
+      </div>
+
+      <div id="edit_error" class="hidden p-3 bg-red-50 text-red-700 rounded-lg text-sm"></div>
+    </div>
+    <div class="modal-footer">
+      <button onclick="closeModal('editModal')" class="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Отмена</button>
+      <button onclick="saveEdit()" id="btn_save_edit"
+        class="px-5 py-2 rounded-lg text-sm font-bold text-white flex items-center gap-2"
+        style="background:linear-gradient(135deg,#0088CC,#006699);">
+        <i class="fas fa-save"></i> Сохранить
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── CREATE MODAL ── -->
+<div id="createModal" class="modal-overlay hidden" style="display:none">
+  <div class="modal-box">
+    <div class="modal-header border-b border-gray-100 pb-4">
+      <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-plus-circle text-blue-500 mr-2"></i>Новый застройщик</h2>
+      <button onclick="closeModal('createModal')" class="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+    </div>
+    <div class="modal-body space-y-4">
+      <div class="form-grid">
+        <div>
+          <label class="fl">Название *</label>
+          <input type="text" id="create_name" class="input-field w-full" placeholder="Название застройщика">
+        </div>
+        <div>
+          <label class="fl">Полное название</label>
+          <input type="text" id="create_full_name" class="input-field w-full" placeholder='ООО "..."'>
+        </div>
+        <div>
+          <label class="fl">Телефон</label>
+          <input type="text" id="create_phone" class="input-field w-full" placeholder="+7 861 ...">
+        </div>
+        <div>
+          <label class="fl">Email</label>
+          <input type="email" id="create_email" class="input-field w-full">
+        </div>
+        <div>
+          <label class="fl">Сайт</label>
+          <input type="url" id="create_website" class="input-field w-full" placeholder="https://...">
+        </div>
+        <div>
+          <label class="fl">ИНН</label>
+          <input type="text" id="create_inn" class="input-field w-full">
+        </div>
+      </div>
+      <div>
+        <label class="fl">URL логотипа</label>
+        <input type="text" id="create_logo_url" class="input-field w-full" placeholder="https://...">
+      </div>
+      <div class="flex gap-4">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" id="create_is_active" checked class="w-4 h-4" style="accent-color:#0088CC;">
+          <span class="text-sm">Активен</span>
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" id="create_is_partner" class="w-4 h-4" style="accent-color:#f59e0b;">
+          <span class="text-sm">Партнёр InBack</span>
+        </label>
+      </div>
+      <div id="create_error" class="hidden p-3 bg-red-50 text-red-700 rounded-lg text-sm"></div>
+    </div>
+    <div class="modal-footer">
+      <button onclick="closeModal('createModal')" class="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Отмена</button>
+      <button onclick="saveCreate()" id="btn_save_create"
+        class="px-5 py-2 rounded-lg text-sm font-bold text-white"
+        style="background:linear-gradient(135deg,#0088CC,#006699);">
+        <i class="fas fa-plus mr-1"></i> Создать
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+const CSRF = document.querySelector('meta[name="csrf-token"]')?.content || '';
+let currentFilter = 'all';
+
+// Pre-built developer data map — avoids JSON escaping issues in onclick attrs
+const DEV_DATA = {
+  {% for d in developers %}
+  {{ d.id }}: {{ {
+    'id': d.id, 'name': d.name, 'full_name': d.full_name,
+    'logo_url': d.logo_url, 'phone': d.phone, 'email': d.email,
+    'website': d.website, 'inn': d.inn,
+    'founded_year': d.founded_year, 'rating': d.rating,
+    'description': (d.description or '')|truncate(500, True, ''),
+    'is_active': d.is_active, 'is_partner': d.is_partner
+  }|tojson }},
+  {% endfor %}
+};
+
+// ── FILTER + SEARCH ──────────────────────────────────────────────────────────
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function applyFilters() {
+  const q = (document.getElementById('devSearch').value || '').toLowerCase().trim();
+  const rows = document.querySelectorAll('.dev-row');
+  let visible = 0;
+  rows.forEach(r => {
+    const name    = r.dataset.name || '';
+    const inn     = r.dataset.inn || '';
+    const phone   = r.dataset.phone || '';
+    const hasJk   = r.dataset.hasJk === '1';
+    const partner = r.dataset.partner === '1';
+    const hasLogo = r.dataset.hasLogo === '1';
+    const matchQ  = !q || name.includes(q) || inn.includes(q) || phone.includes(q);
+    const hasData = r.dataset.hasData === '1';
+    const matchF  = currentFilter === 'all'
+                 || (currentFilter === 'has_jk'  && hasJk)
+                 || (currentFilter === 'partner' && partner)
+                 || (currentFilter === 'no_logo' && !hasLogo)
+                 || (currentFilter === 'no_data' && !hasData);
+    const show = matchQ && matchF;
+    r.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  document.getElementById('devEmpty').classList.toggle('hidden', visible > 0);
+  document.getElementById('visibleCount').textContent = visible;
+}
+
+// ── SORT ─────────────────────────────────────────────────────────────────────
+function applySort() {
+  const [col, dir] = (document.getElementById('sortSelect').value || 'jk_count-desc').split('-');
+  const tbody = document.getElementById('devTbody');
+  const rows = Array.from(tbody.querySelectorAll('.dev-row'));
+  rows.sort((a, b) => {
+    let av = a.dataset[col] || a.dataset.name || '0';
+    let bv = b.dataset[col] || b.dataset.name || '0';
+    if (col === 'name') {
+      return dir === 'asc' ? av.localeCompare(bv, 'ru') : bv.localeCompare(av, 'ru');
+    }
+    av = parseFloat(av) || 0;
+    bv = parseFloat(bv) || 0;
+    return dir === 'asc' ? av - bv : bv - av;
+  });
+  rows.forEach(r => tbody.appendChild(r));
+}
+
+// ── MODAL HELPERS ─────────────────────────────────────────────────────────────
+function closeModal(id) {
+  var el = document.getElementById(id);
+  if (el) { el.style.display = 'none'; el.classList.add('hidden'); }
+}
+function openModal(id) {
+  var el = document.getElementById(id);
+  if (el) { el.classList.remove('hidden'); el.style.display = 'flex'; }
+}
+
+['editModal','createModal'].forEach(id => {
+  document.getElementById(id).addEventListener('click', function(e) {
+    if (e.target === this) closeModal(id);
+  });
+});
+// Escape key closes any open modal
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { closeModal('editModal'); closeModal('createModal'); }
+});
+
+// ── LOGO PREVIEW ──────────────────────────────────────────────────────────────
+function previewLogo() {
+  const url = document.getElementById('edit_logo_url').value.trim();
+  const img  = document.getElementById('edit_logo_preview');
+  const init = document.getElementById('edit_logo_init');
+  if (url) {
+    img.src = url; img.style.opacity = 1;
+    img.style.display = ''; init.style.display = 'none';
+  } else {
+    img.style.display = 'none'; init.style.display = 'flex';
+  }
+}
+
+// ── EDIT MODAL ────────────────────────────────────────────────────────────────
+function openEditModal(devId) {
+  closeModal('createModal');
+  const d = DEV_DATA[devId];
+  if (!d) { console.error('DEV_DATA missing for id', devId); return; }
+  document.getElementById('edit_dev_id').value     = devId;
+  document.getElementById('editModalSubtitle').textContent = `ID: ${devId}`;
+  document.getElementById('edit_name').value        = d.name || '';
+  document.getElementById('edit_full_name').value   = d.full_name || '';
+  document.getElementById('edit_phone').value       = d.phone || '';
+  document.getElementById('edit_email').value       = d.email || '';
+  document.getElementById('edit_website').value     = d.website || '';
+  document.getElementById('edit_inn').value         = d.inn || '';
+  document.getElementById('edit_logo_url').value    = d.logo_url || '';
+  document.getElementById('edit_founded_year').value= d.founded_year || '';
+  document.getElementById('edit_rating').value      = d.rating || '';
+  document.getElementById('edit_description').value = d.description || '';
+  document.getElementById('edit_is_active').checked = !!d.is_active;
+  document.getElementById('edit_is_partner').checked= !!d.is_partner;
+  document.getElementById('edit_error').classList.add('hidden');
+
+  // Logo preview
+  const img  = document.getElementById('edit_logo_preview');
+  const init = document.getElementById('edit_logo_init');
+  init.textContent = (d.name || '?')[0].toUpperCase();
+  if (d.logo_url) {
+    img.src = d.logo_url; img.style.display = ''; img.style.opacity = 1;
+    init.style.display = 'none';
+  } else {
+    img.style.display = 'none'; init.style.display = 'flex';
+  }
+
+  openModal('editModal');
+}
+
+async function saveEdit() {
+  const devId = document.getElementById('edit_dev_id').value;
+  const payload = {
+    name:         document.getElementById('edit_name').value.trim(),
+    full_name:    document.getElementById('edit_full_name').value.trim(),
+    phone:        document.getElementById('edit_phone').value.trim(),
+    email:        document.getElementById('edit_email').value.trim(),
+    website:      document.getElementById('edit_website').value.trim(),
+    inn:          document.getElementById('edit_inn').value.trim(),
+    logo_url:     document.getElementById('edit_logo_url').value.trim(),
+    founded_year: parseInt(document.getElementById('edit_founded_year').value) || null,
+    rating:       parseFloat(document.getElementById('edit_rating').value) || null,
+    description:  document.getElementById('edit_description').value.trim(),
+    is_active:    document.getElementById('edit_is_active').checked,
+    is_partner:   document.getElementById('edit_is_partner').checked,
+  };
+  if (!payload.name) {
+    showError('edit_error', 'Название обязательно');
+    return;
+  }
+  const btn = document.getElementById('btn_save_edit');
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Сохраняю...';
+  btn.disabled = true;
+  try {
+    const r = await fetch(`/api/admin/developers/${devId}/update`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','X-CSRFToken':CSRF},
+      body: JSON.stringify(payload)
+    });
+    const data = await r.json();
+    if (data.ok) {
+      closeModal('editModal');
+      showToast(`✅ Застройщик сохранён`);
+      setTimeout(() => location.reload(), 1200);
+    } else {
+      showError('edit_error', data.error || 'Ошибка сохранения');
+    }
+  } catch(e) {
+    showError('edit_error', e.message);
+  }
+  btn.innerHTML = '<i class="fas fa-save"></i> Сохранить';
+  btn.disabled = false;
+}
+
+// ── CREATE MODAL ──────────────────────────────────────────────────────────────
+function openCreateModal() {
+  closeModal('editModal');
+  ['create_name','create_full_name','create_phone','create_email',
+   'create_website','create_inn','create_logo_url'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('create_is_active').checked = true;
+  document.getElementById('create_is_partner').checked = false;
+  document.getElementById('create_error').classList.add('hidden');
+  openModal('createModal');
+}
+
+async function saveCreate() {
+  const payload = {
+    name:       document.getElementById('create_name').value.trim(),
+    full_name:  document.getElementById('create_full_name').value.trim(),
+    phone:      document.getElementById('create_phone').value.trim(),
+    email:      document.getElementById('create_email').value.trim(),
+    website:    document.getElementById('create_website').value.trim(),
+    inn:        document.getElementById('create_inn').value.trim(),
+    logo_url:   document.getElementById('create_logo_url').value.trim(),
+    is_active:  document.getElementById('create_is_active').checked,
+    is_partner: document.getElementById('create_is_partner').checked,
+  };
+  if (!payload.name) { showError('create_error', 'Название обязательно'); return; }
+  const btn = document.getElementById('btn_save_create');
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>';
+  btn.disabled = true;
+  try {
+    const r = await fetch('/api/admin/developers/create', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','X-CSRFToken':CSRF},
+      body: JSON.stringify(payload)
+    });
+    const data = await r.json();
+    if (data.ok) {
+      closeModal('createModal');
+      showToast(`✅ Застройщик создан (id=${data.id})`);
+      setTimeout(() => location.reload(), 1200);
+    } else {
+      showError('create_error', data.error || 'Ошибка');
+    }
+  } catch(e) {
+    showError('create_error', e.message);
+  }
+  btn.innerHTML = '<i class="fas fa-plus mr-1"></i> Создать';
+  btn.disabled = false;
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+
+function showToast(msg) {
+  const d = document.createElement('div');
+  d.style.cssText = `position:fixed;top:20px;right:20px;z-index:99999;
+    background:#dcfce7;border:1px solid #86efac;color:#166534;
+    border-radius:12px;padding:14px 20px;font-size:14px;font-weight:600;
+    box-shadow:0 4px 16px rgba(0,0,0,0.12);`;
+  d.textContent = msg;
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 3000);
+}
+
+// Init
+applySort();
+
+// ── RESCRAPE SINGLE ────────────────────────────────────────────────────────
+async function rescrapeOne(devId, devName, btn) {
+  const icon = btn.querySelector('i');
+  const orig = btn.innerHTML;
+  btn.disabled = true;
+  icon.className = 'fas fa-spinner fa-spin';
+
+  try {
+    const res  = await fetch(`/api/admin/developers/${devId}/rescrape`, {
+      method: 'POST',
+      headers: {'X-CSRFToken': getCsrfToken()}
+    });
+    const data = await res.json();
+    if (data.ok) {
+      icon.className = 'fas fa-check';
+      btn.style.background = '#f0fdf4';
+      btn.style.color      = '#059669';
+      const parts = [];
+      if (data.data?.founded_year)       parts.push(`основан ${data.data.founded_year}`);
+      if (data.data?.completed_projects) parts.push(`сдано ${data.data.completed_projects}`);
+      if (data.data?.under_construction) parts.push(`строится ${data.data.under_construction}`);
+      showToast(`✅ ${devName}: ${parts.length ? parts.join(', ') : 'обновлено'}`);
+      // Update row data attr so filter works
+      const row = btn.closest('.dev-row');
+      if (row && data.data?.founded_year) row.dataset.hasData = '1';
+      setTimeout(() => { btn.innerHTML = orig; btn.disabled = false; }, 3000);
+    } else {
+      throw new Error(data.error || 'Ошибка');
+    }
+  } catch(e) {
+    icon.className = 'fas fa-times';
+    btn.style.background = '#fff5f5';
+    btn.style.color      = '#dc2626';
+    showToast(`❌ ${devName}: ${e.message}`);
+    setTimeout(() => { btn.innerHTML = orig; btn.disabled = false; }, 3000);
+  }
+}
+
+// ── RESCRAPE ALL (BULK BACKGROUND) ─────────────────────────────────────────
+let _rsPollTimer = null;
+
+async function startRescrapeAll() {
+  const modal = document.getElementById('rescrapeModal');
+  document.getElementById('rsLog').textContent   = '';
+  document.getElementById('rsBar').style.width   = '0%';
+  document.getElementById('rsCount').textContent = '0 / ?';
+  document.getElementById('rsProgress').textContent = 'Запуск задачи...';
+  document.getElementById('btnDoneRescrape').classList.add('hidden');
+  document.getElementById('btnCloseRescrape').disabled = false;
+  modal.classList.remove('hidden');
+  modal.style.display = 'flex';
+
+  try {
+    const res  = await fetch('/api/admin/developers/rescrape-missing', {
+      method: 'POST',
+      headers: {'X-CSRFToken': getCsrfToken()}
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'Ошибка запуска');
+    document.getElementById('rsCount').textContent = `0 / ${data.total}`;
+    _rsPollTimer = setInterval(pollRescrapeStatus, 1200);
+  } catch(e) {
+    document.getElementById('rsLog').textContent = '❌ Ошибка: ' + e.message;
+    document.getElementById('rsProgress').textContent = 'Ошибка запуска';
+  }
+}
+
+async function pollRescrapeStatus() {
+  try {
+    const res  = await fetch('/api/admin/developers/rescrape-status');
+    const data = await res.json();
+    const pct  = data.total ? Math.round(data.done / data.total * 100) : 0;
+    document.getElementById('rsBar').style.width = pct + '%';
+    document.getElementById('rsCount').textContent = `${data.done} / ${data.total}`;
+
+    if (data.status === 'running') {
+      document.getElementById('rsProgress').textContent = `Обрабатываем... ${pct}%`;
+    }
+
+    const log = document.getElementById('rsLog');
+    if (data.log && data.log.length) {
+      log.textContent = data.log.join('\n');
+      log.scrollTop   = log.scrollHeight;
+    }
+
+    if (data.status === 'done' || data.status === 'idle') {
+      clearInterval(_rsPollTimer);
+      document.getElementById('rsProgress').textContent =
+        `Готово — обновлено ${data.done}, ошибок ${data.errors}`;
+      document.getElementById('rsBar').style.width = '100%';
+      document.getElementById('btnDoneRescrape').classList.remove('hidden');
+      document.getElementById('btnCloseRescrape').disabled = false;
+    }
+  } catch(e) { /* ignore poll errors */ }
+}
+
+function closeRescrapeModal() {
+  clearInterval(_rsPollTimer);
+  const rm = document.getElementById('rescrapeModal');
+  rm.classList.add('hidden');
+  rm.style.display = 'none';
+  // Reload page if done to show updated data
+  const progress = document.getElementById('rsProgress').textContent;
+  if (progress.startsWith('Готово')) location.reload();
+}
+
+document.getElementById('rescrapeModal').addEventListener('click', function(e) {
+  if (e.target === this) closeRescrapeModal();
+});
+
+function getCsrfToken() {
+  const m = document.cookie.match(/csrf_token=([^;]+)/);
+  if (m) return decodeURIComponent(m[1]);
+  const el = document.querySelector('meta[name="csrf-token"]');
+  return el ? el.content : '';
+}
+</script>
+{% endblock %}

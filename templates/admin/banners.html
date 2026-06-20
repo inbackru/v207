@@ -1,0 +1,321 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Рекламные баннеры - Админ панель{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Рекламные баннеры</h1>
+        <button onclick="document.getElementById('createBannerModal').classList.remove('hidden')" class="bg-[#0088CC] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#0077b3] transition-colors">
+            <i class="fas fa-plus mr-1"></i> Создать баннер
+        </button>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="mb-4 p-3 rounded-lg text-sm {% if category == 'success' %}bg-green-50 text-green-700{% else %}bg-red-50 text-red-700{% endif %}">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    {% set header_banners = banners|selectattr('placement', 'equalto', 'header')|list %}
+    {% set listing_banners = banners|selectattr('placement', 'equalto', 'listing')|list %}
+
+    <h2 class="text-lg font-semibold text-gray-700 mb-3 mt-2"><i class="fas fa-desktop text-gray-400 mr-2"></i>Баннеры шапки сайта</h2>
+    {% if header_banners %}
+    <div class="space-y-3 mb-8">
+        {% for banner in header_banners %}
+        {% include "admin/_banner_card.html" %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="bg-white rounded-xl border border-gray-100 p-8 text-center mb-8">
+        <p class="text-gray-400 text-sm">Нет баннеров для шапки сайта</p>
+    </div>
+    {% endif %}
+
+    <h2 class="text-lg font-semibold text-gray-700 mb-3"><i class="fas fa-list text-gray-400 mr-2"></i>Баннеры в листинге объектов</h2>
+    {% if listing_banners %}
+    <div class="space-y-3 mb-8">
+        {% for banner in listing_banners %}
+        {% include "admin/_banner_card.html" %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="bg-white rounded-xl border border-gray-100 p-8 text-center mb-8">
+        <p class="text-gray-400 text-sm">Нет баннеров для листинга. Они показываются между карточками объектов на странице поиска.</p>
+    </div>
+    {% endif %}
+</div>
+
+<div id="createBannerModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-y-auto py-8">
+    <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full mx-4 p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-800">Создать баннер</h3>
+            <button onclick="document.getElementById('createBannerModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">&times;</button>
+        </div>
+        <form method="POST" action="/admin/banners/create" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Размещение *</label>
+                    <select name="placement" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] focus:border-transparent">
+                        <option value="header">Шапка сайта</option>
+                        <option value="listing">В листинге объектов</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Заголовок *</label>
+                    <input type="text" name="title" required class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] focus:border-transparent" placeholder="Рассрочка 0% до 2 лет">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Подзаголовок</label>
+                    <input type="text" name="subtitle" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] focus:border-transparent" placeholder="Ваша квартира – ближе, чем кажется">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Крупный текст (справа)</label>
+                    <input type="text" name="large_text" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] focus:border-transparent" placeholder="0%">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Срок действия (бейдж)</label>
+                    <input type="text" name="deadline_text" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] focus:border-transparent" placeholder="До 28 февраля 2026">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Фоновое изображение</label>
+                    <div class="flex items-center gap-2">
+                        <label class="flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors text-sm font-medium">
+                            <i class="fas fa-upload"></i> Загрузить файл
+                            <input type="file" name="image_file" accept="image/*" class="hidden" onchange="previewCreateImage(this)">
+                        </label>
+                        <span class="text-gray-400 text-sm">или</span>
+                        <input type="text" name="image_url" class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] focus:border-transparent" placeholder="URL картинки (https://...)">
+                    </div>
+                    <div id="createImagePreview" class="hidden mt-2">
+                        <img id="createImagePreviewImg" src="" alt="Preview" class="h-20 rounded-lg object-cover border border-gray-200">
+                        <span id="createImageFileName" class="text-xs text-gray-500 ml-2"></span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Ссылка кнопки</label>
+                        <input type="text" name="link_url" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] focus:border-transparent" placeholder="/properties">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Текст кнопки</label>
+                        <input type="text" name="link_text" value="Подробнее" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] focus:border-transparent">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Цвет фона</label>
+                        <input type="color" name="bg_color" value="#1a1a2e" class="w-full h-9 rounded-lg border border-gray-200 cursor-pointer">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Порядок</label>
+                        <input type="number" name="sort_order" value="0" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] focus:border-transparent">
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" name="is_active" id="create_is_active" checked class="rounded">
+                    <label for="create_is_active" class="text-sm text-gray-600">Активен</label>
+                </div>
+            </div>
+            <div class="mt-5 flex justify-end gap-2">
+                <button type="button" onclick="document.getElementById('createBannerModal').classList.add('hidden')" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">Отмена</button>
+                <button type="submit" class="px-4 py-2 text-sm bg-[#0088CC] text-white rounded-lg hover:bg-[#0077b3] transition-colors">Создать</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="editBannerModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-y-auto py-8">
+    <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full mx-4 p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-800">Редактировать баннер</h3>
+            <button onclick="document.getElementById('editBannerModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">&times;</button>
+        </div>
+        <form method="POST" id="editBannerForm" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Размещение *</label>
+                    <select name="placement" id="edit_placement" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] focus:border-transparent">
+                        <option value="header">Шапка сайта</option>
+                        <option value="listing">В листинге объектов</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Заголовок *</label>
+                    <input type="text" name="title" id="edit_title" required class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Подзаголовок</label>
+                    <input type="text" name="subtitle" id="edit_subtitle" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Крупный текст (справа)</label>
+                    <input type="text" name="large_text" id="edit_large_text" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Срок действия (бейдж)</label>
+                    <input type="text" name="deadline_text" id="edit_deadline_text" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Фоновое изображение</label>
+                    <div class="flex items-center gap-2 mb-2">
+                        <label class="flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors text-sm font-medium">
+                            <i class="fas fa-upload"></i> Загрузить файл
+                            <input type="file" name="image_file" accept="image/*" class="hidden" onchange="previewEditImage(this)">
+                        </label>
+                        <span class="text-gray-400 text-sm">или</span>
+                        <input type="text" name="image_url" id="edit_image_url" class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] focus:border-transparent" oninput="updateEditPreviewFromUrl(this.value)">
+                    </div>
+                    <!-- Предпросмотр баннера с overlay -->
+                    <div id="editBannerPreview" class="relative rounded-xl overflow-hidden border border-gray-200 hidden" style="height:80px">
+                        <img id="editImagePreviewImg" src="" alt="Preview" class="w-full h-full object-cover">
+                        <div id="editOverlayDiv" class="absolute inset-0 bg-black pointer-events-none" style="opacity:0"></div>
+                        <div class="absolute inset-0 flex items-center px-4">
+                            <div>
+                                <div id="previewTitle" class="text-white font-bold text-sm truncate"></div>
+                                <div id="previewSubtitle" class="text-white/70 text-xs truncate"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <span id="editImageFileName" class="text-xs text-gray-500 mt-1 block"></span>
+                </div>
+                <!-- Overlay (затемнение) -->
+                <div id="editOverlayRow" class="hidden">
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Затемнение фона <span id="overlayPctLabel" class="text-[#0088CC] font-semibold">0%</span></label>
+                    <input type="range" name="overlay_opacity" id="edit_overlay_opacity" min="0" max="80" step="5" value="0"
+                           class="w-full accent-[#0088CC]"
+                           oninput="document.getElementById('overlayPctLabel').textContent=this.value+'%'; document.getElementById('editOverlayDiv').style.opacity=this.value/100;">
+                    <div class="flex justify-between text-xs text-gray-400 mt-0.5">
+                        <span>Без затемнения</span><span>Сильное затемнение</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Ссылка кнопки</label>
+                        <input type="text" name="link_url" id="edit_link_url" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Текст кнопки</label>
+                        <input type="text" name="link_text" id="edit_link_text" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] focus:border-transparent">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Цвет фона (без картинки)</label>
+                        <input type="color" name="bg_color" id="edit_bg_color" class="w-full h-9 rounded-lg border border-gray-200 cursor-pointer">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Порядок</label>
+                        <input type="number" name="sort_order" id="edit_sort_order" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] focus:border-transparent">
+                    </div>
+                </div>
+            </div>
+            <div class="mt-5 flex justify-end gap-2">
+                <button type="button" onclick="document.getElementById('editBannerModal').classList.add('hidden')" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">Отмена</button>
+                <button type="submit" class="px-4 py-2 text-sm bg-[#0088CC] text-white rounded-lg hover:bg-[#0077b3] transition-colors">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function toggleBanner(id) {
+    fetch('/admin/banners/' + id + '/toggle', {
+        method: 'POST',
+        headers: {'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content}
+    }).then(function(r) {
+        if (!r.ok) { alert('Ошибка: ' + r.status); return null; }
+        return r.json();
+    }).then(function(d) {
+        if (d && d.success) location.reload();
+    }).catch(function(e) {
+        console.error('Toggle error:', e);
+        alert('Ошибка при переключении баннера');
+    });
+}
+function previewCreateImage(input) {
+    var preview = document.getElementById('createImagePreview');
+    var img = document.getElementById('createImagePreviewImg');
+    var fname = document.getElementById('createImageFileName');
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            img.src = e.target.result;
+            fname.textContent = input.files[0].name;
+            preview.classList.remove('hidden');
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+function updateEditPreviewFromUrl(url) {
+    var img = document.getElementById('editImagePreviewImg');
+    var preview = document.getElementById('editBannerPreview');
+    var overlayRow = document.getElementById('editOverlayRow');
+    if (url) {
+        img.src = url;
+        preview.classList.remove('hidden');
+        overlayRow.classList.remove('hidden');
+    } else {
+        preview.classList.add('hidden');
+        overlayRow.classList.add('hidden');
+    }
+}
+function openEditModal(btn) {
+    var d = btn.dataset;
+    document.getElementById('editBannerForm').action = '/admin/banners/' + d.id + '/edit';
+    document.getElementById('edit_title').value = d.title || '';
+    document.getElementById('edit_subtitle').value = d.subtitle || '';
+    document.getElementById('edit_image_url').value = d.imageUrl || '';
+    document.getElementById('edit_link_url').value = d.linkUrl || '';
+    document.getElementById('edit_link_text').value = d.linkText || '';
+    document.getElementById('edit_bg_color').value = d.bgColor || '#1a1a2e';
+    document.getElementById('edit_sort_order').value = d.sortOrder || 0;
+    document.getElementById('edit_placement').value = d.placement || 'header';
+    document.getElementById('edit_deadline_text').value = d.deadlineText || '';
+    document.getElementById('edit_large_text').value = d.largeText || '';
+    // Overlay
+    var overlayVal = parseFloat(d.overlayOpacity || 0) * 100;
+    var slider = document.getElementById('edit_overlay_opacity');
+    slider.value = Math.round(overlayVal);
+    document.getElementById('overlayPctLabel').textContent = Math.round(overlayVal) + '%';
+    document.getElementById('editOverlayDiv').style.opacity = overlayVal / 100;
+    // Preview
+    var editImg = document.getElementById('editImagePreviewImg');
+    var preview = document.getElementById('editBannerPreview');
+    var overlayRow = document.getElementById('editOverlayRow');
+    document.getElementById('previewTitle').textContent = d.title || '';
+    document.getElementById('previewSubtitle').textContent = d.subtitle || '';
+    if (d.imageUrl) {
+        editImg.src = d.imageUrl;
+        preview.classList.remove('hidden');
+        overlayRow.classList.remove('hidden');
+        document.getElementById('editImageFileName').textContent = 'Текущее изображение';
+    } else {
+        preview.classList.add('hidden');
+        overlayRow.classList.add('hidden');
+        document.getElementById('editImageFileName').textContent = '';
+    }
+    document.getElementById('editBannerModal').classList.remove('hidden');
+}
+function previewEditImage(input) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var img = document.getElementById('editImagePreviewImg');
+            img.src = e.target.result;
+            document.getElementById('editBannerPreview').classList.remove('hidden');
+            document.getElementById('editOverlayRow').classList.remove('hidden');
+            document.getElementById('editImageFileName').textContent = input.files[0].name;
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,307 @@
+/* Scroll Reveal Animations */
+
+/* Base states - hidden before animation */
+.scroll-reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), 
+                transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scroll-reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Fade in from left */
+.scroll-reveal-left {
+    opacity: 0;
+    transform: translateX(-60px);
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), 
+                transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scroll-reveal-left.revealed {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Fade in from right */
+.scroll-reveal-right {
+    opacity: 0;
+    transform: translateX(60px);
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), 
+                transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scroll-reveal-right.revealed {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Scale up animation */
+.scroll-reveal-scale {
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), 
+                transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scroll-reveal-scale.revealed {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Staggered children animation */
+.scroll-reveal-stagger > * {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+                transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scroll-reveal-stagger.revealed > *:nth-child(1) { transition-delay: 0.1s; }
+.scroll-reveal-stagger.revealed > *:nth-child(2) { transition-delay: 0.2s; }
+.scroll-reveal-stagger.revealed > *:nth-child(3) { transition-delay: 0.3s; }
+.scroll-reveal-stagger.revealed > *:nth-child(4) { transition-delay: 0.4s; }
+.scroll-reveal-stagger.revealed > *:nth-child(5) { transition-delay: 0.5s; }
+.scroll-reveal-stagger.revealed > *:nth-child(6) { transition-delay: 0.6s; }
+
+.scroll-reveal-stagger.revealed > * {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Highlight text animation */
+.highlight-reveal {
+    background: linear-gradient(120deg, #FFEB3B 0%, #FFC107 100%);
+    background-repeat: no-repeat;
+    background-size: 0% 100%;
+    background-position: 0 88%;
+    transition: background-size 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0 4px;
+    margin: 0 -4px;
+}
+
+.highlight-reveal.revealed {
+    background-size: 100% 35%;
+}
+
+/* Decorative arrow styles */
+.decorative-arrow {
+    position: absolute;
+    opacity: 0;
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.decorative-arrow.revealed {
+    opacity: 1;
+}
+
+.decorative-arrow svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Arrow pointing down-right */
+.arrow-down-right {
+    transform: rotate(45deg) translateY(-20px);
+}
+
+.arrow-down-right.revealed {
+    transform: rotate(45deg) translateY(0);
+}
+
+/* Arrow pointing down-left */
+.arrow-down-left {
+    transform: rotate(-45deg) translateY(-20px);
+}
+
+.arrow-down-left.revealed {
+    transform: rotate(-45deg) translateY(0);
+}
+
+/* Floating animation for decorative elements */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.float-animation {
+    animation: float 4s ease-in-out infinite;
+}
+
+.float-animation-delay-1 {
+    animation-delay: 0.5s;
+}
+
+.float-animation-delay-2 {
+    animation-delay: 1s;
+}
+
+.float-animation-delay-3 {
+    animation-delay: 1.5s;
+}
+
+/* Pulse animation for emphasis */
+@keyframes subtle-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.pulse-animation {
+    animation: subtle-pulse 3s ease-in-out infinite;
+}
+
+/* Draw line animation */
+.draw-line {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.draw-line.revealed {
+    stroke-dashoffset: 0;
+}
+
+/* Counter animation preparation */
+.counter-animate {
+    display: inline-block;
+}
+
+/* Badge bounce in */
+.badge-reveal {
+    opacity: 0;
+    transform: scale(0.5) translateY(-20px);
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.badge-reveal.revealed {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+}
+
+/* Section title underline animation */
+.title-underline {
+    position: relative;
+    display: inline-block;
+}
+
+.title-underline::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #0088CC 0%, #00B4D8 100%);
+    border-radius: 2px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.title-underline.revealed::after {
+    width: 60px;
+}
+
+/* Parallax-like effect for backgrounds */
+.parallax-bg {
+    transition: transform 0.1s ease-out;
+}
+
+/* Card hover with 3D effect */
+.card-3d-hover {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transform-style: preserve-3d;
+}
+
+.card-3d-hover:hover {
+    transform: translateY(-8px) rotateX(2deg);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Blur reveal effect */
+.blur-reveal {
+    opacity: 0;
+    filter: blur(10px);
+    transition: opacity 0.8s ease, filter 0.8s ease;
+}
+
+.blur-reveal.revealed {
+    opacity: 1;
+    filter: blur(0);
+}
+
+/* Typing cursor effect */
+.typing-cursor::after {
+    content: '|';
+    animation: blink 1s infinite;
+    margin-left: 2px;
+    color: #0088CC;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+/* Hero accent arrow animation */
+.hero-accent-arrow {
+    opacity: 0;
+    animation: arrow-appear 0.8s ease-out 1.5s forwards;
+}
+
+.hero-accent-arrow path.draw-line {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    animation: draw-arrow 1s ease-out 1.8s forwards;
+}
+
+@keyframes arrow-appear {
+    0% {
+        opacity: 0;
+        transform: rotate(-15deg) translateY(-10px);
+    }
+    100% {
+        opacity: 1;
+        transform: rotate(-15deg) translateY(0);
+    }
+}
+
+@keyframes draw-arrow {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+/* Subtle bounce for the arrow */
+.hero-accent-arrow {
+    animation: arrow-appear 0.8s ease-out 1.5s forwards, arrow-bounce 2s ease-in-out 3s infinite;
+}
+
+@keyframes arrow-bounce {
+    0%, 100% { transform: rotate(-15deg) translateY(0); }
+    50% { transform: rotate(-15deg) translateY(-5px); }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .scroll-reveal,
+    .scroll-reveal-left,
+    .scroll-reveal-right,
+    .scroll-reveal-scale,
+    .scroll-reveal-stagger > *,
+    .highlight-reveal,
+    .decorative-arrow,
+    .badge-reveal,
+    .blur-reveal {
+        transition: none;
+        opacity: 1;
+        transform: none;
+        filter: none;
+    }
+    
+    .float-animation,
+    .pulse-animation {
+        animation: none;
+    }
+}

@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% block title %}Партнёрская программа{% if current_city %} — {{ current_city.name }}{% endif %} | InBack{% endblock %}
+{% block content %}
+{% if not current_user.is_authenticated %}
+<script>window.location.href = '/login?next=' + encodeURIComponent(window.location.pathname);</script>
+{% else %}
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-2 text-xs text-gray-400 mb-6">
+      <a href="/" class="hover:text-[#0088CC] transition-colors">Главная</a>
+      <span>/</span>
+      <span class="text-gray-700 font-medium">Партнёрская программа</span>
+    </nav>
+
+    <!-- Hero -->
+    <div class="mb-8">
+      <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">Партнёрская программа</h1>
+      <p class="text-sm text-gray-500">Приглашайте друзей и зарабатывайте вместе</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+      <div class="bg-gradient-to-br from-[#0088CC] to-[#006699] rounded-2xl p-5 text-white">
+        <div class="text-3xl font-bold mb-1" id="referral-total-count">—</div>
+        <div class="text-xs opacity-80">Приглашено друзей</div>
+      </div>
+      <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-5 text-white">
+        <div class="text-2xl font-bold mb-1" id="referral-total-earned">—</div>
+        <div class="text-xs opacity-80">Всего заработано</div>
+      </div>
+      <div class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-5 text-white">
+        <div class="text-2xl font-bold mb-1" id="referral-total-pending">—</div>
+        <div class="text-xs opacity-80">Ожидает начисления</div>
+      </div>
+    </div>
+
+    <!-- Referral link card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 mb-6">
+      <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <i class="fas fa-link text-[#0088CC]"></i>
+        Ваша реферальная ссылка
+      </h3>
+      <div class="flex gap-3 items-center">
+        <div class="flex-1 px-4 py-3.5 bg-gray-50 border-2 border-gray-200 rounded-xl text-sm text-gray-700 font-mono overflow-hidden" id="referral-link-display">
+          Загрузка...
+        </div>
+        <button onclick="copyReferralLink()"
+                class="flex-shrink-0 px-5 py-3.5 bg-[#0088CC] hover:bg-[#006699] text-white rounded-xl font-semibold text-sm transition-colors flex items-center gap-2 shadow-sm">
+          <i class="fas fa-copy text-xs"></i>
+          <span id="copy-btn-text">Копировать</span>
+        </button>
+      </div>
+
+      <!-- Share buttons -->
+      <div class="flex flex-wrap gap-3 mt-5">
+        <a id="share-whatsapp" href="#" target="_blank"
+           class="flex items-center gap-2 px-4 py-2.5 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm font-medium hover:bg-green-100 transition-colors">
+          <i class="fab fa-whatsapp text-green-600"></i>WhatsApp
+        </a>
+        <a id="share-telegram" href="#" target="_blank"
+           class="flex items-center gap-2 px-4 py-2.5 bg-blue-50 border border-blue-200 text-blue-700 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors">
+          <i class="fab fa-telegram text-blue-500"></i>Telegram
+        </a>
+        <button onclick="shareViaNavigator()"
+                class="flex items-center gap-2 px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-100 transition-colors">
+          <i class="fas fa-share-alt text-gray-500"></i>Поделиться
+        </button>
+      </div>
+    </div>
+
+    <!-- How it works -->
+    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-2xl p-6 mb-6">
+      <h3 class="text-lg font-bold text-gray-900 mb-4">Как это работает</h3>
+      <div class="grid sm:grid-cols-3 gap-4">
+        <div class="flex gap-3">
+          <div class="w-10 h-10 bg-[#0088CC] rounded-xl flex items-center justify-center flex-shrink-0 text-white font-bold">1</div>
+          <div>
+            <p class="font-semibold text-gray-900 text-sm">Поделитесь ссылкой</p>
+            <p class="text-xs text-gray-600 mt-0.5">Отправьте свою реферальную ссылку другу</p>
+          </div>
+        </div>
+        <div class="flex gap-3">
+          <div class="w-10 h-10 bg-[#0088CC] rounded-xl flex items-center justify-center flex-shrink-0 text-white font-bold">2</div>
+          <div>
+            <p class="font-semibold text-gray-900 text-sm">Друг регистрируется</p>
+            <p class="text-xs text-gray-600 mt-0.5">Он переходит по ссылке и создаёт аккаунт</p>
+          </div>
+        </div>
+        <div class="flex gap-3">
+          <div class="w-10 h-10 bg-[#0088CC] rounded-xl flex items-center justify-center flex-shrink-0 text-white font-bold">3</div>
+          <div>
+            <p class="font-semibold text-gray-900 text-sm">Вы получаете бонус</p>
+            <p class="text-xs text-gray-600 mt-0.5">После первой сделки друга бонус начислится вам</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Referrals table -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      <h3 class="text-lg font-bold text-gray-900 mb-5">Мои приглашённые</h3>
+      <div id="referral-list-container">
+        <div class="text-center py-8">
+          <div class="relative inline-block mb-4">
+            <div class="absolute inset-0 bg-[#0088CC] opacity-20 rounded-full animate-ping"></div>
+            <div class="relative w-12 h-12 bg-gradient-to-br from-[#0088CC] to-[#006699] rounded-full flex items-center justify-center shadow">
+              <svg class="animate-spin h-6 w-6 text-white" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </svg>
+            </div>
+          </div>
+          <p class="text-gray-500 text-sm">Загружаем данные...</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  var _link = '';
+
+  function loadReferralData() {
+    fetch('/api/user/referrals')
+      .then(r=>r.json())
+      .then(data=>{
+        if (!data.success) { showError(); return; }
+        _link = data.referral_link || '';
+        document.getElementById('referral-link-display').textContent = _link;
+        document.getElementById('referral-total-count').textContent = data.total_referrals || 0;
+        document.getElementById('referral-total-earned').textContent = new Intl.NumberFormat('ru-RU').format(data.total_earned||0) + ' ₽';
+        document.getElementById('referral-total-pending').textContent = new Intl.NumberFormat('ru-RU').format(data.total_pending||0) + ' ₽';
+
+        var msg = encodeURIComponent('Регистрируйся на InBack по моей ссылке и получи бонус! ' + _link);
+        document.getElementById('share-whatsapp').href = 'https://wa.me/?text=' + msg;
+        document.getElementById('share-telegram').href = 'https://t.me/share/url?url=' + encodeURIComponent(_link) + '&text=' + encodeURIComponent('Регистрируйся на InBack и получи бонус!');
+
+        var container = document.getElementById('referral-list-container');
+        if (!data.referrals || data.referrals.length === 0) {
+          container.innerHTML = '<div class="text-center py-8"><div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fas fa-user-friends text-gray-400 text-2xl"></i></div><p class="text-gray-500 font-medium">Пока нет приглашений</p><p class="text-gray-400 text-sm mt-1">Поделитесь ссылкой с друзьями, чтобы получить бонусы</p></div>';
+          return;
+        }
+        var html = '<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b border-gray-200"><th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Пользователь</th><th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden sm:table-cell">Телефон</th><th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Бонус</th><th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Статус</th><th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden sm:table-cell">Дата</th></tr></thead><tbody>';
+        data.referrals.forEach(function(r){
+          var sc = r.status==='credited' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700';
+          var st = r.status==='credited' ? 'Начислен' : 'Ожидает сделки';
+          html += '<tr class="border-b border-gray-100 hover:bg-gray-50">';
+          html += '<td class="py-3 px-4 font-medium text-gray-900">' + esc(r.referred_name||'Пользователь') + '</td>';
+          html += '<td class="py-3 px-4 text-gray-600 hidden sm:table-cell">' + esc(r.referred_phone||'—') + '</td>';
+          html += '<td class="py-3 px-4 font-semibold text-green-600">' + new Intl.NumberFormat('ru-RU').format(r.bonus_amount||0) + ' ₽</td>';
+          html += '<td class="py-3 px-4"><span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ' + sc + '">' + st + '</span></td>';
+          html += '<td class="py-3 px-4 text-gray-400 hidden sm:table-cell">' + esc(r.created_at||'') + '</td>';
+          html += '</tr>';
+        });
+        html += '</tbody></table></div>';
+        container.innerHTML = html;
+      })
+      .catch(showError);
+  }
+
+  function showError() {
+    document.getElementById('referral-list-container').innerHTML = '<div class="text-center py-8 text-gray-400"><i class="fas fa-exclamation-circle text-2xl mb-3 block"></i><p class="text-sm">Не удалось загрузить данные</p></div>';
+  }
+
+  window.copyReferralLink = function() {
+    var link = _link || document.getElementById('referral-link-display').textContent;
+    if (!link || link==='Загрузка...') return;
+    navigator.clipboard.writeText(link).then(function(){
+      var btn = document.getElementById('copy-btn-text');
+      if (btn) { btn.textContent='Скопировано!'; setTimeout(function(){ btn.textContent='Копировать'; }, 2000); }
+    }).catch(function(){
+      var input = document.createElement('input');
+      input.value = link;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      document.body.removeChild(input);
+      var btn = document.getElementById('copy-btn-text');
+      if (btn) { btn.textContent='Скопировано!'; setTimeout(function(){ btn.textContent='Копировать'; }, 2000); }
+    });
+  };
+
+  window.shareViaNavigator = function() {
+    if (navigator.share) {
+      navigator.share({title:'InBack', text:'Регистрируйся по моей ссылке!', url: _link||window.location.href});
+    } else {
+      copyReferralLink();
+    }
+  };
+
+  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  loadReferralData();
+})();
+</script>
+{% endif %}
+{% endblock %}

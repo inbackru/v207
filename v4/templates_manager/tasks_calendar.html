@@ -1,0 +1,620 @@
+{% extends "base.html" %}
+
+{% block title %}Календарь задач | InBack{% endblock %}
+
+{% block head %}
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css' rel='stylesheet' />
+{% endblock %}
+
+{% block content %}
+<style>
+/* Hide the global header completely on this page */
+header { display: none !important; }
+body > footer, body > .footer, #footer-section { display: none !important; }
+/* ... rest of styles ... */
+body { padding-top: 0 !important; }
+:root { --brand: #0088CC; --brand-dark: #006699; }
+
+.fc { font-family: inherit; }
+.fc .fc-button-primary {
+    background-color: var(--brand) !important;
+    border-color: var(--brand) !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    padding: 6px 14px !important;
+    text-transform: none !important;
+    box-shadow: 0 1px 3px rgba(0,136,204,0.2) !important;
+    transition: all 0.2s !important;
+}
+.fc .fc-button-primary:hover {
+    background-color: var(--brand-dark) !important;
+    box-shadow: 0 2px 6px rgba(0,136,204,0.3) !important;
+}
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+    background-color: var(--brand-dark) !important;
+    border-color: var(--brand-dark) !important;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.15) !important;
+}
+.fc .fc-button-group > .fc-button {
+    border-radius: 0 !important;
+}
+.fc .fc-button-group > .fc-button:first-child {
+    border-radius: 8px 0 0 8px !important;
+}
+.fc .fc-button-group > .fc-button:last-child {
+    border-radius: 0 8px 8px 0 !important;
+}
+.fc .fc-today-button:disabled { opacity: 0.4; }
+.fc .fc-toolbar-title {
+    font-size: 1.3em !important;
+    font-weight: 700 !important;
+    color: #1f2937 !important;
+}
+.fc-event {
+    cursor: pointer !important;
+    border-radius: 8px !important;
+    padding: 3px 8px !important;
+    font-size: 12px !important;
+    border: none !important;
+    font-weight: 500 !important;
+    transition: transform 0.15s, box-shadow 0.15s !important;
+}
+.fc-event:hover {
+    transform: scale(1.02) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+}
+.fc .fc-daygrid-day.fc-day-today {
+    background: linear-gradient(135deg, #f0f9ff, #e0f2fe) !important;
+}
+.fc .fc-daygrid-day-number {
+    font-weight: 600;
+    font-size: 13px;
+    padding: 8px !important;
+    color: #374151;
+}
+.fc .fc-day-today .fc-daygrid-day-number {
+    background: var(--brand);
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 4px;
+    padding: 0 !important;
+}
+.fc .fc-col-header-cell {
+    background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748b;
+    padding: 10px 0 !important;
+}
+.fc .fc-col-header-cell-cushion {
+    color: #64748b !important;
+    text-decoration: none !important;
+}
+.fc-h-event .fc-event-title { font-weight: 600; }
+.fc .fc-daygrid-day-frame {
+    min-height: 100px;
+}
+.fc th, .fc td {
+    border-color: #f1f5f9 !important;
+}
+.fc .fc-scrollgrid {
+    border-color: #e2e8f0 !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+}
+.fc .fc-toolbar.fc-header-toolbar {
+    margin-bottom: 16px !important;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    border: 1px solid #f1f5f9;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+.stat-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    transform: translateY(-1px);
+}
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+}
+.stat-total::before { background: var(--brand); }
+.stat-active::before { background: #f59e0b; }
+.stat-overdue::before { background: #ef4444; }
+.stat-done::before { background: #10b981; }
+
+.stat-value {
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+.stat-label {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 500;
+}
+.stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.task-legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border-radius: 10px;
+}
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 500;
+}
+.legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.overdue-banner {
+    background: linear-gradient(135deg, #fef2f2, #fee2e2);
+    border: 1px solid #fecaca;
+    border-radius: 12px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    animation: pulse-border 2s infinite;
+}
+@keyframes pulse-border {
+    0%, 100% { border-color: #fecaca; }
+    50% { border-color: #f87171; }
+}
+.overdue-banner-icon {
+    width: 36px;
+    height: 36px;
+    background: #ef4444;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+    .stat-value { font-size: 22px; }
+    .stat-card { padding: 14px; }
+    .fc-toolbar-chunk { margin-bottom: 8px; }
+    .fc .fc-toolbar { flex-direction: column; gap: 8px; }
+}
+</style>
+
+{% if sidebar_links is defined and sidebar_links %}
+{% include 'components/sidebar.html' %}
+{% endif %}
+
+<div class="{% if sidebar_links is defined and sidebar_links %}md:ml-[70px]{% endif %} transition-all duration-300">
+
+<div class="bg-white border-b border-gray-200 shadow-sm kanban-top-header">
+    <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between py-3">
+            <div class="flex items-center gap-3">
+                <div class="flex w-8 h-8 bg-gradient-to-r from-[#0088CC] to-[#006699] rounded-lg items-center justify-center text-white font-bold text-sm">
+                    In
+                </div>
+                <span class="hidden md:inline font-bold text-gray-900 text-lg">InBack</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="/" class="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-gray-700 px-4 py-2 rounded-full border border-blue-200 transition-colors">
+                    <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    <span class="text-sm font-medium">На сайт</span>
+                </a>
+                <a href="{{ url_for('manager_dashboard') }}" class="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-gray-700 px-4 py-2 rounded-full border border-blue-200 transition-colors">
+                    <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+                    </svg>
+                    <span class="text-sm font-medium">Дашборд</span>
+                </a>
+                {% if user_profile %}
+                <div class="relative" id="headerAvatarWrapper">
+                    <button onclick="toggleHeaderCheckinDropdown(event)" class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
+                        <div class="relative">
+                            <div class="w-8 h-8 rounded-full overflow-hidden">
+                                {% if user_profile.avatar %}
+                                <img src="{{ user_profile.avatar }}" alt="{{ user_profile.name }}" class="w-full h-full object-cover">
+                                {% else %}
+                                <div class="w-full h-full bg-gradient-to-r from-[#0088CC] to-[#006699] flex items-center justify-center text-white font-bold text-sm">
+                                    {{ user_profile.initials }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div id="headerCheckinIndicator" class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white bg-gray-300"></div>
+                        </div>
+                    </button>
+                    <div id="headerCheckinDropdown" class="hidden absolute right-0 top-full mt-2 w-60 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden">
+                        <div class="px-4 py-3 border-b border-gray-100">
+                            <p class="text-sm font-semibold text-gray-900">{{ user_profile.name }}</p>
+                            <p class="text-xs text-gray-400" id="headerCheckinStatus">Не на работе</p>
+                        </div>
+                        <div class="p-2">
+                            <button id="headerCheckinBtn" onclick="doHeaderCheckin()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all hover:bg-green-50 text-green-700">
+                                <i class="fas fa-sign-in-alt"></i>
+                                <span id="headerCheckinBtnText">На работе</span>
+                            </button>
+                            <a href="{{ url_for('manager_dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-all">
+                                <i class="fas fa-user"></i>
+                                <span>Профиль</span>
+                            </a>
+                            <a href="{{ url_for('logout') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-600 hover:bg-red-50 transition-all">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Выйти</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bg-white border-b border-gray-200 kanban-tab-section">
+    <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="tab-bar flex">
+            <a href="{{ url_for('manager_deals_kanban') }}" id="tabKanban" class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent hover:border-gray-300 transition-all">
+                <svg class="w-4 h-4 inline-block mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7"/></svg>
+                Канбан
+            </a>
+            <a href="{{ url_for('manager_deals_kanban') }}?view=list" id="tabList" class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent hover:border-gray-300 transition-all">
+                <svg class="w-4 h-4 inline-block mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                Список
+            </a>
+            <a href="{{ url_for('manager_deals_kanban') }}?view=tasks" id="tabTasks" class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent hover:border-gray-300 transition-all">
+                <svg class="w-4 h-4 inline-block mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                Дела
+            </a>
+            <a href="{{ url_for('manager_deals_kanban') }}?view=calendar" class="px-4 py-3 text-sm font-medium text-[#0088CC] border-b-2 border-[#0088CC] transition-all">
+                <svg class="w-4 h-4 inline-block mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                Календарь
+            </a>
+            <a href="{{ url_for('manager_deals_archive') }}" class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent hover:border-gray-300 transition-all">
+                <svg class="w-4 h-4 inline-block mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                Архив
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="hidden max-md:flex items-center gap-3 px-4 py-3 bg-white border-b border-gray-200">
+    <a onclick="if(history.length>1){history.back()}else{location.href='{{ url_for("manager_dashboard") }}'};return false;" href="{{ url_for('manager_dashboard') }}" class="w-8 h-8 flex items-center justify-center rounded-lg bg-[#0088CC]/10 text-[#0088CC]">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    </a>
+    <div class="flex-1 min-w-0">
+        <h1 class="text-sm font-bold text-gray-900">Календарь задач</h1>
+    </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 calendar-page-content">
+    <div class="flex items-center justify-between mb-5 max-md:hidden">
+        <div>
+            <h1 class="text-xl font-bold text-gray-900">Календарь задач</h1>
+            <p class="text-sm text-gray-500 mt-0.5">Все задачи и события по сделкам</p>
+        </div>
+    </div>
+
+    <div class="calendar-stats-section">
+    {% if stats.overdue > 0 %}
+    <div class="overdue-banner">
+        <div class="overdue-banner-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="flex-1">
+            <p class="text-sm font-bold text-red-800">
+                Просроченных задач: {{ stats.overdue }}
+            </p>
+            <p class="text-xs text-red-600 mt-0.5">
+                Необходимо обработать просроченные задачи. Нажмите на задачу в календаре для просмотра деталей.
+            </p>
+        </div>
+        <button onclick="filterOverdue()" class="overdue-filter-btn px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-semibold rounded-lg transition-colors flex-shrink-0">
+            Показать
+        </button>
+    </div>
+    {% endif %}
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+        <div class="stat-card stat-total">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="stat-value text-gray-900">{{ stats.total }}</div>
+                    <div class="stat-label">Всего задач</div>
+                </div>
+                <div class="stat-icon bg-blue-50 text-[#0088CC]">
+                    <i class="fas fa-tasks"></i>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card stat-active">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="stat-value text-amber-600">{{ stats.active }}</div>
+                    <div class="stat-label">Активных</div>
+                </div>
+                <div class="stat-icon bg-amber-50 text-amber-600">
+                    <i class="fas fa-clock"></i>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card stat-overdue">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="stat-value text-red-500">{{ stats.overdue }}</div>
+                    <div class="stat-label">Просроченных</div>
+                </div>
+                <div class="stat-icon bg-red-50 text-red-500">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card stat-done">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="stat-value text-green-600">{{ stats.completed }}</div>
+                    <div class="stat-label">Выполненных</div>
+                </div>
+                <div class="stat-icon bg-green-50 text-green-600">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <div class="calendar-widget-section">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-4">
+        <div class="px-5 py-4 border-b border-gray-100">
+            <div class="task-legend">
+                <div class="legend-item"><span class="legend-dot" style="background:#f59e0b"></span>Активная</div>
+                <div class="legend-item"><span class="legend-dot" style="background:#ef4444"></span>Просроченная</div>
+                <div class="legend-item"><span class="legend-dot" style="background:#10b981"></span>Выполненная</div>
+                <div class="legend-item"><span class="legend-dot" style="background:#6366f1"></span>Высокий приоритет</div>
+                <div class="legend-item"><span class="legend-dot" style="background:#0088CC"></span>Сделка</div>
+                <div class="legend-item"><span class="legend-dot" style="background:#059669"></span>Договор</div>
+            </div>
+        </div>
+        <div class="p-4 sm:p-5">
+            <div id="calendar"></div>
+        </div>
+    </div>
+    </div>
+</div>
+
+</div>
+
+<div id="taskModal" class="hidden fixed inset-0 z-50" style="background: rgba(0,0,0,0.4); backdrop-filter: blur(3px);">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-auto overflow-hidden transform transition-all">
+            <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div id="taskModalIcon" class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-[#0088CC]">
+                        <i class="fas fa-tasks text-sm"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-gray-900" id="taskModalTitle">Задача</h3>
+                </div>
+                <button onclick="document.getElementById('taskModal').classList.add('hidden')" class="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div id="taskModalBody" class="px-5 py-4 text-sm space-y-3"></div>
+            <div class="px-5 py-4 border-t border-gray-100 bg-gray-50">
+                <a id="taskModalLink" href="#" class="flex items-center justify-center gap-2 w-full bg-[#0088CC] text-white py-2.5 rounded-xl hover:bg-[#006699] transition-all text-sm font-semibold shadow-sm">
+                    <i class="fas fa-external-link-alt text-xs"></i>
+                    Открыть сделку
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const events = {{ tasks_json|safe }};
+    const calendarEl = document.getElementById('calendar');
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'ru',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,listWeek'
+        },
+        buttonText: { today: 'Сегодня', month: 'Месяц', week: 'Неделя', list: 'Список' },
+        events: events,
+        eventClick: function(info) {
+            info.jsEvent.preventDefault();
+            const ev = info.event;
+            const props = ev.extendedProps;
+            const isTask = (props.type === 'task');
+
+            document.getElementById('taskModalTitle').textContent = ev.title;
+
+            const iconEl = document.getElementById('taskModalIcon');
+            if (isTask) {
+                iconEl.className = 'w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600';
+                iconEl.innerHTML = '<i class="fas fa-tasks text-sm"></i>';
+            } else {
+                iconEl.className = 'w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-[#0088CC]';
+                iconEl.innerHTML = '<i class="fas fa-handshake text-sm"></i>';
+            }
+
+            let body = '';
+            body += '<div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">';
+            body += '<div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm"><i class="fas fa-briefcase text-[#0088CC] text-xs"></i></div>';
+            body += '<div><p class="text-xs text-gray-400">Сделка</p><p class="font-semibold text-gray-900">' + (props.deal_number || '') + '</p></div>';
+            body += '</div>';
+            body += '<div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">';
+            body += '<div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm"><i class="fas fa-user text-gray-400 text-xs"></i></div>';
+            body += '<div><p class="text-xs text-gray-400">Клиент</p><p class="font-semibold text-gray-900">' + (props.client_name || '—') + '</p></div>';
+            body += '</div>';
+            if (props.description) {
+                body += '<p class="text-gray-500 text-xs px-1">' + props.description + '</p>';
+            }
+            if (isTask) {
+                body += '<div class="flex items-center gap-2 mt-1">';
+                body += '<span class="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-50 text-amber-700 text-xs rounded-lg font-medium"><i class="fas fa-flag text-[10px]"></i>' + (props.priority_label || 'Обычный') + '</span>';
+                body += '<span class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-[#0088CC] text-xs rounded-lg font-medium"><i class="fas fa-tasks text-[10px]"></i>Задача</span>';
+                if (props.is_overdue) {
+                    body += '<span class="inline-flex items-center gap-1 px-2.5 py-1 bg-red-50 text-red-600 text-xs rounded-lg font-semibold"><i class="fas fa-exclamation-triangle text-[10px]"></i>Просрочена</span>';
+                }
+                body += '</div>';
+            } else {
+                body += '<span class="inline-flex items-center gap-1 mt-1 px-2.5 py-1 bg-blue-50 text-[#0088CC] text-xs rounded-lg font-medium"><i class="fas fa-handshake text-[10px]"></i>Сделка — ' + (props.priority_label || '') + '</span>';
+            }
+
+            document.getElementById('taskModalBody').innerHTML = body;
+            document.getElementById('taskModalLink').href = '/manager/deals/' + props.deal_id;
+            document.getElementById('taskModal').classList.remove('hidden');
+        },
+        height: 'auto',
+        dayMaxEvents: 3,
+        firstDay: 1,
+        eventDisplay: 'block',
+        dayHeaderFormat: { weekday: 'short' }
+    });
+    calendar.render();
+
+    // Mobile check-in dropdown logic
+    window.toggleHeaderCheckinDropdown = function(event) {
+        event.stopPropagation();
+        const dropdown = document.getElementById('headerCheckinDropdown');
+        dropdown.classList.toggle('hidden');
+        
+        const closeDropdown = (e) => {
+            if (!dropdown.contains(e.target)) {
+                dropdown.classList.add('hidden');
+                document.removeEventListener('click', closeDropdown);
+            }
+        };
+        setTimeout(() => document.addEventListener('click', closeDropdown), 10);
+    };
+
+    window.doHeaderCheckin = function() {
+        fetch('/manager/api/checkin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token() }}' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    };
+
+    document.getElementById('taskModal').addEventListener('click', function(e) {
+        if (e.target === this || e.target === this.firstElementChild) {
+            this.classList.add('hidden');
+        }
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.getElementById('taskModal').classList.add('hidden');
+        }
+    });
+
+    var overdueFilterActive = false;
+    var prevCalendarView = null;
+
+    window.filterOverdue = function() {
+        if (overdueFilterActive) {
+            resetOverdueFilter();
+            return;
+        }
+        overdueFilterActive = true;
+        prevCalendarView = calendar.view.type;
+        calendar.changeView('listYear');
+        calendar.getEvents().forEach(function(ev) {
+            ev.setProp('display', ev.extendedProps.is_overdue ? 'auto' : 'none');
+        });
+        var btn = document.querySelector('.overdue-filter-btn');
+        if (btn) { btn.textContent = 'Сбросить'; btn.classList.add('bg-red-600'); btn.classList.remove('bg-red-500'); }
+    };
+
+    window.resetOverdueFilter = function() {
+        overdueFilterActive = false;
+        calendar.changeView(prevCalendarView || 'dayGridMonth');
+        calendar.getEvents().forEach(function(ev) {
+            ev.setProp('display', 'auto');
+        });
+        var btn = document.querySelector('.overdue-filter-btn');
+        if (btn) { btn.textContent = 'Показать'; btn.classList.remove('bg-red-600'); btn.classList.add('bg-red-500'); }
+        prevCalendarView = null;
+    };
+});
+</script>
+
+<style>
+@media (max-width: 767px) {
+    #calendar { padding-bottom: 80px; }
+    .fc .fc-toolbar { flex-wrap: wrap; gap: 4px; }
+    .fc .fc-toolbar-title { font-size: 1rem !important; }
+    .fc .fc-button { padding: 4px 8px !important; font-size: 12px !important; }
+    .calendar-page-content { display: flex; flex-direction: column; }
+    .calendar-stats-section { order: 2; }
+    .calendar-widget-section { order: 1; }
+    .stat-card { padding: 0.75rem !important; border-radius: 12px !important; }
+    .stat-value { font-size: 1.25rem !important; }
+    .stat-label { font-size: 0.625rem !important; }
+    .stat-icon { width: 2rem !important; height: 2rem !important; font-size: 0.75rem !important; }
+    .overdue-banner { margin-bottom: 0.75rem; padding: 0.75rem !important; border-radius: 12px !important; font-size: 0.75rem; }
+    .task-legend { flex-wrap: wrap; gap: 4px !important; }
+    .legend-item { font-size: 0.625rem !important; }
+    body > footer, body > .footer, #footer-section { display: none !important; }
+    header, #header-section, .site-header { display: none !important; }
+    .calendar-top-header { display: none !important; }
+    .calendar-tab-nav { display: none !important; }
+    .max-w-7xl { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
+    .calendar-page-content > .flex.items-center.justify-between.mb-5 h1 { font-size: 1.125rem !important; }
+    .calendar-page-content > .flex.items-center.justify-between.mb-5 p { font-size: 0.6875rem !important; }
+    .calendar-page-content > .flex.items-center.justify-between.mb-5 { margin-bottom: 0.75rem !important; }
+}
+</style>
+{% set active_tab = 'deals' %}
+{% include 'components/manager_mobile_nav.html' %}
+{% endblock %}

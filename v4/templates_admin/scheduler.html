@@ -1,0 +1,137 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Планировщик задач — Админ{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-6">
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Фоновые задачи</h1>
+            <p class="text-sm text-gray-500 mt-1">Управление автоматическими процессами системы</p>
+        </div>
+        <div class="flex items-center gap-2">
+            {% if is_running %}
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                Планировщик активен
+            </span>
+            {% else %}
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-100 text-red-600 rounded-full text-sm font-medium">
+                <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                Планировщик остановлен
+            </span>
+            {% endif %}
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="mb-4 p-4 rounded-lg {% if category == 'success' %}bg-green-50 text-green-700 border border-green-200{% elif category == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-blue-50 text-blue-700 border border-blue-200{% endif %}">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    {% if not is_running %}
+    <div class="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-6">
+        <div class="flex items-start gap-3">
+            <i class="fas fa-exclamation-triangle text-amber-500 mt-0.5"></i>
+            <div>
+                <h3 class="font-semibold text-amber-800">Планировщик не запущен</h3>
+                <p class="text-sm text-amber-700 mt-1">Переменная окружения <code class="bg-amber-100 px-1 rounded">ENABLE_SCHEDULER</code> должна быть установлена в <code class="bg-amber-100 px-1 rounded">true</code>. После изменения необходим перезапуск приложения.</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="px-5 py-4 border-b border-gray-200 bg-gray-50">
+            <h2 class="font-semibold text-gray-800">Запланированные задачи</h2>
+        </div>
+        
+        {% if jobs %}
+        <div class="divide-y divide-gray-100">
+            {% for job in jobs %}
+            <div class="p-5 hover:bg-gray-50 transition-colors">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-1">
+                            {% if 'overdue' in job.id %}
+                            <i class="fas fa-exclamation-circle text-red-500"></i>
+                            {% elif 'reminder' in job.id %}
+                            <i class="fas fa-bell text-amber-500"></i>
+                            {% elif 'instant' in job.id %}
+                            <i class="fas fa-bolt text-[#0088CC]"></i>
+                            {% elif 'daily' in job.id %}
+                            <i class="fas fa-envelope text-green-500"></i>
+                            {% elif 'weekly' in job.id %}
+                            <i class="fas fa-calendar-week text-indigo-500"></i>
+                            {% else %}
+                            <i class="fas fa-cog text-gray-400"></i>
+                            {% endif %}
+                            <h3 class="font-medium text-gray-900">{{ job.name }}</h3>
+                        </div>
+                        <div class="flex items-center gap-4 text-xs text-gray-500 ml-8">
+                            <span><i class="fas fa-clock mr-1"></i>Следующий запуск: {{ job.next_run }}</span>
+                            <span><i class="fas fa-sync-alt mr-1"></i>{{ job.trigger }}</span>
+                        </div>
+                    </div>
+                    <form method="POST" action="{{ url_for('admin_scheduler_run_job') }}" class="flex-shrink-0">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="job_id" value="{{ job.id }}">
+                        <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#0088CC] text-white text-xs font-medium rounded-lg hover:bg-[#006699] transition-colors" onclick="return confirm('Запустить задачу вручную?')">
+                            <i class="fas fa-play text-[10px]"></i>
+                            Запустить
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="p-8 text-center text-gray-400">
+            <i class="fas fa-inbox text-3xl mb-3 block"></i>
+            <p class="text-sm">Нет запланированных задач</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="mt-6 bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+        <h3 class="font-semibold text-gray-800 mb-3">Описание задач</h3>
+        <div class="space-y-3 text-sm text-gray-600">
+            <div class="flex items-start gap-3">
+                <i class="fas fa-bell text-amber-500 mt-0.5 w-4 text-center"></i>
+                <div>
+                    <span class="font-medium text-gray-800">Напоминания о задачах</span> — проверяет каждые 5 минут, есть ли задачи, которые наступят через 30 минут. Создаёт уведомление менеджеру.
+                </div>
+            </div>
+            <div class="flex items-start gap-3">
+                <i class="fas fa-exclamation-circle text-red-500 mt-0.5 w-4 text-center"></i>
+                <div>
+                    <span class="font-medium text-gray-800">Просроченные задачи</span> — проверяет каждые 10 минут, есть ли просроченные задачи. Создаёт уведомление менеджеру (не чаще 1 раза в 24 часа на задачу).
+                </div>
+            </div>
+            <div class="flex items-start gap-3">
+                <i class="fas fa-bolt text-[#0088CC] mt-0.5 w-4 text-center"></i>
+                <div>
+                    <span class="font-medium text-gray-800">Моментальные оповещения</span> — проверяет каждые 5 минут новые объекты и отправляет мгновенные уведомления подписчикам.
+                </div>
+            </div>
+            <div class="flex items-start gap-3">
+                <i class="fas fa-envelope text-green-500 mt-0.5 w-4 text-center"></i>
+                <div>
+                    <span class="font-medium text-gray-800">Ежедневный дайджест</span> — отправляет ежедневную подборку новых объектов в 8:00 утра.
+                </div>
+            </div>
+            <div class="flex items-start gap-3">
+                <i class="fas fa-calendar-week text-indigo-500 mt-0.5 w-4 text-center"></i>
+                <div>
+                    <span class="font-medium text-gray-800">Еженедельный дайджест</span> — отправляет еженедельную подборку каждый понедельник в 8:00 утра.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

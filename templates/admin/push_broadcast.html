@@ -1,0 +1,293 @@
+{% extends 'admin/base.html' %}
+{% block title %}Push-рассылки — InBack Admin{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-6 space-y-6">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-xl font-bold text-gray-900">Push-рассылки</h1>
+      <p class="text-sm text-gray-500 mt-0.5">Отправка push-уведомлений пользователям и менеджерам</p>
+    </div>
+    <a href="{{ url_for('adm.admin_push_history') }}" class="text-sm text-[#0088CC] hover:underline flex items-center gap-1">
+      <i class="fas fa-history"></i> История рассылок
+    </a>
+  </div>
+
+  <!-- Stats bar -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="statCards">
+    <div class="bg-white rounded-xl border border-gray-100 p-4 text-center">
+      <div class="text-2xl font-bold text-gray-900" id="statTotal">—</div>
+      <div class="text-xs text-gray-500 mt-0.5">Всего подписок</div>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-100 p-4 text-center">
+      <div class="text-2xl font-bold text-[#0088CC]" id="statUsers">—</div>
+      <div class="text-xs text-gray-500 mt-0.5">Пользователи</div>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-100 p-4 text-center">
+      <div class="text-2xl font-bold text-green-600" id="statManagers">—</div>
+      <div class="text-xs text-gray-500 mt-0.5">Менеджеры</div>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-100 p-4 text-center">
+      <div class="text-2xl font-bold text-gray-400" id="statGuests">—</div>
+      <div class="text-xs text-gray-500 mt-0.5">Гости</div>
+    </div>
+  </div>
+
+  <!-- Compose form -->
+  <div class="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+    <div class="text-sm font-semibold text-gray-800 flex items-center gap-2">
+      <span class="w-6 h-6 rounded-lg flex items-center justify-center text-white text-xs" style="background:linear-gradient(135deg,#0088CC,#006699)">
+        <i class="fas fa-paper-plane"></i>
+      </span>
+      Новая рассылка
+    </div>
+
+    <!-- Title -->
+    <div>
+      <label class="block text-xs font-medium text-gray-700 mb-1">Заголовок <span class="text-red-500">*</span></label>
+      <input type="text" id="pushTitle" maxlength="80" placeholder="Акция! Кешбэк до 10% на новостройки"
+             class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0088CC]">
+      <div class="text-xs text-gray-400 mt-1 text-right"><span id="titleLen">0</span>/80</div>
+    </div>
+
+    <!-- Body -->
+    <div>
+      <label class="block text-xs font-medium text-gray-700 mb-1">Текст уведомления <span class="text-red-500">*</span></label>
+      <textarea id="pushBody" maxlength="200" rows="3" placeholder="Только до 31 мая — повышенный кешбэк при бронировании квартиры..."
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0088CC] resize-none"></textarea>
+      <div class="text-xs text-gray-400 mt-1 text-right"><span id="bodyLen">0</span>/200</div>
+    </div>
+
+    <!-- URL -->
+    <div>
+      <label class="block text-xs font-medium text-gray-700 mb-1">Ссылка при нажатии</label>
+      <input type="text" id="pushUrl" placeholder="/krasnodar/novostrojki" value="/"
+             class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0088CC]">
+    </div>
+
+    <!-- Icon emoji / badge -->
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Эмодзи в заголовке</label>
+        <div class="flex flex-wrap gap-2">
+          {% for em in ['🔔','🏠','💰','🎁','⭐','🔥','📢','🏆','💎','🚀'] %}
+          <button type="button" class="emoji-btn w-9 h-9 rounded-lg border border-gray-200 text-lg hover:border-[#0088CC] transition-colors"
+                  data-emoji="{{ em }}" onclick="pickEmoji(this)">{{ em }}</button>
+          {% endfor %}
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Предпросмотр</label>
+        <div class="bg-gray-50 rounded-xl p-3 border border-gray-100 flex items-start gap-3">
+          <div class="w-10 h-10 rounded-xl flex-shrink-0 bg-gradient-to-br from-[#0088CC] to-[#006699] flex items-center justify-center">
+            <img src="/static/images/icon-192.png" class="w-8 h-8 rounded-lg">
+          </div>
+          <div class="min-w-0">
+            <div id="previewTitle" class="text-xs font-semibold text-gray-900 truncate">Заголовок появится здесь</div>
+            <div id="previewBody" class="text-xs text-gray-500 mt-0.5 line-clamp-2">Текст уведомления</div>
+            <div class="text-xs text-gray-400 mt-0.5">inback.ru · сейчас</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Target audience -->
+    <div>
+      <label class="block text-xs font-medium text-gray-700 mb-2">Аудитория</label>
+      <div class="flex flex-wrap gap-2">
+        <label class="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 cursor-pointer hover:border-[#0088CC] transition-colors has-[:checked]:border-[#0088CC] has-[:checked]:bg-blue-50">
+          <input type="radio" name="pushTarget" value="all" checked class="accent-[#0088CC]">
+          <span class="text-sm">Все (<span id="tAll">—</span>)</span>
+        </label>
+        <label class="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 cursor-pointer hover:border-[#0088CC] transition-colors has-[:checked]:border-[#0088CC] has-[:checked]:bg-blue-50">
+          <input type="radio" name="pushTarget" value="all_users" class="accent-[#0088CC]">
+          <span class="text-sm">Пользователи (<span id="tUsers">—</span>)</span>
+        </label>
+        <label class="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 cursor-pointer hover:border-[#0088CC] transition-colors has-[:checked]:border-[#0088CC] has-[:checked]:bg-blue-50">
+          <input type="radio" name="pushTarget" value="all_managers" class="accent-[#0088CC]">
+          <span class="text-sm">Менеджеры (<span id="tManagers">—</span>)</span>
+        </label>
+        <label class="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 cursor-pointer hover:border-[#0088CC] transition-colors has-[:checked]:border-[#0088CC] has-[:checked]:bg-blue-50">
+          <input type="radio" name="pushTarget" value="guests" class="accent-[#0088CC]">
+          <span class="text-sm">Гости (<span id="tGuests">—</span>)</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Notification type hint -->
+    <div class="bg-blue-50 rounded-lg p-3 text-xs text-blue-700">
+      <i class="fas fa-info-circle mr-1"></i>
+      Рассылка придёт только тем, кто <strong>разрешил уведомления</strong> в браузере или PWA-приложении.
+      Пользователи с отключёнными маркетинговыми уведомлениями — пропускаются.
+    </div>
+
+    <!-- Send button -->
+    <div class="flex items-center gap-3 pt-2">
+      <button type="button" id="sendBtn" onclick="sendBroadcast()"
+              class="px-6 py-2.5 rounded-xl text-sm font-semibold text-white flex items-center gap-2"
+              style="background:linear-gradient(135deg,#0088CC,#006699)">
+        <i class="fas fa-paper-plane"></i> Отправить рассылку
+      </button>
+      <button type="button" onclick="sendBroadcast(true)"
+              class="px-4 py-2.5 rounded-xl text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50">
+        <i class="fas fa-eye mr-1"></i> Тест (только мне)
+      </button>
+    </div>
+
+    <!-- Result -->
+    <div id="broadcastResult" class="hidden rounded-lg px-4 py-3 text-sm font-medium"></div>
+  </div>
+
+  <!-- Presets -->
+  <div class="bg-white rounded-xl border border-gray-200 p-5">
+    <div class="text-sm font-semibold text-gray-800 mb-3">
+      <i class="fas fa-magic text-[#0088CC] mr-1"></i> Готовые шаблоны
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      {% set presets = [
+        ('🎁 Повышенный кешбэк', 'Только эту неделю — кешбэк до 10% при бронировании новостройки через InBack!', '/'),
+        ('🏠 Новые объекты', 'Появились новые квартиры по вашему запросу. Успейте первыми!', '/krasnodar/novostrojki'),
+        ('💰 Снижение цены', 'На 3 объекта из вашего избранного снизилась цена. Смотрите сейчас!', '/dashboard#favorites'),
+        ('📢 Специальное предложение', 'Эксклюзивное предложение от застройщика — только для клиентов InBack.', '/'),
+        ('⭐ Оставьте отзыв', 'Ваше мнение важно! Оставьте отзыв о нашем сервисе и получите бонус.', '/reviews'),
+        ('🔔 Напоминание', 'Не забудьте — вы оставляли заявку. Свяжитесь с менеджером для следующего шага.', '/dashboard'),
+      ] %}
+      {% for title, body, url in presets %}
+      <button type="button" onclick="applyPreset({{ title|tojson }}, {{ body|tojson }}, {{ url|tojson }})"
+              class="text-left px-3 py-2.5 rounded-lg border border-gray-100 hover:border-[#0088CC] hover:bg-blue-50 transition-all group">
+        <div class="text-sm font-medium text-gray-800 group-hover:text-[#0088CC]">{{ title }}</div>
+        <div class="text-xs text-gray-400 mt-0.5 truncate">{{ body[:60] }}…</div>
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Broadcast history -->
+  <div class="bg-white rounded-xl border border-gray-200">
+    <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+      <div class="text-sm font-semibold text-gray-800">
+        <i class="fas fa-history text-gray-400 mr-1"></i> Последние рассылки
+      </div>
+    </div>
+    <div id="historyList" class="divide-y divide-gray-50">
+      {% if history %}
+        {% for h in history %}
+        <div class="px-5 py-4 flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <div class="text-sm font-medium text-gray-900">{{ h.title }}</div>
+            <div class="text-xs text-gray-500 mt-0.5 truncate">{{ h.body }}</div>
+            <div class="text-xs text-gray-400 mt-1">
+              {{ h.sent_at.strftime('%d.%m.%Y %H:%M') }} ·
+              Доставлено: <strong class="text-gray-700">{{ h.delivered }}</strong> ·
+              Ошибок: {{ h.failed }}
+            </div>
+          </div>
+          <span class="flex-shrink-0 text-xs px-2 py-0.5 rounded-full
+            {% if h.target == 'all' %}bg-blue-50 text-blue-700
+            {% elif h.target == 'all_users' %}bg-green-50 text-green-700
+            {% elif h.target == 'all_managers' %}bg-yellow-50 text-yellow-700
+            {% else %}bg-gray-50 text-gray-600{% endif %}">
+            {{ {'all':'Все','all_users':'Пользователи','all_managers':'Менеджеры','guests':'Гости'}.get(h.target, h.target) }}
+          </span>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="px-5 py-8 text-center text-sm text-gray-400">
+          <i class="fas fa-bell-slash text-2xl mb-2 block"></i>
+          Рассылок ещё не было
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+<script>
+var _csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+var _pickedEmoji = '';
+
+/* Load stats */
+fetch('/api/admin/push-stats', {headers: {'X-Requested-With': 'XMLHttpRequest'}})
+.then(function(r){ return r.ok ? r.json() : null; })
+.then(function(d) {
+  if (!d) return;
+  document.getElementById('statTotal').textContent    = d.total || 0;
+  document.getElementById('statUsers').textContent    = d.users || 0;
+  document.getElementById('statManagers').textContent = d.managers || 0;
+  document.getElementById('statGuests').textContent   = d.guests || 0;
+  document.getElementById('tAll').textContent         = d.total || 0;
+  document.getElementById('tUsers').textContent       = d.users || 0;
+  document.getElementById('tManagers').textContent    = d.managers || 0;
+  document.getElementById('tGuests').textContent      = d.guests || 0;
+}).catch(function(){});
+
+/* Live preview + counters */
+document.getElementById('pushTitle').addEventListener('input', function() {
+  document.getElementById('titleLen').textContent = this.value.length;
+  document.getElementById('previewTitle').textContent = this.value || 'Заголовок появится здесь';
+});
+document.getElementById('pushBody').addEventListener('input', function() {
+  document.getElementById('bodyLen').textContent = this.value.length;
+  document.getElementById('previewBody').textContent = this.value || 'Текст уведомления';
+});
+
+function pickEmoji(btn) {
+  document.querySelectorAll('.emoji-btn').forEach(function(b){ b.classList.remove('border-[#0088CC]','bg-blue-50'); });
+  btn.classList.add('border-[#0088CC]', 'bg-blue-50');
+  _pickedEmoji = btn.dataset.emoji;
+  var t = document.getElementById('pushTitle').value.replace(/^[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\s]*/u,'').trim();
+  document.getElementById('pushTitle').value = _pickedEmoji + ' ' + t;
+  document.getElementById('pushTitle').dispatchEvent(new Event('input'));
+}
+
+function applyPreset(title, body, url) {
+  document.getElementById('pushTitle').value = title;
+  document.getElementById('pushBody').value = body;
+  document.getElementById('pushUrl').value = url;
+  document.getElementById('pushTitle').dispatchEvent(new Event('input'));
+  document.getElementById('pushBody').dispatchEvent(new Event('input'));
+}
+
+function sendBroadcast(testOnly) {
+  var title = document.getElementById('pushTitle').value.trim();
+  var body  = document.getElementById('pushBody').value.trim();
+  if (!title || !body) { alert('Заполните заголовок и текст'); return; }
+
+  var target = testOnly ? 'self' : document.querySelector('input[name="pushTarget"]:checked').value;
+  var btn = document.getElementById('sendBtn');
+  var orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Отправляю…';
+
+  fetch('/admin/push-broadcast/send', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json', 'X-CSRFToken': _csrf},
+    body: JSON.stringify({
+      title:  title,
+      body:   body,
+      url:    document.getElementById('pushUrl').value || '/',
+      target: target,
+    }),
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d) {
+    var res = document.getElementById('broadcastResult');
+    res.className = 'rounded-lg px-4 py-3 text-sm font-medium';
+    if (d.ok) {
+      res.className += ' bg-green-50 text-green-700';
+      res.textContent = '✓ ' + (testOnly ? 'Тест отправлен. ' : 'Рассылка выполнена. ') +
+        'Доставлено: ' + d.sent + ' устройств' + (d.failed ? ' (ошибки: ' + d.failed + ')' : '');
+      if (!testOnly) setTimeout(function(){ window.location.reload(); }, 2000);
+    } else {
+      res.className += ' bg-red-50 text-red-700';
+      res.textContent = '✗ Ошибка: ' + (d.error || 'unknown');
+    }
+    res.classList.remove('hidden');
+  })
+  .catch(function(e){ alert('Сетевая ошибка: ' + e); })
+  .finally(function(){ btn.disabled=false; btn.innerHTML=orig; });
+}
+</script>
+{% endblock %}

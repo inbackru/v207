@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>500 - Ошибка сервера | InBack</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-6">
+    <div class="relative max-w-5xl mx-auto w-full">
+        <!-- Фоновая цифра 500 -->
+        <div class="absolute inset-0 w-full h-full flex items-center justify-center overflow-hidden opacity-[0.04] select-none pointer-events-none">
+            <span class="text-[600px] font-bold text-gray-900 leading-none" style="font-family: system-ui, -apple-system, sans-serif;">500</span>
+        </div>
+        
+        <div class="relative text-center z-10 pt-52">
+            <div class="mb-6">
+                <i class="fas fa-exclamation-circle text-6xl text-red-500"></i>
+            </div>
+            <h1 class="mt-4 text-5xl sm:text-7xl font-bold tracking-tight text-gray-900">
+                Ошибка сервера
+            </h1>
+            <p class="mt-6 text-lg sm:text-xl font-medium text-gray-600">
+                Произошла внутренняя ошибка сервера. Мы уже работаем над её устранением.
+            </p>
+            
+            <div class="mt-10 flex flex-col sm:flex-row gap-3 sm:gap-2 mx-auto sm:max-w-md">
+                <div class="relative flex-1">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                    <input 
+                        type="text" 
+                        id="search-input"
+                        placeholder="Поиск квартир..."
+                        class="w-full h-10 pl-10 pr-3 rounded-lg border border-gray-300 shadow-sm focus:border-[#0088CC] focus:outline-none focus:ring-2 focus:ring-[#0088CC]/20 transition-all"
+                    >
+                </div>
+                <button 
+                    onclick="performSearch()"
+                    class="h-10 px-6 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium shadow-sm hover:bg-gray-50 transition-colors"
+                >
+                    Найти
+                </button>
+            </div>
+            
+            <div class="mt-6">
+                <button 
+                    onclick="location.reload()"
+                    class="h-10 px-6 bg-gray-100 border border-gray-300 text-gray-700 rounded-lg font-medium shadow-sm hover:bg-gray-200 transition-colors inline-flex items-center gap-2"
+                >
+                    <i class="fas fa-sync-alt"></i>
+                    Обновить страницу
+                </button>
+            </div>
+            
+            <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6">
+                <button 
+                    onclick="history.back()"
+                    class="group h-10 px-6 bg-gray-200 text-gray-700 rounded-lg font-medium shadow-sm hover:bg-gray-300 transition-all flex items-center gap-2"
+                >
+                    <i class="fas fa-arrow-left opacity-60 transition-transform group-hover:-translate-x-0.5"></i>
+                    Назад
+                </button>
+                <a 
+                    href="/"
+                    class="order-first sm:order-none h-10 px-8 bg-gradient-to-r from-[#0088CC] to-[#006699] text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all flex items-center"
+                >
+                    На главную
+                </a>
+            </div>
+            
+            <div class="mt-10 text-sm text-gray-500">
+                <p>Если проблема повторяется, свяжитесь с нами:</p>
+                <a href="tel:88622666216" class="text-[#0088CC] hover:underline">
+                    <i class="fas fa-phone mr-1"></i>
+                    8 (862) 266-62-16
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function performSearch() {
+            const query = document.getElementById('search-input').value.trim();
+            if (query) {
+                window.location.href = '/properties?search=' + encodeURIComponent(query);
+            } else {
+                window.location.href = '/properties';
+            }
+        }
+        
+        document.getElementById('search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    </script>
+</body>
+</html>

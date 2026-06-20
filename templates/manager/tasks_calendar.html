@@ -1,0 +1,748 @@
+{% extends "base.html" %}
+
+{% block title %}Календарь задач | InBack{% endblock %}
+
+{% block head %}
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css' rel='stylesheet' />
+{% endblock %}
+
+{% block content %}
+<style>
+header { display: none !important; }
+body > footer, body > .footer, #footer-section, #contactStrip { display: none !important; }
+body { padding-top: 0 !important; }
+:root { --brand: #0088CC; --brand-dark: #006699; }
+
+.fc { font-family: inherit; }
+.fc .fc-button-primary {
+    background-color: var(--brand) !important;
+    border-color: var(--brand) !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    padding: 6px 14px !important;
+    text-transform: none !important;
+    box-shadow: 0 1px 3px rgba(0,136,204,0.2) !important;
+    transition: all 0.2s !important;
+}
+.fc .fc-button-primary:hover {
+    background-color: var(--brand-dark) !important;
+    box-shadow: 0 2px 6px rgba(0,136,204,0.3) !important;
+}
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+    background-color: var(--brand-dark) !important;
+    border-color: var(--brand-dark) !important;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.15) !important;
+}
+.fc .fc-button-group > .fc-button { border-radius: 0 !important; }
+.fc .fc-button-group > .fc-button:first-child { border-radius: 8px 0 0 8px !important; }
+.fc .fc-button-group > .fc-button:last-child { border-radius: 0 8px 8px 0 !important; }
+.fc .fc-today-button:disabled { opacity: 0.4; }
+.fc .fc-toolbar-title {
+    font-size: 1.3em !important;
+    font-weight: 700 !important;
+    color: #1f2937 !important;
+}
+.fc-event {
+    cursor: pointer !important;
+    border-radius: 6px !important;
+    padding: 3px 8px !important;
+    font-size: 12px !important;
+    border: none !important;
+    font-weight: 500 !important;
+    transition: transform 0.15s, box-shadow 0.15s !important;
+}
+.fc-event:hover {
+    transform: scale(1.02) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+}
+.fc .fc-daygrid-day.fc-day-today {
+    background: linear-gradient(135deg, #f0f9ff, #e0f2fe) !important;
+}
+.fc .fc-daygrid-day-number {
+    font-weight: 600;
+    font-size: 13px;
+    padding: 8px !important;
+    color: #374151;
+}
+.fc .fc-day-today .fc-daygrid-day-number {
+    background: var(--brand);
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 4px;
+    padding: 0 !important;
+}
+.fc .fc-col-header-cell {
+    background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748b;
+    padding: 10px 0 !important;
+}
+.fc .fc-col-header-cell-cushion {
+    color: #64748b !important;
+    text-decoration: none !important;
+}
+.fc-h-event .fc-event-title { font-weight: 600; }
+.fc th, .fc td { border-color: #f1f5f9 !important; }
+.fc .fc-scrollgrid {
+    border-color: #e2e8f0 !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+}
+.fc .fc-toolbar.fc-header-toolbar { margin-bottom: 16px !important; }
+
+.calendar-fullpage {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 96px);
+    overflow: hidden;
+}
+
+.calendar-stats-bar {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+}
+.mini-stat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: white;
+    border-radius: 10px;
+    border: 1px solid #f1f5f9;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.mini-stat-value { font-weight: 800; }
+
+.calendar-legend-bar {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    align-items: center;
+    flex-shrink: 0;
+}
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 500;
+}
+.legend-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+}
+
+.overdue-banner {
+    background: linear-gradient(135deg, #fef2f2, #fee2e2);
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    animation: pulse-border 2s infinite;
+}
+@keyframes pulse-border {
+    0%, 100% { border-color: #fecaca; }
+    50% { border-color: #f87171; }
+}
+
+.calendar-main-area {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    background: white;
+    border-radius: 14px;
+    border: 1px solid #f1f5f9;
+    padding: 16px;
+}
+
+.fc .fc-daygrid-day-frame { min-height: 90px; }
+
+@media (min-width: 768px) {
+    .calendar-fullpage {
+        height: calc(100vh - 90px);
+    }
+    .fc .fc-view-harness {
+        height: 100% !important;
+    }
+}
+
+@media (max-width: 767px) {
+    .kanban-top-header { display: none !important; }
+    .kanban-tab-section { display: none !important; }
+    header, #header-section, .site-header { display: none !important; }
+    body > footer, body > .footer, #footer-section, #contactStrip { display: none !important; }
+
+    .calendar-fullpage {
+        height: auto;
+        min-height: 0;
+        flex: 1;
+        padding: 0 !important;
+        gap: 0 !important;
+        overflow: hidden;
+    }
+    .calendar-outer-mobile {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 64px);
+        overflow: hidden;
+    }
+
+    .calendar-desktop-header { display: none !important; }
+
+    .mobile-calendar-header {
+        display: flex !important;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        background: white;
+        border-bottom: 1px solid #f1f5f9;
+        flex-shrink: 0;
+    }
+
+    .mobile-stats-row {
+        display: flex !important;
+        gap: 6px;
+        padding: 8px 14px;
+        background: #f8fafc;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        flex-shrink: 0;
+    }
+    .mobile-stats-row::-webkit-scrollbar { display: none; }
+    .mobile-stat-chip {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 5px 10px;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    .mobile-stat-chip.overdue-chip {
+        background: #fef2f2;
+        border-color: #fecaca;
+        color: #dc2626;
+    }
+
+    .calendar-stats-bar { display: none !important; }
+    .overdue-banner { display: none !important; }
+    .calendar-legend-desktop { display: none !important; }
+
+    .calendar-main-area {
+        border-radius: 0 !important;
+        border: none !important;
+        padding: 6px 8px !important;
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .fc .fc-toolbar.fc-header-toolbar {
+        margin-bottom: 8px !important;
+        padding: 0 !important;
+    }
+    .fc .fc-toolbar-title {
+        font-size: 1.05rem !important;
+        text-transform: capitalize !important;
+    }
+    .fc .fc-prev-button,
+    .fc .fc-next-button {
+        width: 40px !important;
+        height: 40px !important;
+        padding: 0 !important;
+        border-radius: 10px !important;
+        background: #f1f5f9 !important;
+        border-color: #e2e8f0 !important;
+        color: #374151 !important;
+        box-shadow: none !important;
+    }
+    .fc .fc-prev-button:active,
+    .fc .fc-next-button:active {
+        background: var(--brand) !important;
+        border-color: var(--brand) !important;
+        color: white !important;
+    }
+    .fc .fc-today-button { display: none !important; }
+    .fc .fc-icon { font-size: 1em !important; }
+
+    .fc .fc-daygrid-day-frame { min-height: 52px !important; }
+    .fc .fc-daygrid-day-number {
+        font-size: 13px !important;
+        padding: 3px 5px !important;
+    }
+    .fc .fc-day-today .fc-daygrid-day-number {
+        width: 26px !important;
+        height: 26px !important;
+        margin: 2px !important;
+    }
+    .fc .fc-col-header-cell {
+        padding: 6px 0 !important;
+        font-size: 10px !important;
+        letter-spacing: 0.3px;
+    }
+    .fc-event {
+        padding: 1px 4px !important;
+        font-size: 9px !important;
+        border-radius: 4px !important;
+        margin-bottom: 1px !important;
+    }
+    .fc .fc-daygrid-event-dot { display: none !important; }
+    .fc .fc-scrollgrid { border-radius: 10px !important; }
+
+    .fc .fc-footer-toolbar {
+        margin-top: 6px !important;
+        justify-content: center !important;
+    }
+    .fc .fc-footer-toolbar .fc-button {
+        background-color: #f1f5f9 !important;
+        border-color: #e2e8f0 !important;
+        color: #64748b !important;
+        font-size: 12px !important;
+        padding: 6px 16px !important;
+        min-height: 36px !important;
+    }
+    .fc .fc-footer-toolbar .fc-button-active {
+        background-color: var(--brand) !important;
+        border-color: var(--brand) !important;
+        color: white !important;
+    }
+
+    .mobile-legend-bar {
+        display: flex !important;
+        gap: 8px;
+        padding: 6px 14px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        background: white;
+        border-top: 1px solid #f1f5f9;
+        flex-shrink: 0;
+    }
+    .mobile-legend-bar::-webkit-scrollbar { display: none; }
+    .mobile-legend-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 10px;
+        color: #6b7280;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    .mobile-legend-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+    }
+}
+
+@media (min-width: 768px) {
+    .mobile-calendar-header { display: none !important; }
+    .mobile-stats-row { display: none !important; }
+    .mobile-legend-bar { display: none !important; }
+    .calendar-outer-mobile {
+        display: block;
+        height: auto;
+        overflow: visible;
+    }
+}
+</style>
+
+{% if sidebar_links is defined and sidebar_links %}
+{% include 'components/sidebar.html' %}
+{% endif %}
+
+<div class="{% if sidebar_links is defined and sidebar_links %}md:ml-[70px]{% endif %} transition-all duration-300 calendar-outer-mobile">
+
+<div class="bg-white border-b border-gray-200 shadow-sm kanban-top-header">
+    <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between py-3">
+            <div class="flex items-center gap-3">
+                <div class="flex w-8 h-8 bg-gradient-to-r from-[#0088CC] to-[#006699] rounded-lg items-center justify-center text-white font-bold text-sm">
+                    In
+                </div>
+                <span class="hidden md:inline font-bold text-gray-900 text-lg">InBack</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="/" class="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-gray-700 px-4 py-2 rounded-full border border-blue-200 transition-colors">
+                    <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    <span class="text-sm font-medium">На сайт</span>
+                </a>
+                <a href="{{ url_for('mgr.manager_dashboard') }}" class="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-gray-700 px-4 py-2 rounded-full border border-blue-200 transition-colors">
+                    <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+                    </svg>
+                    <span class="text-sm font-medium">Дашборд</span>
+                </a>
+                {% if user_profile %}
+                <div class="relative" id="headerAvatarWrapper">
+                    <button onclick="toggleHeaderCheckinDropdown(event)" class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
+                        <div class="relative">
+                            <div class="w-8 h-8 rounded-full overflow-hidden">
+                                {% if user_profile.avatar %}
+                                <img src="{{ user_profile.avatar }}" alt="{{ user_profile.name }}" class="w-full h-full object-cover">
+                                {% else %}
+                                <div class="w-full h-full bg-gradient-to-r from-[#0088CC] to-[#006699] flex items-center justify-center text-white font-bold text-sm">
+                                    {{ user_profile.initials }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div id="headerCheckinIndicator" class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white bg-gray-300"></div>
+                        </div>
+                    </button>
+                    <div id="headerCheckinDropdown" class="hidden absolute right-0 top-full mt-2 w-60 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden">
+                        <div class="px-4 py-3 border-b border-gray-100">
+                            <p class="text-sm font-semibold text-gray-900">{{ user_profile.name }}</p>
+                            <p class="text-xs text-gray-400" id="headerCheckinStatus">Не на работе</p>
+                        </div>
+                        <div class="p-2">
+                            <button id="headerCheckinBtn" onclick="doHeaderCheckin()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all hover:bg-green-50 text-green-700">
+                                <i class="fas fa-sign-in-alt"></i>
+                                <span id="headerCheckinBtnText">На работе</span>
+                            </button>
+                            <a href="{{ url_for('mgr.manager_dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-all">
+                                <i class="fas fa-user"></i>
+                                <span>Профиль</span>
+                            </a>
+                            <a href="{{ url_for('auth.logout') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-600 hover:bg-red-50 transition-all">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Выйти</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bg-white border-b border-gray-200 kanban-tab-section">
+    <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="tab-bar flex">
+            <a href="{{ url_for('mgr.manager_deals_kanban') }}" id="tabKanban" class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent hover:border-gray-300 transition-all">
+                <svg class="w-4 h-4 inline-block mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7"/></svg>
+                Канбан
+            </a>
+            <a href="{{ url_for('mgr.manager_deals_kanban') }}?view=list" id="tabList" class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent hover:border-gray-300 transition-all">
+                <svg class="w-4 h-4 inline-block mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                Список
+            </a>
+            <a href="{{ url_for('mgr.manager_deals_kanban') }}?view=tasks" id="tabTasks" class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent hover:border-gray-300 transition-all">
+                <svg class="w-4 h-4 inline-block mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                Дела
+            </a>
+            <a href="{{ url_for('mgr.manager_tasks_calendar') }}" class="px-4 py-3 text-sm font-medium text-[#0088CC] border-b-2 border-[#0088CC] transition-all">
+                <svg class="w-4 h-4 inline-block mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                Календарь
+            </a>
+            <a href="{{ url_for('mgr.manager_deals_archive') }}" class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent hover:border-gray-300 transition-all">
+                <svg class="w-4 h-4 inline-block mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                Архив
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="mobile-calendar-header" style="display:none;">
+    <a onclick="if(history.length>1){history.back()}else{location.href='{{ url_for("mgr.manager_dashboard") }}'};return false;" href="{{ url_for('mgr.manager_dashboard') }}" class="w-8 h-8 flex items-center justify-center rounded-lg bg-[#0088CC]/10 text-[#0088CC] flex-shrink-0">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    </a>
+    <h1 class="text-sm font-bold text-gray-900 flex-1">Календарь задач</h1>
+</div>
+
+<div class="mobile-stats-row" style="display:none;">
+    <div class="mobile-stat-chip">
+        <svg class="w-3.5 h-3.5 text-[#0088CC]" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/></svg>
+        <span class="text-gray-500">Всего</span>
+        <span class="text-gray-900 font-bold">{{ stats.total }}</span>
+    </div>
+    <div class="mobile-stat-chip">
+        <span class="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0"></span>
+        <span class="text-gray-500">Актив.</span>
+        <span class="text-amber-600 font-bold">{{ stats.active }}</span>
+    </div>
+    {% if stats.overdue > 0 %}
+    <div class="mobile-stat-chip overdue-chip" onclick="filterOverdue()">
+        <span class="w-2 h-2 rounded-full bg-red-500 flex-shrink-0"></span>
+        <span>Проср.</span>
+        <span class="font-bold">{{ stats.overdue }}</span>
+    </div>
+    {% endif %}
+    <div class="mobile-stat-chip">
+        <span class="w-2 h-2 rounded-full bg-green-500 flex-shrink-0"></span>
+        <span class="text-gray-500">Готово</span>
+        <span class="text-green-600 font-bold">{{ stats.completed }}</span>
+    </div>
+</div>
+
+<div class="calendar-fullpage px-4 lg:px-6 py-4 gap-3">
+
+    <div class="calendar-desktop-header flex items-center justify-between flex-shrink-0">
+        <div>
+            <h1 class="text-xl font-bold text-gray-900">Календарь задач</h1>
+        </div>
+        <div class="calendar-stats-bar">
+            <div class="mini-stat">
+                <svg class="w-4 h-4 text-[#0088CC]" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/></svg>
+                <span class="text-gray-500">Всего</span>
+                <span class="mini-stat-value text-gray-900">{{ stats.total }}</span>
+            </div>
+            <div class="mini-stat">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                <span class="text-gray-500">Активных</span>
+                <span class="mini-stat-value text-amber-600">{{ stats.active }}</span>
+            </div>
+            {% if stats.overdue > 0 %}
+            <div class="mini-stat" style="background:#fef2f2; border-color:#fecaca; cursor:pointer;" onclick="filterOverdue()">
+                <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                <span class="text-red-600">Просроченных</span>
+                <span class="mini-stat-value text-red-600">{{ stats.overdue }}</span>
+            </div>
+            {% endif %}
+            <div class="mini-stat">
+                <span class="w-2.5 h-2.5 rounded-full bg-green-500"></span>
+                <span class="text-gray-500">Выполненных</span>
+                <span class="mini-stat-value text-green-600">{{ stats.completed }}</span>
+            </div>
+        </div>
+    </div>
+
+    {% if stats.overdue > 0 %}
+    <div class="overdue-banner">
+        <div class="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center text-white flex-shrink-0">
+            <i class="fas fa-exclamation-triangle text-sm"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+            <p class="text-sm font-bold text-red-800">Просроченных задач: {{ stats.overdue }}</p>
+            <p class="text-xs text-red-600 mt-0.5">Нажмите для просмотра</p>
+        </div>
+        <button onclick="filterOverdue()" class="overdue-filter-btn px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-semibold rounded-lg transition-colors flex-shrink-0">
+            Показать
+        </button>
+    </div>
+    {% endif %}
+
+    <div class="calendar-legend-desktop calendar-legend-bar flex-shrink-0">
+        <div class="legend-item"><span class="legend-dot" style="background:#f59e0b"></span>Активная</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#ef4444"></span>Просроченная</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#10b981"></span>Выполненная</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#6366f1"></span>Высокий приоритет</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#0088CC"></span>Сделка</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#059669"></span>Договор</div>
+    </div>
+
+    <div class="calendar-main-area">
+        <div id="calendar"></div>
+    </div>
+</div>
+
+<div class="mobile-legend-bar" style="display:none;">
+    <div class="mobile-legend-item"><span class="mobile-legend-dot" style="background:#f59e0b"></span>Активная</div>
+    <div class="mobile-legend-item"><span class="mobile-legend-dot" style="background:#ef4444"></span>Просроч.</div>
+    <div class="mobile-legend-item"><span class="mobile-legend-dot" style="background:#10b981"></span>Готова</div>
+    <div class="mobile-legend-item"><span class="mobile-legend-dot" style="background:#6366f1"></span>Приоритет</div>
+    <div class="mobile-legend-item"><span class="mobile-legend-dot" style="background:#0088CC"></span>Сделка</div>
+</div>
+
+</div>
+
+<div id="taskModal" class="hidden fixed inset-0 z-50" style="background: rgba(0,0,0,0.4); backdrop-filter: blur(3px);">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-auto overflow-hidden transform transition-all">
+            <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div id="taskModalIcon" class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-[#0088CC]">
+                        <i class="fas fa-tasks text-sm"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-gray-900" id="taskModalTitle">Задача</h3>
+                </div>
+                <button onclick="document.getElementById('taskModal').classList.add('hidden')" class="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div id="taskModalBody" class="px-5 py-4 text-sm space-y-3"></div>
+            <div class="px-5 py-4 border-t border-gray-100 bg-gray-50">
+                <a id="taskModalLink" href="#" class="flex items-center justify-center gap-2 w-full bg-[#0088CC] text-white py-2.5 rounded-xl hover:bg-[#006699] transition-all text-sm font-semibold shadow-sm">
+                    <i class="fas fa-external-link-alt text-xs"></i>
+                    Открыть сделку
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const events = {{ tasks_json|safe }};
+    const calendarEl = document.getElementById('calendar');
+    var isMobileCalendar = window.innerWidth < 768;
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'ru',
+        headerToolbar: isMobileCalendar ? {
+            left: 'prev',
+            center: 'title',
+            right: 'next'
+        } : {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,listWeek'
+        },
+        footerToolbar: isMobileCalendar ? {
+            center: 'dayGridMonth,listWeek'
+        } : false,
+        buttonText: { today: 'Сегодня', month: 'Месяц', week: 'Неделя', list: 'Список' },
+        events: events,
+        eventClick: function(info) {
+            info.jsEvent.preventDefault();
+            const ev = info.event;
+            const props = ev.extendedProps;
+            const isTask = (props.type === 'task');
+
+            document.getElementById('taskModalTitle').textContent = ev.title;
+
+            const iconEl = document.getElementById('taskModalIcon');
+            if (isTask) {
+                iconEl.className = 'w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600';
+                iconEl.innerHTML = '<i class="fas fa-tasks text-sm"></i>';
+            } else {
+                iconEl.className = 'w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-[#0088CC]';
+                iconEl.innerHTML = '<i class="fas fa-handshake text-sm"></i>';
+            }
+
+            let body = '';
+            body += '<div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">';
+            body += '<div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm"><i class="fas fa-briefcase text-[#0088CC] text-xs"></i></div>';
+            body += '<div><p class="text-xs text-gray-400">Сделка</p><p class="font-semibold text-gray-900">' + (props.deal_number || '') + '</p></div>';
+            body += '</div>';
+            body += '<div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">';
+            body += '<div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm"><i class="fas fa-user text-gray-400 text-xs"></i></div>';
+            body += '<div><p class="text-xs text-gray-400">Клиент</p><p class="font-semibold text-gray-900">' + (props.client_name || '\u2014') + '</p></div>';
+            body += '</div>';
+            if (props.description) {
+                body += '<p class="text-gray-500 text-xs px-1">' + props.description + '</p>';
+            }
+            if (isTask) {
+                body += '<div class="flex items-center gap-2 mt-1">';
+                body += '<span class="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-50 text-amber-700 text-xs rounded-lg font-medium"><i class="fas fa-flag text-[10px]"></i>' + (props.priority_label || '\u041e\u0431\u044b\u0447\u043d\u044b\u0439') + '</span>';
+                body += '<span class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-[#0088CC] text-xs rounded-lg font-medium"><i class="fas fa-tasks text-[10px]"></i>\u0417\u0430\u0434\u0430\u0447\u0430</span>';
+                if (props.is_overdue) {
+                    body += '<span class="inline-flex items-center gap-1 px-2.5 py-1 bg-red-50 text-red-600 text-xs rounded-lg font-semibold"><i class="fas fa-exclamation-triangle text-[10px]"></i>\u041f\u0440\u043e\u0441\u0440\u043e\u0447\u0435\u043d\u0430</span>';
+                }
+                body += '</div>';
+            } else {
+                body += '<span class="inline-flex items-center gap-1 mt-1 px-2.5 py-1 bg-blue-50 text-[#0088CC] text-xs rounded-lg font-medium"><i class="fas fa-handshake text-[10px]"></i>\u0421\u0434\u0435\u043b\u043a\u0430 \u2014 ' + (props.priority_label || '') + '</span>';
+            }
+
+            document.getElementById('taskModalBody').innerHTML = body;
+            document.getElementById('taskModalLink').href = '/manager/deals/' + props.deal_id;
+            document.getElementById('taskModal').classList.remove('hidden');
+        },
+        height: isMobileCalendar ? 'auto' : '100%',
+        contentHeight: isMobileCalendar ? 'auto' : undefined,
+        expandRows: !isMobileCalendar,
+        dayMaxEvents: isMobileCalendar ? 2 : 4,
+        firstDay: 1,
+        eventDisplay: 'block',
+        dayHeaderFormat: { weekday: 'short' }
+    });
+    calendar.render();
+
+    window.toggleHeaderCheckinDropdown = function(event) {
+        event.stopPropagation();
+        const dropdown = document.getElementById('headerCheckinDropdown');
+        dropdown.classList.toggle('hidden');
+        const closeDropdown = (e) => {
+            if (!dropdown.contains(e.target)) {
+                dropdown.classList.add('hidden');
+                document.removeEventListener('click', closeDropdown);
+            }
+        };
+        setTimeout(() => document.addEventListener('click', closeDropdown), 10);
+    };
+
+    window.doHeaderCheckin = function() {
+        fetch('/manager/api/checkin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token() }}' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) { location.reload(); }
+        });
+    };
+
+    document.getElementById('taskModal').addEventListener('click', function(e) {
+        if (e.target === this || e.target === this.firstElementChild) {
+            this.classList.add('hidden');
+        }
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.getElementById('taskModal').classList.add('hidden');
+        }
+    });
+
+    var overdueFilterActive = false;
+    var prevCalendarView = null;
+
+    window.filterOverdue = function() {
+        if (overdueFilterActive) {
+            resetOverdueFilter();
+            return;
+        }
+        overdueFilterActive = true;
+        prevCalendarView = calendar.view.type;
+        calendar.changeView('listYear');
+        calendar.getEvents().forEach(function(ev) {
+            ev.setProp('display', ev.extendedProps.is_overdue ? 'auto' : 'none');
+        });
+        var btn = document.querySelector('.overdue-filter-btn');
+        if (btn) { btn.textContent = '\u0421\u0431\u0440\u043e\u0441\u0438\u0442\u044c'; btn.classList.add('bg-red-600'); btn.classList.remove('bg-red-500'); }
+    };
+
+    window.resetOverdueFilter = function() {
+        overdueFilterActive = false;
+        calendar.changeView(prevCalendarView || 'dayGridMonth');
+        calendar.getEvents().forEach(function(ev) {
+            ev.setProp('display', 'auto');
+        });
+        var btn = document.querySelector('.overdue-filter-btn');
+        if (btn) { btn.textContent = '\u041f\u043e\u043a\u0430\u0437\u0430\u0442\u044c'; btn.classList.remove('bg-red-600'); btn.classList.add('bg-red-500'); }
+        prevCalendarView = null;
+    };
+});
+</script>
+{% set active_tab = 'deals' %}
+{% include 'components/manager_mobile_nav.html' %}
+{% endblock %}

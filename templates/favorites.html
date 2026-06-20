@@ -1,0 +1,1475 @@
+{% extends "base.html" %}
+
+{% block title %}Избранное{% if current_city %} — {{ current_city.name }}{% endif %} | InBack{% endblock %}
+{% block description %}Сохранённые квартиры, ЖК и сравнение объектов. Сравнивайте и выбирайте лучший вариант.{% endblock %}
+
+{% block head_extra %}
+{% if manager_authenticated %}
+<script>window.manager_authenticated = true;</script>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<style>
+/* ── Print / PDF ── */
+@media print {
+  body > *:not(#fav-print-root) { display:none !important; }
+  #fav-print-root { display:block !important; }
+  .no-print { display:none !important; }
+  .print-only { display:block !important; }
+  @page { margin: 15mm 12mm; size: A4 landscape; }
+}
+.print-only { display:none; }
+/* ── Tabs ── */
+.fav-main-tabs { display:flex; gap:0; border-bottom:2px solid #e5e7eb; }
+.fav-main-tab { padding:14px 20px; font-size:14px; font-weight:600; color:#6b7280; border-bottom:2px solid transparent; margin-bottom:-2px; cursor:pointer; transition:all .2s; white-space:nowrap; display:flex; align-items:center; gap:6px; }
+.fav-main-tab:hover { color:#0088CC; }
+.fav-main-tab.active { color:#0088CC; border-bottom-color:#0088CC; }
+.fav-main-tab .tab-badge { background:#0088CC; color:#fff; border-radius:10px; padding:1px 7px; font-size:11px; font-weight:700; }
+/* ── Cards ── */
+.fav-card { transition:box-shadow .18s,transform .18s; }
+.fav-card:hover { box-shadow:0 6px 24px rgba(0,136,204,.12); transform:translateY(-1px); }
+.fav-card-img { width:140px; min-width:140px; height:112px; object-fit:cover; border-radius:12px 0 0 12px; }
+@media(max-width:639px){
+  .fav-card-img { width:100%;min-width:0;height:160px;border-radius:12px 12px 0 0; }
+  .fav-card-body { flex-direction:column!important; }
+}
+.remove-anim { transition:opacity .25s,transform .25s; }
+.remove-anim.removing { opacity:0;transform:scale(.96); }
+/* ── Comparison cards ── */
+.cmp-shelf { display:grid; gap:16px; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); }
+@media(max-width:639px){ .cmp-shelf { grid-template-columns:repeat(2,1fr); gap:10px; } }
+.cmp-card { background:#fff; border-radius:16px; border:1.5px solid #e5e7eb; overflow:hidden; transition:box-shadow .18s; }
+.cmp-card:hover { box-shadow:0 6px 20px rgba(0,136,204,.12); }
+.cmp-card-img { width:100%;height:140px;object-fit:cover; }
+@media(max-width:639px){ .cmp-card-img { height:110px; } }
+.cmp-sub-tab { padding:8px 16px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; transition:all .15s; }
+.cmp-sub-tab.active { background:#0088CC; color:#fff; }
+.cmp-sub-tab:not(.active) { background:#f3f4f6; color:#6b7280; }
+.cmp-sub-tab:not(.active):hover { background:#e5e7eb; }
+/* ── Sort bar ── */
+.fav-sort-bar { display:flex; align-items:center; gap:6px; margin-bottom:14px; flex-wrap:wrap; }
+.fav-sort-btn { padding:4px 12px; border-radius:20px; font-size:12px; font-weight:600; cursor:pointer; transition:all .15s; border:1.5px solid #e5e7eb; color:#6b7280; background:#fff; white-space:nowrap; }
+.fav-sort-btn.active { border-color:#0088CC; color:#0088CC; background:#e8f4fd; }
+.fav-sort-btn:not(.active):hover { border-color:#d1d5db; color:#374151; }
+/* ── Saved search cards ── */
+.ss-card { background:#fff; border-radius:16px; border:1.5px solid #e5e7eb; padding:16px 18px; transition:box-shadow .18s,border-color .18s; }
+.ss-card:hover { box-shadow:0 4px 16px rgba(0,136,204,.1); border-color:#bee3f8; }
+.ss-chip { display:inline-flex; align-items:center; padding:2px 8px; background:#f3f4f6; border-radius:6px; font-size:11px; color:#374151; font-weight:500; gap:3px; }
+.ss-alert-dot { width:7px; height:7px; border-radius:50%; background:#22c55e; flex-shrink:0; }
+</style>
+
+<!-- ── Hero ────────────────────────────────────────────────────────────── -->
+<div style="background:linear-gradient(180deg,#e8f4fd 0%,#f8fbff 60%,#fff 100%);" class="pt-8 pb-0 md:pt-10">
+  <div class="max-w-7xl mx-auto px-4">
+    <!-- Breadcrumb -->
+    <div class="flex items-center gap-1.5 text-sm text-gray-500 mb-4">
+      {% if manager_authenticated %}
+      <a href="{{ url_for('mgr.manager_dashboard') }}" class="hover:text-[#0088CC] transition-colors flex items-center gap-1">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        Панель менеджера
+      </a>
+      {% elif current_city %}
+      <a href="{{ url_for('index', city_slug=current_city.slug) }}" class="hover:text-[#0088CC] transition-colors">Главная</a>
+      <span class="text-gray-300">/</span>
+      <span class="text-gray-700">Избранное</span>
+      {% endif %}
+    </div>
+
+    <!-- Title row -->
+    <div class="flex items-end justify-between gap-4 mb-6">
+      <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 bg-[#0088CC]/10 rounded-full text-xs font-semibold text-[#0088CC] uppercase tracking-wide mb-2">
+          <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/></svg>
+          Избранное
+        </div>
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-900">
+          {% if manager_authenticated %}Рабочая подборка{% else %}Мои объекты{% endif %}
+        </h1>
+        <p class="text-sm text-gray-500 mt-1">
+          {% if manager_authenticated %}Квартиры и ЖК для работы с клиентами — сравнение и подборки
+          {% else %}Сохранённые квартиры, ЖК и сравнение
+          {% endif %}
+        </p>
+      </div>
+      <!-- Sort / Clear action -->
+      <button id="fav-clear-btn" onclick="favClearCurrent()" class="hidden flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border border-red-200 text-red-500 hover:bg-red-50 transition-all">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+        Очистить
+      </button>
+    </div>
+
+    <!-- Main tabs (Циан style) -->
+    <div class="fav-main-tabs overflow-x-auto no-scrollbar">
+      <button class="fav-main-tab active" id="main-tab-btn-properties" onclick="favMainTab('properties')">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+        Квартиры
+        <span class="tab-badge hidden" id="main-badge-properties">0</span>
+      </button>
+      <button class="fav-main-tab" id="main-tab-btn-complexes" onclick="favMainTab('complexes')">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/></svg>
+        ЖК
+        <span class="tab-badge hidden" id="main-badge-complexes">0</span>
+      </button>
+      <button class="fav-main-tab" id="main-tab-btn-comparison" onclick="favMainTab('comparison')">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        Сравнение
+        <span class="tab-badge hidden" id="main-badge-comparison">0</span>
+      </button>
+      {% if not manager_authenticated %}
+      <button class="fav-main-tab" id="main-tab-btn-searches" onclick="favMainTab('searches')">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+        Поиски
+        <span class="tab-badge hidden" id="main-badge-searches">0</span>
+      </button>
+      {% if current_user.is_authenticated %}
+      <button class="fav-main-tab" id="main-tab-btn-collections" onclick="favMainTab('collections')">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+        Подборки
+        <span class="tab-badge hidden" id="main-badge-collections">0</span>
+      </button>
+      {% endif %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- ── Content ──────────────────────────────────────────────────────────── -->
+<div class="bg-gray-50 min-h-screen mobile-pb">
+  <div class="max-w-7xl mx-auto px-4 py-6">
+
+    <!-- Loading -->
+    <div id="fav-loading" class="text-center py-20">
+      <div class="inline-block w-9 h-9 border-[3px] border-[#0088CC] border-t-transparent rounded-full animate-spin mb-4"></div>
+      <p class="text-gray-500 text-sm">Загружаем...</p>
+    </div>
+
+    <!-- ── TAB: Properties ─────────────────────────────────────────────── -->
+    <div id="main-tab-properties" class="main-tab-pane">
+      <div id="sort-bar-properties" class="fav-sort-bar hidden">
+        <span class="text-xs text-gray-400 font-medium mr-1">Сортировка:</span>
+        <button class="fav-sort-btn active" onclick="setSortProp('date_desc')" id="sp-date_desc">Новые</button>
+        <button class="fav-sort-btn" onclick="setSortProp('date_asc')" id="sp-date_asc">Старые</button>
+        <button class="fav-sort-btn" onclick="setSortProp('price_asc')" id="sp-price_asc">Дешевле</button>
+        <button class="fav-sort-btn" onclick="setSortProp('price_desc')" id="sp-price_desc">Дороже</button>
+        <button class="fav-sort-btn" onclick="setSortProp('area_desc')" id="sp-area_desc">Большая площадь</button>
+      </div>
+      <div id="fav-properties-list" class="space-y-3"></div>
+      <div id="fav-properties-empty" class="hidden text-center py-14">
+        <svg class="w-12 h-12 text-gray-200 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+        <p class="text-gray-500 font-medium mb-2">Нет избранных квартир</p>
+        <a href="{{ url_for('props.properties_city', city_slug=current_city.slug) if current_city else url_for('props.properties') }}" class="text-[#0088CC] text-sm hover:underline">Перейти в каталог →</a>
+      </div>
+      <!-- Empty ALL (shows when no props AND no complexes) -->
+      <div id="fav-empty-all" class="hidden text-center py-16">
+        <div class="mx-auto w-20 h-20 rounded-2xl bg-gray-100 flex items-center justify-center mb-5">
+          <svg class="w-10 h-10 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/></svg>
+        </div>
+        <h2 class="text-xl font-bold text-gray-700 mb-2">Пока ничего не сохранено</h2>
+        <p class="text-gray-500 text-sm mb-7 max-w-xs mx-auto">Нажимайте ♡ на карточке объекта, чтобы добавить в избранное</p>
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          <a href="{{ url_for('props.properties_city', city_slug=current_city.slug) if current_city else url_for('props.properties') }}" class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#0088CC] text-white rounded-xl font-semibold hover:bg-[#006699] transition-colors">Найти квартиры</a>
+          <a href="{{ url_for('complexes.residential_complexes_city', city_slug=current_city.slug) if current_city else url_for('mortgage.residential_complexes') }}" class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl font-semibold hover:border-[#0088CC] hover:text-[#0088CC] transition-colors">Жилые комплексы</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB: Complexes ──────────────────────────────────────────────── -->
+    <div id="main-tab-complexes" class="main-tab-pane hidden">
+      <div id="sort-bar-complexes" class="fav-sort-bar hidden">
+        <span class="text-xs text-gray-400 font-medium mr-1">Сортировка:</span>
+        <button class="fav-sort-btn active" onclick="setSortCplx('date_desc')" id="sc-date_desc">Новые</button>
+        <button class="fav-sort-btn" onclick="setSortCplx('date_asc')" id="sc-date_asc">Старые</button>
+        <button class="fav-sort-btn" onclick="setSortCplx('price_asc')" id="sc-price_asc">Дешевле</button>
+        <button class="fav-sort-btn" onclick="setSortCplx('price_desc')" id="sc-price_desc">Дороже</button>
+      </div>
+      <div id="fav-complexes-list" class="space-y-3"></div>
+      <div id="fav-complexes-empty" class="hidden text-center py-14">
+        <svg class="w-12 h-12 text-gray-200 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/></svg>
+        <p class="text-gray-500 font-medium mb-2">Нет избранных ЖК</p>
+        <a href="{{ url_for('complexes.residential_complexes_city', city_slug=current_city.slug) if current_city else url_for('mortgage.residential_complexes') }}" class="text-[#0088CC] text-sm hover:underline">Смотреть ЖК →</a>
+      </div>
+    </div>
+
+    <!-- ── TAB: Saved Searches ─────────────────────────────────────────── -->
+    <div id="main-tab-searches" class="main-tab-pane hidden">
+      <div id="ss-loading" class="text-center py-12">
+        <div class="inline-block w-7 h-7 border-2 border-[#0088CC] border-t-transparent rounded-full animate-spin mb-3"></div>
+        <p class="text-sm text-gray-400">Загружаем поиски...</p>
+      </div>
+      <div id="ss-list" class="space-y-3"></div>
+      <div id="ss-empty" class="hidden text-center py-16">
+        <div class="mx-auto w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
+          <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-700 mb-2">Нет сохранённых поисков</h3>
+        <p class="text-sm text-gray-400 mb-6 max-w-xs mx-auto">Нажмите «Сохранить» на странице новостроек, чтобы сохранить фильтры и получать уведомления о новых объектах</p>
+        <a href="{{ url_for('props.properties_city', city_slug=current_city.slug) if current_city else url_for('props.properties') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0088CC] text-white rounded-xl font-semibold text-sm hover:bg-[#006699] transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          Найти квартиры
+        </a>
+      </div>
+    </div>
+
+    <!-- ── TAB: Comparison ─────────────────────────────────────────────── -->
+    <div id="main-tab-comparison" class="main-tab-pane hidden">
+      <!-- Sub-tabs -->
+      <div class="flex items-center gap-2 mb-5">
+        <button class="cmp-sub-tab active" id="cmp-sub-btn-properties" onclick="cmpSubTab('properties')">Квартиры (<span id="cmp-prop-count">0</span>)</button>
+        <button class="cmp-sub-tab" id="cmp-sub-btn-complexes" onclick="cmpSubTab('complexes')">ЖК (<span id="cmp-cplx-count">0</span>)</button>
+        <div class="flex-1"></div>
+        <button onclick="exportCmpPdf()" id="cmp-pdf-btn" class="hidden md:inline-flex items-center gap-1.5 px-3 py-2 text-sm text-[#0088CC] border border-[#0088CC]/30 rounded-xl hover:bg-[#0088CC]/5 transition-all font-medium">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Скачать PDF
+        </button>
+        {% if manager_authenticated %}
+        <button onclick="window.print()" class="hidden md:inline-flex items-center gap-1.5 px-3 py-2 text-sm text-gray-500 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+          Печать
+        </button>
+        {% endif %}
+        <button id="cmp-clear-btn" onclick="cmpClearSub()" class="hidden inline-flex items-center gap-1.5 px-3 py-2 text-sm text-red-500 border border-red-200 rounded-xl hover:bg-red-50 transition-all">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          Очистить
+        </button>
+      </div>
+
+      <!-- Sub-pane: properties comparison -->
+      <div id="cmp-pane-properties">
+        <div id="cmp-props-loading" class="text-center py-10">
+          <div class="inline-block w-7 h-7 border-2 border-[#0088CC] border-t-transparent rounded-full animate-spin"></div>
+        </div>
+        <div id="cmp-props-grid" class="cmp-shelf hidden"></div>
+        <div id="cmp-props-empty" class="hidden text-center py-14">
+          <svg class="w-12 h-12 text-gray-200 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          <p class="text-gray-500 font-medium mb-1">Нет квартир в сравнении</p>
+          <p class="text-xs text-gray-400">Нажмите «Сравнить» на карточке квартиры</p>
+        </div>
+        <!-- Inline detailed comparison table -->
+        <div id="cmp-props-table-header" class="hidden mt-8 mb-3 flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-[#0088CC]/10 flex items-center justify-center flex-shrink-0">
+            <svg class="w-4 h-4 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          </div>
+          <h3 class="font-bold text-gray-800 text-base">Сравнение характеристик</h3>
+          <span class="text-xs text-gray-400 ml-1"><span class="inline-flex items-center gap-1 text-green-600 bg-green-50 px-2 py-0.5 rounded-full font-medium"><svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg> лучшее значение</span></span>
+        </div>
+        <div id="cmp-props-table" class="hidden bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"></div>
+      </div>
+
+      <!-- Sub-pane: complexes comparison -->
+      <div id="cmp-pane-complexes" class="hidden">
+        <div id="cmp-cplxs-loading" class="text-center py-10">
+          <div class="inline-block w-7 h-7 border-2 border-[#0088CC] border-t-transparent rounded-full animate-spin"></div>
+        </div>
+        <div id="cmp-cplxs-grid" class="cmp-shelf hidden"></div>
+        <div id="cmp-cplxs-empty" class="hidden text-center py-14">
+          <svg class="w-12 h-12 text-gray-200 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/></svg>
+          <p class="text-gray-500 font-medium mb-1">Нет ЖК в сравнении</p>
+          <p class="text-xs text-gray-400">Нажмите «Сравнить» на карточке ЖК</p>
+        </div>
+        <!-- Inline detailed complexes comparison table -->
+        <div id="cmp-cplxs-table-header" class="hidden mt-8 mb-3 flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-[#0088CC]/10 flex items-center justify-center flex-shrink-0">
+            <svg class="w-4 h-4 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/></svg>
+          </div>
+          <h3 class="font-bold text-gray-800 text-base">Сравнение ЖК</h3>
+          <span class="text-xs text-gray-400 ml-1"><span class="inline-flex items-center gap-1 text-green-600 bg-green-50 px-2 py-0.5 rounded-full font-medium"><svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg> лучшее значение</span></span>
+        </div>
+        <div id="cmp-cplxs-table" class="hidden bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"></div>
+      </div>
+    </div>
+
+    <!-- ── TAB: My Collections ──────────────────────────────────────────── -->
+    {% if current_user.is_authenticated and not manager_authenticated %}
+    <div id="main-tab-collections" class="main-tab-pane hidden">
+      <div class="flex items-center justify-between mb-4">
+        <p class="text-sm text-gray-500">Личные подборки объектов</p>
+        <button onclick="favColCreate()" class="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0088CC] text-white rounded-xl text-sm font-semibold hover:bg-[#006699] transition-colors shadow-sm">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          Создать подборку
+        </button>
+      </div>
+      <!-- Collection detail view -->
+      <div id="fav-col-detail" class="hidden mb-5">
+        <div class="flex items-center gap-3 mb-4">
+          <button onclick="favColBack()" class="w-8 h-8 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors flex-shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+          </button>
+          <div class="flex-1 min-w-0">
+            <h3 id="fav-col-detail-title" class="text-base font-bold text-gray-900 truncate"></h3>
+            <p id="fav-col-detail-count" class="text-xs text-gray-500 mt-0.5"></p>
+          </div>
+          <button onclick="favColExportPdf()" class="inline-flex items-center gap-1.5 px-3 py-2 text-sm text-[#0088CC] border border-[#0088CC]/30 rounded-xl hover:bg-[#0088CC]/5 transition-all font-medium">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            Скачать PDF
+          </button>
+        </div>
+        <div id="fav-col-detail-list" class="space-y-3"></div>
+        <div id="fav-col-detail-empty" class="hidden text-center py-12">
+          <svg class="w-12 h-12 text-gray-200 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+          <p class="text-gray-500 font-medium mb-2">Подборка пуста</p>
+          <p class="text-xs text-gray-400">Добавляйте объекты нажимая «В подборку» на карточке</p>
+        </div>
+      </div>
+      <!-- Collections grid -->
+      <div id="fav-col-grid">
+        <div id="fav-col-loading" class="hidden text-center py-10">
+          <div class="inline-block w-7 h-7 border-2 border-[#0088CC] border-t-transparent rounded-full animate-spin"></div>
+        </div>
+        <div id="fav-col-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        <div id="fav-col-empty" class="hidden text-center py-16">
+          <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+          </div>
+          <h3 class="text-base font-bold text-gray-900 mb-1">Подборок пока нет</h3>
+          <p class="text-sm text-gray-500 mb-4 max-w-xs mx-auto">Создайте подборку и добавляйте в неё понравившиеся объекты</p>
+          <button onclick="favColCreate()" class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0088CC] text-white rounded-xl text-sm font-semibold hover:bg-[#006699] transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Создать первую подборку
+          </button>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<!-- ── CREATE COLLECTION MODAL (favorites page) ──────────────────────── -->
+{% if current_user.is_authenticated and not manager_authenticated %}
+<div id="favColCreateModal" class="hidden fixed inset-0 z-[10100] flex items-end sm:items-center justify-center">
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="favColCloseModal()"></div>
+  <div class="relative bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md shadow-2xl p-6 z-10">
+    <div class="flex items-center justify-between mb-5">
+      <h3 class="text-lg font-bold text-gray-900">Новая подборка</h3>
+      <button onclick="favColCloseModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1.5">Название <span class="text-red-500">*</span></label>
+        <input id="fav-col-name-input" type="text" maxlength="100" placeholder="Например: Квартиры у моря" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#0088CC]/30 focus:border-[#0088CC] transition-all">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1.5">Описание <span class="text-gray-400 font-normal">(необязательно)</span></label>
+        <textarea id="fav-col-desc-input" rows="2" maxlength="300" placeholder="Коротко о чём эта подборка..." class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#0088CC]/30 focus:border-[#0088CC] transition-all"></textarea>
+      </div>
+    </div>
+    <div id="fav-col-create-err" class="hidden mt-3 text-xs text-red-500 bg-red-50 rounded-xl px-3 py-2"></div>
+    <div class="mt-5 flex gap-3">
+      <button onclick="favColCloseModal()" class="flex-1 py-3 border border-gray-200 text-gray-600 rounded-xl font-medium text-sm hover:bg-gray-50 transition-colors">Отмена</button>
+      <button onclick="favColSubmit()" id="fav-col-submit-btn" class="flex-1 py-3 bg-[#0088CC] text-white rounded-xl font-semibold text-sm hover:bg-[#006699] transition-colors">Создать</button>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<script>
+(function(){
+var IS_MGR = Boolean(window.manager_authenticated);
+var _propCount = 0, _cplxCount = 0;
+var _cmpPropCount = 0, _cmpCplxCount = 0;
+var _curMain = 'properties';
+var _curSub = 'properties';
+var _cmpPropsLoaded = false, _cmpCplxsLoaded = false;
+var _ssLoaded = false;
+var _sortProp = 'date_desc', _sortCplx = 'date_desc';
+var _allProps = [], _allCplxs = [];
+
+function getCSRF(){ return (document.querySelector('meta[name="csrf-token"]')||{}).content||''; }
+function fmtPrice(n){
+  if(!n) return 'По запросу';
+  n=Number(n);
+  if(n>=1e6) return (n/1e6).toFixed(1).replace('.0','') + ' млн ₽';
+  if(n>=1e3) return Math.round(n/1000) + ' тыс. ₽';
+  return n.toLocaleString('ru-RU') + ' ₽';
+}
+
+// ── Sort helpers ──────────────────────────────────────────────────────────
+function sortProps(arr, key){
+  var a = arr.slice();
+  if(key==='price_asc') return a.sort((x,y)=>(Number(x.price)||Infinity)-(Number(y.price)||Infinity));
+  if(key==='price_desc') return a.sort((x,y)=>(Number(y.price)||0)-(Number(x.price)||0));
+  if(key==='area_desc') return a.sort((x,y)=>(Number(y.area)||0)-(Number(x.area)||0));
+  if(key==='date_asc') return a.sort((x,y)=>new Date(x.created_at||0)-new Date(y.created_at||0));
+  return a.sort((x,y)=>new Date(y.created_at||0)-new Date(x.created_at||0)); // date_desc
+}
+function sortCplxs(arr, key){
+  var a = arr.slice();
+  if(key==='price_asc') return a.sort((x,y)=>(Number(x.min_price||x.price_from)||Infinity)-(Number(y.min_price||y.price_from)||Infinity));
+  if(key==='price_desc') return a.sort((x,y)=>(Number(y.min_price||y.price_from)||0)-(Number(x.min_price||x.price_from)||0));
+  if(key==='date_asc') return a.sort((x,y)=>new Date(x.created_at||0)-new Date(y.created_at||0));
+  return a.sort((x,y)=>new Date(y.created_at||0)-new Date(x.created_at||0));
+}
+window.setSortProp = function(key){
+  _sortProp = key;
+  document.querySelectorAll('[id^="sp-"]').forEach(b=>b.classList.toggle('active', b.id==='sp-'+key));
+  renderProps(sortProps(_allProps, key));
+};
+window.setSortCplx = function(key){
+  _sortCplx = key;
+  document.querySelectorAll('[id^="sc-"]').forEach(b=>b.classList.toggle('active', b.id==='sc-'+key));
+  renderCplxs(sortCplxs(_allCplxs, key));
+};
+
+// ── Main tab switching ────────────────────────────────────────────────────
+window.favMainTab = function(tab){
+  _curMain = tab;
+  document.querySelectorAll('.fav-main-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.main-tab-pane').forEach(p=>p.classList.add('hidden'));
+  var btn = document.getElementById('main-tab-btn-'+tab);
+  if(btn) btn.classList.add('active');
+  var pane = document.getElementById('main-tab-'+tab);
+  if(pane) pane.classList.remove('hidden');
+
+  // Show clear only for fav tabs
+  var clearBtn = document.getElementById('fav-clear-btn');
+  if(clearBtn){
+    var show = (tab==='properties' && _propCount>0) || (tab==='complexes' && _cplxCount>0);
+    clearBtn.classList.toggle('hidden', !show);
+  }
+
+  // Load comparison data on first open
+  if(tab==='comparison' && !_cmpPropsLoaded) loadCmpProps();
+  if(tab==='comparison' && !_cmpCplxsLoaded) loadCmpCplxs();
+  // Load saved searches on first open
+  if(tab==='searches' && !_ssLoaded) loadSavedSearches();
+  updateCmpSubUI();
+};
+
+function updateBadge(id, count){
+  var el = document.getElementById('main-badge-'+id);
+  if(!el) return;
+  el.textContent = count;
+  el.classList.toggle('hidden', count===0);
+}
+
+// ── Comparison sub-tab ────────────────────────────────────────────────────
+window.cmpSubTab = function(sub){
+  _curSub = sub;
+  ['properties','complexes'].forEach(function(s){
+    document.getElementById('cmp-sub-btn-'+s).classList.toggle('active', s===sub);
+    document.getElementById('cmp-pane-'+s).classList.toggle('hidden', s!==sub);
+  });
+  updateCmpClearBtn();
+};
+
+function updateCmpSubUI(){
+  updateCmpClearBtn();
+}
+function updateCmpClearBtn(){
+  var btn = document.getElementById('cmp-clear-btn');
+  if(!btn) return;
+  var count = _curSub==='properties' ? _cmpPropCount : _cmpCplxCount;
+  btn.classList.toggle('hidden', count===0);
+}
+
+// ── Load favorites ─────────────────────────────────────────────────────────
+async function loadAll(){
+  var propEP = IS_MGR ? '/api/manager/favorites/list' : '/api/favorites/list';
+  var cplxEP = IS_MGR ? '/api/manager/complexes/favorites/list' : '/api/complexes/favorites/list';
+  var [pr, cr] = await Promise.allSettled([
+    fetch(propEP).then(r=>r.ok?r.json():null).catch(()=>null),
+    fetch(cplxEP).then(r=>r.ok?r.json():null).catch(()=>null)
+  ]);
+  var props = (pr.status==='fulfilled'&&pr.value&&pr.value.success) ? (pr.value.favorites||pr.value.properties||[]) : [];
+  var cplxs = (cr.status==='fulfilled'&&cr.value&&cr.value.success) ? (cr.value.complexes||cr.value.favorites||[]) : [];
+
+  document.getElementById('fav-loading').classList.add('hidden');
+  _propCount = props.length; _cplxCount = cplxs.length;
+  updateBadge('properties', _propCount);
+  updateBadge('complexes', _cplxCount);
+
+  _allProps = props; _allCplxs = cplxs;
+  renderProps(sortProps(props, _sortProp)); renderCplxs(sortCplxs(cplxs, _sortCplx));
+  if(_propCount===0 && _cplxCount===0){
+    // Show properties tab (fav-empty-all lives inside it)
+    favMainTab('properties');
+    document.getElementById('fav-empty-all').classList.remove('hidden');
+    document.getElementById('fav-properties-empty').classList.add('hidden');
+  } else {
+    if(_propCount>0) favMainTab('properties');
+    else favMainTab('complexes');
+  }
+
+  // ── Sync comparison from server (fixes cross-user localStorage contamination) ──
+  try {
+    var cmpEP = IS_MGR ? '/api/manager/comparison/load' : '/api/user/comparison/load';
+    var cmpR = await fetch(cmpEP).then(r=>r.ok?r.json():null).catch(()=>null);
+    if(cmpR && cmpR.success){
+      // Server is source of truth — overwrite localStorage
+      var serverPropIds = (cmpR.properties||[]).map(p=>String(p.property_id||p.id||p)).filter(Boolean);
+      var serverCplxIds = (cmpR.complexes||[]).map(c=>String(c.complex_id||c.id||c)).filter(Boolean);
+      localStorage.setItem('comparisons', JSON.stringify(serverPropIds));
+      localStorage.setItem('comparison_complexes', JSON.stringify(serverCplxIds));
+      _cmpPropCount = serverPropIds.length;
+      _cmpCplxCount = serverCplxIds.length;
+    } else {
+      // Fallback to localStorage (guest or server error)
+      _cmpPropCount = JSON.parse(localStorage.getItem('comparisons')||'[]').length;
+      _cmpCplxCount = JSON.parse(localStorage.getItem('comparison_complexes')||'[]').length;
+    }
+  } catch(e){
+    _cmpPropCount = JSON.parse(localStorage.getItem('comparisons')||'[]').length;
+    _cmpCplxCount = JSON.parse(localStorage.getItem('comparison_complexes')||'[]').length;
+  }
+  updateBadge('comparison', _cmpPropCount+_cmpCplxCount);
+  document.getElementById('cmp-prop-count').textContent = _cmpPropCount;
+  document.getElementById('cmp-cplx-count').textContent = _cmpCplxCount;
+
+  // ── Saved searches count (for badge) ──
+  if(!IS_MGR){
+    try {
+      var ssR = await fetch('/api/user/saved-searches/count').then(r=>r.ok?r.json():null).catch(()=>null);
+      if(ssR && ssR.count > 0){
+        updateBadge('searches', ssR.count);
+      }
+    } catch(e){}
+  }
+
+  // Check URL param
+  var urlTab = new URLSearchParams(window.location.search).get('tab');
+  if(urlTab==='comparison'){ favMainTab('comparison'); }
+  else if(urlTab==='complexes'){ favMainTab('complexes'); }
+  else if(urlTab==='searches'){ favMainTab('searches'); }
+}
+
+// ── Property cards ─────────────────────────────────────────────────────────
+function renderProps(props){
+  var list = document.getElementById('fav-properties-list');
+  var empty = document.getElementById('fav-properties-empty');
+  var sortBar = document.getElementById('sort-bar-properties');
+  if(props.length===0){ empty.classList.remove('hidden'); if(sortBar) sortBar.classList.add('hidden'); return; }
+  empty.classList.add('hidden');
+  if(sortBar && props.length>1) sortBar.classList.remove('hidden');
+  list.innerHTML = props.map(propCard).join('');
+}
+function propCard(p){
+  var isSold = p.is_sold||false;
+  var price = Number(p.price)||0;
+  var cashback = Number(p.cashback_amount)||Math.round(price*(Number(p.cashback_rate)||3.5)/100);
+  var img = p.image||'/static/images/no-photo.svg';
+  return `<div class="fav-card remove-anim bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden" data-fav-prop="${p.id}">
+    <div class="fav-card-body flex">
+      <div class="relative flex-shrink-0">
+        <img src="${img}" alt="" class="fav-card-img" onerror="this.src='/static/images/no-photo.svg'">
+        ${isSold?'<div class="absolute inset-0 bg-black/35 flex items-center justify-center"><span class="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">ПРОДАН</span></div>':''}
+      </div>
+      <div class="flex-1 p-4 min-w-0">
+        <div class="flex items-start justify-between gap-2 mb-1">
+          <a href="/object/${p.id}" class="font-semibold text-gray-900 text-sm leading-snug hover:text-[#0088CC] ${isSold?'line-through text-gray-400':''}">${p.title||'Квартира'}</a>
+          <button onclick="favRemoveProp('${p.id}')" class="flex-shrink-0 w-7 h-7 rounded-lg bg-gray-50 hover:bg-red-50 hover:text-red-400 flex items-center justify-center text-gray-300 transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <p class="text-xs text-gray-400 mb-0.5 truncate">${p.complex||''}</p>
+        <p class="text-xs text-gray-400 mb-2 truncate">${p.district||p.address||''}</p>
+        <div class="flex items-center gap-2 flex-wrap mb-3">
+          <span class="font-bold text-base ${isSold?'text-gray-400':'text-[#0088CC]'}">${price?fmtPrice(price):'По запросу'}</span>
+          ${!isSold&&cashback?`<span class="text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">💰 ${fmtPrice(cashback)}</span>`:''}
+        </div>
+        <div class="flex gap-2 flex-wrap">
+          <a href="/object/${p.id}" class="px-3 py-1.5 bg-[#0088CC] text-white text-xs font-semibold rounded-lg hover:bg-[#006699] transition-colors">Подробнее</a>
+          ${!isSold?`<button onclick="favAddToCmp('${p.id}','property',this)" class="px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-semibold rounded-lg hover:bg-blue-50 hover:text-[#0088CC] transition-colors">Сравнить</button>`:''}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── Complex cards ──────────────────────────────────────────────────────────
+function renderCplxs(cplxs){
+  var list = document.getElementById('fav-complexes-list');
+  var empty = document.getElementById('fav-complexes-empty');
+  var sortBar = document.getElementById('sort-bar-complexes');
+  if(cplxs.length===0){ empty.classList.remove('hidden'); if(sortBar) sortBar.classList.add('hidden'); return; }
+  empty.classList.add('hidden');
+  if(sortBar && cplxs.length>1) sortBar.classList.remove('hidden');
+  list.innerHTML = cplxs.map(cplxCard).join('');
+}
+function cplxCard(c){
+  var name = c.name||c.complex_name||'Жилой комплекс';
+  var img = c.image||c.main_image||c.complex_image||'/static/images/no-photo.svg';
+  var url = c.url||c.complex_url||'#';
+  var minPrice = c.min_price||c.price_from||0;
+  var maxPrice = c.max_price||0;
+  var complexId = c.id||c.complex_id;
+  return `<div class="fav-card remove-anim bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden" data-fav-cplx="${complexId}">
+    <div class="fav-card-body flex">
+      <div class="relative flex-shrink-0">
+        <img src="${img}" alt="${name}" class="fav-card-img" onerror="this.src='/static/images/no-photo.svg'">
+      </div>
+      <div class="flex-1 p-4 min-w-0">
+        <div class="flex items-start justify-between gap-2 mb-1">
+          <a href="${url}" class="font-semibold text-gray-900 text-sm leading-snug hover:text-[#0088CC]">${name}</a>
+          <button onclick="favRemoveCplx('${complexId}')" class="flex-shrink-0 w-7 h-7 rounded-lg bg-gray-50 hover:bg-red-50 hover:text-red-400 flex items-center justify-center text-gray-300 transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <p class="text-xs text-gray-400 mb-0.5 truncate">${c.developer||c.developer_name||''}</p>
+        <p class="text-xs text-gray-400 mb-2 truncate">${c.address||c.district||c.district_name||c.complex_address||''}</p>
+        ${minPrice?`<div class="flex items-center gap-2 mb-3">
+          <span class="font-bold text-base text-[#0088CC]">от ${fmtPrice(minPrice)}</span>
+          ${maxPrice&&maxPrice>minPrice?`<span class="text-xs text-gray-400">до ${fmtPrice(maxPrice)}</span>`:''}
+        </div>`:'<div class="mb-3"></div>'}
+        <div class="flex gap-2 flex-wrap">
+          <a href="${url}" class="px-3 py-1.5 bg-[#0088CC] text-white text-xs font-semibold rounded-lg hover:bg-[#006699] transition-colors">Подробнее</a>
+          <button onclick="favAddToCmp('${complexId}','complex',this)" class="px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-semibold rounded-lg hover:bg-blue-50 hover:text-[#0088CC] transition-colors">Сравнить</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── Remove favorites ───────────────────────────────────────────────────────
+window.favRemoveProp = async function(id){
+  var card = document.querySelector('[data-fav-prop="'+id+'"]');
+  if(!confirm('Удалить из избранного?')) return;
+  if(card) card.classList.add('removing');
+  var ok = false;
+  try {
+    if(IS_MGR){
+      ok = (await (await fetch('/api/manager/favorites/'+id,{method:'DELETE',headers:{'X-CSRFToken':getCSRF()}})).json()).success;
+    } else {
+      ok = (await (await fetch('/api/favorites/toggle',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':getCSRF()},body:JSON.stringify({property_id:id})})).json()).success;
+    }
+  } catch(e){}
+  if(ok&&card){ setTimeout(()=>{ card.remove(); _propCount=Math.max(0,_propCount-1); updateBadge('properties',_propCount); if(_propCount===0) document.getElementById('fav-properties-empty').classList.remove('hidden'); },250); if(window.updateHeaderFavoritesHeart) window.updateHeaderFavoritesHeart(); }
+  else if(!ok && card) card.classList.remove('removing');
+};
+
+window.favRemoveCplx = async function(id){
+  var card = document.querySelector('[data-fav-cplx="'+id+'"]');
+  if(!confirm('Удалить из избранного?')) return;
+  if(card) card.classList.add('removing');
+  var ok = false;
+  try {
+    if(IS_MGR){
+      ok = (await (await fetch('/api/manager/complexes/favorites/'+id,{method:'DELETE',headers:{'X-CSRFToken':getCSRF()}})).json()).success;
+    } else {
+      ok = (await (await fetch('/api/complexes/favorites/toggle',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':getCSRF()},body:JSON.stringify({complex_id:id})})).json()).success;
+    }
+  } catch(e){}
+  if(ok&&card){ setTimeout(()=>{ card.remove(); _cplxCount=Math.max(0,_cplxCount-1); updateBadge('complexes',_cplxCount); if(_cplxCount===0) document.getElementById('fav-complexes-empty').classList.remove('hidden'); },250); if(window.updateHeaderFavoritesHeart) window.updateHeaderFavoritesHeart(); }
+  else if(!ok && card) card.classList.remove('removing');
+};
+
+window.favClearCurrent = async function(){
+  if(_curMain==='comparison') return;
+  var isProps = _curMain==='properties';
+  if(!confirm('Очистить '+(isProps?'квартиры':'ЖК')+' из избранного?')) return;
+  try {
+    var ep = IS_MGR ? (isProps?'/api/manager/favorites/clear':'/api/manager/complexes/favorites/clear') : (isProps?'/api/favorites/clear-all':'/api/complexes/favorites/clear-all');
+    await fetch(ep,{method:IS_MGR?'DELETE':'POST',headers:{'X-CSRFToken':getCSRF()}});
+    location.reload();
+  } catch(e){ location.reload(); }
+};
+
+// ── Add to comparison ──────────────────────────────────────────────────────
+window.favAddToCmp = async function(id, type, btn){
+  var isProp = type==='property';
+  var ep = IS_MGR ? (isProp?'/api/manager/comparison/property/add':'/api/manager/comparison/complex/add') : (isProp?'/api/user/comparison/property/add':'/api/user/comparison/complex/add');
+  var body = isProp ? {property_id:id} : {complex_id:id};
+  try {
+    var r = await fetch(ep,{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':getCSRF()},body:JSON.stringify(body)});
+    var d = await r.json();
+    if(d.success||d.added){
+      if(btn){ btn.textContent='✓ В сравнении'; btn.disabled=true; btn.classList.add('text-green-600','bg-green-50'); }
+      var key = isProp?'comparisons':'comparison_complexes';
+      try { var arr=JSON.parse(localStorage.getItem(key)||'[]'); if(!arr.includes(String(id))){ arr.push(String(id)); localStorage.setItem(key,JSON.stringify(arr)); } } catch(e){}
+      var total = 0;
+      try { total += JSON.parse(localStorage.getItem('comparisons')||'[]').length; } catch(e){}
+      try { total += JSON.parse(localStorage.getItem('comparison_complexes')||'[]').length; } catch(e){}
+      updateBadge('comparison', total);
+      if(isProp){ _cmpPropCount++; document.getElementById('cmp-prop-count').textContent=_cmpPropCount; }
+      else { _cmpCplxCount++; document.getElementById('cmp-cplx-count').textContent=_cmpCplxCount; }
+      _cmpPropsLoaded = false; _cmpCplxsLoaded = false; // force reload on next open
+    } else { alert(d.message||d.error||'Не удалось добавить'); }
+  } catch(e){}
+};
+
+// ── Comparison tab: load property cards ───────────────────────────────────
+async function loadCmpProps(){
+  _cmpPropsLoaded = true;
+  var loading = document.getElementById('cmp-props-loading');
+  var grid = document.getElementById('cmp-props-grid');
+  var empty = document.getElementById('cmp-props-empty');
+
+  var ids = [];
+  try { ids = JSON.parse(localStorage.getItem('comparisons')||'[]'); } catch(e){}
+
+  // For managers, also try server
+  if(IS_MGR && ids.length===0){
+    try {
+      var sr = await fetch('/api/manager/comparison/load');
+      var sd = await sr.json();
+      if(sd.success && sd.properties) ids = sd.properties.map(p=>String(p.id||p.property_id)).filter(Boolean);
+    } catch(e){}
+  }
+
+  _cmpPropCount = ids.length;
+  document.getElementById('cmp-prop-count').textContent = _cmpPropCount;
+  updateBadge('comparison', _cmpPropCount+_cmpCplxCount);
+
+  if(ids.length===0){ if(loading) loading.classList.add('hidden'); if(empty) empty.classList.remove('hidden'); updateCmpClearBtn(); return; }
+
+  var cards = [];
+  for(var i=0; i<Math.min(ids.length,6); i++){
+    try {
+      var r = await fetch('/api/property/'+ids[i]);
+      if(r.ok){ var d = await r.json(); if(d.id||d.property){ cards.push(d.property||d); } }
+    } catch(e){}
+  }
+
+  if(loading) loading.classList.add('hidden');
+  if(cards.length===0){ if(empty) empty.classList.remove('hidden'); updateCmpClearBtn(); return; }
+
+  grid.innerHTML = cards.map(function(p,i){ return cmpPropCard(p, ids[i]); }).join('');
+  grid.classList.remove('hidden');
+  // Render inline comparison table
+  if(cards.length>=2) renderCmpPropsTable(cards);
+  updateCmpClearBtn();
+}
+
+// ── Inline property comparison table ──────────────────────────────────────
+function renderCmpPropsTable(cards){
+  var header = document.getElementById('cmp-props-table-header');
+  var container = document.getElementById('cmp-props-table');
+  if(!container || cards.length<2){ return; }
+
+  var rows = [
+    { label:'Цена', getVal:function(p){ return Number(p.price)||0; }, fmt:function(v){ return v?fmtPrice(v):'По запросу'; }, best:'min', numComp:true },
+    { label:'Цена за м²', getVal:function(p){ return Number(p.price_per_sqm||p.square_price)||0; }, fmt:function(v){ return v?fmtPrice(v)+'/м²':'—'; }, best:'min', numComp:true },
+    { label:'Тип', getVal:null, fmt:function(v,p){ var r=p.rooms||p.room_count; return (r===0||r==='0')?'Студия':(r?r+'-комн. квартира':(p.property_type||'—')); }, best:null },
+    { label:'Площадь', getVal:function(p){ return Number(p.area||p.total_area)||0; }, fmt:function(v){ return v?v+' м²':'—'; }, best:'max', numComp:true },
+    { label:'Жилая площадь', getVal:function(p){ return Number(p.living_area)||0; }, fmt:function(v){ return v?v+' м²':'—'; }, best:'max', numComp:true },
+    { label:'Площадь кухни', getVal:function(p){ return Number(p.kitchen_area)||0; }, fmt:function(v){ return v?v+' м²':'—'; }, best:'max', numComp:true },
+    { label:'Этаж / этажей', getVal:function(p){ return Number(p.floor)||0; }, fmt:function(v,p){ return p.floor?(p.floor+(p.total_floors||p.floors_total||p.max_floor?'/'+(p.total_floors||p.floors_total||p.max_floor):'')):'—'; }, best:null },
+    { label:'Кэшбек', getVal:function(p){ return Number(p.cashback)||Number(p.cashback_amount)||Math.round((Number(p.price)||0)*(Number(p.cashback_rate)||3.5)/100); }, fmt:function(v){ return v?fmtPrice(v):'—'; }, best:'max', numComp:true },
+    { label:'Ипотека ~5%', getVal:function(p){ return Number(p.price)||0; }, fmt:function(v){ return v?'от '+Math.floor(v*0.05/12).toLocaleString('ru-RU')+' ₽/мес':'—'; }, best:'min', numComp:true, usePrice:true },
+    { label:'Отделка', getVal:null, fmt:function(v,p){ return p.renovation_display_name||p.renovation||'—'; }, best:null },
+    { label:'Санузел', getVal:null, fmt:function(v,p){ return p.bathroom_type||'—'; }, best:null },
+    { label:'Балкон', getVal:null, fmt:function(v,p){ return p.has_balcony===true?'Есть':(p.has_balcony===false?'Нет':'—'); }, best:null },
+    { label:'Класс', getVal:null, fmt:function(v,p){ return p.object_class_display||p.class_type||p.object_class||p.property_class||'—'; }, best:null },
+    { label:'Тип здания', getVal:null, fmt:function(v,p){ return p.building_type||'—'; }, best:null },
+    { label:'Высота потолков', getVal:function(p){ return Number(p.ceiling_height)||0; }, fmt:function(v){ return v?v+' м':'—'; }, best:'max', numComp:true },
+    { label:'Парковка', getVal:null, fmt:function(v,p){ return p.parking_type||'—'; }, best:null },
+    { label:'ЖК', getVal:null, fmt:function(v,p){ return p.residential_complex||p.complex_name||'—'; }, best:null },
+    { label:'Срок сдачи', getVal:null, fmt:function(v,p){ return p.completion_date||'—'; }, best:null },
+    { label:'Застройщик', getVal:null, fmt:function(v,p){ return p.developer||p.developer_name||'—'; }, best:null },
+    { label:'Адрес', getVal:null, fmt:function(v,p){ return p.address||'—'; }, best:null },
+    { label:'Район', getVal:null, fmt:function(v,p){ return p.district||'—'; }, best:null },
+  ];
+
+  var html = '<div class="overflow-x-auto"><table class="w-full border-collapse text-sm" style="min-width:'+(cards.length*180+160)+'px">';
+  // Header with photos
+  html += '<thead><tr>';
+  html += '<th class="text-left py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50 border-b border-gray-100 w-36">Характеристика</th>';
+  cards.forEach(function(p,i){
+    var id=p.id||i; var img=p.main_image||p.image||'/static/images/no-photo.svg';
+    var title=p.title||p.name||('Квартира #'+id);
+    html+='<th class="py-4 px-4 bg-gray-50 border-b border-gray-100 text-center">';
+    html+='<a href="/object/'+id+'" class="flex flex-col items-center gap-2 group">';
+    html+='<div class="relative"><img src="'+img+'" alt="" class="w-24 h-16 object-cover rounded-xl shadow-sm group-hover:shadow-md transition-shadow" onerror="this.src=\'/static/images/no-photo.svg\'">';
+    html+='</div>';
+    html+='<span class="text-xs font-semibold text-gray-800 text-center line-clamp-2 max-w-[160px] group-hover:text-[#0088CC] transition-colors">'+title+'</span>';
+    html+='</a></th>';
+  });
+  html+='</tr></thead><tbody>';
+
+  rows.forEach(function(row,ri){
+    var vals = cards.map(function(p){ return row.getVal?row.getVal(p):null; });
+    var bestVal=null;
+    if(row.best&&row.numComp){
+      var positives=vals.filter(function(v){return v>0;});
+      if(positives.length>0) bestVal=row.best==='min'?Math.min.apply(null,positives):Math.max.apply(null,positives);
+    }
+    var zebra=ri%2===0?'':'bg-gray-50/40';
+    html+='<tr class="'+zebra+' hover:bg-blue-50/20 transition-colors">';
+    html+='<td class="py-3 px-4 text-xs font-semibold text-gray-500 border-b border-gray-100 whitespace-nowrap">'+row.label+'</td>';
+    cards.forEach(function(p,ci){
+      var val=row.getVal?row.getVal(p):null;
+      var display=row.fmt(val,p);
+      var isBest=bestVal!==null&&val===bestVal&&val>0;
+      html+='<td class="py-3 px-4 text-center text-sm border-b border-gray-100'+(isBest?' font-bold text-green-600 bg-green-50/60':' text-gray-700')+'">';
+      if(isBest) html+='<span class="inline-flex items-center justify-center gap-1"><svg class="w-3.5 h-3.5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>'+display+'</span>';
+      else html+=display;
+      html+='</td>';
+    });
+    html+='</tr>';
+  });
+
+  // Action row
+  html+='<tr class="bg-gray-50"><td class="py-3 px-4 rounded-bl-2xl"></td>';
+  cards.forEach(function(p,i){
+    var id=p.id||i;
+    html+='<td class="py-3 px-4 text-center'+(i===cards.length-1?' rounded-br-2xl':'')+'">';
+    html+='<a href="/object/'+id+'" class="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0088CC] text-white text-xs font-semibold rounded-xl hover:bg-[#006699] transition-colors shadow-sm">Открыть →</a>';
+    html+='</td>';
+  });
+  html+='</tr></tbody></table></div>';
+
+  container.innerHTML=html;
+  container.classList.remove('hidden');
+  if(header) header.classList.remove('hidden');
+}
+
+function cmpPropCard(p, fallbackId){
+  var id = p.id || fallbackId;
+  var title = p.title || p.name || ('Квартира #'+id);
+  var price = Number(p.price)||0;
+  var area = p.area||p.total_area||'';
+  var floor = p.floor||'';
+  var maxFloor = p.floors_total||p.max_floor||'';
+  var rooms = p.rooms||p.room_count||'';
+  var img = p.main_image||p.image||'/static/images/no-photo.svg';
+  var cashback = Number(p.cashback_amount)||Math.round(price*(Number(p.cashback_rate)||3.5)/100);
+  return `<div class="cmp-card" data-cmp-prop="${id}">
+    <div class="relative">
+      <img src="${img}" alt="${title}" class="cmp-card-img" onerror="this.src='/static/images/no-photo.svg'">
+      <button onclick="cmpRemoveProp('${id}')" class="absolute top-2 right-2 w-7 h-7 bg-white/90 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 shadow-sm transition-colors">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="p-3">
+      <p class="font-semibold text-xs text-gray-900 leading-snug mb-1 line-clamp-2">${title}</p>
+      <p class="font-bold text-sm text-[#0088CC] mb-2">${price?fmtPrice(price):'По запросу'}</p>
+      <div class="space-y-1 text-xs text-gray-500 mb-2">
+        ${rooms?`<div class="flex justify-between"><span>Комнат</span><span class="font-medium text-gray-700">${rooms}</span></div>`:''}
+        ${area?`<div class="flex justify-between"><span>Площадь</span><span class="font-medium text-gray-700">${area} м²</span></div>`:''}
+        ${floor?`<div class="flex justify-between"><span>Этаж</span><span class="font-medium text-gray-700">${floor}${maxFloor?'/'+maxFloor:''}</span></div>`:''}
+        ${cashback?`<div class="flex justify-between"><span>Кэшбек</span><span class="font-medium text-green-600">${fmtPrice(cashback)}</span></div>`:''}
+      </div>
+      <a href="/object/${id}" class="block w-full text-center py-1.5 bg-[#0088CC]/10 text-[#0088CC] text-xs font-semibold rounded-lg hover:bg-[#0088CC]/20 transition-colors">Открыть</a>
+    </div>
+  </div>`;
+}
+
+// ── Comparison tab: load complex cards ─────────────────────────────────────
+async function loadCmpCplxs(){
+  _cmpCplxsLoaded = true;
+  var loading = document.getElementById('cmp-cplxs-loading');
+  var grid = document.getElementById('cmp-cplxs-grid');
+  var empty = document.getElementById('cmp-cplxs-empty');
+
+  var ids = [];
+  try { ids = JSON.parse(localStorage.getItem('comparison_complexes')||'[]'); } catch(e){}
+
+  _cmpCplxCount = ids.length;
+  document.getElementById('cmp-cplx-count').textContent = _cmpCplxCount;
+  updateBadge('comparison', _cmpPropCount+_cmpCplxCount);
+
+  if(ids.length===0){ if(loading) loading.classList.add('hidden'); if(empty) empty.classList.remove('hidden'); updateCmpClearBtn(); return; }
+
+  var cards = [];
+  for(var i=0; i<Math.min(ids.length,6); i++){
+    try {
+      var rawId = ids[i];
+      var cplxId = (rawId !== null && typeof rawId === 'object') ? (rawId.complex_id || rawId.id || String(rawId)) : rawId;
+      var r = await fetch('/api/complex/'+cplxId);
+      if(r.ok){ var d = await r.json(); if(d.id||d.complex){ cards.push(d.complex||d); } }
+    } catch(e){}
+  }
+
+  if(loading) loading.classList.add('hidden');
+  if(cards.length===0){ if(empty) empty.classList.remove('hidden'); updateCmpClearBtn(); return; }
+
+  grid.innerHTML = cards.map(function(c,i){ return cmpCplxCard(c, ids[i]); }).join('');
+  grid.classList.remove('hidden');
+  if(cards.length>=2) renderCmpCplxsTable(cards);
+  updateCmpClearBtn();
+}
+
+// ── Inline complex comparison table ───────────────────────────────────────
+function renderCmpCplxsTable(cards){
+  var header = document.getElementById('cmp-cplxs-table-header');
+  var container = document.getElementById('cmp-cplxs-table');
+  if(!container || cards.length<2) return;
+
+  var rows = [
+    { label:'Цена от', getVal:function(c){ return Number(c.min_price||c.price_from)||0; }, fmt:function(v){ return v?'от '+fmtPrice(v):'По запросу'; }, best:'min', numComp:true },
+    { label:'Кэшбек', getVal:function(c){ return Number(c.cashback_rate)||3.5; }, fmt:function(v){ return v?v+'%':'—'; }, best:'max', numComp:true },
+    { label:'Срок сдачи', getVal:null, fmt:function(v,c){ return c.completion_date||c.delivery_date||c.end_completion_short||'—'; }, best:null },
+    { label:'Застройщик', getVal:null, fmt:function(v,c){ return c.developer_name||c.developer||'—'; }, best:null },
+    { label:'Адрес', getVal:null, fmt:function(v,c){ return c.address||'—'; }, best:null },
+    { label:'Район', getVal:null, fmt:function(v,c){ return c.district_name||c.district||'—'; }, best:null },
+    { label:'Класс', getVal:null, fmt:function(v,c){ return c.object_class||c.complex_class||c.housing_class||'—'; }, best:null },
+    { label:'Высота потолков', getVal:null, fmt:function(v,c){ return c.ceiling_height||'—'; }, best:null },
+    { label:'Материал стен', getVal:null, fmt:function(v,c){ return c.wall_material||'—'; }, best:null },
+    { label:'Отделка', getVal:null, fmt:function(v,c){ return c.finishing_type||'—'; }, best:null },
+    { label:'Парковка', getVal:null, fmt:function(v,c){ return c.parking_type||'—'; }, best:null },
+    { label:'Этажей', getVal:function(c){ return Number(c.floors_total||c.floors_max||c.max_floor)||0; }, fmt:function(v){ return v?v+' эт.':'—'; }, best:'max', numComp:true },
+    { label:'Квартир', getVal:function(c){ return Number(c.properties_count||c.apartments_count||c.units_count)||0; }, fmt:function(v){ return v?v.toLocaleString('ru-RU'):'—'; }, best:'max', numComp:true },
+  ];
+
+  var html = '<div class="overflow-x-auto"><table class="w-full border-collapse text-sm" style="min-width:'+(cards.length*180+160)+'px">';
+  html += '<thead><tr>';
+  html += '<th class="text-left py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50 border-b border-gray-100 w-36">Характеристика</th>';
+  cards.forEach(function(c,i){
+    var id=c.id||i; var img=c.main_image||c.image||'/static/images/no-photo.svg';
+    var name=c.name||c.complex_name||('ЖК #'+id);
+    var url=c.url||c.complex_url||('/zk/'+id);
+    html+='<th class="py-4 px-4 bg-gray-50 border-b border-gray-100 text-center">';
+    html+='<a href="'+url+'" class="flex flex-col items-center gap-2 group">';
+    html+='<img src="'+img+'" alt="" class="w-24 h-16 object-cover rounded-xl shadow-sm group-hover:shadow-md transition-shadow" onerror="this.src=\'/static/images/no-photo.svg\'">';
+    html+='<span class="text-xs font-semibold text-gray-800 text-center line-clamp-2 max-w-[160px] group-hover:text-[#0088CC] transition-colors">'+name+'</span>';
+    html+='</a></th>';
+  });
+  html+='</tr></thead><tbody>';
+
+  rows.forEach(function(row,ri){
+    var vals=cards.map(function(c){ return row.getVal?row.getVal(c):null; });
+    var bestVal=null;
+    if(row.best&&row.numComp){
+      var positives=vals.filter(function(v){return v>0;});
+      if(positives.length>0) bestVal=row.best==='min'?Math.min.apply(null,positives):Math.max.apply(null,positives);
+    }
+    var zebra=ri%2===0?'':'bg-gray-50/40';
+    html+='<tr class="'+zebra+' hover:bg-blue-50/20 transition-colors">';
+    html+='<td class="py-3 px-4 text-xs font-semibold text-gray-500 border-b border-gray-100 whitespace-nowrap">'+row.label+'</td>';
+    cards.forEach(function(c,ci){
+      var val=row.getVal?row.getVal(c):null;
+      var display=row.fmt(val,c);
+      var isBest=bestVal!==null&&val===bestVal&&val>0;
+      html+='<td class="py-3 px-4 text-center text-sm border-b border-gray-100'+(isBest?' font-bold text-green-600 bg-green-50/60':' text-gray-700')+'">';
+      if(isBest) html+='<span class="inline-flex items-center justify-center gap-1"><svg class="w-3.5 h-3.5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>'+display+'</span>';
+      else html+=display;
+      html+='</td>';
+    });
+    html+='</tr>';
+  });
+
+  html+='<tr class="bg-gray-50"><td class="py-3 px-4 rounded-bl-2xl"></td>';
+  cards.forEach(function(c,i){
+    var id=c.id||i; var url=c.url||c.complex_url||('/zk/'+id);
+    html+='<td class="py-3 px-4 text-center'+(i===cards.length-1?' rounded-br-2xl':'')+'">';
+    html+='<a href="'+url+'" class="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0088CC] text-white text-xs font-semibold rounded-xl hover:bg-[#006699] transition-colors shadow-sm">Открыть →</a>';
+    html+='</td>';
+  });
+  html+='</tr></tbody></table></div>';
+
+  container.innerHTML=html;
+  container.classList.remove('hidden');
+  if(header) header.classList.remove('hidden');
+}
+
+function cmpCplxCard(c, fallbackId){
+  var id = c.id || fallbackId;
+  var name = c.name||c.complex_name||('ЖК #'+id);
+  var img = c.main_image||c.image||'/static/images/no-photo.svg';
+  var minPrice = c.min_price||c.price_from||0;
+  var developer = c.developer_name||c.developer||'';
+  var deliveryDate = c.completion_date||c.delivery_date||c.end_completion_short||'';
+  var cashbackRate = c.cashback_rate||3.5;
+  var url = c.url||c.complex_url||('/zk/'+id);
+  return `<div class="cmp-card" data-cmp-cplx="${id}">
+    <div class="relative">
+      <img src="${img}" alt="${name}" class="cmp-card-img" onerror="this.src='/static/images/no-photo.svg'">
+      <button onclick="cmpRemoveCplx('${id}')" class="absolute top-2 right-2 w-7 h-7 bg-white/90 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 shadow-sm transition-colors">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="p-3">
+      <p class="font-semibold text-xs text-gray-900 leading-snug mb-1 line-clamp-2">${name}</p>
+      <p class="font-bold text-sm text-[#0088CC] mb-2">${minPrice?'от '+fmtPrice(minPrice):'По запросу'}</p>
+      <div class="space-y-1 text-xs text-gray-500 mb-2">
+        ${developer?`<div class="flex justify-between"><span>Застройщик</span><span class="font-medium text-gray-700 text-right max-w-[100px] truncate">${developer}</span></div>`:''}
+        ${deliveryDate?`<div class="flex justify-between"><span>Срок сдачи</span><span class="font-medium text-gray-700">${deliveryDate}</span></div>`:''}
+        ${cashbackRate?`<div class="flex justify-between"><span>Кэшбек</span><span class="font-medium text-green-600">${cashbackRate}%</span></div>`:''}
+      </div>
+      <a href="${url}" class="block w-full text-center py-1.5 bg-[#0088CC]/10 text-[#0088CC] text-xs font-semibold rounded-lg hover:bg-[#0088CC]/20 transition-colors">Открыть</a>
+    </div>
+  </div>`;
+}
+
+// ── Remove from comparison ────────────────────────────────────────────────
+window.cmpRemoveProp = async function(id){
+  var ep = IS_MGR ? '/api/manager/comparison/property/remove' : '/api/user/comparison/property/remove';
+  try {
+    await fetch(ep,{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':getCSRF()},body:JSON.stringify({property_id:id})});
+  } catch(e){}
+  var arr = JSON.parse(localStorage.getItem('comparisons')||'[]').filter(x=>String(x)!==String(id));
+  localStorage.setItem('comparisons',JSON.stringify(arr));
+  var card = document.querySelector('[data-cmp-prop="'+id+'"]');
+  if(card) card.remove();
+  _cmpPropCount = Math.max(0,_cmpPropCount-1);
+  document.getElementById('cmp-prop-count').textContent=_cmpPropCount;
+  updateBadge('comparison',_cmpPropCount+_cmpCplxCount);
+  if(_cmpPropCount===0){ document.getElementById('cmp-props-empty').classList.remove('hidden'); }
+  updateCmpClearBtn();
+  // Update comparison table
+  var cmpTbl = document.getElementById('cmp-props-table');
+  var cmpHdr = document.getElementById('cmp-props-table-header');
+  if(_cmpPropCount < 2){
+    if(cmpTbl) cmpTbl.innerHTML='';
+    if(cmpHdr) cmpHdr.classList.add('hidden');
+  } else {
+    _cmpPropsLoaded = false;
+    loadCmpProps();
+  }
+};
+
+window.cmpRemoveCplx = async function(id){
+  var ep = IS_MGR ? '/api/manager/comparison/complex/remove' : '/api/user/comparison/complex/remove';
+  try {
+    await fetch(ep,{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':getCSRF()},body:JSON.stringify({complex_id:id})});
+  } catch(e){}
+  var arr = JSON.parse(localStorage.getItem('comparison_complexes')||'[]').filter(x=>String(x)!==String(id));
+  localStorage.setItem('comparison_complexes',JSON.stringify(arr));
+  var card = document.querySelector('[data-cmp-cplx="'+id+'"]');
+  if(card) card.remove();
+  _cmpCplxCount = Math.max(0,_cmpCplxCount-1);
+  document.getElementById('cmp-cplx-count').textContent=_cmpCplxCount;
+  updateBadge('comparison',_cmpPropCount+_cmpCplxCount);
+  if(_cmpCplxCount===0){ document.getElementById('cmp-cplxs-empty').classList.remove('hidden'); }
+  updateCmpClearBtn();
+  // Update comparison table
+  var cmpTblC = document.getElementById('cmp-cplxs-table');
+  var cmpHdrC = document.getElementById('cmp-cplxs-table-header');
+  if(_cmpCplxCount < 2){
+    if(cmpTblC) cmpTblC.innerHTML='';
+    if(cmpHdrC) cmpHdrC.classList.add('hidden');
+  } else {
+    _cmpCplxsLoaded = false;
+    loadCmpCplxs();
+  }
+};
+
+window.cmpClearSub = async function(){
+  var isProps = _curSub==='properties';
+  if(!confirm('Очистить '+(isProps?'квартиры':'ЖК')+' из сравнения?')) return;
+  // Always call server to clear DB records
+  try {
+    await fetch('/api/comparison/clear',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':getCSRF()},body:JSON.stringify({type:_curSub})});
+  } catch(e){}
+  if(isProps){ localStorage.removeItem('comparisons'); _cmpPropsLoaded=false; _cmpPropCount=0; loadCmpProps(); }
+  else { localStorage.removeItem('comparison_complexes'); _cmpCplxsLoaded=false; _cmpCplxCount=0; loadCmpCplxs(); }
+  updateBadge('comparison', _cmpPropCount+_cmpCplxCount);
+};
+
+// ── Saved Searches ────────────────────────────────────────────────────────
+async function loadSavedSearches(){
+  _ssLoaded = true;
+  var loading = document.getElementById('ss-loading');
+  var list = document.getElementById('ss-list');
+  var empty = document.getElementById('ss-empty');
+  try {
+    var r = await fetch('/api/user/saved-searches');
+    if(!r.ok) throw new Error();
+    var d = await r.json();
+    if(loading) loading.classList.add('hidden');
+    var searches = d.searches||[];
+    updateBadge('searches', searches.length);
+    if(searches.length===0){ if(empty) empty.classList.remove('hidden'); return; }
+    if(list){ list.classList.remove('hidden'); list.innerHTML = searches.map(ssCard).join(''); }
+  } catch(e){
+    if(loading) loading.classList.add('hidden');
+    if(empty) empty.classList.remove('hidden');
+  }
+}
+
+function ssCard(s){
+  var id = s.id||s.search_id;
+  var name = s.name||'Поиск';
+  var notify = s.notify_new_matches||s.alert_enabled||false;
+  var url = (s.additional_filters ? tryParseUrl(s.additional_filters) : null) || s.search_url || '#';
+  var chips = buildChips(s);
+  var dateStr = '';
+  if(s.created_at){ try{ var _d=new Date(s.created_at.replace(' ','T')); dateStr=isNaN(_d)?'':_d.toLocaleDateString('ru-RU',{day:'2-digit',month:'short',year:'numeric'}); }catch(e){} }
+  return `<div class="ss-card" id="ss-card-${id}">
+    <div class="flex items-start justify-between gap-3">
+      <div class="min-w-0 flex-1">
+        <div class="flex items-center gap-2 mb-1 flex-wrap">
+          ${notify ? '<span class="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 px-2 py-0.5 rounded-full"><span class="ss-alert-dot"></span>Уведомления включены</span>' : ''}
+          ${dateStr ? '<span class="text-xs text-gray-400">'+dateStr+'</span>' : ''}
+        </div>
+        <h3 class="font-semibold text-gray-900 text-sm leading-snug mb-2">${escHtml(name)}</h3>
+        ${chips.length ? '<div class="flex flex-wrap gap-1.5 mb-3">'+chips.map(c=>'<span class="ss-chip">'+escHtml(c)+'</span>').join('')+'</div>' : ''}
+        <div class="flex gap-2 flex-wrap">
+          ${url!=='#' ? `<a href="${escHtml(url)}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#0088CC] text-white text-xs font-semibold rounded-lg hover:bg-[#006699] transition-colors"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>К результатам</a>` : ''}
+          <button onclick="ssToggleAlert('${id}',this)" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${notify ? 'border-green-200 text-green-700 bg-green-50 hover:bg-red-50 hover:text-red-600 hover:border-red-200' : 'border-gray-200 text-gray-600 hover:border-[#0088CC] hover:text-[#0088CC]'}" data-notify="${notify}">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+            ${notify ? 'Выкл. уведомления' : 'Вкл. уведомления'}
+          </button>
+        </div>
+      </div>
+      <button onclick="ssDelete('${id}')" class="flex-shrink-0 w-8 h-8 rounded-lg bg-gray-50 hover:bg-red-50 hover:text-red-400 flex items-center justify-center text-gray-300 transition-colors mt-0.5" title="Удалить">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+      </button>
+    </div>
+  </div>`;
+}
+
+function tryParseUrl(af){
+  try { var o = typeof af==='string'?JSON.parse(af):af; return o.search_url||null; } catch(e){ return null; }
+}
+function escHtml(s){ var d=document.createElement('div'); d.textContent=String(s||''); return d.innerHTML; }
+function buildChips(s){
+  var chips=[];
+  var af={};
+  try { af = s.additional_filters ? (typeof s.additional_filters==='string'?JSON.parse(s.additional_filters):s.additional_filters) : {}; } catch(e){}
+  var roomNames={'0':'Студия','1':'1-комн.','2':'2-комн.','3':'3-комн.','4':'4-комн.','5':'5+-комн.'};
+  // City
+  var cityName = s.city_name||af.city_name; if(cityName) chips.push(cityName);
+  // Rooms
+  var rooms=af.rooms||s.rooms||[];
+  if(typeof rooms==='string') rooms=rooms.split(',').filter(Boolean);
+  if(rooms.length) chips.push(rooms.map(function(r){return roomNames[String(r)]||r+'-комн.';}).join(', '));
+  // Price
+  var pMin=af.price_min||s.price_min; var pMax=af.price_max||s.price_max;
+  if(pMin||pMax){ var p=''; if(pMin) p+='от '+fmtPrice(pMin); if(pMax) p+=(pMin?' ':'')+'до '+fmtPrice(pMax); chips.push(p); }
+  // Area
+  var aMin=af.area_min||s.area_min||s.size_min; var aMax=af.area_max||s.area_max||s.size_max;
+  if(aMin||aMax){ var a=''; if(aMin) a+=aMin+' м²'; if(aMax) a+=(aMin?'—':'')+aMax+' м²'; chips.push(a); }
+  // Districts
+  var dists=af.districts||s.districts||[]; if(typeof dists==='string') dists=dists.split(',').filter(Boolean);
+  if(dists.length) chips.push(dists.slice(0,2).join(', ')+(dists.length>2?'…':''));
+  // Developers
+  var devs=af.developers||s.developers||[]; if(typeof devs==='string') devs=devs.split(',').filter(Boolean);
+  if(devs.length) chips.push(devs.slice(0,1).join(', ')+(devs.length>1?' +ещё':''));
+  // Fallback: parse search_url query params if no chips found yet
+  if(chips.length===0){
+    var searchUrl = s.search_url||af.search_url||'';
+    if(searchUrl){ try {
+      var qp = new URL(searchUrl, window.location.origin).searchParams;
+      var r2=(qp.get('rooms')||'').split(',').filter(Boolean); if(r2.length) chips.push(r2.map(function(r){return roomNames[r]||r+'-комн.';}).join(', '));
+      var pm=qp.get('price_min'), px=qp.get('price_max'); if(pm||px){ var p2=''; if(pm) p2+='от '+fmtPrice(pm); if(px) p2+=(pm?' ':'')+'до '+fmtPrice(px); chips.push(p2); }
+      var ct=qp.get('city'); if(ct) chips.unshift(ct);
+    } catch(e){} }
+  }
+  return chips;
+}
+
+window.ssDelete = async function(id){
+  if(!confirm('Удалить сохранённый поиск?')) return;
+  var card = document.getElementById('ss-card-'+id);
+  if(card){ card.style.opacity='0.5'; card.style.pointerEvents='none'; }
+  try {
+    var r = await fetch('/api/user/saved-searches/'+id,{method:'DELETE',headers:{'X-CSRFToken':getCSRF()}});
+    var d = await r.json();
+    if(d.success && card){
+      card.style.transition='opacity .2s,transform .2s'; card.style.transform='scale(.97)';
+      setTimeout(()=>{ card.remove(); var list=document.getElementById('ss-list'); if(list&&!list.children.length){ list.classList.add('hidden'); document.getElementById('ss-empty').classList.remove('hidden'); } }, 200);
+    } else { if(card){ card.style.opacity=''; card.style.pointerEvents=''; } }
+  } catch(e){ if(card){ card.style.opacity=''; card.style.pointerEvents=''; } }
+};
+
+window.ssToggleAlert = async function(id, btn){
+  var cur = btn.dataset.notify==='true';
+  var newVal = !cur;
+  try {
+    var r = await fetch('/api/user/saved-searches/'+id+'/toggle-alert',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':getCSRF()},body:JSON.stringify({notify_new_matches:newVal})});
+    var d = await r.json();
+    if(d.success){
+      btn.dataset.notify = String(newVal);
+      if(newVal){
+        btn.className='inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors border-green-200 text-green-700 bg-green-50 hover:bg-red-50 hover:text-red-600 hover:border-red-200';
+        btn.innerHTML=btn.innerHTML.replace(/Вкл\..*$|Выкл\..*$/,'Выкл. уведомления');
+        // Add green dot to card header
+        var card=document.getElementById('ss-card-'+id);
+        if(card && !card.querySelector('.ss-alert-dot')){ var dotSpan=document.createElement('span'); dotSpan.className='inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 px-2 py-0.5 rounded-full'; dotSpan.innerHTML='<span class="ss-alert-dot"></span>Уведомления включены'; var flex=card.querySelector('.flex.items-center.gap-2'); if(flex) flex.prepend(dotSpan); }
+      } else {
+        btn.className='inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors border-gray-200 text-gray-600 hover:border-[#0088CC] hover:text-[#0088CC]';
+        btn.innerHTML=btn.innerHTML.replace(/Вкл\..*$|Выкл\..*$/,'Вкл. уведомления');
+        var card2=document.getElementById('ss-card-'+id);
+        if(card2){ var dot=card2.querySelector('.inline-flex.items-center.gap-1\\.5.text-xs.font-semibold.text-green-700'); if(dot) dot.remove(); }
+      }
+    }
+  } catch(e){}
+};
+
+// ── Boot ──────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', loadAll);
+
+// Show/hide PDF button based on whether comparison table is visible
+function updatePdfBtn(){
+  var btn = document.getElementById('cmp-pdf-btn');
+  if(!btn) return;
+  var propTable = document.getElementById('cmp-props-table');
+  var cplxTable = document.getElementById('cmp-cplxs-table');
+  var propVisible = propTable && !propTable.classList.contains('hidden');
+  var cplxVisible = cplxTable && cplxTable.closest('#cmp-pane-complexes') && !cplxTable.closest('#cmp-pane-complexes').classList.contains('hidden') && !cplxTable.classList.contains('hidden');
+  btn.classList.toggle('hidden', !propVisible && !cplxVisible);
+  btn.classList.toggle('md:inline-flex', propVisible || cplxVisible);
+}
+
+// PDF export via browser print with isolated print layout
+window.exportCmpPdf = function(){
+  var activeSub = (typeof _curSub !== 'undefined') ? _curSub : 'properties';
+  var tableEl = activeSub === 'complexes'
+    ? document.getElementById('cmp-cplxs-table')
+    : document.getElementById('cmp-props-table');
+  if(!tableEl || tableEl.classList.contains('hidden')){
+    alert('Сначала добавьте минимум 2 объекта в сравнение'); return;
+  }
+  var tableHtml = tableEl.innerHTML;
+  var title = activeSub === 'complexes' ? 'Сравнение жилых комплексов' : 'Сравнение квартир';
+  var dateStr = new Date().toLocaleDateString('ru-RU',{day:'2-digit',month:'long',year:'numeric'});
+  var printWin = window.open('','_blank','width=1200,height=800');
+  printWin.document.write(`<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8">
+  <title>InBack — ${title}</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;color:#1f2937;background:#fff;padding:20px}
+    .pdf-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #0088CC}
+    .pdf-logo{display:flex;align-items:center;gap:10px}
+    .pdf-logo-icon{width:36px;height:36px;background:#0088CC;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:16px}
+    .pdf-logo-text{font-size:20px;font-weight:800;color:#0088CC}
+    .pdf-logo-sub{font-size:11px;color:#6b7280;margin-top:1px}
+    .pdf-meta{text-align:right;font-size:11px;color:#6b7280}
+    .pdf-title{font-size:18px;font-weight:700;color:#111827;margin-bottom:20px}
+    .pdf-contact{margin-top:20px;padding-top:14px;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;font-size:11px;color:#6b7280}
+    table{width:100%;border-collapse:collapse;font-size:11px}
+    thead th{background:#f9fafb;padding:10px 8px;border-bottom:2px solid #e5e7eb;text-align:center;font-weight:600;color:#374151}
+    thead th:first-child{text-align:left;color:#6b7280;font-size:10px;text-transform:uppercase;letter-spacing:.05em;min-width:120px}
+    tbody td{padding:8px;border-bottom:1px solid #f3f4f6;text-align:center;color:#374151}
+    tbody td:first-child{text-align:left;font-size:10px;font-weight:600;color:#6b7280;background:#fafafa}
+    tr:nth-child(even) td:not(:first-child){background:#f9fafb}
+    .font-bold{font-weight:700}.text-green-600{color:#16a34a}.bg-green-50{background:#f0fdf4}.inline-flex{display:inline-flex;align-items:center;gap:4px}
+    img{max-width:100px;height:64px;object-fit:cover;border-radius:8px;display:block;margin:0 auto 6px}
+    a{color:#0088CC;text-decoration:none;font-weight:600}
+    @media print{@page{margin:10mm;size:A4 landscape}body{padding:0}}
+  </style></head><body>
+  <div class="pdf-header">
+    <div class="pdf-logo">
+      <div class="pdf-logo-icon">IN</div>
+      <div><div class="pdf-logo-text">InBack</div><div class="pdf-logo-sub">Новостройки Краснодара · кэшбек до 500 000 ₽</div></div>
+    </div>
+    <div class="pdf-meta"><div>${dateStr}</div><div>inback.ru · 8 (862) 266-62-16</div></div>
+  </div>
+  <div class="pdf-title">${title}</div>
+  ${tableHtml}
+  <div class="pdf-contact">
+    <span>InBack — сервис покупки новостроек с кэшбеком</span>
+    <span>inback.ru &nbsp;|&nbsp; 8 (862) 266-62-16 &nbsp;|&nbsp; Краснодар</span>
+  </div>
+  <script>window.onload=function(){setTimeout(function(){window.print();window.close();},600)}<\/script>
+  </body></html>`);
+  printWin.document.close();
+};
+
+// Hook into tab switching to show/hide PDF button
+var _origCmpSubTab = window.cmpSubTab;
+if(typeof cmpSubTab === 'function'){
+  var _cmpSubTabOrig = cmpSubTab;
+  window.cmpSubTab = function(sub){
+    _cmpSubTabOrig(sub);
+    setTimeout(updatePdfBtn,100);
+  };
+}
+setTimeout(updatePdfBtn, 1500);
+})();
+
+// ── MY COLLECTIONS TAB ───────────────────────────────────────────────────────
+(function(){
+  if(!document.getElementById('main-tab-collections')) return;
+
+  var _cols = [];
+  var _curCol = null; // currently open collection detail
+
+  function getCSRFCol(){ return (document.querySelector('meta[name="csrf-token"]')||{getAttribute:function(){return'';}}).getAttribute('content')||''; }
+  function fmtPrice(p){ return p ? (p/1e6).toFixed(2).replace('.',',') + ' млн ₽' : '—'; }
+  function escHtml(s){ var d=document.createElement('div'); d.appendChild(document.createTextNode(String(s||''))); return d.innerHTML; }
+
+  // ── Load list ──
+  window.favColLoad = function(){
+    var loading = document.getElementById('fav-col-loading');
+    var list = document.getElementById('fav-col-list');
+    var empty = document.getElementById('fav-col-empty');
+    if(loading) loading.classList.remove('hidden');
+    fetch('/api/my-collections').then(function(r){ return r.ok?r.json():null; }).then(function(data){
+      if(loading) loading.classList.add('hidden');
+      var items = (data && data.collections) || [];
+      _cols = items;
+      // Update badge
+      var badge = document.getElementById('main-badge-collections');
+      if(badge){ badge.textContent=items.length; if(items.length>0) badge.classList.remove('hidden'); else badge.classList.add('hidden'); }
+      if(!list) return;
+      if(!items.length){
+        list.innerHTML='';
+        if(empty) empty.classList.remove('hidden');
+        return;
+      }
+      if(empty) empty.classList.add('hidden');
+      list.innerHTML = items.map(function(c){
+        var cnt = c.properties_count||0;
+        var cntTxt = cnt+' '+(cnt===1?'объект':cnt<5?'объекта':'объектов');
+        return '<div class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all overflow-hidden cursor-pointer group" onclick="favColOpen('+c.id+')">' +
+          '<div class="h-28 bg-gradient-to-br from-blue-50 via-[#0088CC]/10 to-indigo-50 flex items-center justify-center">' +
+            '<svg class="w-10 h-10 text-[#0088CC]/40 group-hover:text-[#0088CC]/60 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>' +
+          '</div>' +
+          '<div class="p-4">' +
+            '<h4 class="text-sm font-bold text-gray-900 truncate mb-1">'+escHtml(c.title)+'</h4>' +
+            (c.description?'<p class="text-xs text-gray-500 mb-2 line-clamp-2">'+escHtml(c.description)+'</p>':'') +
+            '<div class="flex items-center justify-between mt-2">' +
+              '<span class="text-xs text-gray-400">'+cntTxt+' · '+escHtml(c.created_at)+'</span>' +
+              '<button onclick="event.stopPropagation();favColDelete('+c.id+')" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-50 text-gray-300 hover:text-red-400 transition-colors">' +
+                '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>' +
+              '</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }).catch(function(){ if(loading) loading.classList.add('hidden'); });
+  };
+
+  // ── Open detail ──
+  window.favColOpen = function(id){
+    var grid = document.getElementById('fav-col-grid');
+    var detail = document.getElementById('fav-col-detail');
+    var detailList = document.getElementById('fav-col-detail-list');
+    var detailEmpty = document.getElementById('fav-col-detail-empty');
+    var detailTitle = document.getElementById('fav-col-detail-title');
+    var detailCount = document.getElementById('fav-col-detail-count');
+    if(grid) grid.classList.add('hidden');
+    if(detail) detail.classList.remove('hidden');
+    if(detailTitle) detailTitle.textContent='Загрузка...';
+    fetch('/api/my-collections/'+id).then(function(r){ return r.ok?r.json():null; }).then(function(data){
+      if(!data||!data.success){ if(detailTitle) detailTitle.textContent='Ошибка загрузки'; return; }
+      var col = data.collection;
+      _curCol = col;
+      if(detailTitle) detailTitle.textContent = col.title;
+      var cnt = (col.items||[]).length;
+      if(detailCount) detailCount.textContent = cnt+' '+(cnt===1?'объект':cnt<5?'объекта':'объектов');
+      if(!cnt){
+        if(detailList) detailList.innerHTML='';
+        if(detailEmpty) detailEmpty.classList.remove('hidden');
+        return;
+      }
+      if(detailEmpty) detailEmpty.classList.add('hidden');
+      if(detailList) detailList.innerHTML = col.items.map(function(item){
+        return '<div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex items-center gap-3 fav-col-item" id="fav-col-item-'+item.id+'">' +
+          '<div class="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">' +
+            '<svg class="w-5 h-5 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>' +
+          '</div>' +
+          '<div class="flex-1 min-w-0">' +
+            '<p class="text-sm font-semibold text-gray-900 truncate">'+escHtml(item.property_name)+'</p>' +
+            '<p class="text-xs text-gray-500 mt-0.5">'+fmtPrice(item.property_price)+' · Добавлено '+escHtml(item.added_at)+'</p>' +
+          '</div>' +
+          '<button onclick="favColRemoveItem('+col.id+','+item.id+')" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50 text-gray-300 hover:text-red-400 transition-colors flex-shrink-0">' +
+            '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>' +
+          '</button>' +
+        '</div>';
+      }).join('');
+    });
+  };
+
+  // ── Back to grid ──
+  window.favColBack = function(){
+    _curCol = null;
+    var grid = document.getElementById('fav-col-grid');
+    var detail = document.getElementById('fav-col-detail');
+    if(grid) grid.classList.remove('hidden');
+    if(detail) detail.classList.add('hidden');
+    favColLoad();
+  };
+
+  // ── Remove item from collection ──
+  window.favColRemoveItem = function(colId, itemId){
+    var el = document.getElementById('fav-col-item-'+itemId);
+    if(el){ el.style.opacity='0.4'; el.style.pointerEvents='none'; }
+    fetch('/api/my-collections/'+colId+'/remove/'+itemId,{method:'DELETE',headers:{'X-CSRFToken':getCSRFCol()}})
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if(data.success){
+        if(el) el.remove();
+        if(_curCol){ _curCol.items = (_curCol.items||[]).filter(function(i){ return i.id!==itemId; }); var cnt=_curCol.items.length; var dc=document.getElementById('fav-col-detail-count'); if(dc) dc.textContent=cnt+' '+(cnt===1?'объект':cnt<5?'объекта':'объектов'); if(!cnt){ var de=document.getElementById('fav-col-detail-empty'); if(de) de.classList.remove('hidden'); } }
+      } else { if(el){ el.style.opacity=''; el.style.pointerEvents=''; } }
+    }).catch(function(){ if(el){ el.style.opacity=''; el.style.pointerEvents=''; } });
+  };
+
+  // ── Create modal ──
+  window.favColCreate = function(){
+    var m = document.getElementById('favColCreateModal');
+    if(m){ m.classList.remove('hidden'); setTimeout(function(){ var inp=document.getElementById('fav-col-name-input'); if(inp) inp.focus(); },100); }
+    var inp=document.getElementById('fav-col-name-input'); if(inp) inp.value='';
+    var desc=document.getElementById('fav-col-desc-input'); if(desc) desc.value='';
+    var err=document.getElementById('fav-col-create-err'); if(err) err.classList.add('hidden');
+  };
+  window.favColCloseModal = function(){
+    var m = document.getElementById('favColCreateModal'); if(m) m.classList.add('hidden');
+  };
+  window.favColSubmit = function(){
+    var title = (document.getElementById('fav-col-name-input')||{}).value||'';
+    title = title.trim();
+    var err = document.getElementById('fav-col-create-err');
+    if(!title){ if(err){ err.textContent='Введите название подборки'; err.classList.remove('hidden'); } return; }
+    if(err) err.classList.add('hidden');
+    var btn = document.getElementById('fav-col-submit-btn');
+    if(btn){ btn.textContent='Сохранение...'; btn.disabled=true; }
+    var desc = (document.getElementById('fav-col-desc-input')||{}).value||'';
+    fetch('/api/my-collections',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':getCSRFCol()},body:JSON.stringify({title:title,description:desc.trim()})})
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if(btn){ btn.textContent='Создать'; btn.disabled=false; }
+      if(data.success||data.id){
+        favColCloseModal();
+        favColLoad();
+      } else {
+        if(err){ err.textContent=data.error||'Ошибка при создании'; err.classList.remove('hidden'); }
+      }
+    }).catch(function(){ if(btn){ btn.textContent='Создать'; btn.disabled=false; } if(err){ err.textContent='Ошибка сети'; err.classList.remove('hidden'); } });
+  };
+
+  // ── Delete collection ──
+  window.favColDelete = function(id){
+    if(!confirm('Удалить подборку?')) return;
+    fetch('/api/my-collections/'+id,{method:'DELETE',headers:{'X-CSRFToken':getCSRFCol()}})
+    .then(function(r){ return r.json(); })
+    .then(function(data){ if(data.success!==false) favColLoad(); });
+  };
+
+  // ── PDF Export ──
+  window.favColExportPdf = function(){
+    if(!_curCol){ alert('Откройте подборку'); return; }
+    var items = _curCol.items||[];
+    if(!items.length){ alert('Подборка пуста — добавьте объекты'); return; }
+    var dateStr = new Date().toLocaleDateString('ru-RU',{day:'2-digit',month:'long',year:'numeric'});
+    var rows = items.map(function(item,i){
+      return '<tr>'
+        +'<td style="padding:10px 12px;border-bottom:1px solid #f3f4f6;font-weight:600;color:#374151">'+(i+1)+'</td>'
+        +'<td style="padding:10px 12px;border-bottom:1px solid #f3f4f6;color:#111827">'+escHtml(item.property_name)+'</td>'
+        +'<td style="padding:10px 12px;border-bottom:1px solid #f3f4f6;text-align:right;font-weight:700;color:#0088CC">'+fmtPrice(item.property_price)+'</td>'
+        +'<td style="padding:10px 12px;border-bottom:1px solid #f3f4f6;color:#6b7280;font-size:12px">'+escHtml(item.added_at)+'</td>'
+        +'</tr>';
+    }).join('');
+    var printWin = window.open('','_blank','width=900,height=700');
+    printWin.document.write('<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><title>InBack — '+escHtml(_curCol.title)+'</title><style>'
+      +'*{box-sizing:border-box;margin:0;padding:0}'
+      +'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:#1f2937;background:#fff;padding:24px}'
+      +'.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:2.5px solid #0088CC}'
+      +'.logo{display:flex;align-items:center;gap:10px}'
+      +'.logo-icon{width:40px;height:40px;background:#0088CC;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:18px;flex-shrink:0}'
+      +'.logo-name{font-size:22px;font-weight:800;color:#0088CC}'
+      +'.logo-sub{font-size:11px;color:#6b7280;margin-top:2px}'
+      +'.meta{text-align:right;font-size:11px;color:#6b7280;line-height:1.6}'
+      +'.section-title{font-size:18px;font-weight:700;color:#111827;margin-bottom:6px}'
+      +'.section-sub{font-size:12px;color:#6b7280;margin-bottom:20px}'
+      +'table{width:100%;border-collapse:collapse;margin-bottom:24px}'
+      +'thead th{background:#f9fafb;padding:10px 12px;border-bottom:2px solid #e5e7eb;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.04em}'
+      +'thead th:last-child{text-align:right}'
+      +'thead th:nth-child(3){text-align:right}'
+      +'.footer{display:flex;justify-content:space-between;font-size:11px;color:#9ca3af;padding-top:16px;border-top:1px solid #e5e7eb}'
+      +'@media print{@page{margin:12mm;size:A4}body{padding:0}}'
+      +'</style></head><body>'
+      +'<div class="hdr"><div class="logo"><div class="logo-icon">IN</div><div><div class="logo-name">InBack</div><div class="logo-sub">Недвижимость с кэшбеком до 500 000 ₽</div></div></div>'
+      +'<div class="meta"><div>'+dateStr+'</div><div>inback.ru · 8 (862) 266-62-16</div></div></div>'
+      +'<div class="section-title">Подборка: '+escHtml(_curCol.title)+'</div>'
+      +(_curCol.description?'<div class="section-sub">'+escHtml(_curCol.description)+'</div>':'<div class="section-sub">'+items.length+' '+(items.length===1?'объект':items.length<5?'объекта':'объектов')+'</div>')
+      +'<table><thead><tr><th>#</th><th>Объект</th><th style="text-align:right">Цена</th><th>Добавлено</th></tr></thead><tbody>'+rows+'</tbody></table>'
+      +'<div class="footer"><span>Подборка создана в сервисе InBack</span><span>inback.ru &nbsp;|&nbsp; 8 (862) 266-62-16 &nbsp;|&nbsp; Краснодар</span></div>'
+      +'<script>window.onload=function(){setTimeout(function(){window.print();window.close();},500)}<\/script>'
+      +'</body></html>');
+    printWin.document.close();
+  };
+
+  // Hook into favMainTab to load collections lazily
+  var _origFavMainTab = window.favMainTab;
+  window.favMainTab = function(tab){
+    if(_origFavMainTab) _origFavMainTab(tab);
+    if(tab==='collections') favColLoad();
+  };
+})();
+</script>
+{% endblock %}

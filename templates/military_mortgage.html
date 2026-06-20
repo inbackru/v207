@@ -1,0 +1,988 @@
+{% extends "base.html" %}
+
+{% block title %}Военная ипотека 2026 в {{ city_prep }}: ставка от 3.5% для военнослужащих | InBack{% endblock %}
+{% block description %}Военная ипотека 2026 в {{ city_prep }}: ставка от 3.5% для военнослужащих по НИС. Сумма до 4.6 млн ₽, без первоначального взноса. Помощь в оформлении за 1 день.{% endblock %}
+{% block keywords %}военная ипотека 2026, военная ипотека НИС, ипотека для военных, льготная ипотека военнослужащим, военная ипотека без взноса, максимальная сумма военной ипотеки, военная ипотека {{ city_name }}, военная ипотека новостройки, военная ипотека калькулятор, накопительно-ипотечная система, военная ипотека условия 2026, военная ипотека квартира, военная ипотека документы, военная ипотека сумма 4.6 млн, военная ипотека контрактникам, военная ипотека офицерам, военная ипотека в {{ city_prep }}, военная ипотека {{ city_region }}, купить квартиру по военной ипотеке, военная ипотека с кэшбеком, НИС ипотека {{ city_name }}{% endblock %}
+
+{% block og_title %}Военная ипотека 2026 в {{ city_prep }}: ставка от 3.5% для военнослужащих | InBack{% endblock %}
+{% block og_description %}Военная ипотека по НИС в {{ city_prep }} со ставкой от 3.5%. Максимальная сумма до 4.6 млн ₽, без первоначального взноса. Помощь в оформлении документов.{% endblock %}
+{% block twitter_title %}Военная ипотека 2026 в {{ city_prep }}: ставка от 3.5% для военнослужащих | InBack{% endblock %}
+{% block twitter_description %}Военная ипотека по НИС в {{ city_prep }} со ставкой от 3.5%. Сумма до 4.6 млн ₽, без первоначального взноса. Одобрение за 1 день.{% endblock %}
+{% block twitter_image %}{{ url_for('static', filename='images/military-mortgage-og.jpg', _external=True) }}{% endblock %}
+
+{% block head %}
+<meta name="robots" content="index, follow">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ url_for('city_pages.military_mortgage_city', city_slug=current_city.slug if current_city else 'krasnodar', _external=True) }}">
+<meta property="og:site_name" content="InBack">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="{{ url_for('city_pages.military_mortgage_city', city_slug=current_city.slug if current_city else 'krasnodar', _external=True) }}">
+
+<link rel="canonical" href="{{ url_for('city_pages.military_mortgage_city', city_slug=current_city.slug if current_city else 'krasnodar', _external=True) }}" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "RealEstateAgent",
+  "name": "Inback",
+  "image": "https://inback.ru/logo.jpg",
+  "description": "Официальный сервис возврата кэшбека при покупке недвижимости в {{ city_prep }} и других городах России",
+  "areaServed": {
+    "@type": "AdministrativeArea",
+    "name": "{{ city_name }}{% if current_city and current_city.region %}, {{ current_city.region.name }}{% else %} и Краснодарский край{% endif %}"
+  },
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "ул. Красная, 32",
+    "addressLocality": "{{ city_name }}",
+    "addressRegion": {{ (current_city.region.name if current_city and current_city.region else 'Краснодарский край')|tojson }}
+  },
+  "telephone": "+78001231212",
+  "openingHoursSpecification": {
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"],
+    "opens": "09:00",
+    "closes": "19:00"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Кто имеет право на военную ипотеку?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Военная ипотека доступна военнослужащим-участникам накопительно-ипотечной системы (НИС). Это офицеры, прапорщики, контрактники со стажем от 3 лет. Регистрация в НИС обязательна."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Какая максимальная сумма военной ипотеки в 2026 году?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Максимальная сумма по военной ипотеке составляет до 4.6 млн рублей. Если стоимость квартиры выше, разницу можно доплатить собственными средствами или с помощью материнского капитала."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Нужен ли первоначальный взнос по военной ипотеке?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "По военной ипотеке первоначальный взнос не требуется. Накопления на именном счёте участника НИС используются в качестве первого взноса. Ежемесячные платежи погашает государство."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Можно ли получить кэшбек при покупке по военной ипотеке?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Да, при покупке новостройки через InBack по военной ипотеке вы получаете кэшбек до 5% от стоимости квартиры. Это дополнительная выгода сверх льготных условий НИС."
+      }
+    }
+  ]
+}
+</script>
+
+<style>
+.military-hero-gradient {
+    background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 30%, #e0f2fe 60%, #f0fdf4 100%);
+    position: relative;
+}
+.military-hero-gradient::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 40px,
+        rgba(0, 136, 204, 0.03) 40px,
+        rgba(0, 136, 204, 0.03) 42px
+    );
+    pointer-events: none;
+}
+
+@keyframes float-shield-main {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-12px); }
+}
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.stat-card-hover {
+    transition: all 0.3s ease;
+}
+.stat-card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 136, 204, 0.12);
+}
+
+.benefit-card {
+    transition: all 0.3s ease;
+}
+.benefit-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+}
+.benefit-card:hover .benefit-icon {
+    background: #0088CC;
+    color: white;
+}
+.benefit-card:hover .benefit-icon svg {
+    color: white;
+}
+
+.faq-item {
+    transition: all 0.3s ease;
+}
+.faq-item:hover {
+    border-color: #0088CC;
+}
+.faq-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+.faq-content.open {
+    max-height: 500px;
+}
+
+.slider::-webkit-slider-thumb {
+    appearance: none;
+    height: 22px;
+    width: 22px;
+    border-radius: 50%;
+    background: #0088CC;
+    cursor: pointer;
+    border: 3px solid #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 136, 204, 0.3);
+}
+.slider::-moz-range-thumb {
+    height: 22px;
+    width: 22px;
+    border-radius: 50%;
+    background: #0088CC;
+    cursor: pointer;
+    border: 3px solid #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 136, 204, 0.3);
+}
+.slider::-webkit-slider-runnable-track {
+    background: linear-gradient(to right, #0088CC 0%, #e5e7eb 0%);
+    border-radius: 9999px;
+}
+
+.bank-card {
+    transition: all 0.3s ease;
+}
+.bank-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    border-color: #0088CC;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<section class="military-hero-gradient relative overflow-hidden">
+    <div class="container mx-auto px-4 py-16 md:py-24 relative z-10">
+        <div class="grid md:grid-cols-2 gap-10 lg:gap-16 items-center">
+            <div class="max-w-xl text-left">
+                <span class="page-hero-badge">Военная ипотека НИС</span>
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-gray-900 leading-tight">
+                    Военная ипотека <span class="text-[#0088CC]">НИС</span><br class="hidden md:block"> для военнослужащих
+                </h1>
+                <p class="text-xl md:text-2xl mb-10 text-gray-600 leading-relaxed">
+                    Государственная программа в {{ city_prep }}. Ставка от 3.5%, сумма до 4.6 млн ₽, без первоначального взноса
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button onclick="openApplicationModal()" class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-[#0088CC] to-[#006699] text-white rounded-xl hover:shadow-xl transition-all duration-300 transform hover:scale-[1.03] shadow-lg font-semibold text-lg">
+                        Подать заявку
+                    </button>
+                    <a href="#calculator" class="inline-flex items-center justify-center px-8 py-4 bg-white text-gray-800 rounded-xl hover:bg-gray-50 transition-all font-semibold text-lg shadow-md border border-gray-100">
+                        <svg class="w-5 h-5 mr-2 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                        Рассчитать накопления
+                    </a>
+                </div>
+            </div>
+
+            <div class="hidden md:flex items-center justify-center" style="animation: float-shield-main 5s ease-in-out infinite;">
+                <svg width="320" height="360" viewBox="0 0 320 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M160 20 C160 20 260 50 280 80 C300 110 300 200 280 250 C260 300 190 340 160 350 C130 340 60 300 40 250 C20 200 20 110 40 80 C60 50 160 20 160 20Z" fill="url(#shieldGrad)" stroke="#0088CC" stroke-width="2"/>
+                    <path d="M160 40 C160 40 245 65 260 90 C275 115 275 190 260 235 C245 280 185 315 160 325 C135 315 75 280 60 235 C45 190 45 115 60 90 C75 65 160 40 160 40Z" fill="url(#shieldInner)" stroke="#0088CC" stroke-width="1" opacity="0.5"/>
+
+                    <polygon points="160,100 172,132 206,132 178,152 188,184 160,166 132,184 142,152 114,132 148,132" fill="#0088CC" opacity="0.9"/>
+                    <polygon points="160,110 169,134 196,134 174,150 182,174 160,160 138,174 146,150 124,134 151,134" fill="white" opacity="0.3"/>
+
+                    <path d="M70 200 C55 185 45 170 50 160 C55 155 65 158 70 165 C75 158 85 155 90 160 C95 170 85 185 70 200Z" fill="#0088CC" opacity="0.15"/>
+                    <path d="M68 195 C58 183 50 172 54 164 C58 160 65 162 68 168 C71 162 78 160 82 164 C86 172 78 183 68 195Z" fill="#0088CC" opacity="0.1"/>
+
+                    <path d="M250 200 C265 185 275 170 270 160 C265 155 255 158 250 165 C245 158 235 155 230 160 C225 170 235 185 250 200Z" fill="#0088CC" opacity="0.15"/>
+                    <path d="M252 195 C262 183 270 172 266 164 C262 160 255 162 252 168 C249 162 242 160 238 164 C234 172 242 183 252 195Z" fill="#0088CC" opacity="0.1"/>
+
+                    <path d="M60 210 Q50 220 55 230 Q60 235 70 230 Q75 225 80 228 Q90 235 95 225 Q98 218 90 212 Q82 208 75 215 Q68 220 60 210Z" fill="#0088CC" opacity="0.08"/>
+                    <path d="M260 210 Q270 220 265 230 Q260 235 250 230 Q245 225 240 228 Q230 235 225 225 Q222 218 230 212 Q238 208 245 215 Q252 220 260 210Z" fill="#0088CC" opacity="0.08"/>
+
+                    <path d="M85 240 Q75 245 78 255 Q82 260 90 257 Q95 252 100 255" stroke="#0088CC" stroke-width="1.5" fill="none" opacity="0.12"/>
+                    <path d="M235 240 Q245 245 242 255 Q238 260 230 257 Q225 252 220 255" stroke="#0088CC" stroke-width="1.5" fill="none" opacity="0.12"/>
+
+                    <circle cx="160" cy="280" r="18" fill="#0088CC" opacity="0.1"/>
+                    <text x="160" y="286" text-anchor="middle" fill="#0088CC" font-size="14" font-weight="bold" opacity="0.7">НИС</text>
+
+                    <circle cx="100" cy="60" r="3" fill="#0088CC" opacity="0.2"/>
+                    <circle cx="220" cy="55" r="2.5" fill="#0088CC" opacity="0.15"/>
+                    <circle cx="80" cy="300" r="2" fill="#0088CC" opacity="0.15"/>
+                    <circle cx="240" cy="310" r="3" fill="#0088CC" opacity="0.2"/>
+                    <circle cx="160" cy="30" r="2" fill="#0088CC" opacity="0.1"/>
+
+                    <defs>
+                        <linearGradient id="shieldGrad" x1="40" y1="20" x2="280" y2="350">
+                            <stop offset="0%" stop-color="#e0f2fe"/>
+                            <stop offset="50%" stop-color="#f0f9ff"/>
+                            <stop offset="100%" stop-color="#e8f4fd"/>
+                        </linearGradient>
+                        <linearGradient id="shieldInner" x1="60" y1="40" x2="260" y2="325">
+                            <stop offset="0%" stop-color="#bae6fd"/>
+                            <stop offset="100%" stop-color="#e0f2fe"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mt-12">
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-5 text-center stat-card-hover border border-white/50 shadow-sm">
+                <div class="text-3xl font-bold text-[#0088CC] mb-1">3.5%</div>
+                <div class="text-sm text-gray-600">Годовая ставка</div>
+            </div>
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-5 text-center stat-card-hover border border-white/50 shadow-sm">
+                <div class="text-3xl font-bold text-[#0088CC] mb-1">4.6 млн</div>
+                <div class="text-sm text-gray-600">Максимум ₽</div>
+            </div>
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-5 text-center stat-card-hover border border-white/50 shadow-sm">
+                <div class="text-3xl font-bold text-[#0088CC] mb-1">0%</div>
+                <div class="text-sm text-gray-600">Взнос</div>
+            </div>
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-5 text-center stat-card-hover border border-white/50 shadow-sm">
+                <div class="text-3xl font-bold text-[#0088CC] mb-1">25 лет</div>
+                <div class="text-sm text-gray-600">Срок кредита</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="w-full">
+        <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full" preserveAspectRatio="none" style="height: 60px; display: block;">
+            <path d="M0 60V30C240 5 480 50 720 30C960 10 1200 45 1440 25V60H0Z" fill="white"/>
+        </svg>
+    </div>
+</section>
+
+<section class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-14">
+                <span class="page-hero-badge">Условия программы</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Условия военной ипотеки НИС
+                </h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">Кто может участвовать в программе и какие объекты доступны</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mr-4">
+                            <svg class="w-6 h-6 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Кто может участвовать</h3>
+                    </div>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Офицеры - сразу после назначения</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Прапорщики и мичманы - с 3 лет службы</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Сержанты по контракту - с 3 лет службы</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Военнослужащие всех силовых ведомств</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mr-4">
+                            <svg class="w-6 h-6 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Накопления НИС</h3>
+                    </div>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Ежегодный взнос: 280 000 ₽</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">За 3 года: 840 000 ₽</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">За 20 лет: 5 600 000 ₽</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Государство доплачивает до 100%</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mr-4">
+                            <svg class="w-6 h-6 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Объект недвижимости</h3>
+                    </div>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Квартира в новостройке</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Квартира на вторичном рынке</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Жилой дом с участком</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Аккредитовано в Росвоенипотеке</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mr-4">
+                            <svg class="w-6 h-6 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Необходимые документы</h3>
+                    </div>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Паспорт военнослужащего</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Свидетельство участника НИС</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Справка о состоянии накоплений</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Документы на недвижимость</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="text-center mt-10">
+                <button onclick="openApplicationModal()" class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-[#0088CC] to-[#006699] text-white rounded-xl hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg font-semibold text-lg">
+                    Проверить возможность получения
+                </button>
+                <p class="text-gray-500 mt-3 text-sm">Бесплатная консультация и помощь с документами</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="calculator" class="py-20 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-14">
+                <span class="page-hero-badge">Калькулятор</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Калькулятор военной ипотеки
+                </h2>
+                <p class="text-xl text-gray-600">Рассчитайте накопления и возможную покупку</p>
+            </div>
+
+            <div class="bg-white rounded-3xl shadow-xl p-8 md:p-10 border border-gray-100">
+                <div class="grid lg:grid-cols-2 gap-10">
+                    <div class="space-y-8">
+                        <div>
+                            <div class="flex justify-between items-center mb-3">
+                                <label class="text-gray-700 font-semibold">Лет в НИС</label>
+                                <div class="text-lg font-bold text-[#0088CC] bg-[#0088CC]/5 px-3 py-1 rounded-lg" id="militaryServiceYears">5 лет</div>
+                            </div>
+                            <input type="range" min="3" max="25" step="1" value="5"
+                                   class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                                   id="militaryServiceYearsRange">
+                            <div class="flex justify-between text-xs text-gray-400 mt-2">
+                                <span>3 года</span>
+                                <span>25 лет</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center mb-3">
+                                <label class="text-gray-700 font-semibold">Стоимость недвижимости</label>
+                                <div class="text-lg font-bold text-[#0088CC] bg-[#0088CC]/5 px-3 py-1 rounded-lg" id="militaryPropertyPrice">4 000 000 ₽</div>
+                            </div>
+                            <input type="range" min="1000000" max="8000000" step="100000" value="4000000"
+                                   class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                                   id="militaryPropertyPriceRange">
+                            <div class="flex justify-between text-xs text-gray-400 mt-2">
+                                <span>1 млн ₽</span>
+                                <span>8 млн ₽</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center mb-3">
+                                <label class="text-gray-700 font-semibold">Доплата из своих средств</label>
+                                <div class="text-lg font-bold text-[#0088CC] bg-[#0088CC]/5 px-3 py-1 rounded-lg" id="militaryAdditionalPayment">0 ₽</div>
+                            </div>
+                            <input type="range" min="0" max="5000000" step="50000" value="0"
+                                   class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                                   id="militaryAdditionalPaymentRange">
+                            <div class="flex justify-between text-xs text-gray-400 mt-2">
+                                <span>0 ₽</span>
+                                <span>5 млн ₽</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-[#0088CC] to-[#006699] rounded-2xl p-8 text-white flex flex-col justify-between">
+                        <div>
+                            <div class="text-center mb-8">
+                                <p class="text-white/70 text-sm uppercase tracking-wider mb-2">Ваши накопления НИС</p>
+                                <div class="text-5xl font-bold" id="militaryAccumulated">1 400 000 ₽</div>
+                                <p class="text-white/70 mt-1">за время службы</p>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center py-3 border-b border-white/15">
+                                    <span class="text-white/70">Ежегодный взнос</span>
+                                    <span class="font-semibold text-lg">280 000 ₽</span>
+                                </div>
+                                <div class="flex justify-between items-center py-3 border-b border-white/15">
+                                    <span class="text-white/70">Стоимость жилья</span>
+                                    <span class="font-semibold" id="militaryTotalCost">4 000 000 ₽</span>
+                                </div>
+                                <div class="flex justify-between items-center py-3 border-b border-white/15">
+                                    <span class="text-white/70">Нужна доплата</span>
+                                    <span class="font-semibold" id="militaryNeedPayment">2 600 000 ₽</span>
+                                </div>
+                                <div class="flex justify-between items-center py-3">
+                                    <span class="text-white/70">Кэшбек InBack</span>
+                                    <span class="font-bold text-lg bg-white/20 px-3 py-1 rounded-lg" id="militaryCashback">100 000 ₽</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button onclick="openApplicationModal()" class="w-full bg-white text-[#0088CC] py-4 rounded-xl font-bold mt-8 hover:bg-gray-50 transition-colors text-lg shadow-lg">
+                            Подать заявку
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-14">
+            <span class="page-hero-badge">Преимущества</span>
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Преимущества военной ипотеки
+            </h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            <div class="benefit-card bg-white rounded-2xl p-7 border border-gray-100 shadow-sm">
+                <div class="benefit-icon w-14 h-14 bg-[#0088CC]/10 rounded-2xl flex items-center justify-center mb-5 transition-all duration-300">
+                    <svg class="w-7 h-7 text-[#0088CC] transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-2 text-gray-900">Ставка от 3.5%</h3>
+                <p class="text-gray-600 text-sm leading-relaxed">Льготная ставка для участников НИС</p>
+            </div>
+            <div class="benefit-card bg-white rounded-2xl p-7 border border-gray-100 shadow-sm">
+                <div class="benefit-icon w-14 h-14 bg-[#0088CC]/10 rounded-2xl flex items-center justify-center mb-5 transition-all duration-300">
+                    <svg class="w-7 h-7 text-[#0088CC] transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-2 text-gray-900">Первый взнос 0%</h3>
+                <p class="text-gray-600 text-sm leading-relaxed">Покупка жилья без собственных средств</p>
+            </div>
+            <div class="benefit-card bg-white rounded-2xl p-7 border border-gray-100 shadow-sm">
+                <div class="benefit-icon w-14 h-14 bg-[#0088CC]/10 rounded-2xl flex items-center justify-center mb-5 transition-all duration-300">
+                    <svg class="w-7 h-7 text-[#0088CC] transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-2 text-gray-900">До 280 тыс. ₽/год</h3>
+                <p class="text-gray-600 text-sm leading-relaxed">Ежегодные выплаты государства</p>
+            </div>
+            <div class="benefit-card bg-white rounded-2xl p-7 border border-gray-100 shadow-sm">
+                <div class="benefit-icon w-14 h-14 bg-[#0088CC]/10 rounded-2xl flex items-center justify-center mb-5 transition-all duration-300">
+                    <svg class="w-7 h-7 text-[#0088CC] transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-2 text-gray-900">Погашение после 20 лет</h3>
+                <p class="text-gray-600 text-sm leading-relaxed">Государство погашает остаток долга</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-14">
+            <span class="page-hero-badge">Банки-партнеры</span>
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Подберем лучшее предложение
+            </h2>
+            <p class="text-xl text-gray-600">Работаем с ведущими банками России</p>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 max-w-4xl mx-auto">
+            <div class="bank-card bg-white rounded-2xl p-4 flex flex-col items-center justify-center h-28 border border-gray-100">
+                <img src="{{ url_for('static', filename='images/banks/vtb.png') }}" alt="ВТБ" class="h-12 w-auto mb-2">
+                <span class="text-xs text-gray-500">Военная ипотека</span>
+            </div>
+            <div class="bank-card bg-white rounded-2xl p-4 flex flex-col items-center justify-center h-28 border border-gray-100">
+                <img src="{{ url_for('static', filename='images/banks/sber.jpg') }}" alt="Сбер" class="h-12 w-auto mb-2">
+                <span class="text-xs text-gray-500">Военная ипотека</span>
+            </div>
+            <div class="bank-card bg-white rounded-2xl p-4 flex flex-col items-center justify-center h-28 border border-gray-100">
+                <img src="{{ url_for('static', filename='images/banks/alfa.png') }}" alt="Альфа-Банк" class="h-12 w-auto mb-2">
+                <span class="text-xs text-gray-500">Военная ипотека</span>
+            </div>
+            <div class="bank-card bg-white rounded-2xl p-4 flex flex-col items-center justify-center h-28 border border-gray-100">
+                <img src="{{ url_for('static', filename='images/banks/domrf.png') }}" alt="Дом.РФ" class="h-12 w-auto mb-2">
+                <span class="text-xs text-gray-500">Военная ипотека</span>
+            </div>
+            <div class="bank-card bg-white rounded-2xl p-4 flex flex-col items-center justify-center h-28 border border-gray-100">
+                <img src="{{ url_for('static', filename='images/banks/rosselhoz.jpg') }}" alt="Россельхозбанк" class="h-12 w-auto mb-2">
+                <span class="text-xs text-gray-500">Военная ипотека</span>
+            </div>
+        </div>
+        <div class="text-center mt-10">
+            <button onclick="openApplicationModal()" class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-[#0088CC] to-[#006699] text-white rounded-xl hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg font-semibold text-lg">
+                Получить консультацию
+            </button>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-14">
+                <span class="page-hero-badge">Пошаговый алгоритм</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Как оформить военную ипотеку
+                </h2>
+                <p class="text-xl text-gray-600">5 простых шагов к вашему жилью</p>
+            </div>
+
+            <div class="relative">
+                <div class="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#0088CC] via-[#0088CC]/50 to-gray-200 hidden md:block"></div>
+
+                <div class="space-y-8">
+                    <div class="flex items-start gap-6 relative">
+                        <div class="w-16 h-16 bg-gradient-to-br from-[#0088CC] to-[#006699] rounded-2xl flex items-center justify-center text-white font-bold text-xl flex-shrink-0 shadow-lg relative z-10">1</div>
+                        <div class="bg-gray-50 rounded-2xl p-6 flex-1 border border-gray-100">
+                            <h4 class="font-bold text-lg text-gray-900 mb-2">Подайте рапорт на включение в НИС</h4>
+                            <p class="text-gray-600">Обратитесь в свою воинскую часть с рапортом о включении в реестр участников</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-6 relative">
+                        <div class="w-16 h-16 bg-gradient-to-br from-[#0088CC] to-[#006699] rounded-2xl flex items-center justify-center text-white font-bold text-xl flex-shrink-0 shadow-lg relative z-10">2</div>
+                        <div class="bg-gray-50 rounded-2xl p-6 flex-1 border border-gray-100">
+                            <h4 class="font-bold text-lg text-gray-900 mb-2">Получите регистрационный номер</h4>
+                            <p class="text-gray-600">Регистрация в Минобороны обычно занимает 10-15 рабочих дней</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-6 relative">
+                        <div class="w-16 h-16 bg-gradient-to-br from-[#0088CC] to-[#006699] rounded-2xl flex items-center justify-center text-white font-bold text-xl flex-shrink-0 shadow-lg relative z-10">3</div>
+                        <div class="bg-gray-50 rounded-2xl p-6 flex-1 border border-gray-100">
+                            <h4 class="font-bold text-lg text-gray-900 mb-2">Выберите квартиру</h4>
+                            <p class="text-gray-600">Поможем найти квартиру у аккредитованного застройщика</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-6 relative">
+                        <div class="w-16 h-16 bg-gradient-to-br from-[#0088CC] to-[#006699] rounded-2xl flex items-center justify-center text-white font-bold text-xl flex-shrink-0 shadow-lg relative z-10">4</div>
+                        <div class="bg-gray-50 rounded-2xl p-6 flex-1 border border-gray-100">
+                            <h4 class="font-bold text-lg text-gray-900 mb-2">Подайте документы в банк</h4>
+                            <p class="text-gray-600">Предварительное одобрение за 1-2 дня</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-6 relative">
+                        <div class="w-16 h-16 bg-gradient-to-br from-[#0088CC] to-[#006699] rounded-2xl flex items-center justify-center text-white font-bold text-xl flex-shrink-0 shadow-lg relative z-10">5</div>
+                        <div class="bg-gray-50 rounded-2xl p-6 flex-1 border border-gray-100">
+                            <h4 class="font-bold text-lg text-gray-900 mb-2">Оформите сделку и получите ключи</h4>
+                            <p class="text-gray-600">Быстрая регистрация и получение кэшбека от InBack</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-[#0088CC]/5 border border-[#0088CC]/15 rounded-2xl p-6 mt-10 text-center">
+                <p class="text-gray-700 font-semibold">Средний срок оформления военной ипотеки - от 2 недель. Мы ускоряем процесс до 7 дней!</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto">
+            <span class="page-hero-badge">Полная информация</span>
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6">Военная ипотека в {{ city_prep }} 2026</h2>
+            <p class="text-lg text-gray-700 mb-10 leading-relaxed">С 2005 года более 450 тысяч военнослужащих получили жилье по программе НИС. В {{ city_prep }} и {{ city_region }} доступны специальные условия для участников СВО и военнослужащих по контракту.</p>
+
+            <h3 class="text-2xl font-bold mb-6 text-gray-900">Покупка жилья по военной ипотеке</h3>
+            <div class="bg-white rounded-2xl p-8 mb-10 border border-gray-100 shadow-sm">
+                <p class="text-gray-700 mb-6">Военнослужащие могут приобрести квартиру в новостройках {{ city_gen }} по программе НИС (накопительно-ипотечная система). При выборе недвижимости по военной ипотеке учитывайте:</p>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h4 class="font-semibold text-gray-900 mb-4 flex items-center">
+                            <div class="w-8 h-8 bg-[#0088CC]/10 rounded-lg flex items-center justify-center mr-3">
+                                <svg class="w-4 h-4 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                            </div>
+                            Специальные условия НИС
+                        </h4>
+                        <ul class="space-y-2 text-gray-600 ml-11">
+                            <li class="flex items-start"><span class="text-[#0088CC] mr-2">•</span> Аккредитация застройщика в Росвоенипотеке</li>
+                            <li class="flex items-start"><span class="text-[#0088CC] mr-2">•</span> Готовность банка работать с НИС</li>
+                            <li class="flex items-start"><span class="text-[#0088CC] mr-2">•</span> Специальные скидки для военнослужащих</li>
+                            <li class="flex items-start"><span class="text-[#0088CC] mr-2">•</span> Близость к воинским частям и гарнизонам</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-900 mb-4 flex items-center">
+                            <div class="w-8 h-8 bg-[#0088CC]/10 rounded-lg flex items-center justify-center mr-3">
+                                <svg class="w-4 h-4 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            Преимущества для семьи
+                        </h4>
+                        <ul class="space-y-2 text-gray-600 ml-11">
+                            <li class="flex items-start"><span class="text-[#0088CC] mr-2">•</span> Развитая социальная инфраструктура</li>
+                            <li class="flex items-start"><span class="text-[#0088CC] mr-2">•</span> Детские сады и школы поблизости</li>
+                            <li class="flex items-start"><span class="text-[#0088CC] mr-2">•</span> Охраняемая территория и паркинг</li>
+                            <li class="flex items-start"><span class="text-[#0088CC] mr-2">•</span> Удобная транспортная доступность</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="bg-[#0088CC]/5 border border-[#0088CC]/15 rounded-xl p-4 mt-6">
+                    <p class="text-gray-700"><strong>Важно:</strong> Мы работаем с застройщиками, аккредитованными в системе военной ипотеки. Поможем подобрать квартиру с дополнительным кэшбэком до 3,5%.</p>
+                </div>
+            </div>
+
+            <h3 class="text-2xl font-bold mb-6 text-gray-900">Банки {{ city_gen }} с лучшими условиями</h3>
+            <div class="grid md:grid-cols-3 gap-6 mb-10">
+                <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                    <div class="flex items-center gap-3 mb-3">
+                        <img src="{{ url_for('static', filename='images/banks/sber.jpg') }}" alt="Сбербанк" class="h-10 w-auto">
+                    </div>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li class="flex items-center">
+                            <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                                <svg class="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            Ставка от 3.5%
+                        </li>
+                        <li class="flex items-center">
+                            <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                                <svg class="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            Онлайн-одобрение
+                        </li>
+                        <li class="flex items-center">
+                            <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                                <svg class="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            Бонус 100 000 ₽
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                    <div class="flex items-center gap-3 mb-3">
+                        <img src="{{ url_for('static', filename='images/banks/vtb.png') }}" alt="ВТБ" class="h-10 w-auto">
+                    </div>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li class="flex items-center">
+                            <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                                <svg class="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            Первоначальный взнос 0%
+                        </li>
+                        <li class="flex items-center">
+                            <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                                <svg class="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            Без подтверждения доходов
+                        </li>
+                        <li class="flex items-center">
+                            <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                                <svg class="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            Ускоренное рассмотрение
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                    <div class="flex items-center gap-3 mb-3">
+                        <img src="{{ url_for('static', filename='images/banks/domrf.png') }}" alt="Дом.РФ" class="h-10 w-auto">
+                    </div>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li class="flex items-center">
+                            <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                                <svg class="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            Спецпрограмма для СВО
+                        </li>
+                        <li class="flex items-center">
+                            <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                                <svg class="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            Рассрочка до подписания ДКП
+                        </li>
+                        <li class="flex items-center">
+                            <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                                <svg class="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            Скидки от застройщиков
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3 class="text-2xl font-bold mb-6 text-gray-900">Кто может получить военную ипотеку?</h3>
+            <div class="bg-white rounded-2xl p-8 mb-10 border border-gray-100 shadow-sm">
+                <p class="mb-4 text-gray-700"><strong>Участниками программы НИС являются:</strong></p>
+                <ul class="space-y-3">
+                    <li class="flex items-start">
+                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                            <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                        </div>
+                        <span class="text-gray-700">Военнослужащие, заключившие контракт до 01.01.2005</span>
+                    </li>
+                    <li class="flex items-start">
+                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                            <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                        </div>
+                        <span class="text-gray-700">Офицеры, проходящие службу по контракту</span>
+                    </li>
+                    <li class="flex items-start">
+                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                            <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                        </div>
+                        <span class="text-gray-700">Прапорщики и мичманы, прослужившие более 3 лет</span>
+                    </li>
+                </ul>
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mt-6">
+                    <p class="text-amber-800"><strong>Важно:</strong> С 2022 года военнослужащие, участвующие в СВО, получили дополнительные льготы по военной ипотеке, включая повышенные выплаты и упрощенное оформление.</p>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-[#0088CC] to-[#006699] rounded-2xl p-8 text-white text-center">
+                <h3 class="text-2xl font-bold mb-6">Как начать процесс?</h3>
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm mb-8">
+                    <div>
+                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-2 text-sm font-bold">1</div>
+                        <p class="text-xs md:text-sm text-white/80">Подайте заявку на сайте</p>
+                    </div>
+                    <div>
+                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-2 text-sm font-bold">2</div>
+                        <p class="text-xs md:text-sm text-white/80">Получите консультацию</p>
+                    </div>
+                    <div>
+                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-2 text-sm font-bold">3</div>
+                        <p class="text-xs md:text-sm text-white/80">Подберите квартиру</p>
+                    </div>
+                    <div>
+                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-2 text-sm font-bold">4</div>
+                        <p class="text-xs md:text-sm text-white/80">Оформите ипотеку</p>
+                    </div>
+                    <div>
+                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-2 text-sm font-bold">5</div>
+                        <p class="text-xs md:text-sm text-white/80">Получите кэшбэк!</p>
+                    </div>
+                </div>
+                <button onclick="openApplicationModal()" class="bg-white text-[#0088CC] font-bold py-4 px-10 rounded-xl hover:bg-gray-50 transition-all duration-300 text-lg shadow-lg">
+                    Начать оформление
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="max-w-3xl mx-auto">
+            <div class="text-center mb-14">
+                <span class="page-hero-badge">Часто задаваемые вопросы</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Вопросы по военной ипотеке</h2>
+                <p class="text-xl text-gray-600">Ответы на популярные вопросы о программе НИС</p>
+            </div>
+
+            <div class="space-y-4">
+                <div class="faq-item bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden transition-all">
+                    <button class="flex justify-between items-center w-full text-left p-6 group" onclick="toggleMilitaryFAQ(this)">
+                        <h3 class="text-lg font-semibold text-gray-900 group-hover:text-[#0088CC] transition-colors pr-4">Кто может участвовать в НИС?</h3>
+                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-300 flex-shrink-0 faq-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div class="faq-content px-6 pb-6">
+                        <p class="text-gray-600 leading-relaxed">В накопительно-ипотечной системе могут участвовать военнослужащие по контракту, прослужившие более 3 лет, офицеры, прапорщики и мичманы, сержанты и старшины по контракту, а также курсанты военных образовательных учреждений.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden transition-all">
+                    <button class="flex justify-between items-center w-full text-left p-6 group" onclick="toggleMilitaryFAQ(this)">
+                        <h3 class="text-lg font-semibold text-gray-900 group-hover:text-[#0088CC] transition-colors pr-4">Какова максимальная сумма военной ипотеки?</h3>
+                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-300 flex-shrink-0 faq-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div class="faq-content px-6 pb-6">
+                        <p class="text-gray-600 leading-relaxed">Максимальная сумма по военной ипотеке составляет до 4.6 млн рублей. Если стоимость квартиры выше, разницу можно доплатить собственными средствами или с помощью материнского капитала.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden transition-all">
+                    <button class="flex justify-between items-center w-full text-left p-6 group" onclick="toggleMilitaryFAQ(this)">
+                        <h3 class="text-lg font-semibold text-gray-900 group-hover:text-[#0088CC] transition-colors pr-4">Нужен ли первоначальный взнос по военной ипотеке?</h3>
+                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-300 flex-shrink-0 faq-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div class="faq-content px-6 pb-6">
+                        <p class="text-gray-600 leading-relaxed">По военной ипотеке первоначальный взнос не требуется. Накопления на именном счёте участника НИС используются в качестве первого взноса. Ежемесячные платежи погашает государство.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden transition-all">
+                    <button class="flex justify-between items-center w-full text-left p-6 group" onclick="toggleMilitaryFAQ(this)">
+                        <h3 class="text-lg font-semibold text-gray-900 group-hover:text-[#0088CC] transition-colors pr-4">Можно ли получить кэшбек при покупке по военной ипотеке?</h3>
+                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-300 flex-shrink-0 faq-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div class="faq-content px-6 pb-6">
+                        <p class="text-gray-600 leading-relaxed">Да, при покупке новостройки через InBack по военной ипотеке вы получаете кэшбек до 5% от стоимости квартиры. Это дополнительная выгода сверх льготных условий НИС.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+function updateMilitaryCalculator() {
+    const serviceYearsEl = document.getElementById('militaryServiceYears');
+    const propertyPriceEl = document.getElementById('militaryPropertyPrice');
+    const additionalPaymentEl = document.getElementById('militaryAdditionalPayment');
+    const accumulatedEl = document.getElementById('militaryAccumulated');
+    const totalCostEl = document.getElementById('militaryTotalCost');
+    const needPaymentEl = document.getElementById('militaryNeedPayment');
+    const cashbackEl = document.getElementById('militaryCashback');
+
+    const serviceYearsRange = document.getElementById('militaryServiceYearsRange');
+    const propertyPriceRange = document.getElementById('militaryPropertyPriceRange');
+    const additionalPaymentRange = document.getElementById('militaryAdditionalPaymentRange');
+
+    const serviceYears = parseInt(serviceYearsRange.value);
+    const propertyPrice = parseInt(propertyPriceRange.value);
+    const additionalPayment = parseInt(additionalPaymentRange.value);
+
+    const annualContribution = 280000;
+    const accumulated = serviceYears * annualContribution;
+    const totalAvailable = accumulated + additionalPayment;
+    const needPayment = Math.max(0, propertyPrice - totalAvailable);
+    const cashback = propertyPrice * 0.025;
+
+    serviceYearsEl.textContent = serviceYears + ' лет';
+    propertyPriceEl.textContent = formatMilitaryNumber(propertyPrice) + ' ₽';
+    additionalPaymentEl.textContent = formatMilitaryNumber(additionalPayment) + ' ₽';
+    accumulatedEl.textContent = formatMilitaryNumber(accumulated) + ' ₽';
+    totalCostEl.textContent = formatMilitaryNumber(propertyPrice) + ' ₽';
+    needPaymentEl.textContent = formatMilitaryNumber(needPayment) + ' ₽';
+    cashbackEl.textContent = formatMilitaryNumber(Math.round(cashback)) + ' ₽';
+}
+
+function formatMilitaryNumber(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+}
+
+function toggleMilitaryFAQ(btn) {
+    const content = btn.nextElementSibling;
+    const chevron = btn.querySelector('.faq-chevron');
+    const isOpen = content.classList.contains('open');
+
+    document.querySelectorAll('.faq-content.open').forEach(el => {
+        el.classList.remove('open');
+        el.previousElementSibling.querySelector('.faq-chevron').style.transform = 'rotate(0deg)';
+    });
+
+    if (!isOpen) {
+        content.classList.add('open');
+        chevron.style.transform = 'rotate(180deg)';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    updateMilitaryCalculator();
+    document.getElementById('militaryServiceYearsRange').addEventListener('input', updateMilitaryCalculator);
+    document.getElementById('militaryPropertyPriceRange').addEventListener('input', updateMilitaryCalculator);
+    document.getElementById('militaryAdditionalPaymentRange').addEventListener('input', updateMilitaryCalculator);
+});
+</script>
+
+{% endblock %}

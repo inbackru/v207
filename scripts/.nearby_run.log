@@ -1,0 +1,58 @@
+2026-06-15 19:43:51,637 INFO Found 25 complexes to update
+2026-06-15 19:43:51,638 INFO [1/25] Парковый квартал Чувства (id=641)
+2026-06-15 19:44:00,715 INFO    → POI: {'transport': 5, 'shopping': 5, 'education': 0, 'healthcare': 4, 'sport': 0, 'leisure': 4}
+2026-06-15 19:44:02,292 INFO [2/25] Серебряные холмы (id=642)
+2026-06-15 19:44:09,505 WARNING Rate limited, sleeping 60s
+2026-06-15 19:45:12,223 INFO    → POI: {'transport': 5, 'shopping': 4, 'education': 0, 'healthcare': 0, 'sport': 0, 'leisure': 1}
+2026-06-15 19:45:13,743 INFO [3/25] Полет (id=643)
+2026-06-15 19:45:15,318 INFO    → POI: {'transport': 5, 'shopping': 5, 'education': 1, 'healthcare': 4, 'sport': 2, 'leisure': 4}
+2026-06-15 19:45:16,825 INFO [4/25] Новая Высота (id=644)
+2026-06-15 19:45:26,491 INFO    → POI: {'transport': 5, 'shopping': 5, 'education': 5, 'healthcare': 4, 'sport': 3, 'leisure': 4}
+2026-06-15 19:45:28,013 INFO [5/25] Солянка парк (id=645)
+2026-06-15 19:45:36,610 WARNING    ✗ 504 Server Error: Gateway Timeout for url: https://overpass-api.de/api/interpreter
+2026-06-15 19:45:38,112 INFO [6/25] Сергиевский (id=646)
+2026-06-15 19:45:47,930 WARNING Rate limited, sleeping 60s
+2026-06-15 19:46:50,644 INFO    → POI: {'transport': 5, 'shopping': 5, 'education': 5, 'healthcare': 4, 'sport': 3, 'leisure': 4}
+2026-06-15 19:46:52,192 INFO [7/25] Инстеп.Сити (id=647)
+2026-06-15 19:46:54,758 INFO    → POI: {'transport': 5, 'shopping': 5, 'education': 1, 'healthcare': 4, 'sport': 1, 'leisure': 4}
+2026-06-15 19:46:56,264 INFO [8/25] Квартал на Чехова «OLIVIA» (ОЛИВИЯ) (id=648)
+2026-06-15 19:47:00,695 INFO    → POI: {'transport': 5, 'shopping': 5, 'education': 5, 'healthcare': 4, 'sport': 4, 'leisure': 4}
+2026-06-15 19:47:02,215 INFO [9/25] Инстеп.Хуторская (id=649)
+2026-06-15 19:47:07,425 INFO    → POI: {'transport': 5, 'shopping': 5, 'education': 5, 'healthcare': 4, 'sport': 2, 'leisure': 4}
+2026-06-15 19:47:08,946 INFO [10/25] по ул.Соловьиная (id=650)
+2026-06-15 19:47:18,605 WARNING Rate limited, sleeping 60s
+2026-06-15 19:48:20,878 INFO    → POI: {'transport': 5, 'shopping': 3, 'education': 0, 'healthcare': 1, 'sport': 0, 'leisure': 1}
+2026-06-15 19:48:22,395 INFO [11/25] Инстеп.Плевицкая (id=662)
+2026-06-15 19:48:33,400 WARNING    ✗ 504 Server Error: Gateway Timeout for url: https://overpass-api.de/api/interpreter
+2026-06-15 19:48:34,900 INFO [12/25] по ул. Карла Маркса (id=663)
+2026-06-15 19:48:36,614 INFO    → POI: {'transport': 5, 'shopping': 5, 'education': 5, 'healthcare': 4, 'sport': 3, 'leisure': 4}
+2026-06-15 19:48:38,167 INFO [13/25] по ул. Запольная 60 (id=664)
+2026-06-15 19:48:40,242 INFO    → POI: {'transport': 5, 'shopping': 5, 'education': 4, 'healthcare': 4, 'sport': 3, 'leisure': 4}
+2026-06-15 19:48:41,921 INFO [14/25] Белорусский квартал (id=665)
+2026-06-15 19:48:51,382 WARNING Rate limited, sleeping 60s
+2026-06-15 19:49:59,424 INFO    → POI: {'transport': 5, 'shopping': 5, 'education': 3, 'healthcare': 4, 'sport': 2, 'leisure': 4}
+2026-06-15 19:50:00,939 INFO [15/25] по ул. Льва Толстого (id=666)
+2026-06-15 19:50:02,852 INFO    → POI: {'transport': 5, 'shopping': 5, 'education': 5, 'healthcare': 4, 'sport': 3, 'leisure': 4}
+2026-06-15 19:50:04,359 INFO [16/25] микрорайон Северный (id=667)
+2026-06-15 19:50:06,799 INFO    → POI: {'transport': 5, 'shopping': 5, 'education': 1, 'healthcare': 4, 'sport': 0, 'leisure': 4}
+2026-06-15 19:50:08,306 INFO [17/25] по ул. Черняховского, 52А (id=668)
+2026-06-15 19:50:10,148 INFO    → POI: {'transport': 5, 'shopping': 5, 'education': 1, 'healthcare': 4, 'sport': 2, 'leisure': 4}
+2026-06-15 19:50:11,655 INFO [18/25] Дружба (id=669)
+2026-06-15 19:50:23,940 WARNING Rate limited, sleeping 60s
+2026-06-15 19:51:25,860 INFO    → POI: {'transport': 5, 'shopping': 5, 'education': 2, 'healthcare': 4, 'sport': 3, 'leisure': 4}
+2026-06-15 19:51:27,392 INFO [19/25] Рябинки Парк (id=670)
+2026-06-15 19:51:41,224 INFO    → POI: {'transport': 5, 'shopping': 5, 'education': 0, 'healthcare': 4, 'sport': 1, 'leisure': 4}
+2026-06-15 19:51:42,731 INFO [20/25] по ул. Республиканская, 62 (id=671)
+2026-06-15 19:51:45,448 INFO    → POI: {'transport': 5, 'shopping': 5, 'education': 1, 'healthcare': 4, 'sport': 2, 'leisure': 4}
+2026-06-15 19:51:46,961 INFO [21/25] по ул. Кати Зеленко (id=672)
+2026-06-15 19:51:49,003 INFO    → POI: {'transport': 5, 'shopping': 5, 'education': 5, 'healthcare': 4, 'sport': 3, 'leisure': 4}
+2026-06-15 19:51:50,513 INFO [22/25] по ул. Хуторская (id=673)
+2026-06-15 19:52:01,556 WARNING Rate limited, sleeping 60s
+2026-06-15 19:53:07,250 INFO    → POI: {'transport': 5, 'shopping': 5, 'education': 5, 'healthcare': 4, 'sport': 3, 'leisure': 4}
+2026-06-15 19:53:08,758 INFO [23/25] по ул. Береговая, 5 (id=674)
+2026-06-15 19:53:13,118 INFO    → POI: {'transport': 5, 'shopping': 5, 'education': 5, 'healthcare': 4, 'sport': 4, 'leisure': 4}
+2026-06-15 19:53:14,635 INFO [24/25] 3-й Весенний проезд (id=675)
+2026-06-15 19:53:16,512 INFO    → POI: {'transport': 5, 'shopping': 5, 'education': 0, 'healthcare': 1, 'sport': 1, 'leisure': 2}
+2026-06-15 19:53:18,020 INFO [25/25] Перекальского, д. 7 (id=676)
+2026-06-15 19:53:22,221 INFO    → POI: {'transport': 5, 'shopping': 5, 'education': 5, 'healthcare': 4, 'sport': 3, 'leisure': 4}
+2026-06-15 19:53:22,227 INFO Done: 23 updated, 2 errors

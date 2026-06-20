@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>Нет соединения — InBack</title>
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#0088CC"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 60%, #f0fdf4 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: #1a1a2e;
+    }
+    .card {
+      background: white;
+      border-radius: 24px;
+      padding: 48px 40px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,136,204,0.12);
+    }
+    .icon-wrap {
+      width: 96px; height: 96px;
+      background: linear-gradient(135deg, #e8f4fd, #dbeafe);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 28px;
+    }
+    .icon-wrap svg { width: 48px; height: 48px; color: #0088CC; }
+    h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: 12px; color: #0f172a; }
+    p { font-size: 0.95rem; color: #64748b; line-height: 1.6; margin-bottom: 32px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, #0088CC, #006699);
+      color: white; border: none; border-radius: 14px;
+      padding: 14px 28px; font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; text-decoration: none;
+      width: 100%; justify-content: center;
+      transition: opacity .2s;
+    }
+    .btn:hover { opacity: .9; }
+    .btn-outline {
+      background: transparent; color: #0088CC;
+      border: 2px solid #0088CC; margin-top: 12px;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      justify-content: center; margin-bottom: 32px;
+    }
+    .logo-mark {
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, #0088CC, #006699);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: 800; font-size: 1rem;
+    }
+    .logo-text { font-size: 1.3rem; font-weight: 800; color: #0088CC; }
+    .cached-hint {
+      margin-top: 24px; padding: 16px;
+      background: #f8fafc; border-radius: 12px;
+      font-size: 0.8rem; color: #94a3b8;
+    }
+    .pulse { animation: pulse 2s infinite; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .5; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">
+      <div class="logo-mark">In</div>
+      <span class="logo-text">InBack</span>
+    </div>
+
+    <div class="icon-wrap">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M3 3l18 18M8.111 8.111A9 9 0 0112 3c4.97 0 9 4.03 9 9a8.978 8.978 0 01-2.697 6.394M6.343 17.657A9 9 0 013 12c0-1.657.448-3.21 1.232-4.547M15 12a3 3 0 01-4.243 4.243M9 9a3 3 0 014.243-4.243"/>
+      </svg>
+    </div>
+
+    <h1>Нет подключения к сети</h1>
+    <p>Проверьте соединение с интернетом и попробуйте снова. Некоторые страницы доступны в офлайн-режиме.</p>
+
+    <button class="btn" onclick="retryConnection()">
+      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+      </svg>
+      Попробовать снова
+    </button>
+    <a class="btn btn-outline" href="/">На главную</a>
+
+    <div class="cached-hint">
+      <span class="pulse">●</span>
+      Страницы, которые вы посещали, могут быть доступны из кеша
+    </div>
+  </div>
+
+  <script>
+    function retryConnection() {
+      window.location.reload();
+    }
+    window.addEventListener('online', () => window.location.reload());
+  </script>
+</body>
+</html>

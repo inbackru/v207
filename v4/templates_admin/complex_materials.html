@@ -1,0 +1,415 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Материалы: {{ complex.name }} - InBack.ru{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <!-- Header with Complex Name and Actions -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <div class="flex items-center text-sm text-gray-500 mb-2">
+                <a href="{{ url_for('admin_dashboard') }}" class="hover:text-[#1e40af]">Дашборд</a>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <a href="{{ url_for('admin_complexes_materials') }}" class="hover:text-[#1e40af]">Материалы ЖК</a>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <span>{{ complex.name }}</span>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-900">Материалы: {{ complex.name }}</h1>
+            <p class="text-gray-600 mt-2">Управление рекламными материалами для жилого комплекса</p>
+        </div>
+        <div>
+            <button onclick="openCreateModal()" 
+                    class="bg-[#1e40af] hover:bg-[#1d4ed8] text-white px-6 py-3 rounded-lg transition-colors inline-flex items-center">
+                <i class="fas fa-plus mr-2"></i>Добавить материал
+            </button>
+        </div>
+    </div>
+
+    <!-- Materials Table -->
+    <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
+        {% if materials %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Название</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Тип материала</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Тип файла</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Статус</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Порядок</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for material in materials %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center bg-gray-100 rounded">
+                                    {% if material.file_type == 'pdf' %}
+                                        <i class="fas fa-file-pdf text-red-600 text-xl"></i>
+                                    {% else %}
+                                        <i class="fas fa-image text-blue-600 text-xl"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="ml-4">
+                                    <div class="font-medium text-gray-900">{{ material.title }}</div>
+                                    {% if material.description %}
+                                    <div class="text-sm text-gray-500">{{ material.description|truncate(50) }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if material.material_type == 'brochure' %}bg-purple-100 text-purple-800
+                                {% elif material.material_type == 'photo' %}bg-blue-100 text-blue-800
+                                {% elif material.material_type == 'render' %}bg-green-100 text-green-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {% if material.material_type == 'brochure' %}Буклет
+                                {% elif material.material_type == 'photo' %}Фото
+                                {% elif material.material_type == 'render' %}Рендер
+                                {% else %}Другое{% endif %}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-sm text-gray-900">
+                                {% if material.file_type == 'pdf' %}PDF
+                                {% else %}Изображение{% endif %}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if material.is_active %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <i class="fas fa-check-circle mr-1"></i>Активен
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                <i class="fas fa-times-circle mr-1"></i>Неактивен
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ material.sort_order }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-3">
+                                <a href="{{ material.file_url }}" target="_blank"
+                                   class="text-blue-600 hover:text-blue-900" title="Просмотр">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <button onclick='openEditModal({{ material.id }}, "{{ material.title|replace("'", "\\'") }}", "{{ material.description|replace("'", "\\'") if material.description else "" }}", "{{ material.material_type }}", {{ "true" if material.is_active else "false" }}, {{ material.sort_order }})' 
+                                        class="text-[#1e40af] hover:text-[#1d4ed8]" title="Редактировать">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="deleteMaterial({{ material.id }})" 
+                                        class="text-red-600 hover:text-red-900" title="Удалить">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-12">
+            <i class="fas fa-file-alt text-gray-300 text-5xl mb-4"></i>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Нет материалов</h3>
+            <p class="text-gray-500 mb-4">Для этого ЖК еще не добавлено ни одного материала</p>
+            <button onclick="openCreateModal()" 
+                    class="bg-[#1e40af] hover:bg-[#1d4ed8] text-white px-6 py-2 rounded-lg transition-colors inline-flex items-center">
+                <i class="fas fa-plus mr-2"></i>Добавить первый материал
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Create Material Modal -->
+<div id="createModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">Добавить материал</h2>
+                <button onclick="closeCreateModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form method="POST" action="{{ url_for('admin_create_material', complex_id=complex.id) }}" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label for="create_title" class="block text-sm font-medium text-gray-700 mb-1">
+                            Название <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               id="create_title" 
+                               name="title" 
+                               required 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#1e40af] focus:border-[#1e40af]"
+                               placeholder="Например: Планировки ЖК">
+                    </div>
+                    
+                    <div>
+                        <label for="create_description" class="block text-sm font-medium text-gray-700 mb-1">
+                            Описание
+                        </label>
+                        <textarea id="create_description" 
+                                  name="description" 
+                                  rows="3" 
+                                  class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#1e40af] focus:border-[#1e40af]"
+                                  placeholder="Краткое описание материала"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label for="create_material_type" class="block text-sm font-medium text-gray-700 mb-1">
+                            Тип материала <span class="text-red-500">*</span>
+                        </label>
+                        <select id="create_material_type" 
+                                name="material_type" 
+                                required 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#1e40af] focus:border-[#1e40af]">
+                            <option value="brochure">Буклет</option>
+                            <option value="photo">Фото</option>
+                            <option value="render">Рендер</option>
+                            <option value="other">Другое</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="create_file" class="block text-sm font-medium text-gray-700 mb-1">
+                            Файл <span class="text-red-500">*</span>
+                        </label>
+                        <input type="file" 
+                               id="create_file" 
+                               name="file" 
+                               required 
+                               accept=".pdf,.jpg,.jpeg,.png,.webp"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#1e40af] focus:border-[#1e40af]">
+                        <p class="text-sm text-gray-500 mt-1">PDF (макс. 10 МБ) или JPG/PNG/WEBP (макс. 5 МБ)</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="create_sort_order" class="block text-sm font-medium text-gray-700 mb-1">
+                                Порядок сортировки
+                            </label>
+                            <input type="number" 
+                                   id="create_sort_order" 
+                                   name="sort_order" 
+                                   value="0" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#1e40af] focus:border-[#1e40af]">
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <input type="checkbox" 
+                                   id="create_is_active" 
+                                   name="is_active" 
+                                   checked 
+                                   class="h-4 w-4 text-[#1e40af] focus:ring-[#1e40af] border-gray-300 rounded">
+                            <label for="create_is_active" class="ml-2 block text-sm text-gray-700">
+                                Активен
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-3 mt-6 pt-6 border-t">
+                    <button type="button" 
+                            onclick="closeCreateModal()" 
+                            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                        Отмена
+                    </button>
+                    <button type="submit" 
+                            class="px-6 py-2 bg-[#1e40af] text-white rounded-md hover:bg-[#1d4ed8]">
+                        Создать материал
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Material Modal -->
+<div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">Редактировать материал</h2>
+                <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="editForm" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label for="edit_title" class="block text-sm font-medium text-gray-700 mb-1">
+                            Название <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               id="edit_title" 
+                               name="title" 
+                               required 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#1e40af] focus:border-[#1e40af]">
+                    </div>
+                    
+                    <div>
+                        <label for="edit_description" class="block text-sm font-medium text-gray-700 mb-1">
+                            Описание
+                        </label>
+                        <textarea id="edit_description" 
+                                  name="description" 
+                                  rows="3" 
+                                  class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#1e40af] focus:border-[#1e40af]"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label for="edit_material_type" class="block text-sm font-medium text-gray-700 mb-1">
+                            Тип материала <span class="text-red-500">*</span>
+                        </label>
+                        <select id="edit_material_type" 
+                                name="material_type" 
+                                required 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#1e40af] focus:border-[#1e40af]">
+                            <option value="brochure">Буклет</option>
+                            <option value="photo">Фото</option>
+                            <option value="render">Рендер</option>
+                            <option value="other">Другое</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="edit_file" class="block text-sm font-medium text-gray-700 mb-1">
+                            Заменить файл (необязательно)
+                        </label>
+                        <input type="file" 
+                               id="edit_file" 
+                               name="file" 
+                               accept=".pdf,.jpg,.jpeg,.png,.webp"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#1e40af] focus:border-[#1e40af]">
+                        <p class="text-sm text-gray-500 mt-1">Оставьте пустым, чтобы не заменять файл</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="edit_sort_order" class="block text-sm font-medium text-gray-700 mb-1">
+                                Порядок сортировки
+                            </label>
+                            <input type="number" 
+                                   id="edit_sort_order" 
+                                   name="sort_order" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#1e40af] focus:border-[#1e40af]">
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <input type="checkbox" 
+                                   id="edit_is_active" 
+                                   name="is_active" 
+                                   class="h-4 w-4 text-[#1e40af] focus:ring-[#1e40af] border-gray-300 rounded">
+                            <label for="edit_is_active" class="ml-2 block text-sm text-gray-700">
+                                Активен
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-3 mt-6 pt-6 border-t">
+                    <button type="button" 
+                            onclick="closeEditModal()" 
+                            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                        Отмена
+                    </button>
+                    <button type="submit" 
+                            class="px-6 py-2 bg-[#1e40af] text-white rounded-md hover:bg-[#1d4ed8]">
+                        Сохранить изменения
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function openCreateModal() {
+    document.getElementById('createModal').classList.remove('hidden');
+    document.getElementById('createModal').classList.add('flex');
+}
+
+function closeCreateModal() {
+    document.getElementById('createModal').classList.add('hidden');
+    document.getElementById('createModal').classList.remove('flex');
+}
+
+function openEditModal(id, title, description, materialType, isActive, sortOrder) {
+    const form = document.getElementById('editForm');
+    form.action = `/admin/material/${id}/update`;
+    
+    document.getElementById('edit_title').value = title;
+    document.getElementById('edit_description').value = description;
+    document.getElementById('edit_material_type').value = materialType;
+    document.getElementById('edit_is_active').checked = isActive;
+    document.getElementById('edit_sort_order').value = sortOrder;
+    
+    document.getElementById('editModal').classList.remove('hidden');
+    document.getElementById('editModal').classList.add('flex');
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').classList.add('hidden');
+    document.getElementById('editModal').classList.remove('flex');
+}
+
+function deleteMaterial(id) {
+    if (!confirm('Вы уверены, что хотите удалить этот материал? Это действие нельзя отменить.')) {
+        return;
+    }
+    
+    fetch(`/admin/material/${id}/delete`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token() }}',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Ошибка при удалении материала: ' + (data.error || 'Неизвестная ошибка'));
+        }
+    })
+    .catch(error => {
+        alert('Ошибка при удалении материала: ' + error);
+    });
+}
+
+// Close modals on ESC key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeCreateModal();
+        closeEditModal();
+    }
+});
+
+// Close modals on background click
+document.getElementById('createModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeCreateModal();
+    }
+});
+
+document.getElementById('editModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeEditModal();
+    }
+});
+</script>
+{% endblock %}

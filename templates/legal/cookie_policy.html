@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Политика файлов Cookie | inback{% endblock %}
+
+{% block content %}
+<main class="min-h-screen bg-gray-50">
+    <div class="gradient-bg py-12">
+        <div class="container mx-auto px-4">
+            <nav class="text-white/70 text-sm mb-4">
+                <a href="{{ url_for('legal.legal_index') }}" class="hover:text-white transition-colors">Правовая информация</a>
+                <span class="mx-2">/</span>
+                <span class="text-white">Политика файлов Cookie</span>
+            </nav>
+            <h1 class="text-3xl font-bold text-white">Политика в отношении файлов Cookie</h1>
+            <p class="text-white/80 mt-2">в редакции от 1 декабря 2024 года</p>
+        </div>
+    </div>
+    
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-6xl mx-auto flex flex-col lg:flex-row gap-8">
+            {% include 'legal/_sidebar.html' %}
+            
+            <div class="flex-1">
+                <div class="bg-white rounded-xl shadow-sm p-6 md:p-10 border border-gray-100">
+                    <div class="prose prose-lg max-w-none text-gray-700">
+                        <div class="bg-blue-50 border-l-4 border-[#0088CC] p-4 mb-8 rounded-r-lg">
+                            <p class="text-gray-700">В этой Политике объясняется, как inback использует файлы Cookie и подобные технологии для идентификации вас при посещении нашего сайта.</p>
+                        </div>
+                        
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">Что такое Cookie?</h2>
+                        
+                        <p class="mb-4">Файлы cookie представляют собой небольшие файлы данных, которые размещаются на вашем компьютере или мобильном устройстве при посещении веб-сайта. Файлы cookie широко используются для обеспечения работы сайтов и повышения эффективности взаимодействия пользователей с веб-сайтами.</p>
+                        
+                        <p class="mb-6">Файлы cookie, установленные владельцем веб-сайта (в данном случае inback), называются «cookie-файлами первой стороны». Файлы cookie, установленные третьими сторонами, называются «сторонними cookie-файлами».</p>
+                        
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">Какие Cookie мы используем?</h2>
+                        
+                        <div class="space-y-6">
+                            <div class="bg-gray-50 rounded-lg p-5">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                    <span class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                    </span>
+                                    Строго необходимые Cookie
+                                </h3>
+                                <p class="text-gray-600 mb-3">Эти cookie необходимы для функционирования сайта и не могут быть отключены.</p>
+                                <ul class="list-disc pl-6 space-y-1 text-sm text-gray-600">
+                                    <li>Сессия пользователя</li>
+                                    <li>Запись согласия на cookie</li>
+                                    <li>Защита от CSRF-атак</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="bg-gray-50 rounded-lg p-5">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                    <span class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                        </svg>
+                                    </span>
+                                    Аналитические Cookie
+                                </h3>
+                                <p class="text-gray-600 mb-3">Эти cookie позволяют нам измерять и улучшать производительность нашего сайта.</p>
+                                <ul class="list-disc pl-6 space-y-1 text-sm text-gray-600">
+                                    <li>Яндекс.Метрика — анализ поведения пользователей</li>
+                                    <li>Google Analytics — статистика посещений</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="bg-gray-50 rounded-lg p-5">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                    <span class="w-8 h-8 bg-[#0088CC]/20 rounded-full flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        </svg>
+                                    </span>
+                                    Функциональные Cookie
+                                </h3>
+                                <p class="text-gray-600 mb-3">Эти cookie позволяют сайту запоминать сделанный вами выбор.</p>
+                                <ul class="list-disc pl-6 space-y-1 text-sm text-gray-600">
+                                    <li>Выбранный город</li>
+                                    <li>Параметры поиска</li>
+                                    <li>Избранные объекты</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="bg-gray-50 rounded-lg p-5">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                    <span class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+                                        </svg>
+                                    </span>
+                                    Маркетинговые Cookie
+                                </h3>
+                                <p class="text-gray-600 mb-3">Эти cookie могут быть установлены нашими рекламными партнерами.</p>
+                                <ul class="list-disc pl-6 space-y-1 text-sm text-gray-600">
+                                    <li>Яндекс.Директ</li>
+                                    <li>VK Реклама</li>
+                                    <li>MyTarget</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6 mt-10">Как управлять Cookie?</h2>
+                        
+                        <p class="mb-4">Вы имеете право решать, принимать или отклонять файлы cookie.</p>
+                        
+                        <div class="space-y-4 mb-6">
+                            <div class="flex items-start gap-3">
+                                <div class="w-6 h-6 bg-[#0088CC] rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                    <span class="text-white text-sm font-bold">1</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">Баннер Cookie</h4>
+                                    <p class="text-gray-600">При первом посещении сайта вы можете выбрать, какие категории cookie принять или отклонить.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start gap-3">
+                                <div class="w-6 h-6 bg-[#0088CC] rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                    <span class="text-white text-sm font-bold">2</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">Настройки браузера</h4>
+                                    <p class="text-gray-600">Вы можете настроить свой браузер для блокировки или удаления файлов cookie.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start gap-3">
+                                <div class="w-6 h-6 bg-[#0088CC] rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                    <span class="text-white text-sm font-bold">3</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">Отключение рекламы</h4>
+                                    <p class="text-gray-600">Для отказа от рекламы на основе интересов посетите <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener" class="text-[#0088CC] hover:underline">aboutads.info/choices</a>.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6 mt-10">Срок хранения Cookie</h2>
+                        
+                        <ul class="list-disc pl-6 space-y-2 mb-6">
+                            <li><strong>Сессионные cookie</strong> — удаляются при закрытии браузера</li>
+                            <li><strong>Постоянные cookie</strong> — хранятся до 1 года</li>
+                        </ul>
+                        
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6 mt-10">Связаться с нами</h2>
+                        
+                        <p class="mb-4">По вопросам, связанным с использованием cookie, обращайтесь:</p>
+                        <p><a href="mailto:privacy@inback.ru" class="text-[#0088CC] hover:underline">privacy@inback.ru</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<style>
+    .gradient-bg {
+        background: linear-gradient(135deg, #0088cc 0%, #32a4fb 100%);
+    }
+</style>
+{% endblock %}

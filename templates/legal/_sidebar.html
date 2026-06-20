@@ -1,0 +1,52 @@
+<aside class="lg:w-72 flex-shrink-0">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 lg:sticky lg:top-24">
+        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Документы</h3>
+        <nav class="space-y-1">
+            <a href="{{ url_for('legal.privacy_policy') }}" class="block px-3 py-2 rounded-lg {% if request.endpoint == 'privacy_policy' %}bg-[#0088CC]/10 text-[#0088CC] font-medium{% else %}text-gray-700 hover:bg-gray-50 hover:text-[#0088CC]{% endif %} transition-colors text-sm">
+                Политика конфиденциальности
+            </a>
+            <a href="{{ url_for('legal.user_agreement') }}" class="block px-3 py-2 rounded-lg {% if request.endpoint == 'user_agreement' %}bg-[#0088CC]/10 text-[#0088CC] font-medium{% else %}text-gray-700 hover:bg-gray-50 hover:text-[#0088CC]{% endif %} transition-colors text-sm">
+                Пользовательское соглашение
+            </a>
+            <a href="{{ url_for('legal.cookie_policy') }}" class="block px-3 py-2 rounded-lg {% if request.endpoint == 'cookie_policy' %}bg-[#0088CC]/10 text-[#0088CC] font-medium{% else %}text-gray-700 hover:bg-gray-50 hover:text-[#0088CC]{% endif %} transition-colors text-sm">
+                Политика файлов Cookie
+            </a>
+            <a href="{{ url_for('mortgage.cashback_terms') }}" class="block px-3 py-2 rounded-lg {% if request.endpoint == 'cashback_terms' %}bg-[#0088CC]/10 text-[#0088CC] font-medium{% else %}text-gray-700 hover:bg-gray-50 hover:text-[#0088CC]{% endif %} transition-colors text-sm">
+                Условия кэшбека
+            </a>
+            <a href="{{ url_for('legal.public_offer') }}" class="block px-3 py-2 rounded-lg {% if request.endpoint == 'public_offer' %}bg-[#0088CC]/10 text-[#0088CC] font-medium{% else %}text-gray-700 hover:bg-gray-50 hover:text-[#0088CC]{% endif %} transition-colors text-sm">
+                Публичная оферта
+            </a>
+        </nav>
+        
+        <div class="border-t border-gray-100 mt-5 pt-5">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Согласия на обработку ПД</h3>
+            <nav class="space-y-1">
+                <a href="{{ url_for('legal.consent_registration') }}" class="block px-3 py-2 rounded-lg {% if request.endpoint == 'consent_registration' %}bg-[#0088CC]/10 text-[#0088CC] font-medium{% else %}text-gray-700 hover:bg-gray-50 hover:text-[#0088CC]{% endif %} transition-colors text-sm">
+                    №1 Регистрация на сайте
+                </a>
+                <a href="{{ url_for('legal.consent_cashback') }}" class="block px-3 py-2 rounded-lg {% if request.endpoint == 'consent_cashback' %}bg-[#0088CC]/10 text-[#0088CC] font-medium{% else %}text-gray-700 hover:bg-gray-50 hover:text-[#0088CC]{% endif %} transition-colors text-sm">
+                    №2 Получение кэшбека
+                </a>
+                <a href="{{ url_for('legal.consent_marketing') }}" class="block px-3 py-2 rounded-lg {% if request.endpoint == 'consent_marketing' %}bg-[#0088CC]/10 text-[#0088CC] font-medium{% else %}text-gray-700 hover:bg-gray-50 hover:text-[#0088CC]{% endif %} transition-colors text-sm">
+                    №3 Рекламные рассылки
+                </a>
+                <a href="{{ url_for('legal.consent_callback') }}" class="block px-3 py-2 rounded-lg {% if request.endpoint == 'consent_callback' %}bg-[#0088CC]/10 text-[#0088CC] font-medium{% else %}text-gray-700 hover:bg-gray-50 hover:text-[#0088CC]{% endif %} transition-colors text-sm">
+                    №4 Обратный звонок
+                </a>
+                <a href="{{ url_for('legal.consent_cookies') }}" class="block px-3 py-2 rounded-lg {% if request.endpoint == 'consent_cookies' %}bg-[#0088CC]/10 text-[#0088CC] font-medium{% else %}text-gray-700 hover:bg-gray-50 hover:text-[#0088CC]{% endif %} transition-colors text-sm">
+                    №5 Использование cookies
+                </a>
+            </nav>
+        </div>
+        
+        <div class="border-t border-gray-100 mt-5 pt-5">
+            <a href="mailto:legal@inback.ru" class="flex items-center gap-2 text-[#0088CC] hover:underline text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                Запросить документы
+            </a>
+        </div>
+    </div>
+</aside>

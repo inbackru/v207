@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+
+{% block title %}Управление Nearby данными - Админ{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h1><i class="bi bi-geo-alt"></i> Управление Nearby данными</h1>
+            <p class="text-muted">Автоматическое обновление информации о близлежащих объектах для ЖК</p>
+        </div>
+    </div>
+
+    <!-- Статистика -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-primary">
+                <div class="card-body text-center">
+                    <h2 class="text-primary">{{ stats.total }}</h2>
+                    <p class="mb-0">Всего ЖК с координатами</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-success">
+                <div class="card-body text-center">
+                    <h2 class="text-success">{{ stats.with_data }}</h2>
+                    <p class="mb-0">С актуальными данными</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-warning">
+                <div class="card-body text-center">
+                    <h2 class="text-warning">{{ stats.without_data_count }}</h2>
+                    <p class="mb-0">Без данных</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-info">
+                <div class="card-body text-center">
+                    <h2 class="text-info">{{ stats.completion_rate }}%</h2>
+                    <p class="mb-0">Завершено</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Прогресс -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="progress" style="height: 30px;">
+                <div class="progress-bar bg-success" role="progressbar" 
+                     style="width: {{ stats.completion_rate }}%">
+                    {{ stats.completion_rate }}%
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Действия -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-lightning-charge"></i> Автоматическое обновление</h5>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info">
+                <strong><i class="bi bi-info-circle"></i> Как это работает:</strong><br>
+                • Система находит ЖК без nearby данных (добавленные парсером)<br>
+                • Получает информацию из OpenStreetMap API (~10-20 сек на ЖК)<br>
+                • Сохраняет данные в БД<br>
+                • Пользователи видят актуальную информацию на сайте
+            </div>
+
+            <div id="update-status" class="alert d-none"></div>
+            <div id="update-progress" class="progress d-none mb-3" style="height: 25px;">
+                <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                     role="progressbar" style="width: 0%">
+                </div>
+            </div>
+
+            <form id="auto-update-form">
+                <div class="row align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label">Количество ЖК для обновления:</label>
+                        <select name="batch_size" class="form-select">
+                            <option value="1">1 ЖК (тест)</option>
+                            <option value="5" selected>5 ЖК (рекомендуется)</option>
+                            <option value="10">10 ЖК</option>
+                            <option value="20">20 ЖК</option>
+                        </select>
+                    </div>
+                    <div class="col-md-8">
+                        <button type="submit" class="btn btn-primary btn-lg" id="btn-update">
+                            <i class="bi bi-arrow-repeat"></i> Обновить сейчас
+                        </button>
+                        <small class="text-muted ms-2">
+                            Время: ~2-4 минуты для 5 ЖК
+                        </small>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if stats.without_data_count > 0 %}
+    <!-- ЖК без данных -->
+    <div class="card mb-4">
+        <div class="card-header bg-warning">
+            <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> ЖК без nearby данных ({{ stats.without_data_count }})</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Название</th>
+                            <th>Координаты</th>
+                            <th>Статус</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for complex in stats.without_data %}
+                        <tr>
+                            <td>{{ complex.id }}</td>
+                            <td>
+                                <a href="{{ url_for('residential_complex_detail', complex_id=complex.id) }}" target="_blank">
+                                    {{ complex.name }}
+                                </a>
+                            </td>
+                            <td>{{ complex.latitude }}, {{ complex.longitude }}</td>
+                            <td><span class="badge bg-warning">Требует обновления</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if stats.without_data_count > 10 %}
+                <p class="text-muted mb-0">Показано 10 из {{ stats.without_data_count }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if stats.outdated_count > 0 %}
+    <!-- Устаревшие данные -->
+    <div class="card mb-4">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0"><i class="bi bi-clock-history"></i> ЖК с устаревшими данными ({{ stats.outdated_count }})</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted">Данные старше 6 месяцев</p>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Название</th>
+                            <th>Последнее обновление</th>
+                            <th>Статус</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for complex in stats.outdated %}
+                        <tr>
+                            <td>{{ complex.id }}</td>
+                            <td>
+                                <a href="{{ url_for('residential_complex_detail', complex_id=complex.id) }}" target="_blank">
+                                    {{ complex.name }}
+                                </a>
+                            </td>
+                            <td>
+                                {% if complex.nearby_updated_at %}
+                                {{ complex.nearby_updated_at.strftime('%d.%m.%Y') }}
+                                {% else %}
+                                <span class="text-muted">Никогда</span>
+                                {% endif %}
+                            </td>
+                            <td><span class="badge bg-secondary">Устарело</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if stats.outdated_count > 10 %}
+                <p class="text-muted mb-0">Показано 10 из {{ stats.outdated_count }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Инструкция для CLI -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-terminal"></i> CLI команды</h5>
+        </div>
+        <div class="card-body">
+            <p>Для обновления через командную строку:</p>
+            <pre class="bg-dark text-light p-3 rounded"><code># Обновить 5 ЖК
+python3 nearby_auto_updater.py
+
+# Обновить все ЖК требующие обновления
+python3 nearby_auto_updater.py --all</code></pre>
+            
+            <p class="mt-3">Настроить автоматическое обновление (cron):</p>
+            <pre class="bg-dark text-light p-3 rounded"><code># Каждые 30 минут проверять и обновлять
+*/30 * * * * cd /path/to/project && python3 nearby_auto_updater.py</code></pre>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('auto-update-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const btn = document.getElementById('btn-update');
+    const statusDiv = document.getElementById('update-status');
+    const progressDiv = document.getElementById('update-progress');
+    const progressBar = document.getElementById('progress-bar');
+    const batchSize = this.batch_size.value;
+    
+    // Показать прогресс
+    statusDiv.className = 'alert alert-info';
+    statusDiv.textContent = `Обновление ${batchSize} ЖК... Это может занять 2-4 минуты.`;
+    statusDiv.classList.remove('d-none');
+    
+    progressDiv.classList.remove('d-none');
+    progressBar.style.width = '30%';
+    progressBar.textContent = 'Обработка...';
+    
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Обновление...';
+    
+    try {
+        const formData = new FormData(this);
+        
+        const response = await fetch('/admin/nearby/auto-update', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        progressBar.style.width = '100%';
+        progressBar.classList.remove('progress-bar-animated');
+        
+        if (data.success) {
+            statusDiv.className = 'alert alert-success';
+            statusDiv.innerHTML = `
+                <strong><i class="bi bi-check-circle"></i> Успешно!</strong><br>
+                ${data.message}<br>
+                <small>Обновлено: ${data.stats.success} | Ошибок: ${data.stats.failed} | Найдено объектов: ${data.stats.objects_total}</small>
+            `;
+            progressBar.className = 'progress-bar bg-success';
+            progressBar.textContent = 'Готово!';
+            
+            // Перезагрузить страницу через 3 секунды
+            setTimeout(() => {
+                window.location.reload();
+            }, 3000);
+        } else {
+            throw new Error(data.error || 'Unknown error');
+        }
+    } catch (error) {
+        statusDiv.className = 'alert alert-danger';
+        statusDiv.innerHTML = `<strong><i class="bi bi-x-circle"></i> Ошибка:</strong> ${error.message}`;
+        progressBar.className = 'progress-bar bg-danger';
+        progressBar.textContent = 'Ошибка';
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Обновить сейчас';
+    }
+});
+</script>
+{% endblock %}

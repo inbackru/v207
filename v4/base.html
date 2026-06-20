@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <!-- CSRF token for security -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <!-- Set authentication status FIRST before any other scripts -->
+    <script>
+    window.user_authenticated = {{ (current_user.is_authenticated)|tojson|safe }};
+    window.manager_authenticated = {{ (manager_authenticated if manager_authenticated is defined else false)|tojson|safe }};
+    window.admin_authenticated = {{ (admin_authenticated if admin_authenticated is defined else false)|tojson|safe }};
+    window.isManager = {{ (manager_authenticated if manager_authenticated is defined else false)|tojson|safe }};
+    console.log('✅ Manager flag set in HEAD - manager_authenticated:', window.manager_authenticated);
+    console.log('✅ Admin flag set in HEAD - admin_authenticated:', window.admin_authenticated);
+    </script>
+    
+    {% block meta %}
+    <title>{% block title %}Кэшбек за новостройки в {{ current_city.name_prepositional if current_city else 'Краснодаре' }} до 500 000 ₽ | InBack.ru{% endblock %}</title>
+    <meta content="{% block description %}Получите до 10% кэшбека при покупке новостройки в {{ current_city.name_prepositional if current_city else 'Краснодаре' }}. Проверенные застройщики, юридическое сопровождение. ✅ Выгода до 500 000 ₽{% endblock %}" name="description"/>
+    <meta content="{% block keywords %}новостройки {{ current_city.name if current_city else 'Краснодар' }}, кэшбек за квартиру, возврат денег при покупке недвижимости, застройщики {{ current_city.name_genitive if current_city else 'Краснодара' }}, ипотека{% endblock %}" name="keywords"/>
+    <meta content="InBack.ru" name="author"/>
+    <meta content="index, follow" name="robots"/>
+    <meta content="1-3 days" name="revisit-after"/>
+    <meta content="general" name="rating"/>
+    <meta content="{{ current_city.name if current_city else 'Краснодар' }}, Россия" name="geo.placename"/>
+    <meta content="45.0355;38.9753" name="geo.position"/>
+    <meta content="InBack.ru - кэшбек сервис для покупки недвижимости" name="subject"/>
+    <meta content="кэшбек, новостройки, недвижимость, {{ current_city.name if current_city else 'Краснодар' }}, ипотека, застройщики" name="classification"/>
+    {% endblock %}
+    
+    <!-- Social Meta Tags -->
+    <meta property="og:title" content="{% block og_title %}Кэшбек за новостройки в {{ current_city.name_prepositional if current_city else 'Краснодаре' }} до 500 000 ₽ | InBack.ru{% endblock %}"/>
+    <meta property="og:description" content="{% block og_description %}Получите до 10% кэшбека при покупке новостройки в {{ current_city.name_prepositional if current_city else 'Краснодаре' }}. Проверенные застройщики, юридическое сопровождение. Выгода до 500 000 ₽{% endblock %}"/>
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}"/>
+    <meta property="og:url" content="{{ request.url if request else 'https://inback.ru' }}"/>
+    <meta property="og:image" content="https://inback.ru/static/images/social-preview.jpg"/>
+    <meta property="og:image:width" content="1200"/>
+    <meta property="og:image:height" content="630"/>
+    <meta property="og:site_name" content="InBack.ru"/>
+    <meta property="og:locale" content="ru_RU"/>
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:title" content="{% block twitter_title %}Кэшбек за новостройки в {{ current_city.name_prepositional if current_city else 'Краснодаре' }} | InBack.ru{% endblock %}"/>
+    <meta name="twitter:description" content="{% block twitter_description %}Получите до 10% кэшбека при покупке новостройки в {{ current_city.name_prepositional if current_city else 'Краснодаре' }}{% endblock %}"/>
+    <meta name="twitter:image" content="https://inback.ru/static/images/social-preview.jpg"/>
+    
+    <!-- Additional SEO -->
+    <!-- Canonical URL for SEO - prevents duplicate content issues -->
+    {% if canonical_url %}
+    <link rel="canonical" href="{{ canonical_url }}" />
+    {% else %}
+    <link rel="canonical" href="https://inback.ru{{ request.path.split('?')[0] if request and request.path else '' }}" />
+    {% endif %}
+    
+    <!-- 
+      Note: Hreflang tags NOT used for city-based pages because each city has 
+      unique content (different properties). Using canonical URLs + city-specific 
+      meta tags + sitemap instead.
+    -->
+    
+    {% if request and 'replit' in request.host %}
+    <meta name="robots" content="noindex, nofollow">
+    {% endif %}
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.png') }}"/>
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon.png') }}"/>
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon.png') }}"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='favicon.png') }}"/>
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "InBack.ru",
+      "url": "https://inback.ru",
+      "logo": "https://inback.ru/static/images/logo.png",
+      "description": "Сервис возврата кэшбека при покупке недвижимости в {{ current_city.name_prepositional if current_city else 'Краснодаре' }}",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "ул. Красная, 176",
+        "addressLocality": "{{ current_city.name if current_city else 'Краснодар' }}", 
+        "addressRegion": {{ (current_city.region.name if current_city and current_city.region else 'Краснодарский край')|tojson }},
+        "addressCountry": "RU"
+      },
+      "telephone": "8 (862) 266-62-16",
+      "email": "info@inback.ru",
+      "sameAs": [
+        "https://t.me/inback_krd",
+        "https://wa.me/78622666216",
+        "https://vk.com/inback_krd"
+      ],
+      "openingHours": "Mo-Fr 09:00-19:00",
+      "priceRange": "$$",
+      "areaServed": {
+        "@type": "City",
+        "name": "{{ current_city.name if current_city else 'Краснодар' }}"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "reviewCount": "508",
+        "bestRating": "5",
+        "worstRating": "1"
+      },
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Новостройки с кэшбеком",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Product",
+              "name": "Кэшбек за покупку новостроек",
+              "description": "Возврат до 500 000 ₽ при покупке квартиры в новостройке"
+            },
+            "priceSpecification": {
+              "@type": "PriceSpecification",
+              "price": "0",
+              "priceCurrency": "RUB"
+            }
+          }
+        ]
+      }
+    }
+    </script>
+    
+    <meta content="index, follow" name="robots"/>
+    
+    <!-- Performance Hints -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="//cdn.tailwindcss.com">
+    
+    <!-- Critical Resource Preloading -->
+    <link rel="preload" href="{{ url_for('static', filename='css/styles.css') }}?v=20251019-5" as="style">
+    <link rel="preload" href="{{ url_for('static', filename='js/main.js') }}" as="script">
+    
+    <!-- Essential Resources Only -->
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"></noscript>
+    
+    <!-- Essential CSS -->
+    <link href="{{ url_for('static', filename='css/styles.css') }}?v=20251019-5" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/comparison.css') }}" rel="stylesheet">
+    
+    
+    {% block head %}{% endblock %}
+    {% block extra_head %}{% endblock %}
+    
+    <!-- Begin of Chaport Live Chat code -->
+    <script type="text/javascript">
+    (function(w,d,v3){
+        w.chaportConfig = {
+            appId : '68f0c90bff74d8504910745a',
+            launcher: {
+                enabled: true
+            },
+            appearance: {
+                zIndex: 10020
+            }
+        };
+
+        if(w.chaport)return;v3=w.chaport={};v3._q=[];v3._l={};v3.q=function(){v3._q.push(arguments)};v3.on=function(e,fn){if(!v3._l[e])v3._l[e]=[];v3._l[e].push(fn)};var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://app.chaport.ru/javascripts/insert.js';var ss=d.getElementsByTagName('script')[0];ss.parentNode.insertBefore(s,ss)})(window, document);
+        
+        // Автоматическое открытие Chaport при переходе из Telegram
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('jivo_open') === '1') {
+                // Ждем загрузки виджета Chaport
+                const checkChaportReady = setInterval(function() {
+                    if (typeof window.chaport !== 'undefined' && window.chaport.q) {
+                        clearInterval(checkChaportReady);
+                        // Открываем чат через 500мс для надежности
+                        setTimeout(function() {
+                            window.chaport.q('open');
+                            console.log('💬 Chaport chat opened from Telegram');
+                        }, 500);
+                    }
+                }, 100);
+                
+                // Останавливаем проверку через 10 секунд если виджет не загрузился
+                setTimeout(function() {
+                    clearInterval(checkChaportReady);
+                }, 10000);
+            }
+        })();
+        
+        (function() {
+            function manageChaportOnMobile() {
+                var isMobile = window.innerWidth < 1024;
+                var styleId = 'chaport-launcher-hide';
+                if (isMobile) {
+                    if (!document.getElementById(styleId)) {
+                        var style = document.createElement('style');
+                        style.id = styleId;
+                        style.textContent = `
+                            .chaport-launcher-button, 
+                            #chaport-container .chaport-launcher,
+                            .chaport-launcher { 
+                                display: none !important; 
+                                visibility: hidden !important; 
+                                pointer-events: none !important; 
+                                opacity: 0 !important;
+                                width: 0 !important;
+                                height: 0 !important;
+                            }
+                            /* Если чат открыт, показываем контейнер */
+                            #chaport-container.chaport-container-opened,
+                            #chaport-container[style*="display: block"],
+                            #chaport-container[style*="visibility: visible"] {
+                                display: block !important;
+                                visibility: visible !important;
+                                opacity: 1 !important;
+                                pointer-events: auto !important;
+                            }
+                        `;
+                        document.head.appendChild(style);
+                    }
+                } else {
+                    var existing = document.getElementById(styleId);
+                    if (existing) existing.remove();
+                }
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', manageChaportOnMobile);
+            } else {
+                manageChaportOnMobile();
+            }
+            window.addEventListener('resize', manageChaportOnMobile);
+            
+            // Дополнительная проверка через интервал, так как Chaport может добавлять элементы динамически
+            setInterval(manageChaportOnMobile, 2000);
+        })();
+    </script>
+    <!-- End of Chaport Live Chat code -->
+    
+    <!-- Yandex.Metrika counter -->
+    <script type="text/javascript">
+        (function(m,e,t,r,i,k,a){
+            m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+            m[i].l=1*new Date();
+            for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+            k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+        })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=104270300', 'ym');
+
+        ym(104270300, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", accurateTrackBounce:true, trackLinks:true});
+    </script>
+    <noscript><div><img src="https://mc.yandex.ru/watch/104270300" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <!-- /Yandex.Metrika counter -->
+    
+    <!-- Allow child templates to inject head content -->
+    {% block head_extra %}{% endblock %}
+</head>
+<body class="bg-white overflow-x-hidden pb-16 md:pb-0">
+    {% include 'top_bar.html' %}
+    {% include 'header.html' %}
+
+    <div class="hidden md:block">
+        {% block breadcrumbs %}{% endblock %}
+    </div>
+
+    {% block content %}{% endblock %}
+
+    <!-- Contact Strip Above Footer -->
+    <section id="contactStrip" class="bg-gray-100 py-4">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex flex-col sm:flex-row items-center gap-2 sm:gap-6 text-center sm:text-left">
+                    <div class="text-base sm:text-lg font-bold text-gray-800 whitespace-nowrap">8 (862) 266-62-16</div>
+                    <div class="text-sm sm:text-base text-gray-600">Нужна консультация по недвижимости?</div>
+                </div>
+                <button onclick="openApplicationModal()" class="w-full sm:w-auto px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold transition-colors">
+                    Получить консультацию
+                </button>
+            </div>
+        </div>
+    </section>
+
+    {% include 'footer.html' %}
+
+    <!-- Phone Modal -->
+    <div id="phoneModal" class="fixed inset-0 z-[10000] hidden items-center justify-center p-4" style="display:none;">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closePhoneModal()"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-auto overflow-hidden animate-[fadeIn_0.2s_ease]">
+            <button onclick="closePhoneModal()" class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 z-10">
+                <i class="fas fa-times text-sm"></i>
+            </button>
+            <div class="p-6 text-center">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-phone-alt text-green-500 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-1">Свяжитесь с нами</h3>
+                <p class="text-sm text-gray-500 mb-4" id="phoneModalSubtitle">Мы поможем подобрать квартиру</p>
+                <a href="tel:+78622666216" class="block text-2xl font-bold text-[#0088CC] mb-4 hover:underline">8 (862) 266-62-16</a>
+                <p class="text-xs text-gray-400 mb-4">Пн-Пт 9:00—18:00</p>
+                <div class="border-t border-gray-100 pt-4">
+                    <p class="text-sm text-gray-600 mb-3">Или оставьте заявку — перезвоним за 5 минут</p>
+                    <form id="phoneModalForm" onsubmit="submitPhoneModalForm(event)" class="space-y-3">
+                        <input type="text" name="name" placeholder="Ваше имя" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#0088CC]/30 focus:border-[#0088CC] outline-none">
+                        <input type="tel" name="phone" placeholder="+7 (___) ___-__-__" required class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#0088CC]/30 focus:border-[#0088CC] outline-none">
+                        <input type="hidden" name="property_id" id="phoneModalPropertyId" value="">
+                        <input type="hidden" name="source" value="phone_modal">
+                        <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2.5 rounded-lg transition-colors text-sm">
+                            Перезвоните мне
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Map Modal -->
+    <div id="mapModal" class="fixed inset-0 z-[10000] hidden items-center justify-center" style="display:none;">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeMapModal()"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden animate-[fadeIn_0.2s_ease]" style="max-height:90vh;">
+            <div class="flex items-center justify-between p-3 border-b border-gray-100">
+                <div class="flex items-center gap-2 min-w-0">
+                    <i class="fas fa-map-marker-alt text-[#0088CC]"></i>
+                    <span id="mapModalTitle" class="font-semibold text-gray-800 text-sm truncate">Расположение</span>
+                </div>
+                <button onclick="closeMapModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 flex-shrink-0">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+            </div>
+            <div id="mapModalContainer" class="w-full" style="height:60vh;"></div>
+            <div class="p-3 border-t border-gray-100 flex gap-2">
+                <a id="mapModalYandexLink" href="#" target="_blank" class="flex-1 flex items-center justify-center gap-1.5 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition-colors font-medium">
+                    <i class="fab fa-yandex text-red-500"></i> Яндекс Карты
+                </a>
+                <a id="mapModalGoogleLink" href="#" target="_blank" class="flex-1 flex items-center justify-center gap-1.5 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition-colors font-medium">
+                    <i class="fab fa-google text-blue-500"></i> Google Maps
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Essential JavaScript Only -->
+    <script src="{{ url_for('static', filename='js/form-validation.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/modals.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/performance_optimizer.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/super_search.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/header_search.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/favorites.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/comparison.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+    
+    <!-- Initialize Favorites Manager globally -->
+    <script>
+    // Global function to update favorites count in header
+    function updateHeaderFavoritesCount() {
+        const headerElement = document.getElementById('favorites-count-header');
+        if (!headerElement) return;
+        
+        // Получаем общее количество избранного (квартиры + ЖК)
+        const properties = JSON.parse(localStorage.getItem('favorites') || '[]');
+        const complexes = JSON.parse(localStorage.getItem('complex_favorites') || '[]');
+        const totalCount = properties.length + complexes.length;
+        
+        if (totalCount > 0) {
+            headerElement.textContent = totalCount;
+            headerElement.classList.remove('hidden');
+        } else {
+            headerElement.classList.add('hidden');
+        }
+    }
+    
+    window.addEventListener('DOMContentLoaded', function() {
+        // Wait for all scripts to load
+        setTimeout(() => {
+            if (typeof FavoritesManager !== 'undefined' && !window.favoritesManager) {
+                window.favoritesManager = new FavoritesManager();
+                console.log('Global favorites system initialized');
+            }
+            
+            // Update header favorites count on page load
+            updateHeaderFavoritesCount();
+            
+            // Обновляем счетчик при изменении localStorage
+            window.addEventListener('storage', updateHeaderFavoritesCount);
+            
+        }, 100);
+    });
+    </script>
+
+
+    
+    <!-- Callback Modal -->
+    <div id="callback-modal-container" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-black bg-opacity-50" onclick="closeCallbackModal()"></div>
+        
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto transform transition-all duration-300">
+            <!-- Close button -->
+            <button onclick="closeCallbackModal()" class="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            
+            <!-- Callback Content Container -->
+            <div id="callback-content">
+                <!-- Content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}?v=202508061"></script>
+    <script>
+        // Global scroll lock counter - prevents race conditions
+        window.modalScrollLockCounter = 0;
+        
+        // Lock body scroll with counter mechanism
+        window.lockBodyScroll = function() {
+            window.modalScrollLockCounter++;
+            console.log('Lock counter:', window.modalScrollLockCounter);
+            
+            // Only apply lock on first modal
+            if (window.modalScrollLockCounter === 1) {
+                document.body.style.overflow = 'hidden';
+                console.log('Body scroll locked');
+            }
+        };
+        
+        // Unlock body scroll with counter mechanism
+        window.unlockBodyScroll = function() {
+            window.modalScrollLockCounter = Math.max(0, window.modalScrollLockCounter - 1);
+            console.log('Unlock counter:', window.modalScrollLockCounter);
+            
+            // Only remove lock when all modals are closed
+            if (window.modalScrollLockCounter === 0) {
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+                document.body.style.position = '';
+                document.body.style.height = '';
+                document.documentElement.style.overflow = '';
+                
+                // Clean up any modal-related classes
+                document.body.className = document.body.className
+                    .replace(/modal-open|no-scroll|overflow-hidden|scroll-disabled/g, '')
+                    .trim();
+                    
+                console.log('Body scroll unlocked');
+            }
+        };
+        
+        // Global quiz variables - accessible immediately
+        let currentStep = 0;
+        const totalSteps = 4;
+        const formData = {};
+        
+        // Telegram notifications handled server-side only for security
+        // No client-side bot tokens - all Telegram interactions via backend API
+
+        // Global function accessible immediately when page loads - opens working modal
+        window.openApplicationModal = function(propertyData = null) {
+            console.log('Opening application modal...', propertyData);
+            
+            // Store property data globally for form submission
+            window.currentPropertyData = propertyData;
+            
+            // Close any other open modals - AGGRESSIVELY
+            const quizModal = document.getElementById('quiz-modal-container');
+            const callbackModal = document.getElementById('callback-modal-container');
+            const cookieNotice = document.getElementById('cookieNotice');
+            
+            if (quizModal) {
+                quizModal.classList.add('hidden');
+                quizModal.style.display = 'none';
+                quizModal.style.visibility = 'hidden';
+                quizModal.style.zIndex = '0';
+                window.unlockBodyScroll();
+            }
+            if (callbackModal) {
+                callbackModal.classList.add('hidden');
+                callbackModal.style.display = 'none';
+                callbackModal.style.visibility = 'hidden';
+            }
+            if (cookieNotice) {
+                cookieNotice.style.display = 'none';
+            }
+            
+            // Open unified quick registration modal with highest z-index
+            const modal = document.getElementById('quickRegistrationModal');
+            if (modal) {
+                // Force show the modal
+                modal.classList.remove('hidden');
+                modal.style.display = 'flex';
+                modal.style.visibility = 'visible';
+                modal.style.zIndex = '9999';
+                
+                // Show correct view based on authentication
+                const isAuthenticated = window.user_authenticated || window.manager_authenticated || window.admin_authenticated;
+                const guestRegView = document.getElementById('guestRegistrationView');
+                const formView = document.getElementById('applicationFormView');
+                const thankYouView = document.getElementById('applicationThankYouView');
+                
+                if (guestRegView) {
+                    if (isAuthenticated) {
+                        guestRegView.classList.add('hidden');
+                        guestRegView.style.display = 'none';
+                    } else {
+                        guestRegView.classList.remove('hidden');
+                        guestRegView.style.display = 'block';
+                    }
+                }
+                
+                if (formView) {
+                    if (isAuthenticated) {
+                        formView.classList.remove('hidden');
+                        formView.style.display = 'block';
+                    } else {
+                        formView.classList.add('hidden');
+                        formView.style.display = 'none';
+                    }
+                }
+                
+                if (thankYouView) {
+                    thankYouView.classList.add('hidden');
+                    thankYouView.style.display = 'none';
+                }
+                
+                // Use counter-based scroll lock
+                window.lockBodyScroll();
+                console.log('Opened application modal with property data:', propertyData);
+                return;
+            }
+            
+            console.warn('No modal elements found - modal functionality not available on this page');
+        };
+
+        window.openPhoneModal = function(propertyId, subtitle) {
+            var modal = document.getElementById('phoneModal');
+            if (!modal) return;
+            if (propertyId) {
+                var el = document.getElementById('phoneModalPropertyId');
+                if (el) el.value = propertyId;
+            }
+            if (subtitle) {
+                var sub = document.getElementById('phoneModalSubtitle');
+                if (sub) sub.textContent = subtitle;
+            }
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        };
+        window.closePhoneModal = function() {
+            var modal = document.getElementById('phoneModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+            }
+            document.body.style.overflow = '';
+        };
+        window.submitPhoneModalForm = function(e) {
+            e.preventDefault();
+            var form = document.getElementById('phoneModalForm');
+            var formData = new FormData(form);
+            var data = {};
+            formData.forEach(function(v, k) { data[k] = v; });
+            fetch('/api/callback-request', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            }).then(function(r) { return r.json(); }).then(function(res) {
+                form.innerHTML = '<div class="text-center py-4"><div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3"><i class="fas fa-check text-green-500 text-xl"></i></div><p class="font-semibold text-gray-800">Заявка отправлена!</p><p class="text-sm text-gray-500 mt-1">Перезвоним в ближайшее время</p></div>';
+                setTimeout(function() { closePhoneModal(); }, 3000);
+            }).catch(function() {
+                form.innerHTML = '<div class="text-center py-4"><p class="font-semibold text-gray-800">Спасибо! Мы перезвоним.</p></div>';
+                setTimeout(function() { closePhoneModal(); }, 3000);
+            });
+        };
+
+        window._mapModalInstance = null;
+        window._mapModalLoading = false;
+        window.openMapModal = function(lat, lon, title) {
+            if (window._mapModalLoading) return;
+            var modal = document.getElementById('mapModal');
+            if (!modal) return;
+            var titleEl = document.getElementById('mapModalTitle');
+            if (titleEl && title) titleEl.textContent = title;
+            var yLink = document.getElementById('mapModalYandexLink');
+            var gLink = document.getElementById('mapModalGoogleLink');
+            if (yLink) yLink.href = 'https://yandex.ru/maps/?pt=' + lon + ',' + lat + '&z=16&l=map';
+            if (gLink) gLink.href = 'https://maps.google.com/?q=' + lat + ',' + lon;
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            if (window._mapModalInstance) {
+                window._mapModalInstance.destroy();
+                window._mapModalInstance = null;
+            }
+            window._mapModalLoading = true;
+            setTimeout(function() {
+                if (typeof ymaps !== 'undefined') {
+                    ymaps.ready(function() {
+                        window._mapModalLoading = false;
+                        var container = document.getElementById('mapModalContainer');
+                        if (!container || modal.style.display === 'none') return;
+                        window._mapModalInstance = new ymaps.Map(container, {
+                            center: [lat, lon],
+                            zoom: 16,
+                            controls: ['zoomControl', 'fullscreenControl']
+                        });
+                        var pm = new ymaps.Placemark([lat, lon], {
+                            balloonContent: title || ''
+                        }, {preset: 'islands#blueCircleDotIcon'});
+                        window._mapModalInstance.geoObjects.add(pm);
+                    });
+                } else {
+                    window._mapModalLoading = false;
+                }
+            }, 100);
+        };
+        window.closeMapModal = function() {
+            var modal = document.getElementById('mapModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+            }
+            document.body.style.overflow = '';
+            if (window._mapModalInstance) {
+                window._mapModalInstance.destroy();
+                window._mapModalInstance = null;
+            }
+        };
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Modal elements
+            const modal = document.getElementById('quiz-modal');
+            const backdrop = document.getElementById('modal-backdrop');
+            const modalContainer = document.getElementById('modal-container');
+            const closeBtn = document.getElementById('close-modal');
+            
+            // Skip old quiz code if quiz-modal doesn't exist (using new quiz from header.html)
+            if (!modal) return;
+            
+            // Form elements
+            const form = document.getElementById('quiz-form');
+            const steps = document.querySelectorAll('.step');
+            const progressFill = document.getElementById('progress-fill');
+            const currentStepDisplay = document.getElementById('current-step-display');
+            const nextButtons = document.querySelectorAll('.next-step');
+            const prevButtons = document.querySelectorAll('.prev-step');
+            const optionCards = document.querySelectorAll('.option-card');
+            
+            // Modal is now ready - no need to redefine function
+
+            // Close modal function
+            function closeModal() {
+                if (modal) {
+                    modal.classList.remove('scale-100', 'opacity-100');
+                    modal.classList.add('scale-95', 'opacity-0');
+                    setTimeout(() => {
+                        if (modalContainer) modalContainer.classList.add('hidden');
+                        // Use counter-based scroll unlock
+                        window.unlockBodyScroll();
+                    }, 300);
+                }
+            }
+
+            // Event listeners with safety checks
+            if (closeBtn) closeBtn.addEventListener('click', closeModal);
+            if (backdrop) backdrop.addEventListener('click', closeModal);
+            
+            // Next step buttons with safety checks
+            if (nextButtons.length > 0) {
+                nextButtons.forEach(button => {
+                    if (button) {
+                        button.addEventListener('click', function() {
+                            if (validateStep(currentStep)) {
+                                goToStep(currentStep + 1);
+                            }
+                        });
+                    }
+                });
+            }
+            
+            // Previous step buttons with safety checks  
+            if (prevButtons.length > 0) {
+                prevButtons.forEach(button => {
+                    if (button) {
+                        button.addEventListener('click', function() {
+                            goToStep(currentStep - 1);
+                        });
+                    }
+                });
+            }
+            
+            // Option card selection with safety checks
+            if (optionCards.length > 0) {
+                optionCards.forEach(card => {
+                    if (card) {
+                        card.addEventListener('click', function() {
+                    const stepEl = this && this.closest ? this.closest('.step') : null;
+                    const stepId = stepEl ? stepEl.id : null;
+                    const value = this.getAttribute('data-value');
+                    
+                    // Remove selection from all cards in current step
+                    const allCardsInStep = stepEl ? stepEl.querySelectorAll('.option-card') : [];
+                    allCardsInStep.forEach(c => {
+                        c.classList.remove('border-[#0088CC]', 'bg-blue-50');
+                        c.classList.add('border-gray-200');
+                    });
+                    
+                    // Select current card
+                    this.classList.remove('border-gray-200');
+                    this.classList.add('border-[#0088CC]', 'bg-blue-50');
+                    
+                    // Save selected value
+                    switch(stepId) {
+                        case 'step-1':
+                            formData.districts = value;
+                            break;
+                        case 'step-2':
+                            formData.rooms = value;
+                            break;
+                        case 'step-3':
+                            formData.budget = value;
+                            break;
+                    }
+                        });
+                    }
+                });
+            }
+            
+            // Step validation
+            function validateStep(stepIndex) {
+                switch(stepIndex) {
+                    case 0:
+                        if (!formData.districts) {
+                            showNotification('Пожалуйста, выберите район', 'warning');
+                            return false;
+                        }
+                        return true;
+                    case 1:
+                        if (!formData.rooms) {
+                            showNotification('Пожалуйста, выберите количество комнат', 'warning');
+                            return false;
+                        }
+                        return true;
+                    case 2:
+                        if (!formData.budget) {
+                            showNotification('Пожалуйста, выберите примерный бюджет', 'warning');
+                            return false;
+                        }
+                        return true;
+                    case 3:
+                        const name = document.getElementById('name').value;
+                        const phone = document.getElementById('phone').value;
+                        const consent = document.getElementById('consent').checked;
+                        
+                        if (!name || !phone) {
+                            showNotification('Пожалуйста, заполните обязательные поля', 'error');
+                            return false;
+                        }
+                        
+                        if (!consent) {
+                            showNotification('Необходимо согласие на обработку данных', 'error');
+                            return false;
+                        }
+                        
+                        formData.name = name;
+                        formData.phone = phone;
+                        formData.email = document.getElementById('email').value;
+                        return true;
+                    default:
+                        return true;
+                }
+            }
+
+            // Show notification
+            function showNotification(message, type = 'info') {
+                // Remove existing notification
+                const existing = document.getElementById('quiz-notification');
+                if (existing) existing.remove();
+
+                const notification = document.createElement('div');
+                notification.id = 'quiz-notification';
+                notification.className = `fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg transition-all duration-300 ${
+                    type === 'error' ? 'bg-red-500 text-white' : 
+                    type === 'warning' ? 'bg-yellow-500 text-white' : 
+                    type === 'success' ? 'bg-green-500 text-white' : 
+                    'bg-blue-500 text-white'
+                }`;
+                notification.innerHTML = `
+                    <div class="flex items-center">
+                        <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : type === 'success' ? 'check-circle' : 'info-circle'} mr-2"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.classList.add('opacity-0');
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            }
+            
+            // Go to step function
+            function goToStep(stepIndex) {
+                if (stepIndex < 0 || stepIndex > totalSteps) return;
+                
+                // Hide all steps
+                steps.forEach((step, index) => {
+                    if (step) {
+                        step.style.display = index === stepIndex ? 'block' : 'none';
+                    }
+                });
+                
+                // Update current step
+                currentStep = stepIndex;
+                
+                // Update progress bar - calculate correctly for 4 steps + thank you
+                const progressPercent = stepIndex >= totalSteps ? 100 : ((stepIndex + 1) / totalSteps) * 100;
+                if (progressFill) {
+                    progressFill.style.width = `${progressPercent}%`;
+                }
+                
+                // Update step display
+                if (currentStepDisplay && stepIndex < totalSteps) {
+                    currentStepDisplay.textContent = stepIndex + 1;
+                } else if (currentStepDisplay && stepIndex >= totalSteps) {
+                    currentStepDisplay.textContent = 'Готово';
+                }
+                
+                console.log('Moved to step:', stepIndex + 1);
+            }
+            
+            // Form submission with safety check - exclude company check form
+            if (form && !form.classList.contains('company-check-form')) {
+                form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const submitBtn = document.getElementById('submit-btn');
+                const submitText = document.getElementById('submit-text');
+                const submitSpinner = document.getElementById('submit-spinner');
+                
+                // Show loading (with null checks)
+                if (submitBtn) submitBtn.disabled = true;
+                if (submitText) submitText.classList.add('hidden');
+                if (submitSpinner) submitSpinner.classList.remove('hidden');
+                
+                if (validateStep(currentStep)) {
+                    // Collect all form data
+                    const finalFormData = {
+                        districts: getSelectedOptionText('step-1') || 'Не указано',
+                        rooms: getSelectedOptionText('step-2') || 'Не указано',
+                        budget: getSelectedOptionText('step-3') || 'Не указано',
+                        name: document.getElementById('name').value,
+                        phone: document.getElementById('phone').value,
+                        email: document.getElementById('email').value || 'Не указано'
+                    };
+
+                    // Get current date and time
+                    const now = new Date();
+                    const dateTime = now.toLocaleString('ru-RU', {
+                        day: '2-digit',
+                        month: '2-digit', 
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    // Create Telegram message
+                    const telegramMessage = `🏠 *НОВАЯ ЗАЯВКА НА ПОДБОР ЖИЛЬЯ*
+
+⏰ *Дата и время*: ${dateTime}
+
+👤 *КОНТАКТНАЯ ИНФОРМАЦИЯ:*
+• *Имя*: ${finalFormData.name}
+• *Телефон*: ${finalFormData.phone}
+• *Email*: ${finalFormData.email}
+
+🎯 *КРИТЕРИИ ПОИСКА:*
+• *Район*: ${finalFormData.districts}
+• *Количество комнат*: ${finalFormData.rooms}
+• *Бюджет*: ${finalFormData.budget} млн ₽
+
+🎁 *ПОТЕНЦИАЛЬНЫЙ КЭШБЕК*:
+${getBudgetCashback(formData.budget)}
+
+📋 *СЛЕДУЮЩИЕ ШАГИ*:
+✅ Связаться с клиентом в течение 15 минут
+✅ Подобрать варианты по критериям
+✅ Рассчитать точную сумму кэшбека
+
+💬 *Источник*: Форма заявки на сайте InBack.ru`;
+
+                    // Send to Telegram
+                    axios.post(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                        chat_id: TELEGRAM_CHAT_ID,
+                        text: telegramMessage,
+                        parse_mode: 'Markdown'
+                    })
+                    .then(() => {
+                        console.log('Сообщение отправлено в Telegram');
+                        showNotification('Заявка успешно отправлена!', 'success');
+                    })
+                    .catch(error => {
+                        console.warn('Ошибка отправки в Telegram:', error);
+                        showNotification('Ошибка отправки. Попробуйте еще раз.', 'error');
+                    });
+
+                    // Go to thank you step
+                    goToStep(totalSteps);
+                    
+                    // Reset button (with null checks)
+                    if (submitBtn) submitBtn.disabled = false;
+                    if (submitText) submitText.classList.remove('hidden');
+                    if (submitSpinner) submitSpinner.classList.add('hidden');
+                } else {
+                    // Reset button (with null checks)
+                    if (submitBtn) submitBtn.disabled = false;
+                    if (submitText) submitText.classList.remove('hidden');
+                    if (submitSpinner) submitSpinner.classList.add('hidden');
+                }
+                });
+            }
+
+            // Get selected option text
+            function getSelectedOptionText(stepId) {
+                const step = document.getElementById(stepId);
+                if (!step) return null;
+                const selectedCard = step.querySelector('.option-card.border-\\[\\#0088CC\\]');
+                if (!selectedCard) return null;
+                return selectedCard.querySelector('h3').textContent;
+            }
+            
+            // Get cashback info based on budget
+            function getBudgetCashback(budget) {
+                switch(budget) {
+                    case '3-5': return 'до 150 000 ₽';
+                    case '5-7': return 'до 210 000 ₽';
+                    case '7-10': return 'до 300 000 ₽';
+                    case '10+': return 'до 500 000 ₽';
+                    default: return 'уточняется индивидуально';
+                }
+            }
+
+            // Phone mask
+            const phoneInput = document.getElementById('phone');
+            if (phoneInput) {
+                phoneInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    let formattedValue = '';
+                    
+                    if (value.length > 0) {
+                        if (value.length <= 1) {
+                            formattedValue = '+7';
+                        } else if (value.length <= 4) {
+                            formattedValue = '+7 (' + value.substring(1);
+                        } else if (value.length <= 7) {
+                            formattedValue = '+7 (' + value.substring(1, 4) + ') ' + value.substring(4);
+                        } else if (value.length <= 9) {
+                            formattedValue = '+7 (' + value.substring(1, 4) + ') ' + value.substring(4, 7) + '-' + value.substring(7);
+                        } else {
+                            formattedValue = '+7 (' + value.substring(1, 4) + ') ' + value.substring(4, 7) + '-' + value.substring(7, 9) + '-' + value.substring(9, 11);
+                        }
+                    }
+                    
+                    e.target.value = formattedValue;
+                });
+                
+                // Set default +7 when focused
+                phoneInput.addEventListener('focus', function(e) {
+                    if (!e.target.value) {
+                        e.target.value = '+7 ';
+                    }
+                });
+            }
+        });
+    </script>
+
+    <style>
+        .step {
+            display: none;
+        }
+        .step.active {
+            display: block;
+        }
+        .option-card.selected {
+            border-color: #0088CC !important;
+            background-color: rgb(239 246 255) !important;
+        }
+    </style>
+
+    <!-- Optimized Scripts -->
+    <script src="{{ url_for('static', filename='js/dom-helper.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/performance-lite.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/form-validation-lite.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/turbo-loader.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/cache-optimizer.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/image-compressor.js') }}" defer></script>
+
+    <!-- Quick Registration / Manager Contact Modal -->
+    <div id="quickRegistrationModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" onclick="if(event.target === this) closeQuickRegistrationModal()">
+        <div class="bg-white rounded-xl p-6 md:p-8 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <!-- Guest User - Quick Registration View -->
+            {% if not current_user.is_authenticated %}
+            <div id="guestRegistrationView">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold text-gray-900">Быстрая регистрация</h3>
+                    <button type="button" onclick="closeQuickRegistrationModal()" class="w-10 h-10 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors cursor-pointer">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <p class="text-gray-600 mb-6">Введите ваш номер телефона для регистрации и получения доступа к кэшбеку</p>
+                
+                <form id="quickRegisterForm">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Ваше имя *</label>
+                            <input type="text" name="name" id="regName" required 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0088CC] focus:border-[#0088CC]"
+                                   placeholder="Введите ваше имя">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Номер телефона *</label>
+                            <input type="tel" name="phone" id="regPhone" required 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0088CC] focus:border-[#0088CC]"
+                                   placeholder="+7 (900) 123-45-67">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email (необязательно)</label>
+                            <input type="email" name="email" id="regEmail"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0088CC] focus:border-[#0088CC]"
+                                   placeholder="your@email.com">
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3 mt-6">
+                        <button type="button" onclick="closeQuickRegistrationModal()" 
+                                class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                            Отмена
+                        </button>
+                        <button type="submit" id="submitRegisterBtn"
+                                class="flex-1 px-4 py-2 bg-gradient-to-r from-[#0088CC] to-[#006699] text-white rounded-lg hover:from-[#0077BB] hover:to-[#005588] transition disabled:opacity-50">
+                            <span id="submitRegisterText">Зарегистрироваться</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {% else %}
+            <!-- Authenticated User - Manager Contact Form View -->
+            <div id="applicationFormView">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold text-gray-900">Заявка на просмотр</h3>
+                    <button type="button" onclick="closeQuickRegistrationModal()" class="w-10 h-10 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors text-2xl cursor-pointer">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <form id="contactManagerForm">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Ваше имя *</label>
+                            <input type="text" name="name" required 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                   placeholder="Введите ваше имя">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Телефон *</label>
+                            <input type="tel" name="phone" required 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                   placeholder="+7 (900) 123-45-67">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" name="email" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                   placeholder="Ваш email (необязательно)">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Удобное время для звонка</label>
+                            <select name="contact_time" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Не важно</option>
+                                <option value="morning">Утром (9:00-12:00)</option>
+                                <option value="afternoon">Днем (12:00-17:00)</option>
+                                <option value="evening">Вечером (17:00-20:00)</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Сообщение</label>
+                            <textarea name="message" rows="3" 
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                      placeholder="Расскажите, чем можем помочь..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3 mt-6">
+                        <button type="button" onclick="closeQuickRegistrationModal()" 
+                                class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                            Отмена
+                        </button>
+                        <button type="submit" id="submitContactBtn"
+                                class="flex-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition disabled:opacity-50">
+                            <span id="submitText">Отправить заявку</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {% endif %}
+            
+            <!-- Thank You View -->
+            <div id="applicationThankYouView" class="hidden text-center py-8">
+                <div class="mb-6">
+                    <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Спасибо!</h3>
+                    <p class="text-gray-600 mb-2">Ваша заявка успешно отправлена.</p>
+                    <p class="text-gray-600">Наш менеджер свяжется с вами в ближайшее время.</p>
+                </div>
+                
+                <button onclick="closeQuickRegistrationModal()" 
+                        class="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition font-semibold">
+                    Закрыть
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cookie Notice - Bottom Bar -->
+    <div id="cookieNotice" class="fixed bottom-0 left-0 right-0 z-[9999] flex justify-center p-4 transform translate-y-full transition-transform duration-500 ease-out" style="display: none;">
+        <div id="cookieNoticeContent" class="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-2xl w-full">
+            <div class="p-4 flex flex-col sm:flex-row items-center gap-4">
+                <div class="flex items-center gap-3 flex-1">
+                    <span class="text-2xl">🍪</span>
+                    <p class="text-sm text-gray-600">
+                        Мы используем cookie для улучшения вашего опыта на сайте.
+                        <a href="/cookie-policy" class="text-[#0088CC] hover:underline">Подробнее</a>
+                    </p>
+                </div>
+                
+                <div class="flex items-center gap-2 shrink-0">
+                    <button 
+                        onclick="acceptNecessaryCookies()" 
+                        class="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors duration-200">
+                        Отклонить
+                    </button>
+                    <button 
+                        onclick="acceptAllCookies()" 
+                        class="px-5 py-2 bg-[#0088CC] text-white rounded-lg text-sm font-semibold hover:bg-[#0077BB] transition-colors duration-200">
+                        Принять
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Cookie notice functionality
+        function checkCookieConsent() {
+            const consent = localStorage.getItem('cookieConsent');
+            
+            if (!consent) {
+                showCookieNotice();
+            } else {
+                // Apply stored consent settings
+                try {
+                    const consentData = JSON.parse(consent);
+                    applyCookieConsent(consentData);
+                } catch (e) {
+                    // Handle legacy consent format
+                    if (consent === 'accepted') {
+                        applyCookieConsent({ type: 'all', analytics: true, marketing: true });
+                    }
+                }
+            }
+        }
+        
+        function applyCookieConsent(consentData) {
+            // Apply analytics settings
+            if (typeof gtag !== 'undefined') {
+                gtag('consent', 'update', {
+                    'analytics_storage': consentData.analytics ? 'granted' : 'denied',
+                    'ad_storage': consentData.marketing ? 'granted' : 'denied',
+                    'functionality_storage': 'granted',
+                    'personalization_storage': consentData.preferences ? 'granted' : 'denied'
+                });
+            }
+        }
+
+        function showCookieNotice() {
+            const notice = document.getElementById('cookieNotice');
+            
+            if (notice) {
+                notice.style.display = 'flex';
+                setTimeout(() => {
+                    notice.classList.remove('translate-y-full');
+                    notice.classList.add('translate-y-0');
+                }, 50);
+            }
+        }
+
+        function hideCookieNotice() {
+            const notice = document.getElementById('cookieNotice');
+            
+            if (notice) {
+                notice.classList.remove('translate-y-0');
+                notice.classList.add('translate-y-full');
+                setTimeout(() => {
+                    notice.style.display = 'none';
+                }, 500);
+            }
+        }
+
+        function acceptAllCookies() {
+            const consentData = {
+                necessary: true,
+                analytics: true,
+                marketing: true,
+                preferences: true,
+                date: new Date().toISOString(),
+                type: 'all'
+            };
+            
+            localStorage.setItem('cookieConsent', JSON.stringify(consentData));
+            setCookies(consentData);
+            hideCookieNotice();
+            
+            // Enable all analytics
+            if (typeof gtag !== 'undefined') {
+                gtag('consent', 'update', {
+                    'analytics_storage': 'granted',
+                    'ad_storage': 'granted',
+                    'functionality_storage': 'granted',
+                    'personalization_storage': 'granted'
+                });
+            }
+        }
+        
+        function acceptNecessaryCookies() {
+            const consentData = {
+                necessary: true,
+                analytics: false,
+                marketing: false,
+                preferences: false,
+                date: new Date().toISOString(),
+                type: 'necessary'
+            };
+            
+            localStorage.setItem('cookieConsent', JSON.stringify(consentData));
+            setCookies(consentData);
+            hideCookieNotice();
+            
+            // Only enable necessary functionality
+            if (typeof gtag !== 'undefined') {
+                gtag('consent', 'update', {
+                    'analytics_storage': 'denied',
+                    'ad_storage': 'denied',
+                    'functionality_storage': 'granted',
+                    'personalization_storage': 'denied'
+                });
+            }
+        }
+        
+        function setCookies(consentData) {
+            // Set necessary cookies
+            if (consentData.necessary) {
+                document.cookie = `user_session=active; max-age=31536000; path=/; secure; samesite=strict`;
+            }
+            
+            // Set analytics cookies
+            if (consentData.analytics) {
+                document.cookie = `analytics_enabled=true; max-age=31536000; path=/; secure; samesite=strict`;
+            }
+            
+            // Set marketing cookies  
+            if (consentData.marketing) {
+                document.cookie = `marketing_enabled=true; max-age=31536000; path=/; secure; samesite=strict`;
+            }
+            
+            // Set preference cookies
+            if (consentData.preferences) {
+                document.cookie = `preferences_enabled=true; max-age=31536000; path=/; secure; samesite=strict`;
+                // Save user preferences like theme, language etc.
+                const preferences = {
+                    theme: 'light',
+                    language: 'ru',
+                    notifications: true
+                };
+                localStorage.setItem('userPreferences', JSON.stringify(preferences));
+            }
+            
+            // Set consent record cookie
+            document.cookie = `cookie_consent=${consentData.type}; max-age=31536000; path=/; secure; samesite=strict`;
+        }
+        
+        // Legacy function for backwards compatibility
+        function acceptCookies() {
+            acceptAllCookies();
+        }
+
+        // Show cookie notice on page load if not already accepted
+        document.addEventListener('DOMContentLoaded', function() {
+            // Delay showing to avoid interfering with page load
+            setTimeout(checkCookieConsent, 1000);
+        });
+        
+        // Modal close function - uses counter-based scroll management
+        function closeQuickRegistrationModal() {
+            console.log('closeQuickRegistrationModal called');
+            const modal = document.getElementById('quickRegistrationModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+                modal.style.visibility = 'hidden';
+                console.log('Modal hidden successfully');
+            }
+            
+            // Reset modal to form view
+            setTimeout(() => {
+                const formView = document.getElementById('applicationFormView');
+                const thankYouView = document.getElementById('applicationThankYouView');
+                const contactForm = document.getElementById('contactManagerForm');
+                
+                if (formView) formView.classList.remove('hidden');
+                if (thankYouView) thankYouView.classList.add('hidden');
+                if (contactForm) contactForm.reset();
+            }, 300);
+            
+            // Use counter-based scroll unlock - no race conditions
+            window.unlockBodyScroll();
+        }
+        
+        // Make function globally available
+        window.closeQuickRegistrationModal = closeQuickRegistrationModal;
+        
+        // Show thank you view
+        function showThankYouView() {
+            const formView = document.getElementById('applicationFormView');
+            const thankYouView = document.getElementById('applicationThankYouView');
+            
+            if (formView) formView.classList.add('hidden');
+            if (thankYouView) thankYouView.classList.remove('hidden');
+        }
+        
+        // Handle contact manager form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            const contactForm = document.getElementById('contactManagerForm');
+            if (contactForm) {
+                contactForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(this);
+                    const data = Object.fromEntries(formData.entries());
+                    
+                    // Validate required fields
+                    if (!data.name || !data.phone) {
+                        alert('Пожалуйста, заполните имя и телефон');
+                        return;
+                    }
+                    
+                    // Show loading state
+                    const submitBtn = document.getElementById('submitContactBtn');
+                    const submitText = document.getElementById('submitText');
+                    const submitSpinner = document.getElementById('submitSpinner');
+                    
+                    if (submitBtn) submitBtn.disabled = true;
+                    if (submitText) submitText.classList.add('hidden');
+                    if (submitSpinner) submitSpinner.classList.remove('hidden');
+                    
+                    // Submit to API
+                    fetch('/api/contact-manager', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.success) {
+                            // Show thank you view instead of closing immediately
+                            showThankYouView();
+                            contactForm.reset();
+                        } else {
+                            alert(result.error || 'Ошибка при отправке заявки');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Произошла ошибка. Попробуйте позже.');
+                    })
+                    .finally(() => {
+                        // Reset button state (with null checks)
+                        if (submitBtn) submitBtn.disabled = false;
+                        if (submitText) submitText.classList.remove('hidden');
+                        if (submitSpinner) submitSpinner.classList.add('hidden');
+                    });
+                });
+            }
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+
+    <!-- Load balance for authenticated users -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Only load balance if user is authenticated
+        if (window.user_authenticated) {
+            loadBalanceInHeader();
+        }
+    });
+    
+    function loadBalanceInHeader() {
+        fetch('/api/balance')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateHeaderBalance(data.available_amount);
+                }
+            })
+            .catch(error => console.error('Balance load error:', error));
+    }
+    
+    function updateHeaderBalance(amount) {
+        // Ищу элементы с балансом в хедере
+        const balanceElements = document.querySelectorAll('[data-balance-value], .balance-amount, .wallet-balance, [class*="balance"]');
+        
+        // Также проверяю конкретные селекторы
+        const headerBalance = document.querySelector('.header-balance, .user-balance, [id*="balance"]');
+        
+        if (headerBalance) {
+            const display = amount.toFixed(2) + '₽';
+            headerBalance.textContent = display;
+            console.log('✅ Header balance updated:', display);
+        }
+        
+        // Обновляю все элементы с числовым значением
+        balanceElements.forEach(el => {
+            if (el.textContent && el.textContent.includes('₽')) {
+                el.textContent = amount.toFixed(2) + '₽';
+            }
+        });
+    }
+    </script>
+    
+
+<!-- AUTO LOAD BALANCE FOR AUTHENTICATED USERS -->
+<script>
+// Load balance immediately when script runs (not waiting for load event)
+if (window.user_authenticated) {
+    (function loadBalance() {
+        fetch('/api/balance').then(r => r.json()).then(data => {
+            if (data.success && data.available_amount) {
+                const amount = Math.round(parseFloat(data.available_amount)); const display = amount.toLocaleString('ru-RU') + ' ₽';
+                console.log("💰 UPDATING BALANCE TO:", display);
+                
+                const walletSpan = document.querySelector('a[href="/wallet"] span');
+                if (walletSpan) {
+                    walletSpan.textContent = display;
+                    console.log("✅ Updated wallet link span:", display);
+                }
+                
+                document.querySelectorAll('[data-balance-display]').forEach(el => {
+                    el.textContent = display;
+                });
+                
+                const header = document.querySelector('header, nav, .header, #header');
+                if (header) {
+                    header.querySelectorAll('span').forEach(span => {
+                        if (span.textContent.trim() === '0 ₽' || span.textContent.trim() === '0 Р') {
+                            span.textContent = display;
+                        }
+                    });
+                }
+            }
+        }).catch(e => console.log("Balance error:", e));
+    })();
+}
+</script>
+
+</body>
+</html>

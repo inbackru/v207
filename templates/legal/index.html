@@ -1,0 +1,493 @@
+{% extends "base.html" %}
+
+{% block title %}Правовая информация | InBack{% endblock %}
+{% block description %}Политика конфиденциальности, пользовательское соглашение, условия кешбека и другие правовые документы сервиса InBack.{% endblock %}
+
+{% block content %}
+<style>
+.legal-tab-nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.legal-tab-btn {
+    white-space: nowrap;
+    padding: 14px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6b7280;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all .18s;
+    background: none;
+    border-top: none; border-left: none; border-right: none;
+    flex-shrink: 0;
+}
+.legal-tab-btn:hover { color: #0088CC; }
+.legal-tab-btn.active { color: #0088CC; border-bottom-color: #0088CC; font-weight: 600; }
+.legal-section { display: none; }
+.legal-section.active { display: block; }
+.prose h2 { font-size: 1.5rem; font-weight: 700; color: #111827; margin: 2rem 0 1rem; }
+.prose h3 { font-size: 1.15rem; font-weight: 600; color: #1e40af; margin: 1.5rem 0 0.75rem; }
+.prose p { margin-bottom: 1rem; line-height: 1.75; color: #374151; }
+.prose ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
+.prose ul li { margin-bottom: 0.35rem; color: #374151; line-height: 1.65; }
+.prose strong { color: #111827; }
+.prose a { color: #0088CC; text-decoration: underline; }
+.section-counter { counter-reset: section; }
+.section-counter h3::before { counter-increment: section; content: counter(section)". "; color: #0088CC; }
+</style>
+
+<!-- Sticky tab navigation -->
+<div class="legal-tab-nav">
+    <div class="container mx-auto px-4">
+        <div class="flex overflow-x-auto gap-0 hide-scrollbar" style="-webkit-overflow-scrolling:touch;scrollbar-width:none;">
+            <button class="legal-tab-btn active" data-tab="privacy">Политика конфиденциальности</button>
+            <button class="legal-tab-btn" data-tab="user-agreement">Пользовательское соглашение</button>
+            <button class="legal-tab-btn" data-tab="cookies">Политика файлов Cookie</button>
+            <button class="legal-tab-btn" data-tab="consent">Согласие на обработку данных</button>
+            <button class="legal-tab-btn" data-tab="cashback">Условия кэшбека</button>
+            <button class="legal-tab-btn" data-tab="operator">Об операторе</button>
+        </div>
+    </div>
+</div>
+
+<main class="min-h-screen bg-gray-50">
+    <div class="container mx-auto px-4 py-10 max-w-4xl">
+
+        <!-- ─── ПОЛИТИКА КОНФИДЕНЦИАЛЬНОСТИ ─────────────────────────────── -->
+        <div id="tab-privacy" class="legal-section active">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="bg-gradient-to-r from-[#0088CC] to-[#32a4fb] px-8 py-8">
+                    <h1 class="text-2xl font-bold text-white">Политика конфиденциальности InBack</h1>
+                    <p class="text-white/80 mt-1 text-sm">Последнее обновление: 1 декабря 2024 года</p>
+                </div>
+                <div class="px-8 py-8 prose section-counter">
+                    <p>Настоящая Политика объясняет, как мы собираем, используем, раскрываем и защищаем вашу информацию при использовании нашего сервиса кешбека при покупке недвижимости.</p>
+
+                    <h3>Согласие на обработку данных</h3>
+                    <p>Используя сервис InBack, вы соглашаетесь с условиями данной Политики. Если вы не согласны — пожалуйста, не используйте наш сервис. Мы можем периодически обновлять Политику.</p>
+
+                    <h3>Собираемая информация</h3>
+                    <p>Для предоставления услуг кэшбека мы собираем:</p>
+                    <ul>
+                        <li><strong>Персональные данные:</strong> имя, фамилия, отчество, телефон, email, паспортные данные (при необходимости)</li>
+                        <li><strong>Информация о сделке:</strong> ЖК, договор долевого участия или купли-продажи</li>
+                        <li><strong>Техническая информация:</strong> IP-адрес, cookies, браузер и устройство</li>
+                        <li><strong>Финансовая информация:</strong> реквизиты для перевода кешбека (не хранятся на серверах)</li>
+                    </ul>
+
+                    <h3>Как мы используем информацию</h3>
+                    <ul>
+                        <li>Предоставление и персонализация услуг кешбека</li>
+                        <li>Верификация вашей личности и сделки</li>
+                        <li>Уведомления о статусе кешбека</li>
+                        <li>Улучшение качества сервиса и разработка новых функций</li>
+                        <li>Профилактика мошенничества и обеспечение безопасности</li>
+                        <li>Выполнение юридических обязательств</li>
+                    </ul>
+                    <p>Мы не продаём и не передаём ваши данные третьим лицам для маркетинга без вашего явного согласия.</p>
+
+                    <h3>Передача данных третьим лицам</h3>
+                    <ul>
+                        <li><strong>Партнёрам-застройщикам:</strong> для подтверждения факта покупки и расчёта кешбека</li>
+                        <li><strong>Платёжным системам:</strong> исключительно для перевода кешбека</li>
+                        <li><strong>Государственным органам:</strong> при наличии законного требования</li>
+                        <li><strong>Юридическим консультантам:</strong> при необходимости защиты наших интересов</li>
+                    </ul>
+
+                    <h3>Безопасность данных</h3>
+                    <ul>
+                        <li>Шифрование передаваемых данных по протоколу TLS</li>
+                        <li>Регулярное тестирование систем на уязвимости</li>
+                        <li>Ограниченный доступ к персональным данным сотрудников</li>
+                        <li>Регулярное резервное копирование</li>
+                    </ul>
+
+                    <h3>Cookies и аналогичные технологии</h3>
+                    <p>Мы используем cookies для авторизации, персонализации контента, анализа трафика и защиты от спама. Вы можете управлять настройками в браузере.</p>
+
+                    <h3>Ваши права</h3>
+                    <ul>
+                        <li>Получать информацию о целях обработки ваших данных</li>
+                        <li>Требовать уточнения или удаления неточных данных</li>
+                        <li>Отозвать согласие на обработку</li>
+                        <li>Обжаловать действия в отношении ваших данных</li>
+                    </ul>
+                    <p>Обращайтесь: <a href="mailto:privacy@inback.ru">privacy@inback.ru</a></p>
+
+                    <h3>Хранение данных</h3>
+                    <ul>
+                        <li>Не более 3 лет с момента последнего взаимодействия</li>
+                        <li>До истечения срока, установленного законодательством</li>
+                        <li>До отзыва согласия на обработку данных</li>
+                    </ul>
+
+                    <h3>Изменения в Политике</h3>
+                    <p>Мы оставляем за собой право изменять данную Политику. О существенных изменениях уведомим через сайт, email или SMS.</p>
+
+                    <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg mt-6">
+                        <strong class="text-amber-800">Важно:</strong>
+                        <p class="text-amber-700 text-sm mt-1 mb-0">Информация о застройщиках носит справочный характер. Участие в кешбек-программах может отличаться. Актуальные условия уточняйте у консультантов: <a href="tel:+78622666216" class="text-amber-800 font-semibold">8 (862) 266-62-16</a>.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── ПОЛЬЗОВАТЕЛЬСКОЕ СОГЛАШЕНИЕ ───────────────────────────────── -->
+        <div id="tab-user-agreement" class="legal-section">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="bg-gradient-to-r from-[#0088CC] to-[#32a4fb] px-8 py-8">
+                    <h1 class="text-2xl font-bold text-white">Пользовательское соглашение</h1>
+                    <p class="text-white/80 mt-1 text-sm">в редакции от 1 декабря 2024 года</p>
+                </div>
+                <div class="px-8 py-8 prose section-counter">
+                    <p>Настоящее Пользовательское соглашение (далее — Соглашение) регулирует отношения между сервисом InBack и пользователями сайта inback.ru.</p>
+
+                    <h3>Предмет соглашения</h3>
+                    <p>InBack предоставляет пользователям информационный сервис для поиска недвижимости с возможностью получения кэшбека при покупке через партнёрскую программу.</p>
+
+                    <h3>Регистрация и аккаунт</h3>
+                    <ul>
+                        <li>Регистрация осуществляется через номер телефона или социальные сети</li>
+                        <li>Пользователь несёт ответственность за сохранность данных своего аккаунта</li>
+                        <li>Запрещено создавать несколько аккаунтов одним лицом</li>
+                        <li>InBack вправе заблокировать аккаунт при нарушении Соглашения</li>
+                    </ul>
+
+                    <h3>Условия использования сервиса</h3>
+                    <ul>
+                        <li>Сервис предназначен для поиска и сравнения объектов недвижимости</li>
+                        <li>Информация об объектах носит справочный характер</li>
+                        <li>Запрещено использование автоматических средств сбора данных (парсинг)</li>
+                        <li>Запрещена коммерческая перепродажа данных с сайта</li>
+                    </ul>
+
+                    <h3>Ограничение ответственности</h3>
+                    <p>InBack не несёт ответственности за:</p>
+                    <ul>
+                        <li>Достоверность информации, предоставленной застройщиками</li>
+                        <li>Действия третьих лиц (застройщиков, платёжных систем)</li>
+                        <li>Временную недоступность сервиса в связи с техническими работами</li>
+                        <li>Косвенные убытки пользователя</li>
+                    </ul>
+
+                    <h3>Интеллектуальная собственность</h3>
+                    <p>Все материалы сайта (логотип, дизайн, тексты, код) являются собственностью InBack и защищены законом об авторском праве.</p>
+
+                    <h3>Изменение соглашения</h3>
+                    <p>InBack вправе изменять Соглашение в одностороннем порядке. Продолжение использования сервиса после изменений означает согласие с ними.</p>
+
+                    <h3>Применимое право</h3>
+                    <p>Соглашение регулируется законодательством Российской Федерации. Споры рассматриваются в судах по месту нахождения InBack — г. Краснодар.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── ПОЛИТИКА COOKIES ───────────────────────────────────────────── -->
+        <div id="tab-cookies" class="legal-section">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="bg-gradient-to-r from-[#0088CC] to-[#32a4fb] px-8 py-8">
+                    <h1 class="text-2xl font-bold text-white">Политика файлов Cookie</h1>
+                    <p class="text-white/80 mt-1 text-sm">в редакции от 1 декабря 2024 года</p>
+                </div>
+                <div class="px-8 py-8 prose">
+                    <div class="bg-blue-50 border-l-4 border-[#0088CC] p-4 mb-6 rounded-r-lg">
+                        <p class="mb-0">В этой Политике объясняется, как InBack использует файлы Cookie и подобные технологии для идентификации вас при посещении сайта.</p>
+                    </div>
+
+                    <h2>Что такое Cookie?</h2>
+                    <p>Файлы cookie — небольшие файлы данных, размещаемые на вашем устройстве при посещении сайта. Они широко используются для обеспечения работы сайтов и улучшения взаимодействия с пользователями.</p>
+
+                    <h2>Какие Cookie мы используем?</h2>
+                    <div class="grid gap-4 not-prose mb-6">
+                        <div class="bg-gray-50 rounded-xl p-5 border border-gray-100">
+                            <div class="flex items-center gap-3 mb-3">
+                                <span class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                </span>
+                                <h3 class="font-semibold text-gray-900 m-0">Строго необходимые Cookie</h3>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-2">Необходимы для функционирования сайта, не могут быть отключены.</p>
+                            <ul class="list-disc pl-5 text-sm text-gray-600 space-y-1 m-0">
+                                <li>Сессия пользователя</li><li>Запись согласия на Cookie</li><li>Защита от CSRF-атак</li>
+                            </ul>
+                        </div>
+                        <div class="bg-gray-50 rounded-xl p-5 border border-gray-100">
+                            <div class="flex items-center gap-3 mb-3">
+                                <span class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                                </span>
+                                <h3 class="font-semibold text-gray-900 m-0">Аналитические Cookie</h3>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-2">Позволяют улучшать производительность сайта.</p>
+                            <ul class="list-disc pl-5 text-sm text-gray-600 space-y-1 m-0">
+                                <li>Яндекс.Метрика</li><li>Google Analytics</li>
+                            </ul>
+                        </div>
+                        <div class="bg-gray-50 rounded-xl p-5 border border-gray-100">
+                            <div class="flex items-center gap-3 mb-3">
+                                <span class="w-8 h-8 bg-[#0088CC]/20 rounded-full flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                </span>
+                                <h3 class="font-semibold text-gray-900 m-0">Функциональные Cookie</h3>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-2">Запоминают ваш выбор (город, параметры поиска).</p>
+                            <ul class="list-disc pl-5 text-sm text-gray-600 space-y-1 m-0">
+                                <li>Выбранный город</li><li>Параметры поиска</li><li>Избранные объекты</li>
+                            </ul>
+                        </div>
+                        <div class="bg-gray-50 rounded-xl p-5 border border-gray-100">
+                            <div class="flex items-center gap-3 mb-3">
+                                <span class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
+                                </span>
+                                <h3 class="font-semibold text-gray-900 m-0">Маркетинговые Cookie</h3>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-2">Установлены рекламными партнёрами.</p>
+                            <ul class="list-disc pl-5 text-sm text-gray-600 space-y-1 m-0">
+                                <li>Яндекс.Директ</li><li>VK Реклама</li><li>MyTarget</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h2>Как управлять Cookie?</h2>
+                    <ul>
+                        <li><strong>Баннер Cookie</strong> — при первом посещении вы можете выбрать категории cookie</li>
+                        <li><strong>Настройки браузера</strong> — вы можете заблокировать или удалить cookie в настройках</li>
+                        <li><strong>Отказ от рекламы</strong> — через <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener">aboutads.info/choices</a></li>
+                    </ul>
+
+                    <h2>Срок хранения Cookie</h2>
+                    <ul>
+                        <li><strong>Сессионные cookie</strong> — удаляются при закрытии браузера</li>
+                        <li><strong>Постоянные cookie</strong> — хранятся до 1 года</li>
+                    </ul>
+                    <p>По вопросам: <a href="mailto:privacy@inback.ru">privacy@inback.ru</a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── СОГЛАСИЕ НА ОБРАБОТКУ ДАННЫХ ─────────────────────────────── -->
+        <div id="tab-consent" class="legal-section">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="bg-gradient-to-r from-[#0088CC] to-[#32a4fb] px-8 py-8">
+                    <h1 class="text-2xl font-bold text-white">Согласие на обработку персональных данных</h1>
+                    <p class="text-white/80 mt-1 text-sm">в редакции от 1 декабря 2024 года</p>
+                </div>
+                <div class="px-8 py-8 prose section-counter">
+                    <div class="bg-blue-50 border-l-4 border-[#0088CC] p-4 mb-6 rounded-r-lg">
+                        <p class="mb-0">Мы обязуемся использовать ваши данные исключительно для обработки возврата кешбека за покупку недвижимости и не передавать их третьим лицам.</p>
+                    </div>
+
+                    <h3>Какие данные мы собираем</h3>
+                    <ul>
+                        <li>Фамилия, имя и отчество</li>
+                        <li>Контактный телефон</li>
+                        <li>Адрес электронной почты</li>
+                        <li>Данные о покупке недвижимости (ЖК, договор, стоимость)</li>
+                        <li>Паспортные данные (при необходимости для выплаты кешбека)</li>
+                    </ul>
+
+                    <h3>Как мы используем данные</h3>
+                    <ul>
+                        <li>Оформление и выплата кешбека</li>
+                        <li>Связь с вами по вопросам выплаты</li>
+                        <li>Улучшение качества нашего сервиса</li>
+                        <li>Отправка информации о специальных предложениях (только с вашего согласия)</li>
+                    </ul>
+
+                    <h3>Правовое основание обработки</h3>
+                    <p>Обработка осуществляется на основании:</p>
+                    <ul>
+                        <li>Федерального закона № 152-ФЗ «О персональных данных»</li>
+                        <li>Вашего явного согласия (данного при регистрации или оформлении заявки)</li>
+                        <li>Договора об оказании услуг кешбека</li>
+                    </ul>
+
+                    <h3>Защита данных</h3>
+                    <ul>
+                        <li>Шифрование передаваемых данных (TLS)</li>
+                        <li>Регулярное обновление систем безопасности</li>
+                        <li>Ограниченный доступ к персональным данным</li>
+                        <li>Регулярное резервное копирование</li>
+                    </ul>
+
+                    <h3>Ваши права</h3>
+                    <ul>
+                        <li>Доступ к своим персональным данным</li>
+                        <li>Исправление неточных данных</li>
+                        <li>Удаление персональных данных (при соблюдении требований закона)</li>
+                        <li>Отзыв согласия на обработку</li>
+                        <li>Обжалование действий оператора в Роскомнадзоре</li>
+                    </ul>
+
+                    <h3>Срок обработки</h3>
+                    <p>Данные хранятся в течение 3 лет с момента последнего взаимодействия или до отзыва согласия, в зависимости от того, что наступит раньше.</p>
+
+                    <h3>Контакты оператора</h3>
+                    <div class="bg-gray-50 p-4 rounded-lg not-prose">
+                        <div class="space-y-1 text-sm">
+                            <p><strong>Email:</strong> <a href="mailto:privacy@inback.ru" class="text-[#0088CC]">privacy@inback.ru</a></p>
+                            <p><strong>Телефон:</strong> <a href="tel:+78622666216" class="text-[#0088CC]">8 (862) 266-62-16</a></p>
+                            <p><strong>Адрес:</strong> 350000, г. Краснодар, ул. Красная, д. 176</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── УСЛОВИЯ КЕШБЕКА ────────────────────────────────────────────── -->
+        <div id="tab-cashback" class="legal-section">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="bg-gradient-to-r from-[#0088CC] to-[#32a4fb] px-8 py-8">
+                    <h1 class="text-2xl font-bold text-white">Условия получения кэшбека</h1>
+                    <p class="text-white/80 mt-1 text-sm">Актуальные условия программы InBack</p>
+                </div>
+                <div class="px-8 py-8 prose section-counter">
+                    <div class="grid grid-cols-3 gap-4 not-prose mb-8">
+                        <div class="bg-green-50 rounded-xl p-5 text-center border border-green-100">
+                            <div class="text-3xl font-black text-green-600 mb-1">до 5%</div>
+                            <div class="text-xs text-gray-500">от стоимости квартиры</div>
+                        </div>
+                        <div class="bg-blue-50 rounded-xl p-5 text-center border border-blue-100">
+                            <div class="text-3xl font-black text-[#0088CC] mb-1">до 500 000 ₽</div>
+                            <div class="text-xs text-gray-500">максимальный кешбек</div>
+                        </div>
+                        <div class="bg-purple-50 rounded-xl p-5 text-center border border-purple-100">
+                            <div class="text-3xl font-black text-purple-600 mb-1">30 дней</div>
+                            <div class="text-xs text-gray-500">срок выплаты после регистрации</div>
+                        </div>
+                    </div>
+
+                    <h3>Кто может получить кешбек</h3>
+                    <ul>
+                        <li>Физическое лицо, приобретающее жильё впервые через InBack</li>
+                        <li>Покупка должна быть зарегистрирована через сервис (до подписания договора)</li>
+                        <li>Объект — новостройка от аккредитованного застройщика-партнёра</li>
+                        <li>Покупатель не является сотрудником застройщика или InBack</li>
+                    </ul>
+
+                    <h3>Условия получения</h3>
+                    <ul>
+                        <li>Заявка подаётся <strong>до</strong> подписания договора купли-продажи</li>
+                        <li>Первый контакт с застройщиком — через InBack или с согласия InBack</li>
+                        <li>Сделка подтверждена документально (ДДУ, договор, выписка ЕГРН)</li>
+                        <li>Денежные средства переведены застройщику в полном объёме</li>
+                    </ul>
+
+                    <h3>Порядок выплаты</h3>
+                    <ul>
+                        <li>Подача заявки через личный кабинет или менеджера</li>
+                        <li>Подтверждение факта сделки (5–10 рабочих дней)</li>
+                        <li>Выплата на банковскую карту или счёт</li>
+                        <li>Срок выплаты — до 30 дней с момента подтверждения сделки</li>
+                    </ul>
+
+                    <h3>Размер кешбека</h3>
+                    <p>Размер определяется партнёрским договором с застройщиком и может варьироваться. Базовый размер — <strong>3–5% от стоимости квартиры</strong>, но не более 500 000 ₽.</p>
+
+                    <h3>Ограничения</h3>
+                    <ul>
+                        <li>Кешбек не начисляется при самостоятельном обращении к застройщику</li>
+                        <li>Не распространяется на объекты вторичного рынка</li>
+                        <li>Не суммируется с другими скидками или акциями застройщика, если иное не оговорено</li>
+                        <li>InBack вправе отказать в выплате при предоставлении недостоверных данных</li>
+                    </ul>
+
+                    <div class="bg-[#0088CC]/5 border border-[#0088CC]/20 rounded-xl p-5 not-prose mt-6">
+                        <p class="text-sm text-gray-700 m-0">Полные условия программы уточняйте у менеджеров: <a href="tel:+78622666216" class="text-[#0088CC] font-semibold">8 (862) 266-62-16</a> или <a href="mailto:info@inback.ru" class="text-[#0088CC]">info@inback.ru</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── ОБ ОПЕРАТОРЕ ──────────────────────────────────────────────── -->
+        <div id="tab-operator" class="legal-section">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="bg-gradient-to-r from-[#0088CC] to-[#32a4fb] px-8 py-8">
+                    <h1 class="text-2xl font-bold text-white">Об операторе персональных данных</h1>
+                    <p class="text-white/80 mt-1 text-sm">Реквизиты и контакты</p>
+                </div>
+                <div class="px-8 py-8">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-gray-50 rounded-xl p-6 border border-gray-100">
+                            <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                                Юридическая информация
+                            </h3>
+                            <div class="space-y-3 text-sm text-gray-700">
+                                <div><span class="font-medium text-gray-500">Наименование:</span><br>Сервис InBack</div>
+                                <div><span class="font-medium text-gray-500">Адрес:</span><br>350000, Краснодарский край, г. Краснодар, ул. Красная, д. 176</div>
+                                <div><span class="font-medium text-gray-500">Реестр РКН:</span><br>Регистрация оператора ПД</div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 rounded-xl p-6 border border-gray-100">
+                            <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                Контакты
+                            </h3>
+                            <div class="space-y-3 text-sm">
+                                <div><span class="text-gray-500">Email (общий):</span><br><a href="mailto:info@inback.ru" class="text-[#0088CC] hover:underline">info@inback.ru</a></div>
+                                <div><span class="text-gray-500">Email (персданные):</span><br><a href="mailto:privacy@inback.ru" class="text-[#0088CC] hover:underline">privacy@inback.ru</a></div>
+                                <div><span class="text-gray-500">Email (юридический):</span><br><a href="mailto:legal@inback.ru" class="text-[#0088CC] hover:underline">legal@inback.ru</a></div>
+                                <div><span class="text-gray-500">Телефон:</span><br><a href="tel:+78622666216" class="text-[#0088CC] hover:underline font-semibold">8 (862) 266-62-16</a></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 bg-blue-50 rounded-xl p-6 border border-blue-100">
+                        <h3 class="font-bold text-gray-900 mb-3">Все правовые документы</h3>
+                        <div class="grid sm:grid-cols-2 gap-3">
+                            {% for label, tab in [('Политика конфиденциальности','privacy'),('Пользовательское соглашение','user-agreement'),('Политика файлов Cookie','cookies'),('Согласие на обработку ПД','consent'),('Условия кэшбека','cashback')] %}
+                            <button onclick="switchTab('{{ tab }}')" class="flex items-center gap-2 text-sm text-[#0088CC] hover:underline text-left">
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                {{ label }}
+                            </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<style>
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+
+<script>
+const TAB_MAP = {
+    'privacy': 'tab-privacy',
+    'user-agreement': 'tab-user-agreement',
+    'cookies': 'tab-cookies',
+    'consent': 'tab-consent',
+    'cashback': 'tab-cashback',
+    'operator': 'tab-operator'
+};
+
+function switchTab(tab) {
+    document.querySelectorAll('.legal-tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.legal-section').forEach(s => s.classList.remove('active'));
+    const btn = document.querySelector(`[data-tab="${tab}"]`);
+    const section = document.getElementById(TAB_MAP[tab]);
+    if (btn) btn.classList.add('active');
+    if (section) section.classList.add('active');
+    btn && btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    history.replaceState(null, '', window.location.pathname + '?tab=' + tab);
+}
+
+document.querySelectorAll('.legal-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+
+const urlTab = new URLSearchParams(window.location.search).get('tab');
+if (urlTab && TAB_MAP[urlTab]) switchTab(urlTab);
+</script>
+{% endblock %}

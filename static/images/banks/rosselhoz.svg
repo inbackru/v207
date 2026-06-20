@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80">
+  <rect width="200" height="80" fill="white" rx="8"/>
+  <circle cx="40" cy="40" r="22" fill="#006D38"/>
+  <path d="M30 42 C30 32 40 24 40 24 C40 24 50 32 50 42" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <ellipse cx="40" cy="46" rx="10" ry="6" fill="none" stroke="white" stroke-width="1.5"/>
+  <line x1="40" y1="34" x2="40" y2="50" stroke="white" stroke-width="1.5"/>
+  <text x="72" y="30" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#006D38">Россельхоз</text>
+  <text x="72" y="48" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#006D38">Банк</text>
+</svg>

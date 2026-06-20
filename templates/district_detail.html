@@ -1,0 +1,1990 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Район {{ district_name }} - Новостройки и кэшбек | InBack</title>
+    <meta name="description" content="Новостройки в районе {{ district_name }} {{ (current_city.name_genitive or current_city.name) if current_city else 'Краснодара' }} с кэшбеком до 5%. Инфраструктура, карта района, транспорт и лучшие предложения от застройщиков.">
+    <meta name="keywords" content="новостройки {{ district_name }}, жилая недвижимость {{ district_name }}, кэшбек за квартиру, район {{ district_name }} {{ current_city.name if current_city else 'Краснодар' }}, инфраструктура района">
+    <meta name="robots" content="index, follow">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon.png"/>
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon.png"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/images/icons/icon-192x192.png"/>
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="{{ url_for('districts.district_detail', district=district, _external=True) }}">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url_for('districts.district_detail', district=district, _external=True) }}">
+    <meta property="og:title" content="Район {{ district_name }} - Новостройки с кэшбеком | InBack">
+    <meta property="og:description" content="Новостройки в районе {{ district_name }} {{ (current_city.name_genitive or current_city.name) if current_city else 'Краснодара' }} с кэшбеком до 500 000 ₽. Цены, инфраструктура, карта и лучшие предложения.">
+    <meta property="og:image" content="{{ url_for('static', filename='images/districts/' + district + '.jpg', _external=True) }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="ru_RU">
+    <meta property="og:site_name" content="InBack">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="{{ url_for('districts.district_detail', district=district, _external=True) }}">
+    <meta name="twitter:title" content="Район {{ district_name }} - Новостройки с кэшбеком | InBack">
+    <meta name="twitter:description" content="Новостройки в районе {{ district_name }} {{ (current_city.name_genitive or current_city.name) if current_city else 'Краснодара' }} с кэшбеком до 500 000 ₽. Цены, инфраструктура, карта и лучшие предложения.">
+    <meta name="twitter:image" content="{{ url_for('static', filename='images/districts/' + district + '.jpg', _external=True) }}">
+    
+    <!-- Structured Data JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Главная",
+              "item": "{{ url_for('index', _external=True) }}"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Районы",
+              "item": "{{ url_for('districts', _external=True) }}"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "{{ district_name }}",
+              "item": "{{ url_for('districts.district_detail', district=district, _external=True) }}"
+            }
+          ]
+        },
+        {
+          "@type": "WebPage",
+          "name": "Район {{ district_name }} - Новостройки с кэшбеком",
+          "description": "Новостройки в районе {{ district_name }} {{ (current_city.name_genitive or current_city.name) if current_city else 'Краснодара' }} с кэшбеком до 500 000 ₽",
+          "url": "{{ url_for('districts.district_detail', district=district, _external=True) }}",
+          "inLanguage": "ru-RU",
+          "publisher": {"@id": "https://inback.ru/#organization"}
+        },
+        {
+          "@type": "Place",
+          "name": "Район {{ district_name }}",
+          "description": "Новостройки в районе {{ district_name }} {{ (current_city.name_genitive or current_city.name) if current_city else 'Краснодара' }} с кэшбеком до 500 000 ₽",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "{{ district_name }}",
+            "addressRegion": "{{ current_city.name if current_city else 'Краснодар' }}",
+            "addressCountry": "RU"
+          },
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": "{{ '%.6f'|format(district_data.latitude or 45.035) }}",
+            "longitude": "{{ '%.6f'|format(district_data.longitude or 38.975) }}"
+          },
+          "url": "{{ url_for('districts.district_detail', district=district, _external=True) }}"
+        }
+      ]
+    }
+    </script>
+    <!-- Global Organization + WebSite schema (mirrors base.html for standalone page) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": ["Organization", "LocalBusiness", "RealEstateAgent"],
+          "@id": "https://inback.ru/#organization",
+          "name": "InBack",
+          "alternateName": "Clickback",
+          "url": "https://inback.ru",
+          "logo": {"@type": "ImageObject", "url": "https://inback.ru/static/images/logo.png"},
+          "sameAs": ["https://t.me/inbackru"],
+          "address": {"@type": "PostalAddress", "addressLocality": "Краснодар", "addressRegion": "Краснодарский край", "addressCountry": "RU"},
+          "areaServed": "Краснодарский край",
+          "description": "Кэшбек-сервис при покупке новостроек. До 500 000 ₽ реальными деньгами."
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://inback.ru/#website",
+          "url": "https://inback.ru",
+          "name": "InBack.ru",
+          "inLanguage": "ru-RU",
+          "publisher": {"@id": "https://inback.ru/#organization"},
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": {"@type": "EntryPoint", "urlTemplate": "https://inback.ru/search?q={search_term_string}"},
+            "query-input": "required name=search_term_string"
+          }
+        }
+      ]
+    }
+    </script>
+    <!-- Resource hints -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="//cdn.tailwindcss.com">
+    <link rel="dns-prefetch" href="//mc.yandex.ru">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ton: {
+                            blue: '#0088cc',
+                            dark: '#222426',
+                            light: '#f5f5f5',
+                            accent: '#00a3e0',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Manrope', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Yandex Maps API с API ключом -->
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey={{ yandex_api_key }}" type="text/javascript"></script>
+    
+    <!-- Наша система карт с полигонами -->
+    <script src="{{ url_for('static', filename='js/yandex_maps.js') }}?v=20250927"></script>
+    <script src="{{ url_for('static', filename='js/district_maps_enhanced.js') }}?v=20250927"></script>
+    <style>
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 136, 204, 0.15);
+            transition: all 0.3s ease;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #0088CC 0%, #006699 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .dropdown-btn {
+            background: transparent;
+            border: none;
+            color: #141A24;
+            font-weight: 500;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        
+        .dropdown-btn:hover {
+            background: rgba(0, 136, 204, 0.1);
+        }
+        
+        .dropdown-btn svg {
+            width: 16px;
+            height: 16px;
+            transition: transform 0.2s;
+        }
+        
+        .dropdown-btn.open svg {
+            transform: rotate(180deg);
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+            padding: 0.5rem 0;
+            min-width: 200px;
+            z-index: 50;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease-out;
+            pointer-events: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .dropdown-menu.open,
+        .group:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .dropdown-item {
+            padding: 0.5rem 1rem;
+            color: #141A24;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+        
+        .dropdown-item:hover {
+            background: rgba(0, 136, 204, 0.1);
+            color: #0088CC;
+        }
+        
+        .dropdown-item svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .gallery-container {
+            scrollbar-width: thin;
+            scrollbar-color: #0088cc #f1f1f1;
+        }
+        
+        .gallery-container::-webkit-scrollbar {
+            height: 8px;
+        }
+        
+        .gallery-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .gallery-container::-webkit-scrollbar-thumb {
+            background: #0088cc;
+            border-radius: 10px;
+        }
+
+        /* Map Styles */
+        #district-map {
+            height: 400px;
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+        }
+
+        .map-container {
+            position: relative;
+            height: 400px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 136, 204, 0.15);
+            z-index: 1;
+        }
+
+        .map-overlay {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            max-width: 280px;
+        }
+
+        .map-overlay h3 {
+            margin: 0 0 8px 0;
+            color: #0088CC;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .map-overlay p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Infrastructure Filter Styles */
+        .infrastructure-filter {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            z-index: 1010;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .filter-toggle-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: none;
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .filter-toggle-btn:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .filter-chevron {
+            transition: transform 0.2s ease;
+            font-size: 12px;
+        }
+
+        .filter-toggle-btn.active .filter-chevron {
+            transform: rotate(180deg);
+        }
+
+        .filter-panel {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            padding: 16px;
+            min-width: 240px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+        }
+
+        .filter-panel.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .filter-categories {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .filter-category {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .filter-category:hover {
+            background-color: rgba(248, 250, 252, 0.8);
+        }
+
+        .filter-category input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #0088CC;
+            cursor: pointer;
+        }
+
+        .filter-icon {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .filter-category input[type="checkbox"]:checked + .filter-icon {
+            filter: grayscale(0);
+        }
+
+        .filter-category input[type="checkbox"]:not(:checked) + .filter-icon {
+            filter: grayscale(1);
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    {% include 'header.html' %}
+
+    <!-- Hero Section with 3D Element -->
+    <section class="py-12 md:py-20 bg-gradient-to-b from-white to-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+                <!-- Left Content -->
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold mb-6 text-gray-900">Район {{ district_name }}</h1>
+                    <p class="text-xl mb-8 text-gray-600">Купить квартиру в районе {{ district_name }} {{ (current_city.name_genitive or current_city.name) if current_city else 'Краснодара' }} с кэшбеком до 5%. Проверенные застройщики, развитая инфраструктура района, удобная транспортная доступность. Новостройки с максимальными выгодами для покупателей.</p>
+                    
+                    {% if district_data.distance_to_center %}
+                    <div class="flex items-center justify-start space-x-4 mb-6">
+                        <div class="bg-gray-200 px-4 py-2 rounded-lg border border-gray-400">
+                            <div class="flex items-center text-gray-600">
+                                <i class="fas fa-map-marker-alt mr-2"></i>
+                                <span class="font-semibold">{{ "%.1f"|format(district_data.distance_to_center) }} км</span>
+                                <span class="text-sm text-gray-500 ml-2">до центра</span>
+                            </div>
+                        </div>
+                        
+                        {% if district_data.infrastructure_data %}
+                        <div class="bg-gray-200 px-3 py-2 rounded-lg border border-gray-400">
+                            <div class="flex items-center text-gray-600">
+                                <i class="fas fa-hospital mr-2 text-sm"></i>
+                                <span class="font-semibold">{{ district_data.infrastructure_data.get('medical_count', 0) }}</span>
+                                <span class="text-sm text-gray-500 ml-1">медицина</span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-200 px-3 py-2 rounded-lg border border-gray-400">
+                            <div class="flex items-center text-gray-600">
+                                <i class="fas fa-graduation-cap mr-2 text-sm"></i>
+                                <span class="font-semibold">{{ district_data.infrastructure_data.get('education_count', 0) }}</span>
+                                <span class="text-sm text-gray-500 ml-1">образование</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    <div class="flex flex-wrap gap-3">
+                        <a href="/{{ (current_city.slug if current_city else 'krasnodar') }}/novostrojki?districts={{ district }}" class="inline-flex items-center px-6 py-3 bg-gray-100 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 transform hover:scale-[1.02] font-medium text-center">
+                            <i class="fas fa-search mr-2"></i>
+                            Найти квартиру
+                        </a>
+                        <button onclick="openApplicationModal()" class="inline-flex items-center px-6 py-3 bg-gray-100 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 transform hover:scale-[1.02] font-medium text-center">
+                            <i class="fas fa-comments mr-2"></i>
+                            Получить консультацию
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Interactive District Map -->
+                <div class="flex justify-center lg:justify-end">
+                    <div class="w-full max-w-lg">
+                        
+                        <div class="map-container">
+                            <div id="district-map"></div>
+                            
+                            <!-- Infrastructure Filter Overlay -->
+                            <div class="infrastructure-filter">
+                                <div class="filter-header">
+                                    <button id="infrastructure-toggle" class="filter-toggle-btn">
+                                        <i class="fas fa-filter"></i>
+                                        <span>Инфраструктура</span>
+                                        <i class="fas fa-chevron-down filter-chevron"></i>
+                                    </button>
+                                </div>
+                                <div id="infrastructure-panel" class="filter-panel">
+                                    <div class="filter-categories">
+                                        <label class="filter-category">
+                                            <input type="checkbox" class="infrastructure-filter" data-category="medical" checked>
+                                            <span class="filter-icon medical">🏥</span>
+                                            <span>Медицина</span>
+                                        </label>
+                                        <label class="filter-category">
+                                            <input type="checkbox" class="infrastructure-filter" data-category="education" checked>
+                                            <span class="filter-icon education">🎓</span>
+                                            <span>Образование</span>
+                                        </label>
+                                        <label class="filter-category">
+                                            <input type="checkbox" class="infrastructure-filter" data-category="transport" checked>
+                                            <span class="filter-icon transport">🚌</span>
+                                            <span>Транспорт</span>
+                                        </label>
+                                        <label class="filter-category">
+                                            <input type="checkbox" class="infrastructure-filter" data-category="shopping" checked>
+                                            <span class="filter-icon shopping">🛒</span>
+                                            <span>Магазины</span>
+                                        </label>
+                                        <label class="filter-category">
+                                            <input type="checkbox" class="infrastructure-filter" data-category="leisure" checked>
+                                            <span class="filter-icon leisure">🎯</span>
+                                            <span>Развлечения</span>
+                                        </label>
+                                        <label class="filter-category">
+                                            <input type="checkbox" class="infrastructure-filter" data-category="finance" checked>
+                                            <span class="filter-icon finance">🏦</span>
+                                            <span>Финансы</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="map-overlay">
+                                <h3>{{ district_name }}</h3>
+                                <p>📍 {{ current_city.name if current_city else 'Краснодар' }}, Россия</p>
+                                <p class="text-xs mt-2 text-gray-500">Карта района с основными объектами</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Легенда карты -->
+                        <div class="mt-4 p-3 bg-white rounded-lg shadow-sm border border-gray-200">
+                            <h4 class="text-sm font-semibold text-gray-700 mb-2">🗺️ Точки на карте</h4>
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <div class="flex items-center">
+                                    <div class="w-2 h-2 rounded-full bg-red-500 mr-2"></div>
+                                    <span>Медицина</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-2 h-2 rounded-full bg-blue-500 mr-2"></div>
+                                    <span>Образование</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
+                                    <span>Магазины</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-2 h-2 rounded-full bg-purple-500 mr-2"></div>
+                                    <span>Транспорт</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-2 h-2 rounded-full bg-orange-500 mr-2"></div>
+                                    <span>Финансы</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-2 h-2 rounded-full bg-teal-500 mr-2"></div>
+                                    <span>Отдых</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-2 h-2 rounded-full bg-yellow-600 mr-2"></div>
+                                    <span>Спорт</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-2 h-2 rounded-full bg-blue-600 mr-2"></div>
+                                    <span>Улицы</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Breadcrumbs -->
+    <div class="container mx-auto px-4 py-3 text-sm">
+        <nav aria-label="Breadcrumb" class="flex">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <li class="inline-flex items-center">
+                    <a class="text-[#0088CC] hover:underline inline-flex items-center" href="{{ url_for('index') }}">
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewbox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
+                        Главная
+                    </a>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewbox="0 0 20 20"><path clip-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" fill-rule="evenodd"></path></svg>
+                        <a class="text-[#0088CC] hover:underline ml-1 md:ml-2" href="/{{ current_city.slug if current_city else 'krasnodar' }}/novostrojki">Новостройки {{ current_city.name if current_city else 'Краснодара' }}</a>
+                    </div>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewbox="0 0 20 20"><path clip-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" fill-rule="evenodd"></path></svg>
+                        <a class="text-[#0088CC] hover:underline ml-1 md:ml-2" href="/{{ current_city.slug if current_city else 'krasnodar' }}/districts">Районы</a>
+                    </div>
+                </li>
+                <li aria-current="page">
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewbox="0 0 20 20"><path clip-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" fill-rule="evenodd"></path></svg>
+                        <span class="text-gray-500 ml-1 md:ml-2">{{ district_name }}</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        {% if empty_state %}
+        <!-- Empty State (no data for this city) -->
+        <div class="bg-white rounded-lg shadow-sm p-16 text-center">
+            <div class="text-gray-400 text-6xl mb-4">🏗️</div>
+            <h1 class="text-2xl font-semibold text-gray-600 mb-3">Данные пока не заполнены</h1>
+            <p class="text-gray-500 mb-6 max-w-lg mx-auto">
+                Справочник районов для {{ (current_city.name_genitive or current_city.name) if current_city else 'этого города' }} находится в разработке.<br>
+                Скоро здесь появится полная информация о районах с новостройками.
+            </p>
+            <a href="/{{ (current_city.slug if current_city else 'krasnodar') }}/novostrojki?districts={{ district }}" 
+               class="inline-flex items-center px-6 py-3 bg-[#0088CC] text-white font-medium rounded-lg hover:bg-[#006699] transition-colors">
+                Смотреть все новостройки
+                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+        {% else %}
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Sidebar -->
+            <div class="lg:w-1/4">
+                <div class="bg-white rounded-lg shadow-md p-6 sticky top-4">
+                    <h2 class="text-xl font-bold mb-4 text-gray-800">Другие районы</h2>
+                    <div class="space-y-2 max-h-96 overflow-y-auto">
+                        {% if city_districts %}
+                        {% for d in city_districts %}
+                        <a href="/{{ city_slug }}/rayon/{{ d.slug }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == d.slug %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            {{ d.name }}
+                        </a>
+                        {% endfor %}
+                        {% else %}
+                        <a href="{{ url_for('districts.district_detail', district='krasnaya-ploshchad') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'krasnaya-ploshchad' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Красная площадь
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='9i-kilometr') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == '9i-kilometr' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            9-й километр
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='40-let-pobedy') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == '40-let-pobedy' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            40 лет Победы
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='aviagorodok') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'aviagorodok' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Авиагородок
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='avrora') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'avrora' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Аврора
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='basket-hall') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'basket-hall' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Баскет-холл
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='berezovy') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'berezovy' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Березовый
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='cheremushki') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'cheremushki' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Черемушки
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='dubinka') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'dubinka' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Дубинка
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='enka') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'enka' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Энка
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='festivalny') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'festivalny' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Фестивальный
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='gidrostroitelei') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'gidrostroitelei' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Гидростроителей
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='gorkhutor') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'gorkhutor' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Горхутор
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='hbk') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'hbk' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            ХБК
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='kalinino') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'kalinino' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Калинино
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='karasunsky') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'karasunsky' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Карасунский
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='kkb') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'kkb' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            ККБ
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='kolosistiy') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'kolosistiy' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Колосистый
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='komsomolsky') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'komsomolsky' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Комсомольский
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='kozhzavod') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'kozhzavod' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Кожзавод
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='krasnodarskiy') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'krasnodarskiy' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Краснодарский
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='ksk') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'ksk' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            КСК
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='kubansky') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'kubansky' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Кубанский
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='mkg') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'mkg' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            МКГ
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='molodezhny') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'molodezhny' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Молодежный
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='muzykalny-mkr') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'muzykalny-mkr' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Музыкальный микрорайон
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='nemetskaya-derevnya') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'nemetskaya-derevnya' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Немецкая деревня
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='novoznamenskiy') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'novoznamenskiy' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Новознаменский
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='panorama') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'panorama' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Панорама
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='pashkovskiy') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'pashkovskiy' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Пашковский
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='pashkovsky') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'pashkovsky' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Пашковский (2)
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='pokrovka') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'pokrovka' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Покровка
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='prikubansky') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'prikubansky' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Прикубанский
+                        </a>
+                        <!-- Новые районы -->
+                        <a href="{{ url_for('districts.district_detail', district='tsentralnyy') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'tsentralnyy' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Центральный
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='uchhoz-kuban') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'uchhoz-kuban' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Учхоз Кубань
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='vavilova') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'vavilova' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Вавилова
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='votochno-kruglikovskii') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'votochno-kruglikovskii' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Восточно-Кругликовский
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='yablonovskiy') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'yablonovskiy' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Яблоновский
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='zapadny') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'zapadny' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Западный
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='zapadny-obhod') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'zapadny-obhod' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Западный обход
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='zapadny-okrug') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'zapadny-okrug' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Западный округ
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='zip-zhukova') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'zip-zhukova' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            ЗИП Жукова
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='shmr') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'shmr' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            ШМРП
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='skhi') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'skhi' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            СХИП
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='slavyansky') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'slavyansky' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Славянский
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='slavyansky2') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'slavyansky2' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Славянский 2
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='solnechny') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'solnechny' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Солнечный
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='tabachnaya-fabrika') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'tabachnaya-fabrika' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            Табачная фабрика
+                        </a>
+                        <a href="{{ url_for('districts.district_detail', district='tec') }}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors {% if district == 'tec' %}bg-ton-light text-ton-blue font-semibold{% endif %}">
+                            ТЭЦ
+                        </a>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mt-6 p-4 bg-ton-light rounded-lg">
+                        <h3 class="font-semibold text-ton-blue mb-2">Нужна помощь?</h3>
+                        <p class="text-sm text-gray-600 mb-3">Поможем выбрать лучшую новостройку</p>
+                        <button onclick="openApplicationModal()" class="w-full bg-ton-blue text-white py-2 px-4 rounded-lg text-sm font-semibold hover:bg-ton-accent transition-colors">
+                            Получить консультацию
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="lg:w-3/4">
+                <!-- Featured District Info -->
+                <section class="bg-white rounded-lg shadow-md overflow-hidden mb-8 card-hover">
+                    <div class="md:flex">
+                        <div class="md:w-1/3">
+                            <div class="h-64 md:h-full bg-gradient-to-br from-ton-blue to-ton-accent relative">
+                                <div class="absolute inset-0 bg-black opacity-20"></div>
+                                <div class="absolute bottom-4 left-4 text-white">
+                                    <div class="flex items-center mb-1">
+                                        <i class="fas fa-map-marker-alt text-white mr-2 text-lg"></i>
+                                        <h2 class="text-2xl font-bold">{{ district_name }}</h2>
+                                    </div>
+                                    <p class="text-sm opacity-90 ml-6">{{ current_city.name if current_city else 'Краснодар' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6 md:w-2/3">
+                            <div class="flex justify-between items-start mb-4">
+                                <h2 class="text-2xl font-bold text-gray-800">Район {{ district_name }}</h2>
+                                <span class="bg-ton-light text-ton-blue text-xs font-semibold px-2.5 py-0.5 rounded">{{ current_city.name if current_city else 'Краснодар' }}</span>
+                            </div>
+                            
+                            <p class="text-gray-600 mb-4">
+                                {% if district_data.seo_description %}
+                                    {{ district_data.seo_description }}
+                                {% else %}
+                                    Развивающийся район {{ current_city.name if current_city else 'Краснодара' }} с хорошими перспективами для покупки недвижимости. Качественные новостройки, развитая инфраструктура, удобная транспортная доступность.
+                                {% endif %}
+                            </p>
+
+                            <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg mb-4">
+                                <div class="flex items-center justify-center">
+                                    <i class="fas fa-percent text-ton-blue mr-2 text-lg"></i>
+                                    <span class="text-ton-blue font-semibold text-lg">Кэшбек до 5%</span>
+                                    <span class="text-gray-600 ml-2">от стоимости квартиры</span>
+                                </div>
+                            </div>
+
+                            {% if properties %}
+                            <div class="mb-4">
+                                <h3 class="font-semibold text-gray-800 mb-2">Средняя стоимость жилья:</h3>
+                                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div class="bg-ton-blue h-2.5 rounded-full" style="width: 75%"></div>
+                                </div>
+                                <div class="flex justify-between text-sm text-gray-600 mt-1">
+                                    <span>{{ "{:,.0f}".format(properties|map(attribute='price')|min) }} ₽</span>
+                                    <span>{{ "{:,.0f}".format(properties|map(attribute='price')|max) }} ₽</span>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <div class="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
+                                <button onclick="openApplicationModal()" class="bg-ton-blue text-white px-4 py-2 rounded-full font-medium hover:bg-ton-accent transition flex items-center justify-center">
+                                    <i class="fas fa-calculator mr-2"></i> Рассчитать кэшбек
+                                </button>
+                                <a href="/{{ (current_city.slug if current_city else 'krasnodar') }}/novostrojki?districts={{ district }}" class="border border-ton-blue text-ton-blue px-4 py-2 rounded-full font-medium hover:bg-ton-light transition flex items-center justify-center text-center">
+                                    <i class="fas fa-list mr-2"></i> Все новостройки
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- District Details -->
+                <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Подробнее о районе {{ district_name }}</h2>
+
+                    <!-- SEO-описание района -->
+                    <div class="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-l-4 border-blue-500">
+                        <h3 class="text-lg font-semibold mb-3 text-gray-800">{{ district_name }} - престижный район {{ current_city.name if current_city else 'Краснодара' }}</h3>
+                        <div class="text-gray-700 leading-relaxed space-y-3">
+                            <p><strong>{{ district_name }}</strong> – один из наиболее востребованных районов {{ current_city.name if current_city else 'Краснодара' }} для покупки недвижимости с кэшбеком. 
+                            Район расположен в {% if district_data.distance_to_center %}{{ "%.1f"|format(district_data.distance_to_center) }} км{% else %}нескольких километрах{% endif %} от центра города и предлагает отличные возможности для комфортного проживания.</p>
+                            
+                            <p><strong>Новостройки в районе {{ district_name }}</strong> пользуются высоким спросом благодаря развитой инфраструктуре и удобной транспортной доступности. 
+                            {% if properties %}В районе представлено {{ properties|length }} объектов недвижимости{% endif %} от ведущих застройщиков {{ current_city.name if current_city else 'Краснодара' }}.</p>
+                            
+                            {% if district_data.infrastructure_data %}
+                            {% set infra = district_data.infrastructure_data %}
+                            {% if infra is string %}
+                            {% set infra_data = infra|from_json %}
+                            {% else %}
+                            {% set infra_data = infra %}
+                            {% endif %}
+                            <p><strong>Инфраструктура района {{ district_name }}</strong> включает:
+                            {% if infra_data.medical_count %}{{ infra_data.medical_count }} медицинских учреждений,{% endif %}
+                            {% if infra_data.education_count %}{{ infra_data.education_count }} образовательных учреждений,{% endif %}
+                            {% if infra_data.shopping_count %}{{ infra_data.shopping_count }} торговых объектов,{% endif %}
+                            {% if infra_data.transport_count %}{{ infra_data.transport_count }} транспортных узлов.{% endif %}
+                            Это делает район {{ district_name }} идеальным для семейного проживания.</p>
+                            {% endif %}
+                            
+                            <p><strong>Купить квартиру в районе {{ district_name }}</strong> с максимальным кэшбеком можно на платформе InBack.ru. 
+                            Мы предлагаем эксклюзивные условия сотрудничества с застройщиками и гарантируем возврат до 3% от стоимости жилья.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <h3 class="text-lg font-semibold mb-3 text-gray-800">Жилая инфраструктура</h3>
+                            <ul class="space-y-2 text-gray-600">
+                                {% if district_data.infrastructure_data %}
+                                {% set infra = district_data.infrastructure_data %}
+                                {% if infra is string %}
+                                {% set infra_data = infra|from_json %}
+                                {% else %}
+                                {% set infra_data = infra %}
+                                {% endif %}
+                                <li class="flex items-start">
+                                    <i class="fas fa-shopping-cart text-blue-600 mt-1 mr-2"></i>
+                                    <span>{{ infra_data.shopping_count or 'Множество' }} торговых центров и супермаркетов</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-hospital text-red-600 mt-1 mr-2"></i>
+                                    <span>{{ infra_data.medical_count or 'Несколько' }} медицинских учреждений</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-graduation-cap text-green-600 mt-1 mr-2"></i>
+                                    <span>{{ infra_data.education_count or 'Множество' }} школ и детских садов</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-dumbbell text-orange-600 mt-1 mr-2"></i>
+                                    <span>{{ infra_data.sports_count or 'Несколько' }} спортивных объектов</span>
+                                </li>
+                                {% else %}
+                                <li class="flex items-start">
+                                    <i class="fas fa-shopping-cart text-blue-600 mt-1 mr-2"></i>
+                                    <span>Торговые центры и супермаркеты</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-hospital text-red-600 mt-1 mr-2"></i>
+                                    <span>Медицинские учреждения</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-graduation-cap text-green-600 mt-1 mr-2"></i>
+                                    <span>Школы и детские сады</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-tree text-green-600 mt-1 mr-2"></i>
+                                    <span>Парки и зеленые зоны</span>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-semibold mb-3 text-gray-800">Транспортная доступность</h3>
+                            <ul class="space-y-2 text-gray-600">
+                                <li class="flex items-start">
+                                    <i class="fas fa-bus text-purple-600 mt-1 mr-2"></i>
+                                    <span>Развитая сеть общественного транспорта</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-car text-blue-600 mt-1 mr-2"></i>
+                                    <span>Удобные выезды на центральные улицы</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-map-marker-alt text-green-600 mt-1 mr-2"></i>
+                                    <span>{% if district_data.distance_to_center %}{{ "%.1f"|format(district_data.distance_to_center) }} км{% else %}Близость{% endif %} до центра {{ current_city.name if current_city else 'Краснодара' }}</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-taxi text-yellow-600 mt-1 mr-2"></i>
+                                    <span>Быстрая доступность такси и каршеринга</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+
+                    <!-- Ключевые преимущества района -->
+                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg mb-6 border-l-4 border-green-500">
+                        <h4 class="font-semibold text-green-800 mb-3"><i class="fas fa-star mr-2"></i>Почему выбирают {{ district_name }}:</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <div class="flex items-center text-gray-700">
+                                    <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                                    <span>Развитая социальная инфраструктура</span>
+                                </div>
+                                <div class="flex items-center text-gray-700">
+                                    <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                                    <span>Новостройки от проверенных застройщиков</span>
+                                </div>
+                                <div class="flex items-center text-gray-700">
+                                    <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                                    <span>Удобная транспортная развязка</span>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex items-center text-gray-700">
+                                    <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                                    <span>Высокий потенциал роста стоимости</span>
+                                </div>
+                                <div class="flex items-center text-gray-700">
+                                    <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                                    <span>Кэшбек до 3% при покупке</span>
+                                </div>
+                                <div class="flex items-center text-gray-700">
+                                    <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                                    <span>Экологически чистый район</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% if properties %}
+                        <div class="mt-4 p-3 bg-white rounded-lg border border-green-200">
+                            <p class="text-sm text-gray-700 text-center">
+                                <strong class="text-green-700">{{ properties|length }} новостроек</strong> доступны для покупки с кэшбеком в районе {{ district_name }}
+                            </p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Properties in District -->
+                {% if properties %}
+                <section class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Новостройки в районе {{ district_name }}</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {% for property in properties[:4] %}
+                        <a href="/{{ city_slug }}/property/{{ property.id }}" class="bg-white rounded-lg shadow-md overflow-hidden card-hover block hover:shadow-lg transition-shadow">
+                            <div class="h-48 relative overflow-hidden bg-gray-100">
+                                {% if property.main_image %}
+                                <img src="{{ property.main_image }}" alt="{{ property.title }}" class="w-full h-full object-cover" loading="lazy" onerror="this.parentElement.classList.add('bg-gradient-to-br','from-gray-200','to-gray-300'); this.style.display='none';">
+                                {% else %}
+                                <div class="w-full h-full bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
+                                    <svg class="w-16 h-16 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline stroke-linecap="round" stroke-linejoin="round" stroke-width="1" points="9 22 9 12 15 12 15 22"/></svg>
+                                </div>
+                                {% endif %}
+                                <div class="absolute top-3 left-3">
+                                    <span class="bg-[#0088CC] text-white px-2 py-1 rounded text-xs font-semibold shadow">
+                                        Кэшбек {{ "{:,.0f}".format(property.cashback) }} ₽
+                                    </span>
+                                </div>
+                                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+                                    <span class="text-white font-bold text-sm">{% if property.rooms == 0 %}Студия{% else %}{{ property.rooms }}-комн.{% endif %} · {{ property.area }} м²</span>
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex justify-between items-baseline mb-1">
+                                    <span class="text-xl font-bold text-gray-900">{{ "{:,.0f}".format(property.price) }} ₽</span>
+                                    {% if property.area %}<span class="text-sm text-gray-400">{{ "{:,.0f}".format(property.price / property.area) }} ₽/м²</span>{% endif %}
+                                </div>
+                                {% if property.rc_name %}<p class="text-[#0088CC] text-sm font-medium mb-1">{{ property.rc_name }}</p>{% endif %}
+                                <p class="text-gray-500 text-sm truncate">{{ property.address }}</p>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    
+                    {% if properties|length > 4 %}
+                    <div class="text-center mt-6">
+                        <a href="/{{ city_slug }}/novostrojki?districts={{ district }}" class="inline-block bg-transparent border-2 border-[#0088CC] text-[#0088CC] px-8 py-3 rounded-full font-bold hover:bg-[#0088CC] hover:text-white transition-all duration-300">
+                            Показать ещё {{ properties|length - 4 }} предложений
+                        </a>
+                    </div>
+                    {% endif %}
+                </section>
+                {% endif %}
+
+                <!-- Residential Complexes -->
+                {% if complexes %}
+                <section class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Жилые комплексы в районе {{ district_name }}</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {% for complex in complexes[:4] %}
+                        <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">{{ complex.name }}</h3>
+                            <p class="text-gray-600 mb-4">{{ complex.developer }}</p>
+                            <div class="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-4">
+                                <div>
+                                    <i class="fas fa-building text-ton-blue mr-1"></i>
+                                    {{ complex.buildings_count }} корпуса
+                                </div>
+                                <div>
+                                    <i class="fas fa-home text-ton-blue mr-1"></i>
+                                    {{ complex.apartments_count }} квартир
+                                </div>
+                                <div>
+                                    <i class="fas fa-layer-group text-ton-blue mr-1"></i>
+                                    {{ complex.floors }} этажей
+                                </div>
+                                <div>
+                                    <i class="fas fa-percent text-ton-blue mr-1"></i>
+                                    До {{ complex.cashback_percent }}%
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-lg font-bold text-gray-800">от {{ "{:,.0f}".format(complex.price_from) }} ₽</span>
+                                <button class="bg-ton-blue text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-ton-accent transition-colors">
+                                    Подробнее
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endif %}
+
+                <!-- Expert Advice -->
+                <div class="bg-yellow-50 p-6 rounded-lg border border-yellow-100">
+                    <h4 class="font-semibold text-yellow-800 mb-3"><i class="fas fa-lightbulb mr-2"></i>Совет эксперта:</h4>
+                    <p class="text-yellow-700 mb-4">
+                        {% if district == 'krasnaya-ploshchad' %}
+                            Отличный выбор для тех, кто хочет жить в центре города с развитой инфраструктурой и культурной жизнью.
+                        {% elif district == 'cheremushki' %}
+                            Идеально подходит для семей с детьми благодаря развитой социальной инфраструктуре.
+                        {% elif district == 'festivalny' %}
+                            Хороший вариант для молодых людей и семей, ценящих современную инфраструктуру.
+                        {% else %}
+                            Перспективный район для инвестиций в недвижимость с хорошим потенциалом роста.
+                        {% endif %}
+                    </p>
+                    <button onclick="openApplicationModal()" class="bg-yellow-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-yellow-700 transition-colors">
+                        Получить персональную консультацию
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </main>
+
+    <!-- Contact Strip Above Footer -->
+    <section class="bg-gray-100 py-4">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-6">
+                    <div class="text-lg font-bold text-gray-800">8 (862) 266-62-16</div>
+                    <div class="text-gray-600">Нужна консультация по недвижимости?</div>
+                </div>
+                <button onclick="openApplicationModal()" class="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold transition-colors">
+                    Получить консультацию
+                </button>
+            </div>
+        </div>
+    </section>
+
+    {% include 'footer.html' %}
+
+    <!-- Application Modal -->
+    <div id="applicationModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="z-index: 9999;">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold text-gray-900">Оставить заявку</h3>
+                <button onclick="closeApplicationModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <form action="/send-application" method="POST" class="space-y-4">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <input type="hidden" name="source" value="district_{{ district.slug }}" />
+                
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Имя</label>
+                    <input type="text" id="name" name="name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div>
+                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Телефон</label>
+                    <input type="tel" id="phone" name="phone" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div>
+                    <label for="message" class="block text-sm font-medium text-gray-700 mb-1">Сообщение (необязательно)</label>
+                    <textarea id="message" name="message" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Расскажите о ваших пожеланиях..."></textarea>
+                </div>
+                
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+                    Отправить заявку
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function toggleDropdown(button) {
+            const dropdown = button.closest('.dropdown');
+            const menu = dropdown.querySelector('.dropdown-menu');
+            const isOpen = menu.classList.contains('open');
+            
+            // Close all other dropdowns
+            document.querySelectorAll('.dropdown-menu.open').forEach(menu => {
+                menu.classList.remove('open');
+            });
+            document.querySelectorAll('.dropdown-btn.open').forEach(btn => {
+                btn.classList.remove('open');
+            });
+            
+            // Toggle current dropdown
+            if (!isOpen) {
+                menu.classList.add('open');
+                button.classList.add('open');
+            }
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.dropdown')) {
+                document.querySelectorAll('.dropdown-menu.open').forEach(menu => {
+                    menu.classList.remove('open');
+                });
+                document.querySelectorAll('.dropdown-btn.open').forEach(btn => {
+                    btn.classList.remove('open');
+                });
+            }
+        });
+
+        // Application Modal Functions - Override header function
+        window.openApplicationModal = function() {
+            console.log('✅ Opening application modal from district page - OVERRIDE');
+            const modal = document.getElementById('applicationModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                if (typeof window.lockBodyScroll === 'function') window.lockBodyScroll();
+                console.log('✅ District modal opened successfully');
+            } else {
+                console.error('❌ District modal element not found');
+            }
+        };
+
+        function closeApplicationModal() {
+            console.log('Closing application modal');
+            const modal = document.getElementById('applicationModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                if (typeof window.unlockBodyScroll === 'function') window.unlockBodyScroll();
+                console.log('Modal closed successfully');
+            }
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('applicationModal');
+            if (modal && event.target === modal) {
+                closeApplicationModal();
+            }
+        });
+
+        // Глобальное хранилище для всех POI объектов 
+        window.allPoiPlacemarks = window.allPoiPlacemarks || [];
+        
+        // Initialize coordinates from backend data (для внешнего скрипта)
+        {% if district_data %}
+        window.districtCoords = {{ district_data|tojson|safe }};
+        {% else %}
+        window.districtCoords = {"latitude": 45.0355, "longitude": 38.9753, "zoom_level": 13};
+        {% endif %}
+        window.districtName = "{{ district_name|safe }}";
+        
+        // Initialize Yandex district map
+        ymaps.ready(function () {
+            
+            // Check if coordinates are available
+            var lat = districtCoords.latitude || 45.0355;
+            var lng = districtCoords.longitude || 38.9753;
+            var zoom = districtCoords.zoom_level || 13;
+            
+            if (lat && lng) {
+                // Initialize Yandex map
+                const map = new ymaps.Map('district-map', {
+                    center: [lat, lng],
+                    zoom: zoom,
+                    controls: ['zoomControl', 'typeSelector', 'fullscreenControl']
+                });
+                
+                // Create custom placemark with InBack styling
+                const placemark = new ymaps.Placemark([lat, lng], {
+                    balloonContentHeader: '<strong style="color: #0088CC;">{{ district_name }}</strong>',
+                    balloonContentBody: '<span style="font-size: 12px; color: #666;">Район {{ current_city.name if current_city else "Краснодара" }}</span><br><div style="margin-top: 8px;"><strong style="color: #0088CC; font-size: 14px;">Новостройки с кэшбеком</strong></div>',
+                    hintContent: '{{ district_name }}'
+                }, {
+                    preset: 'islands#blueIcon',
+                    iconColor: '#0088CC',
+                    iconImageSize: [12, 12],
+                    iconImageOffset: [-6, -6]
+                });
+                
+                map.geoObjects.add(placemark);
+                
+                // Check if we have geometry from database
+                {% if district_data and district_data.geometry %}
+                let boundaryFound = false;
+                try {
+                    console.log('✅ Using district geometry from database ({{ district_data.geometry_source }})');
+                    const geometryData = '{{ district_data.geometry|safe }}';
+                    
+                    // Parse coordinates from format: lat1,lng1;lat2,lng2;...
+                    const coordPairs = geometryData.split(';');
+                    const coordinates = coordPairs.map(pair => {
+                        const [lat, lng] = pair.split(',').map(parseFloat);
+                        return [lat, lng];
+                    });
+                    
+                    if (coordinates.length > 0) {
+                        // Create polygon from coordinates
+                        const districtPolygon = new ymaps.Polygon([coordinates], {
+                            balloonContent: '<strong>{{ district_name }}</strong><br>Границы района'
+                        }, {
+                            fillColor: '#0088CC15',
+                            strokeColor: '#0088CC',
+                            strokeWidth: 3,
+                            strokeOpacity: 0.8,
+                            fillOpacity: 0.15
+                        });
+                        
+                        map.geoObjects.add(districtPolygon);
+                        
+                        // Fit map to polygon bounds with padding
+                        const bounds = districtPolygon.geometry.getBounds();
+                        map.setBounds(bounds, {
+                            checkZoomRange: true,
+                            zoomMargin: [30, 30, 30, 30]
+                        });
+                        
+                        boundaryFound = true;
+                        console.log(`✅ District polygon displayed: ${coordinates.length} points`);
+                    }
+                } catch (error) {
+                    console.error('Error displaying district geometry from DB:', error);
+                }
+                {% else %}
+                let boundaryFound = false;
+                {% endif %}
+                
+                // Try multiple geocoding queries for district boundaries (fallback if no DB geometry)
+                const searchQueries = [
+                    `{{ district_name }} микрорайон {{ current_city.name if current_city else 'Краснодар' }}`,
+                    `район {{ district_name }} {{ current_city.name if current_city else 'Краснодар' }}`,
+                    `{{ district_name }} {{ current_city.name if current_city else 'Краснодар' }}`,
+                    `микрорайон {{ district_name }}`
+                ];
+                
+                async function tryGeocoding() {
+                    for (let query of searchQueries) {
+                        try {
+                            console.log('Trying geocoding query:', query);
+                            const res = await ymaps.geocode(query, {
+                                kind: 'district',
+                                results: 1,
+                                boundedBy: [[{{ district_data.latitude - 0.6 if district_data.latitude else 44.5 }}, {{ district_data.longitude - 0.6 if district_data.longitude else 38.5 }}], [{{ district_data.latitude + 0.6 if district_data.latitude else 45.5 }}, {{ district_data.longitude + 0.6 if district_data.longitude else 39.5 }}]]
+                            });
+                            
+                            const firstGeoObject = res.geoObjects.get(0);
+                            if (firstGeoObject) {
+                                console.log('Found geo object:', firstGeoObject.getAddressLine());
+                                console.log('Geometry type:', firstGeoObject.geometry.getType());
+                                console.log('Bounds:', firstGeoObject.geometry.getBounds());
+                                
+                                // Try to get administrative division boundaries via ObjectManager
+                                try {
+                                    const coords = firstGeoObject.geometry.getCoordinates();
+                                    const center = Array.isArray(coords[0]) ? coords[0] : coords;
+                                    
+                                    // Use administrative divisions layer
+                                    ymaps.borders.load('RU', {
+                                        lang: 'ru',
+                                        quality: 2 // higher quality boundaries
+                                    }).then(function (result) {
+                                        // Find district boundaries by coordinates
+                                        const districtBoundary = result.features.find(feature => {
+                                            if (feature.properties && feature.properties.name) {
+                                                const name = feature.properties.name.toLowerCase();
+                                                return name.includes('{{ district_name|lower }}') || 
+                                                       name.includes('центральн') && '{{ district_name|lower }}'.includes('центральн');
+                                            }
+                                            return false;
+                                        });
+                                        
+                                        if (districtBoundary && districtBoundary.geometry) {
+                                            console.log('Found administrative boundary');
+                                            const districtPolygon = new ymaps.GeoObject(districtBoundary, {
+                                                fillColor: '#0088CC15',
+                                                strokeColor: '#0088CC',
+                                                strokeWidth: 3,
+                                                strokeOpacity: 1,
+                                                fillOpacity: 0.15
+                                            });
+                                            map.geoObjects.add(districtPolygon);
+                                            boundaryFound = true;
+                                        }
+                                    }).catch(function(error) {
+                                        console.log('Borders API failed:', error);
+                                    });
+                                } catch (error) {
+                                    console.log('Error with borders:', error);
+                                }
+                                
+                                // Check if we have polygon geometry from geocoder
+                                const geometry = firstGeoObject.geometry;
+                                if (geometry && (geometry.getType() === 'Polygon' || geometry.getType() === 'Rectangle')) {
+                                    console.log('Adding polygon boundary from geocoder');
+                                    
+                                    // Add district boundary polygon
+                                    const districtPolygon = new ymaps.GeoObject({
+                                        geometry: firstGeoObject.geometry
+                                    }, {
+                                        fillColor: '#0088CC15',
+                                        strokeColor: '#0088CC',
+                                        strokeWidth: 3,
+                                        strokeOpacity: 1,
+                                        fillOpacity: 0.15,
+                                        strokeStyle: [5, 5] // dashed line
+                                    });
+                                    map.geoObjects.add(districtPolygon);
+                                    
+                                    // Fit map to district bounds with padding
+                                    const bounds = firstGeoObject.geometry.getBounds();
+                                    map.setBounds(bounds, {
+                                        checkZoomRange: true,
+                                        zoomMargin: [50, 50, 50, 50]
+                                    });
+                                    
+                                    boundaryFound = true;
+                                    break;
+                                } else if (geometry) {
+                                    // Use the same center coordinates as the main placemark
+                                    console.log('Creating district boundary at same center as placemark');
+                                    
+                                    // Create district boundary circle centered at the same place as placemark
+                                    const districtCircle = new ymaps.Circle([
+                                        [lat, lng], 2000 // Use original lat/lng coordinates, 2km radius
+                                    ], {}, {
+                                        fillColor: '#0088CC15', // Light blue fill
+                                        strokeColor: '#0088CC', // Blue outline
+                                        strokeWidth: 3,
+                                        strokeOpacity: 1,
+                                        fillOpacity: 0.15,
+                                        strokeStyle: [5, 5] // dashed line
+                                    });
+                                    map.geoObjects.add(districtCircle);
+                                    boundaryFound = true;
+                                    break;
+                                }
+                            }
+                        } catch (error) {
+                            console.log('Geocoding failed for query:', query, error);
+                            continue;
+                        }
+                    }
+                    
+                    // If no polygon boundary found, add styled circle that looks like district boundary
+                    if (!boundaryFound) {
+                        console.log('No polygon found, adding styled district boundary');
+                        
+                        // Create district boundary with blue dashed outline
+                        const districtBoundary = new ymaps.Circle([
+                            [lat, lng], 2000 // 2km radius
+                        ], {}, {
+                            fillColor: '#0088CC15', // Light blue fill
+                            strokeColor: '#0088CC', // Blue outline
+                            strokeWidth: 3,
+                            strokeOpacity: 1,
+                            fillOpacity: 0.15,
+                            strokeStyle: [5, 5] // dashed line
+                        });
+                        
+                        map.geoObjects.add(districtBoundary);
+                    }
+                }
+                
+                tryGeocoding();
+                
+                // Переменная теперь объявлена в ymaps.ready scope
+                
+                // Загружаем инфраструктуру из базы данных если доступна
+                {% if district_data and district_data.infrastructure_data %}
+                try {
+                    let infrastructureData;
+                    // Инфраструктура хранится как JSON строка в базе, нужно распарсить
+                    const rawData = {{ district_data.infrastructure_data|tojson|safe }};
+                    if (typeof rawData === 'string') {
+                        infrastructureData = JSON.parse(rawData);
+                    } else {
+                        infrastructureData = rawData;
+                    }
+                    console.log('Infrastructure data loaded:', infrastructureData);
+                    
+                    // Функция для получения стиля POI маркеров (цвет, иконка, preset)
+                    function getPoiStyle(category) {
+                        const styleMap = {
+                            'medical': {
+                                color: '#e74c3c',        // Красный для медицины
+                                glyph: 'plus',           // Плюс (медицинский крест)
+                                preset: 'islands#glyphCircleIcon'
+                            },
+                            'education': {
+                                color: '#3498db',        // Синий для образования
+                                glyph: 'home',           // Дом (школа)
+                                preset: 'islands#glyphCircleIcon'
+                            },
+                            'shopping': {
+                                color: '#2ecc71',        // Зеленый для магазинов
+                                glyph: 'asterisk',       // Звездочка для магазинов
+                                preset: 'islands#glyphCircleIcon'
+                            },
+                            'transport': {
+                                color: '#9b59b6',        // Фиолетовый для транспорта
+                                glyph: 'time',           // Часы для транспорта
+                                preset: 'islands#glyphCircleIcon'
+                            },
+                            'finance': {
+                                color: '#f39c12',        // Оранжевый для финансов
+                                glyph: 'minus',          // Минус для банков
+                                preset: 'islands#glyphCircleIcon'
+                            },
+                            'leisure': {
+                                color: '#1abc9c',        // Бирюзовый для отдыха
+                                glyph: 'heart',          // Сердечко (развлечения)
+                                preset: 'islands#glyphCircleIcon'
+                            },
+                            'sports': {
+                                color: '#e67e22',        // Оранжевый для спорта
+                                glyph: 'star',           // Звездочка (спорт)
+                                preset: 'islands#glyphCircleIcon'
+                            }
+                        };
+                        return styleMap[category] || {
+                            color: '#95a5a6',
+                            glyph: 'asterisk',
+                            preset: 'islands#glyphCircleIcon'
+                        };
+                    }
+                    
+                    // Совместимость с существующим кодом
+                    function getPoiColor(category) {
+                        return getPoiStyle(category).color;
+                    }
+                    
+                    // Функция для русской локализации типов объектов
+                    function getPoiTypeRu(amenity, shop, leisure, highway) {
+                        const typeMap = {
+                            // Медицина
+                            'hospital': 'больница',
+                            'clinic': 'клиника', 
+                            'pharmacy': 'аптека',
+                            'dentist': 'стоматология',
+                            'veterinary': 'ветклиника',
+                            
+                            // Образование
+                            'school': 'школа',
+                            'kindergarten': 'детский сад',
+                            'university': 'университет',
+                            'college': 'колледж',
+                            'library': 'библиотека',
+                            
+                            // Транспорт
+                            'bus_stop': 'автобусная остановка',
+                            'taxi': 'такси',
+                            'parking': 'парковка',
+                            'fuel': 'заправка',
+                            'car_repair': 'автосервис',
+                            'car_wash': 'автомойка',
+                            'car_rental': 'прокат авто',
+                            'car_sharing': 'каршеринг',
+                            
+                            // Магазины
+                            'supermarket': 'супермаркет',
+                            'convenience': 'продуктовый магазин',
+                            'bakery': 'пекарня',
+                            'clothes': 'магазин одежды',
+                            'hairdresser': 'парикмахерская',
+                            'beauty': 'салон красоты',
+                            'mall': 'торговый центр',
+                            'electronics': 'электроника',
+                            'furniture': 'мебель',
+                            'books': 'книжный',
+                            'shoes': 'обувь',
+                            'mobile_phone': 'салон связи',
+                            
+                            // Спорт и отдых
+                            'fitness_centre': 'фитнес-центр',
+                            'swimming_pool': 'бассейн',
+                            'playground': 'детская площадка',
+                            'park': 'парк',
+                            'sports_centre': 'спорт центр',
+                            'cinema': 'кинотеатр',
+                            'theatre': 'театр',
+                            'cafe': 'кафе',
+                            'restaurant': 'ресторан',
+                            'fast_food': 'фастфуд',
+                            'bar': 'бар',
+                            
+                            // Финансы
+                            'bank': 'банк',
+                            'atm': 'банкомат',
+                            'bureau_de_change': 'обмен валют',
+                            
+                            // Услуги
+                            'post_office': 'почта',
+                            'police': 'полиция',
+                            'fire_station': 'пожарная часть',
+                            'townhall': 'администрация',
+                            'government': 'госучреждение',
+                            
+                            // Другое
+                            'hotel': 'отель',
+                            'place_of_worship': 'храм',
+                            'waste_disposal': 'мусорка',
+                            'toilets': 'туалет',
+                            'marketplace': 'рынок'
+                        };
+                        
+                        if (amenity && typeMap[amenity]) return typeMap[amenity];
+                        if (shop && typeMap[shop]) return typeMap[shop];
+                        if (leisure && typeMap[leisure]) return typeMap[leisure];
+                        if (highway === 'bus_stop') return 'автобусная остановка';
+                        
+                        return amenity || shop || leisure || highway || 'объект';
+                    }
+                    
+                    // Переместили объявление в глобальный scope
+                    
+                    // Загружаем инфраструктуру с Overpass API
+                    fetch('/api/infrastructure?lat=' + lat + '&lng=' + lng + '&radius=2000')
+                        .then(response => response.json())
+                        .then(poiData => {
+                            console.log('POI data received:', poiData);
+                            
+                            // Добавляем POI на карту
+                            Object.keys(poiData).forEach(category => {
+                                const items = poiData[category];
+                                if (!items || items.length === 0) return;
+                                
+                                // Ограничиваем количество POI для лучшего отображения
+                                const limitedItems = items.slice(0, 8);
+                                
+                                limitedItems.forEach(poi => {
+                                    // Используем исправленное название из API (уже на русском языке)
+                                    const displayName = poi.name || 'Объект инфраструктуры';
+                                    const style = getPoiStyle(category);
+                                    
+                                    const placemark = new ymaps.Placemark([poi.lat, poi.lng], {
+                                        balloonContentHeader: `<strong style="color: ${style.color};">${displayName}</strong>`,
+                                        balloonContentBody: `
+                                            <div style="font-size: 13px; color: #666; line-height: 1.4;">
+                                                📍 <strong>${displayName}</strong>
+                                                <br>📏 <strong>Расстояние:</strong> ${poi.distance_to_point} км от района
+                                                <br>🏛️ <strong>До центра:</strong> ${poi.distance_to_center} км
+                                            </div>
+                                        `
+                                    }, {
+                                        iconLayout: 'default#imageWithContent',
+                                        iconImageHref: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+                                                <circle cx="10" cy="10" r="8" fill="${style.color}" stroke="#fff" stroke-width="2"/>
+                                                <text x="10" y="14" text-anchor="middle" font-size="10" fill="#fff">${style.glyph === 'plus' ? '+' : style.glyph === 'heart' ? '♥' : style.glyph === 'star' ? '★' : style.glyph === 'home' ? '⌂' : style.glyph === 'asterisk' ? '*' : style.glyph === 'time' ? '⧖' : style.glyph === 'minus' ? '−' : '•'}</text>
+                                            </svg>
+                                        `),
+                                        iconImageSize: [20, 20],
+                                        iconImageOffset: [-10, -10]
+                                    });
+                                    
+                                    // Сохраняем категорию и данные в placemark для фильтрации
+                                    placemark.category = category;
+                                    placemark.poiData = poi;
+                                    
+                                    map.geoObjects.add(placemark);
+                                    window.allPoiPlacemarks.push(placemark);
+                                });
+                                
+                                // Показываем количество найденных объектов
+                                if (items.length > 8) {
+                                    console.log(`${category}: показано ${limitedItems.length} из ${items.length} объектов`);
+                                }
+                            });
+                            
+                            // Добавляем обработчики фильтров после загрузки всех POI
+                            setupFilters();
+                        })
+                        .catch(error => {
+                            console.log('Error loading POI data:', error);
+                        });
+                } catch (error) {
+                    console.log('Error parsing infrastructure data:', error);
+                }
+                {% endif %}
+                
+                // Функция настройки фильтров
+                function setupFilters() {
+                    // Функция определения типа POI на основе тегов
+                    function getPoiType(poi) {
+                        if (!poi.tags) return null;
+                        
+                        const tags = poi.tags;
+                        
+                        // Школы
+                        if (tags.amenity === 'school') return 'school';
+                        
+                        // Детские сады
+                        if (tags.amenity === 'kindergarten') return 'kindergarten';
+                        
+                        // Магазины
+                        if (tags.shop && ['supermarket', 'mall', 'convenience', 'department_store', 
+                            'bakery', 'greengrocer', 'butcher', 'clothes'].includes(tags.shop)) {
+                            return 'shopping';
+                        }
+                        if (tags.amenity === 'marketplace') return 'shopping';
+                        
+                        // Фитнес и спорт
+                        if (tags.leisure && ['fitness_centre', 'sports_centre'].includes(tags.leisure)) {
+                            return 'fitness';
+                        }
+                        if (tags.amenity === 'gym') return 'fitness';
+                        
+                        // Парки
+                        if (tags.leisure === 'park') return 'park';
+                        
+                        // Транспорт
+                        if (tags.highway === 'bus_stop') return 'transport';
+                        if (tags.public_transport === 'stop_position') return 'transport';
+                        
+                        // Fallback на основе категории API
+                        if (poi.category === 'education') return 'school'; // По умолчанию школа для образования
+                        if (poi.category === 'shopping') return 'shopping';
+                        if (poi.category === 'leisure') return 'park'; // По умолчанию парк для досуга
+                        if (poi.category === 'transport') return 'transport';
+                        
+                        return null;
+                    }
+                    
+                    // ✅ ИСПРАВЛЕНО: Правильная функция обновления видимости объектов
+                    function updateMapVisibility() {
+                        // Защитная проверка: используем глобальный массив и проверяем его наличие
+                        const placemarks = Array.isArray(window.allPoiPlacemarks) ? window.allPoiPlacemarks : [];
+                        if (!placemarks.length) {
+                            console.log('No placemarks available for filtering');
+                            return;
+                        }
+                        
+                        const checkedFilters = Array.from(document.querySelectorAll('.infrastructure-filter:checked'))
+                            .map(checkbox => checkbox.dataset.category);  // ✅ ИСПРАВЛЕНО: dataset.category
+                        
+                        console.log('Active filters:', checkedFilters);
+                        
+                        // Обновляем видимость объектов вместо удаления/добавления
+                        placemarks.forEach(placemark => {
+                            if (!placemark || !placemark.poiData) return;
+                            
+                            const poi = placemark.poiData;
+                            const category = getPoiCategory(poi);  // ✅ ИСПРАВЛЕНО: новая функция
+                            
+                            if (category && checkedFilters.includes(category)) {
+                                // Показываем объект
+                                try {
+                                    if (map && map.geoObjects && !map.geoObjects.contains && placemark.setMap) {
+                                        // Для современного API Yandex Maps
+                                        placemark.setMap(map);
+                                    } else if (map && map.geoObjects && map.geoObjects.add) {
+                                        // Проверяем не добавлен ли уже
+                                        let alreadyAdded = false;
+                                        try {
+                                            map.geoObjects.each(function(obj) {
+                                                if (obj === placemark) alreadyAdded = true;
+                                            });
+                                        } catch(e) {}
+                                        
+                                        if (!alreadyAdded) {
+                                            map.geoObjects.add(placemark);
+                                        }
+                                    }
+                                } catch(e) {
+                                    console.log('Error showing placemark:', e);
+                                }
+                            } else {
+                                // Скрываем объект
+                                try {
+                                    if (map && map.geoObjects && map.geoObjects.remove) {
+                                        map.geoObjects.remove(placemark);
+                                    } else if (placemark.setMap) {
+                                        placemark.setMap(null);
+                                    }
+                                } catch(e) {
+                                    console.log('Error hiding placemark:', e);
+                                }
+                            }
+                        });
+                    }
+                    
+                    // ✅ НОВАЯ: Функция определения категории POI
+                    function getPoiCategory(poi) {
+                        if (!poi) return null;
+                        
+                        // Медицина
+                        if (poi.amenity === 'hospital' || poi.amenity === 'clinic' || poi.amenity === 'pharmacy') {
+                            return 'medical';
+                        }
+                        
+                        // Образование  
+                        if (poi.amenity === 'school' || poi.amenity === 'kindergarten' || poi.amenity === 'university') {
+                            return 'education';
+                        }
+                        
+                        // Транспорт
+                        if (poi.highway === 'bus_stop' || poi.amenity === 'taxi' || poi.amenity === 'parking') {
+                            return 'transport';
+                        }
+                        
+                        // Магазины
+                        if (poi.shop || poi.amenity === 'marketplace') {
+                            return 'shopping';
+                        }
+                        
+                        // Досуг
+                        if (poi.leisure || poi.amenity === 'cinema' || poi.amenity === 'restaurant' || poi.amenity === 'cafe') {
+                            return 'leisure';
+                        }
+                        
+                        // Финансы
+                        if (poi.amenity === 'bank' || poi.amenity === 'atm') {
+                            return 'finance';
+                        }
+                        
+                        return null;
+                    }
+                    
+                    // Предотвращаем повторную инициализацию фильтров
+                    if (window.__infraFiltersInit) return;
+                    window.__infraFiltersInit = true;
+                    
+                    // Добавляем обработчики событий для всех фильтров
+                    document.querySelectorAll('.infrastructure-filter').forEach(checkbox => {
+                        checkbox.addEventListener('change', updateMapVisibility);
+                    });
+                    
+                    // Применяем фильтры сразу при загрузке
+                    updateMapVisibility();
+                    
+                    console.log('Infrastructure filters setup complete');
+                }
+                
+                // Добавляем улицы района с координатами
+                try {
+                    const district_slug = '{{ district }}';
+                    fetch('/api/streets/district/' + district_slug)
+                        .then(response => response.json())
+                        .then(streetsData => {
+                            console.log('Streets data loaded:', streetsData);
+                            
+                            if (streetsData && streetsData.length > 0) {
+                                streetsData.forEach(street => {
+                                    if (street.latitude && street.longitude) {
+                                        const streetPlacemark = new ymaps.Placemark([street.latitude, street.longitude], {
+                                            balloonContentHeader: `<strong style="color: #0088CC;">🛣️ ${street.name}</strong>`,
+                                            balloonContentBody: `
+                                                <div style="font-size: 13px; color: #666; line-height: 1.4;">
+                                                    📍 <strong>Улица:</strong> ${street.name}
+                                                    <br>🏘️ <strong>Район:</strong> {{ district_name }}
+                                                    <br>🗺️ <strong>Координаты:</strong> ${street.latitude.toFixed(6)}, ${street.longitude.toFixed(6)}
+                                                </div>
+                                            `,
+                                            hintContent: `Улица ${street.name}`
+                                        }, {
+                                            preset: 'islands#blueIcon',
+                                            iconColor: '#0088CC',
+                                            iconImageSize: [8, 8],
+                                            iconImageOffset: [-4, -4]
+                                        });
+                                        
+                                        map.geoObjects.add(streetPlacemark);
+                                    }
+                                });
+                                
+                                console.log(`Добавлено ${streetsData.filter(s => s.latitude && s.longitude).length} улиц с координатами`);
+                            }
+                        })
+                        .catch(error => {
+                            console.log('Error loading streets data:', error);
+                        });
+                } catch (error) {
+                    console.log('Error adding streets to map:', error);
+                }
+
+                // Disable scroll wheel zoom initially
+                map.behaviors.disable('scrollZoom');
+                
+                // Enable scroll wheel zoom on map focus
+                map.events.add('mouseenter', function() {
+                    map.behaviors.enable('scrollZoom');
+                });
+                
+                map.events.add('mouseleave', function() {
+                    map.behaviors.disable('scrollZoom');
+                });
+                
+            } else {
+                // Show loading message for districts without coordinates
+                document.getElementById('district-map').innerHTML = `
+                    <div style="height: 100%; display: flex; align-items: center; justify-content: center; background: #f8f9fa; color: #666; border: 2px dashed #0088CC;">
+                        <div style="text-align: center; padding: 20px;">
+                            <div style="font-size: 2.5rem; margin-bottom: 1rem; color: #0088CC;">🔄</div>
+                            <h3 style="color: #0088CC; margin: 0 0 8px 0;">Координаты обновляются</h3>
+                            <p style="margin: 0; font-size: 14px;">Карта района <strong>{{ district_name }}</strong><br>будет доступна через 1-2 минуты</p>
+                            <button onclick="location.reload()" style="margin-top: 15px; padding: 8px 16px; background: #0088CC; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                Обновить страницу
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+    </script>
+
+    <!-- Infrastructure Filter Toggle JavaScript - отдельный блок -->
+    <script>
+        // Функция инициализации toggle фильтра инфраструктуры
+        function initInfrastructureToggle() {
+            console.log('Инициализация infrastructure toggle...');
+            
+            const toggleBtn = document.getElementById('infrastructure-toggle');
+            const panel = document.getElementById('infrastructure-panel');
+            
+            console.log('Toggle button found:', !!toggleBtn);
+            console.log('Panel found:', !!panel);
+            
+            if (toggleBtn && panel) {
+                console.log('Добавляем обработчики событий для infrastructure toggle');
+                
+                // Основной обработчик клика по кнопке
+                toggleBtn.addEventListener('click', function(e) {
+                    console.log('Infrastructure toggle button clicked');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const isActive = toggleBtn.classList.contains('active');
+                    console.log('Current state:', isActive ? 'active' : 'inactive');
+                    
+                    // Переключаем классы
+                    toggleBtn.classList.toggle('active');
+                    panel.classList.toggle('active');
+                    
+                    console.log('New state:', toggleBtn.classList.contains('active') ? 'active' : 'inactive');
+                });
+
+                // Закрытие панели при клике снаружи
+                document.addEventListener('click', function(event) {
+                    // Проверяем, что клик не по элементам фильтра
+                    if (!event.target.closest('.infrastructure-filter')) {
+                        console.log('Closing infrastructure panel - clicked outside');
+                        toggleBtn.classList.remove('active');
+                        panel.classList.remove('active');
+                    }
+                });
+
+                // Предотвращаем закрытие панели при клике по ней
+                panel.addEventListener('click', function(e) {
+                    console.log('Clicked inside infrastructure panel');
+                    e.stopPropagation();
+                });
+
+                console.log('Infrastructure filter toggle успешно инициализирован');
+            } else {
+                console.error('Infrastructure toggle elements not found!');
+                console.error('Toggle button:', toggleBtn);
+                console.error('Panel:', panel);
+            }
+
+            // ✅ ИСПРАВЛЕНО: Вторая карта теперь инициализируется внешним скриптом
+            console.log('🗺️ Secondary map will be initialized by external script');
+            
+            // Остальная инициализация теперь в district_secondary_map.js
+            // ☑️ Старая функция initializeSecondaryMap удалена - теперь в external script
+        }
+
+        // Инициализация при загрузке DOM
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initInfrastructureToggle);
+        } else {
+            // DOM уже загружен
+            initInfrastructureToggle();
+        }
+    </script>
+    
+    <!-- ✅ Внешний скрипт для второй карты (исправляет проблемы с inline JavaScript) -->
+    <script src="{{ url_for('static', filename='js/district_secondary_map.js') }}?v=2"></script>
+    <!-- ✅ Тестовый inline скрипт для проверки логов -->
+    <script>
+        console.log('🧪 TEST: Inline script works! Element found:', document.querySelector('#secondary-district-map'));
+    </script>
+</body>
+</html>

@@ -1,0 +1,2150 @@
+{% extends "base.html" %}
+
+{% block title %}Канбан сделок | InBack{% endblock %}
+
+{% block head %}
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css' rel='stylesheet' />
+<style>
+header { display: none !important; }
+body > footer, body > .footer, #footer-section { display: none !important; }
+body { padding-top: 0 !important; }
+:root { --brand: #0088CC; --brand-dark: #006699; --green: #059669; }
+
+.kanban-container {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 0 0 16px;
+    min-height: calc(100vh - 260px);
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+}
+.kanban-container::-webkit-scrollbar { height: 6px; }
+.kanban-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+.kanban-column {
+    min-width: 280px;
+    max-width: 300px;
+    flex-shrink: 0;
+    background: #f8fafc;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 260px);
+}
+.kanban-header {
+    padding: 12px 14px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+.kanban-cards {
+    padding: 8px;
+    overflow-y: auto;
+    flex: 1;
+    scrollbar-width: thin;
+    min-height: 60px;
+    transition: background 0.2s;
+}
+.kanban-cards.drag-over {
+    background: rgba(0, 136, 204, 0.06);
+    border-radius: 0 0 12px 12px;
+}
+
+.kanban-card {
+    background: white;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    cursor: pointer;
+    transition: all 0.2s;
+    border-left: 4px solid transparent;
+    user-select: none;
+}
+.kanban-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    transform: translateY(-1px);
+}
+.kanban-card.dragging {
+    opacity: 0.5;
+    transform: rotate(2deg);
+}
+
+.deal-number { font-size: 11px; font-family: monospace; color: #6b7280; }
+.deal-client { font-size: 13px; font-weight: 600; color: #1f2937; margin: 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.deal-price { font-size: 12px; color: #059669; font-weight: 600; }
+.deal-cashback { font-size: 11px; color: #0088CC; }
+.deal-complex { font-size: 11px; color: #6b7280; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.deal-meta { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; padding-top: 8px; border-top: 1px solid #f3f4f6; }
+.deal-date { font-size: 10px; color: #9ca3af; }
+.deal-tasks-badge { font-size: 10px; padding: 2px 6px; border-radius: 9999px; }
+.empty-column { text-align: center; padding: 24px 16px; color: #9ca3af; font-size: 13px; }
+
+.tab-bar a {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #6b7280;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+}
+.tab-bar a:hover { color: #0088CC; }
+.tab-bar a.active { color: #0088CC; border-bottom-color: #0088CC; }
+
+#listContainer table thead th { position: sticky; top: 0; background: #f9fafb; z-index: 2; }
+#listContainer table tbody tr:last-child { border-bottom: none; }
+.list-deal-row:hover td { background: rgba(0, 136, 204, 0.03); }
+
+.col-add-btn {
+    width: 24px; height: 24px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 12px;
+    border: none;
+    background: rgba(255,255,255,0.6);
+    color: inherit;
+}
+.col-add-btn:hover { background: rgba(255,255,255,0.9); transform: scale(1.1); }
+
+.slide-panel {
+    position: fixed; top: 0; right: 0; height: 100vh;
+    width: 500px; max-width: 100vw;
+    background: white; z-index: 90;
+    box-shadow: -8px 0 30px rgba(0,0,0,0.15);
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex; flex-direction: column;
+}
+.slide-panel.open { transform: translateX(0); }
+.slide-panel.fullscreen { width: 100vw; }
+.slide-panel-header {
+    padding: 12px 16px; border-bottom: 1px solid #e5e7eb;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0; background: #f8fafc;
+}
+.slide-panel iframe { flex: 1; border: none; width: 100%; }
+.slide-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.3);
+    z-index: 89; display: none; backdrop-filter: blur(1px);
+}
+.slide-overlay.active { display: block; }
+#createSlidePanel { z-index: 100; }
+#createSlideOverlay { z-index: 99; }
+
+.form-input {
+    width: 100%; padding: 10px 14px; border: 1px solid #e5e7eb; border-radius: 10px;
+    font-size: 14px; transition: all 0.2s; outline: none; background: #fafafa;
+}
+.form-input:focus { border-color: #0088CC; box-shadow: 0 0 0 3px rgba(0,136,204,0.1); background: white; }
+.form-label { font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; display: block; }
+
+.mobile-stage-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    border-radius: 20px;
+    border: 1.5px solid #e5e7eb;
+    background: white;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+.mobile-stage-chip.active {
+    background: #0088CC;
+    color: white;
+    border-color: #0088CC;
+    box-shadow: 0 2px 8px rgba(0,136,204,0.3);
+}
+.mobile-stage-chip:not(.active):hover { border-color: #0088CC; color: #0088CC; }
+.mobile-stage-chip .chip-count {
+    font-size: 10px;
+    background: rgba(0,0,0,0.08);
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-weight: 700;
+}
+.mobile-stage-chip.active .chip-count {
+    background: rgba(255,255,255,0.3);
+}
+.mobile-filter-chips::-webkit-scrollbar { display: none; }
+
+@media (max-width: 768px) {
+    .kanban-column { min-width: 85vw; max-width: 85vw; }
+    .kanban-container {
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        padding: 0 4px 16px;
+        gap: 8px;
+        min-height: calc(100vh - 280px);
+        scroll-behavior: smooth;
+        overscroll-behavior-x: contain;
+    }
+    .kanban-column { scroll-snap-align: start; }
+    .slide-panel { width: 100vw; }
+    .kanban-card { padding: 10px !important; }
+    .kanban-card .text-sm { font-size: 12px !important; }
+    .kanban-card .text-xs { font-size: 10px !important; }
+    .kanban-desktop-controls { display: none !important; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% if sidebar_links is defined and sidebar_links %}
+{% include 'components/sidebar.html' %}
+{% endif %}
+
+<div class="{% if sidebar_links is defined and sidebar_links %}md:ml-[70px]{% endif %} transition-all duration-300">
+
+<div class="bg-white border-b border-gray-200 shadow-sm kanban-top-header">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between py-3">
+            <div class="flex items-center gap-3">
+                <div class="flex w-8 h-8 bg-gradient-to-r from-[#0088CC] to-[#006699] rounded-lg items-center justify-center text-white font-bold text-sm">
+                    In
+                </div>
+                <span class="hidden md:inline font-bold text-gray-900 text-lg">InBack</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="/" class="hidden sm:flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-gray-700 px-4 py-2 rounded-full border border-blue-200 transition-colors">
+                    <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+                    </svg>
+                    <span class="text-sm font-medium">На сайт</span>
+                </a>
+
+                <div class="relative" id="mgr-notification-bell-container">
+                    <button id="mgr-notification-bell-btn" class="relative flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100 transition-colors" title="Уведомления">
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                        </svg>
+                        <span id="mgr-notification-badge" class="hidden absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center" style="font-size: 10px;">0</span>
+                    </button>
+                    <div id="mgr-notification-dropdown" class="hidden absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden">
+                        <div class="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200">
+                            <h3 class="text-sm font-semibold text-gray-900">Уведомления</h3>
+                            <button id="mgr-mark-all-read-btn" class="text-xs text-[#0088CC] hover:text-[#006699] font-medium transition-colors hidden">Прочитать все</button>
+                        </div>
+                        <div id="mgr-notification-list" class="max-h-80 overflow-y-auto">
+                            <div class="flex items-center justify-center py-8 text-gray-400">
+                                <svg class="w-5 h-5 animate-spin mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
+                                <span class="text-sm">Загрузка...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <button id="avatar-dropdown-btn" class="flex items-center gap-2 hover:bg-gray-50 rounded-lg p-1 transition-colors">
+                        <div class="w-9 h-9 rounded-full flex items-center justify-center shadow-sm overflow-hidden">
+                            {% if current_manager.profile_image %}
+                            <img src="{{ current_manager.profile_image }}" alt="{{ current_manager.full_name }}" class="w-full h-full object-cover">
+                            {% else %}
+                            <div class="w-full h-full bg-gradient-to-r from-[#0088CC] to-[#006699] flex items-center justify-center text-white font-bold text-sm">
+                                {{ current_manager.full_name[0].upper() if current_manager.full_name else 'M' }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div id="avatar-dropdown-menu" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                        <div class="px-4 py-3 border-b border-gray-100">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                                    {% if current_manager.profile_image %}
+                                    <img src="{{ current_manager.profile_image }}" alt="{{ current_manager.full_name }}" class="w-full h-full object-cover">
+                                    {% else %}
+                                    <div class="w-full h-full bg-gradient-to-r from-[#0088CC] to-[#006699] flex items-center justify-center text-white font-bold text-sm">
+                                        {{ current_manager.full_name[0].upper() if current_manager.full_name else 'M' }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">{{ current_manager.full_name }}</p>
+                                    <p class="text-xs text-[#0088CC] font-medium">{{ current_manager.display_position }}</p>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500">{{ current_manager.email }}</p>
+                        </div>
+                        <a href="{{ url_for('manager_profile') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                            Профиль
+                        </a>
+                        <div id="desktopShiftBlock" class="px-4 py-3 border-b border-gray-100">
+                            <div class="flex items-center gap-3">
+                                <div id="deskShiftIconWrap" class="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <svg id="deskShiftIconInactive" class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <svg id="deskShiftIconActive" class="w-4 h-4 text-green-600 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div id="deskShiftLabel" class="text-xs text-gray-400">Смена не начата</div>
+                                    <div class="text-sm font-bold text-gray-900" id="deskShiftDuration">--:--:--</div>
+                                </div>
+                                <button id="deskShiftToggleBtn" onclick="toggleCheckin()" class="flex items-center justify-center w-8 h-8 rounded-full bg-green-500 hover:bg-green-600 text-white transition-colors shadow-sm">
+                                    <svg id="deskShiftPlayIcon" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+                                    <svg id="deskShiftStopIcon" class="w-4 h-4 hidden" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <a href="{{ url_for('logout') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                            </svg>
+                            Выход
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bg-white border-b border-gray-200 kanban-tab-section">
+    <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="tab-bar flex">
+            <a href="javascript:void(0)" class="active" id="tabKanban" onclick="switchView('kanban')">
+                <svg class="w-4 h-4 inline-block mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7"/></svg>
+                Канбан
+            </a>
+            <a href="javascript:void(0)" id="tabList" onclick="switchView('list')">
+                <svg class="w-4 h-4 inline-block mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                Список
+            </a>
+            <a href="javascript:void(0)" id="tabTasks" onclick="switchView('tasks')">
+                <svg class="w-4 h-4 inline-block mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                Дела
+            </a>
+            <a href="javascript:void(0)" id="tabCalendar" onclick="switchView('calendar')">
+                <svg class="w-4 h-4 inline-block mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                Календарь
+            </a>
+            <a href="{{ url_for('manager_deals_archive') }}">
+                <svg class="w-4 h-4 inline-block mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                Архив
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="hidden max-md:flex items-center gap-3 px-4 py-3 bg-white border-b border-gray-200">
+    <a onclick="if(history.length>1){history.back()}else{location.href='{{ url_for("manager_dashboard") }}'};return false;" href="{{ url_for('manager_dashboard') }}" class="w-8 h-8 flex items-center justify-center rounded-lg bg-[#0088CC]/10 text-[#0088CC]">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    </a>
+    <div class="flex-1 min-w-0">
+        <h1 class="text-sm font-bold text-gray-900">Сделки</h1>
+    </div>
+    <button onclick="openCreateModal()" class="flex items-center gap-1.5 bg-[#0088CC] text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Создать
+    </button>
+</div>
+
+<div class="hidden max-md:block bg-white border-b border-gray-100 px-3 py-2">
+    <div class="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 mb-2 focus-within:border-[#0088CC] focus-within:ring-2 focus-within:ring-[#0088CC]/20 transition-all">
+        <i class="fas fa-search text-gray-400 text-xs"></i>
+        <input type="text" id="mobileKanbanSearch" placeholder="Поиск по сделкам..."
+               class="flex-1 bg-transparent border-none outline-none text-sm text-gray-700 placeholder-gray-400"
+               oninput="mobileFilterKanban()">
+        <button id="mobileSearchClear" class="hidden text-gray-400 p-1" onclick="clearMobileSearch()">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+    </div>
+    <div class="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 mobile-filter-chips" style="scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;">
+        <button class="mobile-stage-chip active" data-filter="all" onclick="mobileFilterStage('all', this)">
+            Все
+        </button>
+        {% for stage in stages %}
+        <button class="mobile-stage-chip" data-filter="{{ stage.key }}" onclick="mobileFilterStage('{{ stage.key }}', this)" style="--chip-color: {{ stage.color }};">
+            <span class="w-2 h-2 rounded-full flex-shrink-0" style="background: {{ stage.color }};"></span>
+            {{ stage.label }}
+            <span class="chip-count">{{ deals_by_stage.get(stage.key, [])|length }}</span>
+        </button>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div class="flex items-center justify-between mb-4 flex-wrap gap-3 kanban-desktop-controls">
+        <div class="flex items-center gap-3">
+            <h1 class="text-xl font-bold text-gray-900">Сделки</h1>
+            <button onclick="openCreateModal()" class="flex items-center gap-2 bg-[#0088CC] hover:bg-[#006699] text-white pl-3 pr-4 py-2 rounded-lg font-semibold text-sm transition-all shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Создать
+            </button>
+        </div>
+        <div class="flex items-center gap-2 flex-1 max-w-xl ml-4 bg-white border border-gray-300 rounded-lg px-3 py-1.5 shadow-sm hover:border-[#0088CC] focus-within:border-[#0088CC] focus-within:ring-2 focus-within:ring-[#0088CC]/20 transition-all">
+            <i class="fas fa-search text-gray-400 text-xs"></i>
+            <div class="flex items-center gap-1 flex-wrap" id="searchTags"></div>
+            <div class="relative flex-1">
+                <input type="text" id="kanbanSearch" placeholder="Поиск сделок..." 
+                       class="w-full bg-transparent border-none outline-none text-sm text-gray-700 placeholder-gray-400 py-1"
+                       oninput="filterKanbanCards()" onfocus="showSearchDropdown()" autocomplete="off">
+                <div id="searchDropdown" class="hidden absolute left-0 top-full mt-1 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden" style="width: 560px; max-width: 90vw;">
+                    <div class="flex">
+                        <div class="w-48 border-r border-gray-100 p-2 flex-shrink-0">
+                            <button onclick="setSearchCategory(this, 'stage')" class="search-cat-btn active w-full text-left px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 text-[#0088CC] transition-colors">
+                                Группа стадий
+                            </button>
+                            <button onclick="setSearchCategory(this, 'quick')" class="search-cat-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 text-gray-600 transition-colors">
+                                Быстрые фильтры
+                            </button>
+                        </div>
+                        <div class="flex-1 p-3">
+                            <div id="searchCatStage">
+                                <div class="text-xs font-semibold text-gray-400 uppercase px-1 pb-2 tracking-wider">Группа стадий</div>
+                                <div class="space-y-0.5 max-h-64 overflow-y-auto">
+                                    {% for stage in stages %}
+                                    <button onclick="addSearchTag('stage', '{{ stage.key }}', '{{ stage.label }}', '{{ stage.color }}')" 
+                                            class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm hover:bg-gray-50 text-left transition-colors">
+                                        <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background: {{ stage.color }};"></span>
+                                        {{ stage.label }}
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div id="searchCatQuick" class="hidden">
+                                <div class="text-xs font-semibold text-gray-400 uppercase px-1 pb-2 tracking-wider">Быстрые фильтры</div>
+                                <div class="space-y-0.5">
+                                    <button onclick="addSearchTag('stage', 'in_progress', 'Сделки в работе', '#0088CC')" class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm hover:bg-gray-50 text-left transition-colors">
+                                        <i class="fas fa-briefcase text-[#0088CC] text-xs w-3"></i> Сделки в работе
+                                    </button>
+                                    <button onclick="addSearchTag('stage', 'completed', 'Завершённые', '#10b981')" class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm hover:bg-gray-50 text-left transition-colors">
+                                        <i class="fas fa-check-circle text-green-500 text-xs w-3"></i> Завершённые
+                                    </button>
+                                    <button onclick="addSearchTag('stage', 'rejected', 'Отклонённые', '#ef4444')" class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm hover:bg-gray-50 text-left transition-colors">
+                                        <i class="fas fa-times-circle text-red-500 text-xs w-3"></i> Отклонённые
+                                    </button>
+                                    <button onclick="addSearchTag('stage', 'postponed', 'Отложенные', '#f59e0b')" class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm hover:bg-gray-50 text-left transition-colors">
+                                        <i class="fas fa-pause-circle text-amber-500 text-xs w-3"></i> Отложенные
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mt-3 pt-3 border-t border-gray-100 flex justify-end gap-2">
+                                <button onclick="clearAllSearch()" class="px-3 py-1.5 text-xs text-gray-500 hover:text-gray-700 font-medium transition-colors">Сбросить</button>
+                                <button onclick="hideSearchDropdown()" class="px-4 py-1.5 bg-[#0088CC] text-white text-xs font-semibold rounded-lg hover:bg-[#006699] transition-colors flex items-center gap-1">
+                                    <i class="fas fa-search text-[10px]"></i> Найти
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button onclick="clearAllSearch()" id="searchClearBtn" class="hidden text-gray-400 hover:text-gray-600 transition-colors p-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        {% if viewable_managers|length > 0 %}
+        <div class="flex items-center gap-2 flex-shrink-0">
+            <select id="managerFilter" onchange="filterByManager(this.value)" 
+                    class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm bg-white shadow-sm hover:border-[#0088CC] focus:border-[#0088CC] focus:ring-2 focus:ring-[#0088CC]/20 transition-all">
+                <option value="">Все менеджеры</option>
+                {% for vm in viewable_managers %}
+                <option value="{{ vm.id }}" {% if request.args.get('manager_id')|int == vm.id %}selected{% endif %}>
+                    {{ vm.full_name or vm.email }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="kanban-container" id="kanbanContainer">
+        {% for stage in stages %}
+        <div class="kanban-column" data-stage="{{ stage.key }}">
+            <div class="kanban-header" style="background: {{ stage.color }}15; border-bottom: 2px solid {{ stage.color }};">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full" style="background: {{ stage.color }};"></span>
+                    <span class="text-sm font-semibold" style="color: {{ stage.color }};">{{ stage.label }}</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <span class="text-xs font-bold px-2 py-0.5 rounded-full" style="background: {{ stage.color }}20; color: {{ stage.color }};">
+                        {{ deals_by_stage.get(stage.key, [])|length }}
+                    </span>
+                    <button class="col-add-btn" style="color: {{ stage.color }};" onclick="openCreateModal('{{ stage.key }}')" title="Добавить сделку">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="kanban-cards" data-stage="{{ stage.key }}"
+                 ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+                {% set stage_deals = deals_by_stage.get(stage.key, []) %}
+                {% if stage_deals %}
+                    {% for deal in stage_deals %}
+                    {% set deal_active_tasks = deal.tasks.filter_by(is_completed=False).all() %}
+                    {% set deal_overdue_count = deal_active_tasks|selectattr('is_overdue')|list|length %}
+                    <div class="kanban-card {% if deal_overdue_count > 0 %}ring-2 ring-red-400 bg-red-50/40{% endif %}" style="border-left-color: {% if deal_overdue_count > 0 %}#ef4444{% else %}{{ stage.color }}{% endif %};"
+                         draggable="true"
+                         data-deal-id="{{ deal.id }}"
+                         data-deal-status="{{ deal.status }}"
+                         ondragstart="handleDragStart(event)"
+                         ondragend="handleDragEnd(event)"
+                         onclick="openSlidePanel({{ deal.id }})">
+                        <div class="flex items-center justify-between">
+                            <span class="deal-number">{{ deal.deal_number }}</span>
+                            {% if deal.is_locked %}
+                            <span class="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-500"><i class="fas fa-lock text-[10px]"></i></span>
+                            {% endif %}
+                        </div>
+                        <div class="deal-client">{{ deal.client.full_name or deal.client.email or 'Клиент' }}</div>
+                        {% if viewable_managers|length > 0 and deal.manager_id != current_manager.id %}
+                        <div class="text-[10px] text-gray-400 mt-0.5"><i class="fas fa-user-tie mr-1"></i>{{ deal.manager.full_name if deal.manager else '' }}</div>
+                        {% endif %}
+                        {% if deal.source %}
+                        <div class="text-[10px] text-[#0088CC] mt-0.5"><i class="fas fa-globe mr-1"></i>{{ deal.source }}</div>
+                        {% endif %}
+                        {% if deal.residential_complex_name %}
+                        <div class="deal-complex"><i class="fas fa-building mr-1"></i>{{ deal.residential_complex_name }}</div>
+                        {% endif %}
+                        {% if deal.property_price and deal.property_price > 0 %}
+                        <div class="flex items-center gap-3 mt-2">
+                            <span class="deal-price">{{ '{:,.0f}'.format(deal.property_price|float).replace(',', ' ') }} ₽</span>
+                            <span class="deal-cashback">кб {{ '{:,.0f}'.format(deal.cashback_amount|float).replace(',', ' ') }} ₽</span>
+                        </div>
+                        {% endif %}
+                        {% if deal.client and deal.client.quiz_completed %}
+                        <div class="mt-1.5 space-y-0.5">
+                            {% if deal.client.preferred_district %}<div class="text-[10px] text-gray-500"><i class="fas fa-bullseye mr-1 text-gray-400"></i>{{ deal.client.preferred_district }}</div>{% endif %}
+                            {% if deal.client.property_type %}<div class="text-[10px] text-gray-500"><i class="fas fa-home mr-1 text-gray-400"></i>{{ deal.client.property_type }}</div>{% endif %}
+                            {% if deal.client.budget_range %}<div class="text-[10px] text-gray-500"><i class="fas fa-credit-card mr-1 text-gray-400"></i>{{ deal.client.budget_range }}</div>{% endif %}
+                            {% if deal.client.room_count %}<div class="text-[10px] text-gray-500"><i class="fas fa-door-open mr-1 text-gray-400"></i>{{ deal.client.room_count }}</div>{% endif %}
+                            {% if deal.client.timing %}<div class="text-[10px] text-gray-500"><i class="fas fa-clock mr-1 text-gray-400"></i>{{ deal.client.timing }}</div>{% endif %}
+                        </div>
+                        {% endif %}
+                        <div class="deal-meta">
+                            <span class="deal-date">{{ deal.created_at.strftime('%d.%m.%Y') }}</span>
+                            {% set active_tasks_all = deal.tasks.filter_by(is_completed=False).all() %}
+                            {% set overdue_count = active_tasks_all|selectattr('is_overdue')|list|length %}
+                            {% if active_tasks_all|length > 0 %}
+                                {% if overdue_count > 0 %}
+                                <span class="deal-tasks-badge bg-red-100 text-red-600 font-semibold">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>{{ overdue_count }} просроч.
+                                </span>
+                                {% endif %}
+                                {% if active_tasks_all|length - overdue_count > 0 %}
+                                <span class="deal-tasks-badge bg-amber-100 text-amber-700">
+                                    <i class="fas fa-tasks mr-1"></i>{{ active_tasks_all|length - overdue_count }}
+                                </span>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-column">
+                        <i class="fas fa-inbox text-2xl mb-2 block text-gray-300"></i>
+                        <span>Нет сделок</span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div id="listContainer" class="hidden">
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="bg-gray-50 border-b border-gray-200">
+                            <th class="text-left px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wider whitespace-nowrap">Сделка</th>
+                            <th class="text-left px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wider whitespace-nowrap">Стадия сделки</th>
+                            <th class="text-left px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wider whitespace-nowrap">Дела</th>
+                            <th class="text-left px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wider whitespace-nowrap">Клиент</th>
+                            <th class="text-left px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wider whitespace-nowrap">Сумма</th>
+                            <th class="text-left px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wider whitespace-nowrap">Ответственный</th>
+                            <th class="text-left px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wider whitespace-nowrap cursor-pointer select-none" onclick="sortListTable('date')" id="sortDateHeader">
+                                Дата создания
+                                <svg class="w-3 h-3 inline-block ml-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="listTableBody">
+                        {% set all_deals = [] %}
+                        {% for stage in stages %}
+                            {% for deal in deals_by_stage.get(stage.key, []) %}
+                        <tr class="border-b border-gray-100 hover:bg-blue-50/40 cursor-pointer transition-colors list-deal-row"
+                            data-deal-id="{{ deal.id }}"
+                            data-deal-status="{{ deal.status }}"
+                            data-deal-date="{{ deal.created_at.strftime('%Y-%m-%d %H:%M') }}"
+                            onclick="openSlidePanel({{ deal.id }})">
+                            <td class="px-4 py-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-file-alt text-gray-400 text-xs"></i>
+                                    </div>
+                                    <div>
+                                        <a href="/manager/deals/{{ deal.id }}" onclick="event.stopPropagation(); openSlidePanel({{ deal.id }}); return false;" class="text-[#0088CC] font-semibold text-sm hover:underline">{{ deal.client.full_name or deal.client.email or 'Клиент' }}</a>
+                                        <div class="text-xs text-gray-400">{{ deal.property_description or 'Продажа' }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3" onclick="event.stopPropagation()">
+                                {% set stage_color = stage.color if stage else '#6b7280' %}
+                                <select class="stage-select text-xs font-medium px-2.5 py-1.5 rounded-lg border cursor-pointer focus:ring-2 focus:ring-[#0088CC]/20 focus:border-[#0088CC] transition-all bg-white"
+                                        data-deal-id="{{ deal.id }}"
+                                        onchange="changeStageInline(this)"
+                                        style="border-color: {{ stage_color }}; color: {{ stage_color }};">
+                                    {% for s in stages %}
+                                    <option value="{{ s.key }}" {% if s.key == deal.status %}selected{% endif %} data-color="{{ s.color }}">{{ s.label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td class="px-4 py-3">
+                                {% set active_tasks_list = deal.tasks.filter_by(is_completed=False).all() %}
+                                {% set next_task = active_tasks_list[0] if active_tasks_list else None %}
+                                {% if next_task %}
+                                <div class="text-xs">
+                                    <div class="{% if next_task.is_overdue %}text-red-600 font-semibold{% else %}text-gray-700{% endif %} font-medium">
+                                        {% if next_task.is_overdue %}<i class="fas fa-exclamation-circle mr-1"></i>{% endif %}
+                                        {{ next_task.due_date.strftime('%d.%m.%Y') if next_task.due_date else '' }}
+                                    </div>
+                                    <div class="{% if next_task.is_overdue %}text-red-500{% else %}text-gray-500{% endif %} truncate max-w-[140px]">{{ next_task.title }}</div>
+                                </div>
+                                {% else %}
+                                <span class="text-xs text-gray-300">Дела отсутствуют</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="text-sm text-gray-900">{{ deal.client.full_name or deal.client.email or 'Клиент' }}</span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="text-sm font-medium text-gray-900">{% if deal.property_price and deal.property_price > 0 %}{{ '{:,.0f}'.format(deal.property_price|float).replace(',', ' ') }} ₽{% else %}—{% endif %}</span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="flex items-center gap-2">
+                                    {% if deal.manager and deal.manager.profile_image %}
+                                    <img src="{{ deal.manager.profile_image }}" alt="" class="w-6 h-6 rounded-full object-cover flex-shrink-0">
+                                    {% else %}
+                                    <div class="w-6 h-6 rounded-full bg-[#0088CC] flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
+                                        {{ (deal.manager.first_name[0] if deal.manager and deal.manager.first_name else 'М') }}{{ (deal.manager.last_name[0] if deal.manager and deal.manager.last_name else '') }}
+                                    </div>
+                                    {% endif %}
+                                    <span class="text-sm text-gray-700">{{ deal.manager.full_name if deal.manager else 'Не назначен' }}</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="text-sm text-gray-600">{{ deal.created_at.strftime('%d.%m.%Y') }}</span>
+                            </td>
+                        </tr>
+                            {% endfor %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if total_deals == 0 %}
+            <div class="text-center py-12 text-gray-400">
+                <i class="fas fa-inbox text-4xl mb-3 block"></i>
+                <p class="text-sm">Нет сделок для отображения</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div id="tasksContainer" class="hidden">
+        {% set task_columns = [
+            ('Просроченные', '#ef4444', task_columns_data.overdue),
+            ('На сегодня', '#059669', task_columns_data.today),
+            ('На этой неделе', '#0088CC', task_columns_data.this_week),
+            ('На следующей неделе', '#f59e0b', task_columns_data.next_week),
+            ('Без дел', '#6b7280', task_columns_data.no_tasks)
+        ] %}
+
+        <div class="kanban-container" id="tasksKanbanContainer">
+            {% for col_name, col_color, col_items in task_columns %}
+            <div class="kanban-column" style="min-width: 260px;" data-task-col="{{ col_name }}">
+                <div class="kanban-header" style="background: {{ col_color }}; border-bottom: 2px solid {{ col_color }};">
+                    <div class="flex items-center gap-2">
+                        <span class="text-white text-sm font-bold">{{ col_name }}</span>
+                        <span class="text-white/80 text-xs bg-white/20 px-1.5 py-0.5 rounded-full">{{ col_items|length }}</span>
+                    </div>
+                    <button class="text-white/70 hover:text-white" onclick="openCreateModal()" title="Добавить сделку">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                    </button>
+                </div>
+                <div class="kanban-cards task-drop-zone" data-task-col="{{ col_name }}"
+                     ondragover="handleTaskDragOver(event)" ondragleave="handleTaskDragLeave(event)" ondrop="handleTaskDrop(event)">
+                    {% for item in col_items %}
+                    {% set deal = item.deal %}
+                    {% set col_task = item.task %}
+                    {% set days_since = ((now_moscow - deal.created_at).days) if deal.created_at else 0 %}
+                    <div class="kanban-card {% if col_name == 'Просроченные' %}ring-2 ring-red-400 bg-red-50/40{% endif %}"
+                         style="border-left-color: {{ col_color }};"
+                         draggable="true"
+                         data-deal-id="{{ deal.id }}"
+                         data-task-id="{{ col_task.id if col_task else '' }}"
+                         data-task-col-source="{{ col_name }}"
+                         ondragstart="handleTaskCardDragStart(event)"
+                         ondragend="handleTaskCardDragEnd(event)"
+                         onclick="openSlidePanel({{ deal.id }})">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-sm font-semibold text-gray-900">{{ deal.client.full_name or deal.client.email or 'Клиент' }}</span>
+                            <div class="flex items-center gap-1">
+                                {% if col_task and col_task.is_overdue %}
+                                <span class="w-2.5 h-2.5 bg-red-500 rounded-full" title="Просрочена"></span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if deal.property_price and deal.property_price > 0 %}
+                        <div class="text-xs font-medium text-gray-900 mb-1">{{ '{:,.0f}'.format(deal.property_price|float).replace(',', ' ') }} ₽</div>
+                        {% elif deal.client and deal.client.budget_range %}
+                        <div class="text-[10px] text-gray-500 mb-1"><i class="fas fa-ruble-sign mr-1"></i>{{ deal.client.budget_range }}</div>
+                        {% endif %}
+                        {% if col_task %}
+                        <div class="text-xs text-[#0088CC] font-medium mb-1"><i class="fas fa-tasks mr-1 text-[10px]"></i>{{ col_task.title }}</div>
+                        {% else %}
+                        <div class="text-xs text-gray-400 mb-1">Нет активных дел</div>
+                        {% endif %}
+                        <div class="text-[10px] text-gray-400 mb-1">{{ deal.created_at|russian_date if deal.created_at else '' }}</div>
+                        {% if col_task and col_task.due_date %}
+                        <div class="text-[10px] text-gray-500 mb-0.5">Срок</div>
+                        <div class="text-[10px] {% if col_task.is_overdue %}text-red-600 font-bold{% else %}text-gray-700{% endif %}">{{ col_task.due_date.strftime('%d.%m.%Y %H:%M') }}</div>
+                        <div class="text-[10px] {% if col_task.is_overdue %}text-red-600{% else %}text-green-600{% endif %} font-medium">{{ 'Просрочена' if col_task.is_overdue else 'Активна' }}</div>
+                        {% endif %}
+                        <div class="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
+                            <span class="text-[10px] text-[#0088CC] font-medium cursor-pointer hover:underline" onclick="event.stopPropagation(); openSlidePanel({{ deal.id }})">+ Дело</span>
+                            <div class="flex items-center gap-2">
+                                {% if col_task and col_task.due_date %}
+                                <span class="text-[10px] {% if col_task.is_overdue %}text-red-500{% else %}text-gray-400{% endif %}">{{ col_task.due_date.strftime('%H:%M') }}</span>
+                                {% endif %}
+                                <span class="text-[10px] text-gray-400">{{ days_since }} дн.</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% if col_items|length == 0 %}
+                    <div class="text-center py-8 text-gray-400 text-xs">
+                        <i class="fas fa-inbox text-2xl mb-2 block"></i>
+                        <span>Нет сделок</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+</div>
+
+    <div id="calendarContainer" class="hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+            {% if calendar_stats %}
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+                <div class="bg-white rounded-xl border border-gray-200 p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-2xl font-bold text-gray-900">{{ calendar_stats.total }}</div>
+                            <div class="text-xs text-gray-500 mt-0.5">Всего задач</div>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-[#0088CC]">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl border border-gray-200 p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-2xl font-bold text-amber-600">{{ calendar_stats.active }}</div>
+                            <div class="text-xs text-gray-500 mt-0.5">Активных</div>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl border border-gray-200 p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-2xl font-bold text-red-500">{{ calendar_stats.overdue }}</div>
+                            <div class="text-xs text-gray-500 mt-0.5">Просроченных</div>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-red-500">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl border border-gray-200 p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-2xl font-bold text-green-600">{{ calendar_stats.completed }}</div>
+                            <div class="text-xs text-gray-500 mt-0.5">Выполненных</div>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center text-green-600">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="flex flex-wrap items-center gap-4 mb-4">
+                <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full inline-block" style="background:#f59e0b"></span><span class="text-xs text-gray-600">Активная</span></div>
+                <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full inline-block" style="background:#ef4444"></span><span class="text-xs text-gray-600">Просроченная</span></div>
+                <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full inline-block" style="background:#10b981"></span><span class="text-xs text-gray-600">Выполненная</span></div>
+                <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full inline-block" style="background:#6366f1"></span><span class="text-xs text-gray-600">Высокий приоритет</span></div>
+                <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full inline-block" style="background:#0088CC"></span><span class="text-xs text-gray-600">Сделка</span></div>
+                <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full inline-block" style="background:#059669"></span><span class="text-xs text-gray-600">Договор</span></div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-gray-200 p-4">
+                <div id="kanbanCalendar"></div>
+            </div>
+        </div>
+
+        <div id="calendarTaskModal" class="hidden fixed inset-0 z-[10020] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+            <div class="relative w-full max-w-sm mx-4">
+                <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+                    <div class="bg-gradient-to-r from-[#0088CC] to-[#006699] px-5 py-4 flex items-center gap-3">
+                        <div id="calTaskModalIcon" class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-white">
+                            <i class="fas fa-tasks text-sm"></i>
+                        </div>
+                        <h3 id="calTaskModalTitle" class="text-white font-bold text-sm flex-1 line-clamp-2"></h3>
+                        <button onclick="document.getElementById('calendarTaskModal').classList.add('hidden')" class="text-white/70 hover:text-white transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                    <div id="calTaskModalBody" class="px-5 py-4 text-sm space-y-3"></div>
+                    <div class="px-5 py-4 border-t border-gray-100 bg-gray-50">
+                        <a id="calTaskModalLink" href="#" class="flex items-center justify-center gap-2 w-full bg-[#0088CC] text-white py-2.5 rounded-xl hover:bg-[#006699] transition-all text-sm font-semibold shadow-sm">
+                            <i class="fas fa-external-link-alt text-xs"></i>
+                            Открыть сделку
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div id="quickTaskModal" class="hidden fixed inset-0 z-[10025] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+    <div class="relative w-full max-w-md mx-4">
+        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+            <div class="bg-gradient-to-r from-[#0088CC] to-[#006699] px-5 py-4 flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-white">
+                    <i class="fas fa-plus text-sm"></i>
+                </div>
+                <h3 id="quickTaskModalTitle" class="text-white font-bold text-sm flex-1">Новое дело</h3>
+                <button onclick="closeQuickTaskModal()" class="text-white/70 hover:text-white transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="px-5 py-4 space-y-4">
+                <input type="hidden" id="quickTaskDealId" value="">
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Сделка</label>
+                    <select id="quickTaskDealSelect" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-[#0088CC]/20 focus:border-[#0088CC] outline-none">
+                        <option value="">Выберите сделку...</option>
+                        {% for deal in deals_by_stage.values()|sum(start=[]) %}
+                        <option value="{{ deal.id }}">{{ deal.deal_number }} — {{ deal.client.full_name or deal.client.email or 'Клиент' }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Название дела</label>
+                    <input type="text" id="quickTaskTitle" placeholder="Например: Позвонить клиенту" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-[#0088CC]/20 focus:border-[#0088CC] outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Дата</label>
+                        <input type="date" id="quickTaskDate" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-[#0088CC]/20 focus:border-[#0088CC] outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Время</label>
+                        <input type="time" id="quickTaskTime" value="12:00" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-[#0088CC]/20 focus:border-[#0088CC] outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Приоритет</label>
+                    <div class="flex gap-2">
+                        <button type="button" onclick="setQuickTaskPriority('low')" data-priority="low" class="quick-priority-btn flex-1 px-3 py-2 rounded-xl text-xs font-medium border-2 border-gray-200 text-gray-500 hover:border-blue-300 transition-all">Низкий</button>
+                        <button type="button" onclick="setQuickTaskPriority('normal')" data-priority="normal" class="quick-priority-btn flex-1 px-3 py-2 rounded-xl text-xs font-medium border-2 border-[#0088CC] bg-[#0088CC]/10 text-[#0088CC] transition-all">Обычный</button>
+                        <button type="button" onclick="setQuickTaskPriority('high')" data-priority="high" class="quick-priority-btn flex-1 px-3 py-2 rounded-xl text-xs font-medium border-2 border-gray-200 text-gray-500 hover:border-red-300 transition-all">Высокий</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Описание</label>
+                    <textarea id="quickTaskDesc" rows="2" placeholder="Подробности..." class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-[#0088CC]/20 focus:border-[#0088CC] outline-none resize-none"></textarea>
+                </div>
+            </div>
+            <div class="px-5 py-4 border-t border-gray-100 bg-gray-50 flex gap-3">
+                <button onclick="closeQuickTaskModal()" class="flex-1 py-2.5 rounded-xl text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-100 transition-all">Отмена</button>
+                <button onclick="submitQuickTask()" id="quickTaskSubmitBtn" class="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#0088CC] hover:bg-[#006699] transition-all shadow-sm">Создать</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="slide-overlay" id="createSlideOverlay" onclick="closeCreateModal()"></div>
+<div class="slide-panel" id="createSlidePanel">
+    <div class="slide-panel-header">
+        <div class="flex items-center gap-3">
+            <button onclick="closeCreateModal()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-200 text-gray-500 transition-colors" title="Закрыть">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-medium text-[#0088CC]">● CRM</span>
+                <span class="text-xs text-gray-400">›</span>
+                <span class="text-sm font-semibold text-gray-700">Новая сделка</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="toggleCreateFullscreen()" id="createFullscreenBtn" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-200 text-gray-500 transition-colors" title="На весь экран">
+                <svg class="w-4 h-4" id="createExpandIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+                <svg class="w-4 h-4 hidden" id="createCollapseIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9V4H4m11 0v5h5M9 20v-5H4m11 0v5h5"/></svg>
+            </button>
+        </div>
+    </div>
+    <div class="flex-1 overflow-y-auto">
+        <div class="p-5">
+            <div class="mb-5">
+                <div class="flex flex-wrap gap-2 mb-5" id="stageSelector">
+                    {% for stage in stages %}
+                    <button type="button" onclick="selectStage('{{ stage.key }}')" 
+                            class="stage-select-btn px-3 py-1.5 rounded-full text-xs font-medium border-2 transition-all"
+                            data-stage="{{ stage.key }}"
+                            style="border-color: {{ stage.color }}30; color: {{ stage.color }}; background: {{ stage.color }}08;"
+                            data-color="{{ stage.color }}">
+                        <span class="w-2 h-2 rounded-full inline-block mr-1.5" style="background: {{ stage.color }};"></span>
+                        {{ stage.label }}
+                    </button>
+                    {% endfor %}
+                </div>
+                <input type="hidden" id="createDealStatus" value="new">
+            </div>
+
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm mb-4">
+                <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-user text-[#0088CC]"></i>
+                        <span class="text-sm font-bold text-gray-800">Клиент</span>
+                    </div>
+                    <button type="button" onclick="toggleNewClientForm()" id="toggleClientBtn" class="text-xs text-[#0088CC] hover:text-[#006699] font-medium">
+                        <i class="fas fa-plus mr-1"></i>Новый клиент
+                    </button>
+                </div>
+                <div class="p-4">
+                    <div id="existingClientSection">
+                        <div class="relative">
+                            <input type="text" id="clientSearchInput" placeholder="Поиск клиента по имени, телефону, email..."
+                                   class="form-input pr-10" oninput="searchClients(this.value)" onfocus="showClientDropdown()" autocomplete="off">
+                            <div class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                <i class="fas fa-search text-sm"></i>
+                            </div>
+                        </div>
+                        <div id="clientDropdown" class="hidden mt-1 max-h-40 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                            {% for client in assigned_clients %}
+                            <button type="button" onclick="selectClient({{ client.id }}, '{{ (client.full_name or client.email)|e }}')" 
+                                    class="client-option w-full flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 text-left transition-colors border-b border-gray-50 last:border-0"
+                                    data-name="{{ (client.full_name or '')|lower }}" data-email="{{ (client.email or '')|lower }}" data-phone="{{ (client.phone or '')|lower }}">
+                                <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-user text-gray-400 text-xs"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">{{ client.full_name or 'Без имени' }}</p>
+                                    <p class="text-xs text-gray-400">{{ client.phone or client.email or '' }}</p>
+                                </div>
+                            </button>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" id="createDealClient" value="">
+                        <div id="selectedClientBadge" class="hidden mt-2 inline-flex items-center gap-2 bg-blue-50 text-[#0088CC] px-3 py-1.5 rounded-lg text-sm font-medium">
+                            <i class="fas fa-user-check"></i>
+                            <span id="selectedClientName"></span>
+                            <button onclick="clearSelectedClient()" class="ml-1 hover:text-red-500">&times;</button>
+                        </div>
+                    </div>
+                    <div id="newClientSection" class="hidden">
+                        <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-[#0088CC]"><i class="fas fa-user-plus mr-1"></i>Создание нового клиента</span>
+                                <button type="button" onclick="toggleNewClientForm()" class="text-xs text-gray-400 hover:text-gray-600">Отмена</button>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">Имя <span class="text-red-500">*</span></label>
+                                    <input type="text" id="newClientName" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[#0088CC] focus:border-[#0088CC] bg-white" placeholder="Иван Иванов">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">Телефон</label>
+                                    <input type="tel" id="newClientPhone" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[#0088CC] focus:border-[#0088CC] bg-white" placeholder="+7 (999) 123-45-67">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-500 mb-1">Email <span class="text-red-500">*</span></label>
+                                <input type="email" id="newClientEmail" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[#0088CC] focus:border-[#0088CC] bg-white" placeholder="email@example.com">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-500 mb-1">Запрос клиента</label>
+                                <input type="text" id="newClientRequest" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[#0088CC] focus:border-[#0088CC] bg-white" placeholder="Например: 2-комн., Сочи, до 10 млн">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm mb-4">
+                <div class="px-4 py-3 border-b border-gray-100">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-info-circle text-[#0088CC]"></i>
+                        <span class="text-sm font-bold text-gray-800">О сделке</span>
+                    </div>
+                </div>
+                <div class="p-4 space-y-3">
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">Жилой комплекс</label>
+                        <select id="createDealComplex" class="form-input" onchange="handleComplexSelect(this)">
+                            <option value="">Выберите ЖК</option>
+                            {% for rc in residential_complexes %}
+                            <option value="{{ rc.name }}">{{ rc.name }}</option>
+                            {% endfor %}
+                            <option value="__custom__">Ввести вручную...</option>
+                        </select>
+                        <input type="text" id="createDealComplexCustom" class="form-input mt-2" placeholder="Название ЖК" style="display:none;">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1">Стоимость, ₽</label>
+                            <input type="text" id="createDealPrice" class="form-input" placeholder="10 000 000" oninput="formatPriceInput(this)">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1">Кэшбэк, ₽</label>
+                            <input type="text" id="createDealCashback" class="form-input" placeholder="300 000" oninput="formatPriceInput(this)">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1 uppercase text-[10px] font-semibold text-red-400 tracking-wider">Описание объекта</label>
+                        <textarea id="createDealDescription" class="form-input" rows="3" placeholder="Студия 28м², 5 этаж, вид на море..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sticky bottom-0 bg-white border-t border-gray-200 px-5 py-3 flex justify-end gap-3">
+            <button onclick="closeCreateModal()" class="px-5 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors">Отмена</button>
+            <button onclick="submitCreateDeal()" id="createDealSubmitBtn" class="px-6 py-2.5 text-sm font-bold text-white bg-[#059669] hover:bg-[#047857] rounded-xl transition-all shadow-md">
+                <i class="fas fa-check mr-2"></i>Создать сделку
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="slide-overlay" id="slideOverlay" onclick="closeSlidePanel()"></div>
+<div class="slide-panel" id="slidePanel">
+    <div class="slide-panel-header">
+        <div class="flex items-center gap-3">
+            <button onclick="closeSlidePanel()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-200 text-gray-500 transition-colors" title="Закрыть">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <span class="text-sm font-semibold text-gray-700" id="slidePanelTitle">Сделка</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="toggleFullscreen()" id="fullscreenBtn" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-200 text-gray-500 transition-colors" title="Полный экран">
+                <svg class="w-4 h-4" id="expandIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+                <svg class="w-4 h-4 hidden" id="collapseIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9V4H4m11 0v5h5M9 20v-5H4m11 0v5h5"/></svg>
+            </button>
+            <a href="#" id="slidePanelOpenFull" target="_blank" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-200 text-gray-500 transition-colors" title="Открыть в новой вкладке">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            </a>
+        </div>
+    </div>
+    <iframe id="slidePanelIframe" src="about:blank"></iframe>
+</div>
+
+<script>
+var kanbanCalendarInstance = null;
+
+function switchView(view) {
+    const kanban = document.getElementById('kanbanContainer');
+    const list = document.getElementById('listContainer');
+    const tasks = document.getElementById('tasksContainer');
+    const cal = document.getElementById('calendarContainer');
+    const tabK = document.getElementById('tabKanban');
+    const tabL = document.getElementById('tabList');
+    const tabT = document.getElementById('tabTasks');
+    const tabC = document.getElementById('tabCalendar');
+
+    [kanban, list, tasks, cal].forEach(el => el && el.classList.add('hidden'));
+    [tabK, tabL, tabT, tabC].forEach(el => el && el.classList.remove('active'));
+
+    if (view === 'calendar') {
+        cal.classList.remove('hidden');
+        tabC.classList.add('active');
+        if (!kanbanCalendarInstance) {
+            initKanbanCalendar();
+        } else {
+            kanbanCalendarInstance.render();
+        }
+    } else if (view === 'list') {
+        list.classList.remove('hidden');
+        tabL.classList.add('active');
+        filterListRows();
+    } else if (view === 'tasks') {
+        tasks.classList.remove('hidden');
+        tabT.classList.add('active');
+    } else {
+        kanban.classList.remove('hidden');
+        tabK.classList.add('active');
+    }
+    localStorage.setItem('dealsView', view);
+}
+
+function initKanbanCalendar() {
+    var calendarEl = document.getElementById('kanbanCalendar');
+    if (!calendarEl || typeof FullCalendar === 'undefined') return;
+
+    var events = {{ calendar_events_json|safe }};
+    kanbanCalendarInstance = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'ru',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,listWeek'
+        },
+        buttonText: { today: 'Сегодня', month: 'Месяц', week: 'Неделя', list: 'Список' },
+        events: events,
+        dateClick: function(info) {
+            openQuickTaskModal(null, info.dateStr, '12:00');
+        },
+        selectable: true,
+        eventClick: function(info) {
+            info.jsEvent.preventDefault();
+            var ev = info.event;
+            var props = ev.extendedProps;
+            var isTask = (props.type === 'task');
+
+            document.getElementById('calTaskModalTitle').textContent = ev.title;
+
+            var iconEl = document.getElementById('calTaskModalIcon');
+            if (isTask) {
+                iconEl.className = 'w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-white';
+                iconEl.innerHTML = '<i class="fas fa-tasks text-sm"></i>';
+            } else {
+                iconEl.className = 'w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-white';
+                iconEl.innerHTML = '<i class="fas fa-handshake text-sm"></i>';
+            }
+
+            var body = '';
+            body += '<div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">';
+            body += '<div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm"><i class="fas fa-briefcase text-[#0088CC] text-xs"></i></div>';
+            body += '<div><p class="text-xs text-gray-400">Сделка</p><p class="font-semibold text-gray-900">' + (props.deal_number || '') + '</p></div>';
+            body += '</div>';
+            body += '<div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">';
+            body += '<div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm"><i class="fas fa-user text-gray-400 text-xs"></i></div>';
+            body += '<div><p class="text-xs text-gray-400">Клиент</p><p class="font-semibold text-gray-900">' + (props.client_name || '—') + '</p></div>';
+            body += '</div>';
+            if (props.description) {
+                body += '<p class="text-gray-500 text-xs px-1">' + props.description + '</p>';
+            }
+            if (isTask) {
+                body += '<div class="flex items-center gap-2 mt-1">';
+                body += '<span class="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-50 text-amber-700 text-xs rounded-lg font-medium"><i class="fas fa-flag text-[10px]"></i>' + (props.priority_label || 'Обычный') + '</span>';
+                if (props.is_overdue) {
+                    body += '<span class="inline-flex items-center gap-1 px-2.5 py-1 bg-red-50 text-red-600 text-xs rounded-lg font-semibold"><i class="fas fa-exclamation-triangle text-[10px]"></i>Просрочена</span>';
+                }
+                body += '</div>';
+            } else {
+                body += '<span class="inline-flex items-center gap-1 mt-1 px-2.5 py-1 bg-blue-50 text-[#0088CC] text-xs rounded-lg font-medium"><i class="fas fa-handshake text-[10px]"></i>Сделка — ' + (props.priority_label || '') + '</span>';
+            }
+
+            document.getElementById('calTaskModalBody').innerHTML = body;
+            document.getElementById('calTaskModalLink').href = '/manager/deals/' + props.deal_id;
+            document.getElementById('calendarTaskModal').classList.remove('hidden');
+        },
+        height: 'auto',
+        dayMaxEvents: 3,
+        firstDay: 1,
+        eventDisplay: 'block',
+        dayHeaderFormat: { weekday: 'short' }
+    });
+    kanbanCalendarInstance.render();
+
+    document.getElementById('calendarTaskModal').addEventListener('click', function(e) {
+        if (e.target === this || e.target === this.firstElementChild) {
+            this.classList.add('hidden');
+        }
+    });
+}
+
+async function changeStageInline(selectEl) {
+    const dealId = selectEl.dataset.dealId;
+    const newStage = selectEl.value;
+    try {
+        const resp = await fetch(`/api/deals/${dealId}/stage`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({stage: newStage})
+        });
+        const data = await resp.json();
+        if (data.success) {
+            const opt = selectEl.options[selectEl.selectedIndex];
+            const color = opt.dataset.color || '#6b7280';
+            selectEl.style.borderColor = color;
+            selectEl.style.color = color;
+        } else {
+            alert(data.error || 'Ошибка смены этапа');
+            location.reload();
+        }
+    } catch(e) {
+        alert('Ошибка сети');
+        location.reload();
+    }
+}
+
+let listSortDir = 'desc';
+function sortListTable(col) {
+    if (col === 'date') {
+        listSortDir = listSortDir === 'desc' ? 'asc' : 'desc';
+        const tbody = document.getElementById('listTableBody');
+        const rows = Array.from(tbody.querySelectorAll('.list-deal-row'));
+        rows.sort((a, b) => {
+            const da = a.dataset.dealDate || '';
+            const db = b.dataset.dealDate || '';
+            return listSortDir === 'asc' ? da.localeCompare(db) : db.localeCompare(da);
+        });
+        rows.forEach(r => tbody.appendChild(r));
+    }
+}
+
+function filterListRows() {
+    const query = document.getElementById('kanbanSearch').value.toLowerCase().trim();
+    const stageFilters = (typeof activeSearchTags !== 'undefined' ? activeSearchTags : []).filter(t => t.type === 'stage').map(t => t.value);
+    document.querySelectorAll('.list-deal-row').forEach(row => {
+        const status = row.dataset.dealStatus;
+        const text = row.textContent.toLowerCase();
+        let visible = true;
+        if (stageFilters.length > 0 && !stageFilters.includes(status)) visible = false;
+        if (query && !text.includes(query)) visible = false;
+        row.style.display = visible ? '' : 'none';
+    });
+}
+
+const urlView = new URLSearchParams(window.location.search).get('view');
+const initialView = urlView || localStorage.getItem('dealsView');
+if (initialView === 'list' || initialView === 'tasks' || initialView === 'calendar') {
+    requestAnimationFrame(() => switchView(initialView));
+}
+
+function filterByManager(managerId) {
+    const url = new URL(window.location.href);
+    if (managerId) {
+        url.searchParams.set('manager_id', managerId);
+    } else {
+        url.searchParams.delete('manager_id');
+    }
+    window.location.href = url.toString();
+}
+
+(function() {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+    let draggedCard = null;
+
+    window.handleDragStart = function(e) {
+        draggedCard = e.currentTarget;
+        draggedCard.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', draggedCard.dataset.dealId);
+    };
+
+    window.handleDragEnd = function(e) {
+        if (draggedCard) draggedCard.classList.remove('dragging');
+        draggedCard = null;
+        document.querySelectorAll('.kanban-cards.drag-over').forEach(el => el.classList.remove('drag-over'));
+    };
+
+    window.handleDragOver = function(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        e.currentTarget.classList.add('drag-over');
+    };
+
+    window.handleDragLeave = function(e) {
+        e.currentTarget.classList.remove('drag-over');
+    };
+
+    window.handleDrop = function(e) {
+        e.preventDefault();
+        e.currentTarget.classList.remove('drag-over');
+        const dealId = e.dataTransfer.getData('text/plain');
+        const newStage = e.currentTarget.dataset.stage;
+        if (!dealId || !newStage) return;
+        const card = document.querySelector('[data-deal-id="' + dealId + '"]');
+        if (card && card.dataset.dealStatus === newStage) return;
+
+        fetch('/api/deals/' + dealId, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+            body: JSON.stringify({ status: newStage })
+        }).then(r => {
+            if (r.ok) { window.location.reload(); }
+            else { r.json().then(d => alert(d.error || 'Ошибка обновления статуса')).catch(() => alert('Ошибка обновления статуса')); }
+        }).catch(() => alert('Ошибка сети'));
+    };
+
+    (function initTouchDrag() {
+        if (!('ontouchstart' in window)) return;
+        var touchCard = null, touchClone = null, touchDealId = null, touchStartX = 0, touchStartY = 0, isDragging = false;
+        var longPressTimer = null, longPressDelay = 400, suppressClick = false;
+
+        document.addEventListener('click', function(e) {
+            if (suppressClick) {
+                e.preventDefault();
+                e.stopPropagation();
+                suppressClick = false;
+                return false;
+            }
+        }, true);
+
+        document.addEventListener('touchstart', function(e) {
+            var card = e.target.closest('.kanban-card');
+            if (!card) return;
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            longPressTimer = setTimeout(function() {
+                isDragging = true;
+                suppressClick = true;
+                touchCard = card;
+                touchDealId = card.dataset.dealId;
+                card.style.opacity = '0.4';
+                touchClone = card.cloneNode(true);
+                touchClone.style.cssText = 'position:fixed;z-index:10010;pointer-events:none;width:' + card.offsetWidth + 'px;opacity:0.9;transform:rotate(2deg);box-shadow:0 8px 25px rgba(0,0,0,0.2);border-radius:10px;';
+                touchClone.style.left = (touchStartX - card.offsetWidth/2) + 'px';
+                touchClone.style.top = (touchStartY - 30) + 'px';
+                document.body.appendChild(touchClone);
+                if (navigator.vibrate) navigator.vibrate(30);
+            }, longPressDelay);
+        }, {passive: true});
+
+        document.addEventListener('touchmove', function(e) {
+            if (longPressTimer && !isDragging) {
+                var dx = Math.abs(e.touches[0].clientX - touchStartX);
+                var dy = Math.abs(e.touches[0].clientY - touchStartY);
+                if (dx > 10 || dy > 10) { clearTimeout(longPressTimer); longPressTimer = null; }
+            }
+            if (!isDragging || !touchClone) return;
+            e.preventDefault();
+            var tx = e.touches[0].clientX, ty = e.touches[0].clientY;
+            touchClone.style.left = (tx - touchClone.offsetWidth/2) + 'px';
+            touchClone.style.top = (ty - 30) + 'px';
+            document.querySelectorAll('.kanban-cards').forEach(function(zone) {
+                var r = zone.getBoundingClientRect();
+                if (tx >= r.left && tx <= r.right && ty >= r.top && ty <= r.bottom) {
+                    zone.classList.add('drag-over');
+                } else {
+                    zone.classList.remove('drag-over');
+                }
+            });
+        }, {passive: false});
+
+        document.addEventListener('touchend', function(e) {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+            if (!isDragging) return;
+            isDragging = false;
+            suppressClick = true;
+            if (touchCard) touchCard.style.opacity = '';
+            if (touchClone) { touchClone.remove(); touchClone = null; }
+            var endX = e.changedTouches[0].clientX, endY = e.changedTouches[0].clientY;
+            var targetZone = null;
+            document.querySelectorAll('.kanban-cards').forEach(function(zone) {
+                zone.classList.remove('drag-over');
+                var r = zone.getBoundingClientRect();
+                if (endX >= r.left && endX <= r.right && endY >= r.top && endY <= r.bottom) {
+                    targetZone = zone;
+                }
+            });
+            if (targetZone && touchDealId) {
+                var newStage = targetZone.dataset.stage;
+                var card = document.querySelector('[data-deal-id="' + touchDealId + '"]');
+                if (card && card.dataset.dealStatus !== newStage) {
+                    fetch('/api/deals/' + touchDealId, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                        body: JSON.stringify({ status: newStage })
+                    }).then(function(r) {
+                        if (r.ok) window.location.reload();
+                        else r.json().then(function(d) { alert(d.error || 'Ошибка'); }).catch(function() { alert('Ошибка'); });
+                    }).catch(function() { alert('Ошибка сети'); });
+                }
+            }
+            touchCard = null; touchDealId = null;
+            setTimeout(function() { suppressClick = false; }, 300);
+        }, {passive: true});
+
+        document.addEventListener('touchcancel', function() {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+            if (touchCard) touchCard.style.opacity = '';
+            if (touchClone) { touchClone.remove(); touchClone = null; }
+            isDragging = false; touchCard = null; touchDealId = null;
+            document.querySelectorAll('.kanban-cards.drag-over').forEach(function(el) { el.classList.remove('drag-over'); });
+        }, {passive: true});
+    })();
+
+    var taskDraggedCard = null;
+
+    window.handleTaskCardDragStart = function(e) {
+        taskDraggedCard = e.currentTarget;
+        taskDraggedCard.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', JSON.stringify({
+            dealId: taskDraggedCard.dataset.dealId,
+            taskId: taskDraggedCard.dataset.taskId,
+            source: taskDraggedCard.dataset.taskColSource
+        }));
+    };
+
+    window.handleTaskCardDragEnd = function(e) {
+        if (taskDraggedCard) taskDraggedCard.classList.remove('dragging');
+        taskDraggedCard = null;
+        document.querySelectorAll('.task-drop-zone.drag-over').forEach(function(el) { el.classList.remove('drag-over'); });
+    };
+
+    window.handleTaskDragOver = function(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        e.currentTarget.classList.add('drag-over');
+    };
+
+    window.handleTaskDragLeave = function(e) {
+        e.currentTarget.classList.remove('drag-over');
+    };
+
+    function getTargetDate(targetCol) {
+        var now = new Date();
+        if (targetCol === 'На сегодня') {
+            return new Date(now.getFullYear(), now.getMonth(), now.getDate(), 18, 0);
+        } else if (targetCol === 'На этой неделе') {
+            var dayOfWeek = now.getDay();
+            var daysToFri = (5 - dayOfWeek + 7) % 7;
+            if (daysToFri <= 0) daysToFri = 1;
+            return new Date(now.getFullYear(), now.getMonth(), now.getDate() + daysToFri, 18, 0);
+        } else if (targetCol === 'На следующей неделе') {
+            var dayOfWeek2 = now.getDay();
+            var daysToNextFri = (5 - dayOfWeek2 + 7) % 7 + 7;
+            return new Date(now.getFullYear(), now.getMonth(), now.getDate() + daysToNextFri, 18, 0);
+        }
+        return null;
+    }
+
+    function formatDateStr(d) {
+        return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    }
+
+    function formatDateTimeStr(d) {
+        return formatDateStr(d) + 'T' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+    }
+
+    window.handleTaskDrop = function(e) {
+        e.preventDefault();
+        e.currentTarget.classList.remove('drag-over');
+        var raw = e.dataTransfer.getData('text/plain');
+        if (!raw) return;
+        try { var info = JSON.parse(raw); } catch(err) { return; }
+        var dealId = info.dealId;
+        var taskId = info.taskId;
+        var sourceCol = info.source;
+        var targetCol = e.currentTarget.dataset.taskCol;
+        if (!dealId || sourceCol === targetCol) return;
+
+        var targetDate = getTargetDate(targetCol);
+        if (!targetDate) return;
+
+        if (!taskId) {
+            openQuickTaskModal(dealId, formatDateStr(targetDate), String(targetDate.getHours()).padStart(2,'0') + ':' + String(targetDate.getMinutes()).padStart(2,'0'));
+            return;
+        }
+
+        fetch('/api/deals/' + dealId + '/tasks/' + taskId + '/reschedule', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+            body: JSON.stringify({ due_date: formatDateTimeStr(targetDate) })
+        }).then(function(r) {
+            if (r.ok) window.location.reload();
+            else r.json().then(function(d) { alert(d.error || 'Ошибка переноса задачи'); }).catch(function() { alert('Ошибка'); });
+        }).catch(function() { alert('Ошибка сети'); });
+    };
+
+    var quickTaskPriority = 'normal';
+
+    window.openQuickTaskModal = function(dealId, dateStr, timeStr) {
+        var modal = document.getElementById('quickTaskModal');
+        var dealSelect = document.getElementById('quickTaskDealSelect');
+        var dealIdField = document.getElementById('quickTaskDealId');
+        var dateField = document.getElementById('quickTaskDate');
+        var timeField = document.getElementById('quickTaskTime');
+        var titleField = document.getElementById('quickTaskTitle');
+        var descField = document.getElementById('quickTaskDesc');
+
+        titleField.value = '';
+        descField.value = '';
+        quickTaskPriority = 'normal';
+        setQuickTaskPriority('normal');
+
+        if (dealId) {
+            dealIdField.value = dealId;
+            dealSelect.value = dealId;
+            dealSelect.parentElement.style.display = 'none';
+        } else {
+            dealIdField.value = '';
+            dealSelect.value = '';
+            dealSelect.parentElement.style.display = '';
+        }
+
+        if (dateStr) dateField.value = dateStr;
+        else {
+            var now = new Date();
+            dateField.value = formatDateStr(now);
+        }
+        if (timeStr) timeField.value = timeStr;
+        else timeField.value = '12:00';
+
+        modal.classList.remove('hidden');
+        setTimeout(function() { titleField.focus(); }, 100);
+    };
+
+    window.closeQuickTaskModal = function() {
+        document.getElementById('quickTaskModal').classList.add('hidden');
+    };
+
+    window.setQuickTaskPriority = function(p) {
+        quickTaskPriority = p;
+        document.querySelectorAll('.quick-priority-btn').forEach(function(btn) {
+            var bp = btn.dataset.priority;
+            if (bp === p) {
+                if (bp === 'high') {
+                    btn.className = 'quick-priority-btn flex-1 px-3 py-2 rounded-xl text-xs font-medium border-2 border-red-500 bg-red-50 text-red-600 transition-all';
+                } else if (bp === 'low') {
+                    btn.className = 'quick-priority-btn flex-1 px-3 py-2 rounded-xl text-xs font-medium border-2 border-blue-400 bg-blue-50 text-blue-600 transition-all';
+                } else {
+                    btn.className = 'quick-priority-btn flex-1 px-3 py-2 rounded-xl text-xs font-medium border-2 border-[#0088CC] bg-[#0088CC]/10 text-[#0088CC] transition-all';
+                }
+            } else {
+                btn.className = 'quick-priority-btn flex-1 px-3 py-2 rounded-xl text-xs font-medium border-2 border-gray-200 text-gray-500 hover:border-gray-300 transition-all';
+            }
+        });
+    };
+
+    window.submitQuickTask = function() {
+        var dealId = document.getElementById('quickTaskDealId').value || document.getElementById('quickTaskDealSelect').value;
+        var title = document.getElementById('quickTaskTitle').value.trim();
+        var date = document.getElementById('quickTaskDate').value;
+        var time = document.getElementById('quickTaskTime').value || '12:00';
+        var desc = document.getElementById('quickTaskDesc').value.trim();
+
+        if (!dealId) { alert('Выберите сделку'); return; }
+        if (!title) { alert('Введите название дела'); return; }
+        if (!date) { alert('Выберите дату'); return; }
+
+        var submitBtn = document.getElementById('quickTaskSubmitBtn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Создание...';
+
+        fetch('/api/deals/' + dealId + '/tasks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+            body: JSON.stringify({
+                title: title,
+                due_date: date + 'T' + time,
+                priority: quickTaskPriority,
+                description: desc
+            })
+        }).then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                closeQuickTaskModal();
+                window.location.reload();
+            } else {
+                alert(data.error || 'Ошибка создания дела');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Создать';
+            }
+        }).catch(function() {
+            alert('Ошибка сети');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Создать';
+        });
+    };
+
+    document.getElementById('quickTaskModal').addEventListener('click', function(e) {
+        if (e.target === this) closeQuickTaskModal();
+    });
+
+    let isNewClientMode = false;
+
+    window.toggleNewClientForm = function() {
+        isNewClientMode = !isNewClientMode;
+        document.getElementById('existingClientSection').classList.toggle('hidden', isNewClientMode);
+        document.getElementById('newClientSection').classList.toggle('hidden', !isNewClientMode);
+        const btn = document.getElementById('toggleClientBtn');
+        btn.innerHTML = isNewClientMode ? '<i class="fas fa-users mr-1"></i>Выбрать из списка' : '<i class="fas fa-plus mr-1"></i>Новый клиент';
+        if (!isNewClientMode) {
+            document.getElementById('newClientName').value = '';
+            document.getElementById('newClientPhone').value = '';
+            document.getElementById('newClientEmail').value = '';
+            document.getElementById('newClientRequest').value = '';
+        }
+    };
+
+    window.searchClients = function(query) {
+        const q = query.toLowerCase().trim();
+        document.querySelectorAll('.client-option').forEach(el => {
+            if (!q) { el.style.display = ''; return; }
+            const name = el.dataset.name || '';
+            const email = el.dataset.email || '';
+            const phone = el.dataset.phone || '';
+            el.style.display = (name.includes(q) || email.includes(q) || phone.includes(q)) ? '' : 'none';
+        });
+        showClientDropdown();
+    };
+
+    window.showClientDropdown = function() {
+        document.getElementById('clientDropdown').classList.remove('hidden');
+    };
+
+    window.selectClient = function(id, name) {
+        document.getElementById('createDealClient').value = id;
+        document.getElementById('selectedClientName').textContent = name;
+        document.getElementById('selectedClientBadge').classList.remove('hidden');
+        document.getElementById('clientDropdown').classList.add('hidden');
+        document.getElementById('clientSearchInput').value = '';
+    };
+
+    window.clearSelectedClient = function() {
+        document.getElementById('createDealClient').value = '';
+        document.getElementById('selectedClientBadge').classList.add('hidden');
+    };
+
+    window.selectStage = function(key) {
+        document.getElementById('createDealStatus').value = key;
+        document.querySelectorAll('.stage-select-btn').forEach(btn => {
+            const c = btn.dataset.color;
+            if (btn.dataset.stage === key) {
+                btn.style.background = c;
+                btn.style.color = '#fff';
+                btn.style.borderColor = c;
+            } else {
+                btn.style.background = c + '08';
+                btn.style.color = c;
+                btn.style.borderColor = c + '30';
+            }
+        });
+    };
+
+    window.formatPriceInput = function(input) {
+        let v = input.value.replace(/[^\d]/g, '');
+        if (v) input.value = parseInt(v).toLocaleString('ru-RU');
+        else input.value = '';
+    };
+
+    function parsePriceValue(str) {
+        return parseFloat((str || '').replace(/[^\d]/g, '')) || 0;
+    }
+
+    window.openCreateModal = function(stage) {
+        document.getElementById('createDealStatus').value = stage || 'new';
+        document.getElementById('createDealClient').value = '';
+        document.getElementById('clientSearchInput').value = '';
+        document.getElementById('selectedClientBadge').classList.add('hidden');
+        document.getElementById('createDealComplex').value = '';
+        document.getElementById('createDealComplexCustom').style.display = 'none';
+        document.getElementById('createDealComplexCustom').value = '';
+        document.getElementById('createDealPrice').value = '';
+        document.getElementById('createDealCashback').value = '';
+        document.getElementById('createDealDescription').value = '';
+        document.getElementById('clientDropdown').classList.add('hidden');
+        if (isNewClientMode) toggleNewClientForm();
+        if (stage) selectStage(stage); else {
+            document.querySelectorAll('.stage-select-btn').forEach(btn => {
+                const c = btn.dataset.color;
+                if (btn.dataset.stage === 'new') {
+                    btn.style.background = c;
+                    btn.style.color = '#fff';
+                    btn.style.borderColor = c;
+                } else {
+                    btn.style.background = c + '08';
+                    btn.style.color = c;
+                    btn.style.borderColor = c + '30';
+                }
+            });
+        }
+        document.getElementById('createSlidePanel').classList.add('open');
+        document.getElementById('createSlideOverlay').classList.add('active');
+    };
+
+    window.closeCreateModal = function() {
+        document.getElementById('createSlidePanel').classList.remove('open', 'fullscreen');
+        document.getElementById('createSlideOverlay').classList.remove('active');
+        document.getElementById('createExpandIcon').classList.remove('hidden');
+        document.getElementById('createCollapseIcon').classList.add('hidden');
+    };
+
+    window.toggleCreateFullscreen = function() {
+        const panel = document.getElementById('createSlidePanel');
+        panel.classList.toggle('fullscreen');
+        document.getElementById('createExpandIcon').classList.toggle('hidden');
+        document.getElementById('createCollapseIcon').classList.toggle('hidden');
+    };
+
+    window.handleComplexSelect = function(sel) {
+        const customInput = document.getElementById('createDealComplexCustom');
+        if (sel.value === '__custom__') {
+            customInput.style.display = '';
+            customInput.focus();
+        } else {
+            customInput.style.display = 'none';
+            customInput.value = '';
+        }
+    };
+
+    function formatPhoneForServer(phone) {
+        const digits = phone.replace(/[^\d]/g, '');
+        if (digits.length === 11 && digits[0] === '7') {
+            return '+7-' + digits.slice(1,4) + '-' + digits.slice(4,7) + '-' + digits.slice(7,9) + '-' + digits.slice(9,11);
+        }
+        if (digits.length === 10) {
+            return '+7-' + digits.slice(0,3) + '-' + digits.slice(3,6) + '-' + digits.slice(6,8) + '-' + digits.slice(8,10);
+        }
+        return phone;
+    }
+
+    async function createNewClient() {
+        const name = document.getElementById('newClientName').value.trim();
+        let phone = document.getElementById('newClientPhone').value.trim();
+        const email = document.getElementById('newClientEmail').value.trim();
+        const clientRequest = document.getElementById('newClientRequest').value.trim();
+        if (!name) {
+            alert('Укажите имя клиента');
+            return null;
+        }
+        if (!email) {
+            alert('Укажите email клиента');
+            return null;
+        }
+        if (phone) {
+            phone = formatPhoneForServer(phone);
+        }
+        try {
+            const body = { full_name: name, email: email };
+            if (phone) body.phone = phone;
+            if (clientRequest) body.client_request = clientRequest;
+            const res = await fetch('/api/manager/add-client', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                body: JSON.stringify(body)
+            });
+            const data = await res.json();
+            if (res.ok && data.success) return data.client_id;
+            alert(data.error || 'Ошибка создания клиента');
+            return null;
+        } catch(e) {
+            alert('Ошибка сети при создании клиента');
+            return null;
+        }
+    }
+
+    window.submitCreateDeal = async function() {
+        const btn = document.getElementById('createDealSubmitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Создаём...';
+
+        let clientId;
+        if (isNewClientMode) {
+            clientId = await createNewClient();
+            if (!clientId) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check mr-2"></i>Создать сделку'; return; }
+        } else {
+            clientId = document.getElementById('createDealClient').value;
+            if (!clientId) { alert('Выберите клиента'); btn.disabled = false; btn.innerHTML = '<i class="fas fa-check mr-2"></i>Создать сделку'; return; }
+        }
+
+        const complexSel = document.getElementById('createDealComplex').value;
+        const complexCustom = document.getElementById('createDealComplexCustom').value.trim();
+        const complexName = complexSel === '__custom__' ? complexCustom : complexSel;
+        const price = parsePriceValue(document.getElementById('createDealPrice').value);
+        const cashback = parsePriceValue(document.getElementById('createDealCashback').value);
+        const description = document.getElementById('createDealDescription').value.trim();
+        const status = document.getElementById('createDealStatus').value || 'new';
+
+        fetch('/api/deals', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+            body: JSON.stringify({
+                client_id: parseInt(clientId),
+                residential_complex_name: complexName,
+                property_price: price,
+                cashback_amount: cashback,
+                property_description: description,
+                status: status
+            })
+        }).then(r => r.json().then(d => ({ ok: r.ok, data: d })))
+        .then(({ ok, data }) => {
+            if (ok) { window.location.reload(); }
+            else { alert(data.error || 'Ошибка создания сделки'); btn.disabled = false; btn.innerHTML = '<i class="fas fa-check mr-2"></i>Создать сделку'; }
+        }).catch(() => { alert('Ошибка сети'); btn.disabled = false; btn.innerHTML = '<i class="fas fa-check mr-2"></i>Создать сделку'; });
+    };
+
+    window.openSlidePanel = function(dealId) {
+        const panel = document.getElementById('slidePanel');
+        const overlay = document.getElementById('slideOverlay');
+        const iframe = document.getElementById('slidePanelIframe');
+        const openFull = document.getElementById('slidePanelOpenFull');
+        const dealUrl = '/manager/deals/' + dealId;
+
+        iframe.src = dealUrl + '?partial=1';
+        openFull.href = dealUrl;
+        document.getElementById('slidePanelTitle').textContent = 'Загрузка...';
+
+        iframe.onload = function() {
+            try {
+                const title = iframe.contentDocument?.title;
+                if (title) document.getElementById('slidePanelTitle').textContent = title.split('|')[0].trim();
+            } catch(e) {
+                document.getElementById('slidePanelTitle').textContent = 'Сделка';
+            }
+        };
+
+        overlay.classList.add('active');
+        requestAnimationFrame(() => panel.classList.add('open'));
+        document.body.style.overflow = 'hidden';
+    };
+
+    window.closeSlidePanel = function() {
+        const panel = document.getElementById('slidePanel');
+        const overlay = document.getElementById('slideOverlay');
+        panel.classList.remove('open', 'fullscreen');
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+        document.getElementById('expandIcon').classList.remove('hidden');
+        document.getElementById('collapseIcon').classList.add('hidden');
+        setTimeout(() => { document.getElementById('slidePanelIframe').src = 'about:blank'; }, 300);
+    };
+
+    window.toggleFullscreen = function() {
+        const panel = document.getElementById('slidePanel');
+        const expand = document.getElementById('expandIcon');
+        const collapse = document.getElementById('collapseIcon');
+        panel.classList.toggle('fullscreen');
+        expand.classList.toggle('hidden');
+        collapse.classList.toggle('hidden');
+    };
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            if (document.getElementById('slidePanel').classList.contains('open')) { closeSlidePanel(); }
+            else if (document.getElementById('createSlidePanel').classList.contains('open')) { closeCreateModal(); }
+            hideSearchDropdown();
+        }
+    });
+
+    let activeSearchTags = [];
+
+    window.showSearchDropdown = function() {
+        document.getElementById('searchDropdown').classList.remove('hidden');
+    };
+
+    window.hideSearchDropdown = function() {
+        document.getElementById('searchDropdown').classList.add('hidden');
+    };
+
+    window.setSearchCategory = function(el, cat) {
+        document.querySelectorAll('.search-cat-btn').forEach(btn => {
+            btn.classList.remove('active', 'text-[#0088CC]');
+            btn.classList.add('text-gray-600');
+        });
+        el.classList.add('active', 'text-[#0088CC]');
+        el.classList.remove('text-gray-600');
+        document.getElementById('searchCatStage').classList.toggle('hidden', cat !== 'stage');
+        document.getElementById('searchCatQuick').classList.toggle('hidden', cat !== 'quick');
+    };
+
+    window.addSearchTag = function(type, value, label, color) {
+        if (activeSearchTags.find(t => t.type === type && t.value === value)) return;
+        activeSearchTags.push({ type, value, label, color });
+        renderSearchTags();
+        filterKanbanCards();
+        hideSearchDropdown();
+    };
+
+    window.removeSearchTag = function(idx) {
+        activeSearchTags.splice(idx, 1);
+        renderSearchTags();
+        filterKanbanCards();
+    };
+
+    window.clearAllSearch = function() {
+        activeSearchTags = [];
+        document.getElementById('kanbanSearch').value = '';
+        renderSearchTags();
+        filterKanbanCards();
+    };
+
+    function renderSearchTags() {
+        const container = document.getElementById('searchTags');
+        const clearBtn = document.getElementById('searchClearBtn');
+        container.innerHTML = '';
+        activeSearchTags.forEach((tag, idx) => {
+            const el = document.createElement('span');
+            el.className = 'inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium text-white cursor-default';
+            el.style.background = tag.color || '#0088CC';
+            el.innerHTML = tag.label + '<button onclick="removeSearchTag(' + idx + ')" class="ml-1 hover:opacity-70">&times;</button>';
+            container.appendChild(el);
+        });
+        clearBtn.classList.toggle('hidden', activeSearchTags.length === 0 && !document.getElementById('kanbanSearch').value);
+    }
+
+    window.filterKanbanCards = function() {
+        const query = document.getElementById('kanbanSearch').value.toLowerCase().trim();
+        const clearBtn = document.getElementById('searchClearBtn');
+        clearBtn.classList.toggle('hidden', activeSearchTags.length === 0 && !query);
+        const stageFilters = activeSearchTags.filter(t => t.type === 'stage').map(t => t.value);
+
+        document.querySelectorAll('.kanban-column').forEach(col => {
+            const stageKey = col.dataset.stage;
+
+            if (stageFilters.length > 0 && !stageFilters.includes(stageKey)) {
+                col.style.display = 'none';
+                return;
+            }
+            col.style.display = '';
+
+            const cards = col.querySelectorAll('.kanban-card');
+            let visibleCount = 0;
+            cards.forEach(card => {
+                if (!query) { card.style.display = ''; visibleCount++; return; }
+                const text = card.textContent.toLowerCase();
+                if (text.includes(query)) { card.style.display = ''; visibleCount++; }
+                else { card.style.display = 'none'; }
+            });
+
+            const emptyMsg = col.querySelector('.empty-column');
+            if (emptyMsg) emptyMsg.style.display = visibleCount === 0 && query ? '' : (cards.length === 0 ? '' : 'none');
+        });
+
+        filterListRows();
+    };
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#kanbanSearch') && !e.target.closest('#searchDropdown')) {
+            hideSearchDropdown();
+        }
+        if (!e.target.closest('#avatar-dropdown-btn') && !e.target.closest('#avatar-dropdown-menu')) {
+            document.getElementById('avatar-dropdown-menu')?.classList.add('hidden');
+        }
+        if (!e.target.closest('#mgr-notification-bell-container')) {
+            document.getElementById('mgr-notification-dropdown')?.classList.add('hidden');
+        }
+        if (!e.target.closest('#clientSearchInput') && !e.target.closest('#clientDropdown')) {
+            document.getElementById('clientDropdown')?.classList.add('hidden');
+        }
+    });
+
+    var avatarBtn = document.getElementById('avatar-dropdown-btn');
+    if (avatarBtn) {
+        avatarBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            document.getElementById('avatar-dropdown-menu').classList.toggle('hidden');
+            document.getElementById('mgr-notification-dropdown')?.classList.add('hidden');
+        });
+    }
+
+    var notifBtn = document.getElementById('mgr-notification-bell-btn');
+    if (notifBtn) {
+        notifBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            document.getElementById('mgr-notification-dropdown').classList.toggle('hidden');
+            document.getElementById('avatar-dropdown-menu')?.classList.add('hidden');
+            loadNotifications();
+        });
+    }
+
+    function loadNotifications() {
+        var listEl = document.getElementById('mgr-notification-list');
+        if (!listEl) return;
+        fetch('/api/manager/notifications').then(function(r) { return r.json(); }).then(function(data) {
+            if (data.success && data.notifications && data.notifications.length > 0) {
+                var html = '';
+                data.notifications.forEach(function(n) {
+                    html += '<div class="px-4 py-3 border-b border-gray-100 hover:bg-gray-50 transition-colors">';
+                    html += '<p class="text-sm text-gray-900">' + (n.message || n.title || '') + '</p>';
+                    html += '<p class="text-xs text-gray-400 mt-1">' + (n.time || '') + '</p>';
+                    html += '</div>';
+                });
+                listEl.innerHTML = html;
+                var badge = document.getElementById('mgr-notification-badge');
+                var unread = data.unread_count || data.notifications.length;
+                if (badge && unread > 0) { badge.textContent = unread; badge.classList.remove('hidden'); }
+            } else {
+                listEl.innerHTML = '<div class="flex items-center justify-center py-8 text-gray-400"><span class="text-sm">Нет уведомлений</span></div>';
+            }
+        }).catch(function() {
+            listEl.innerHTML = '<div class="flex items-center justify-center py-8 text-gray-400"><span class="text-sm">Нет уведомлений</span></div>';
+        });
+    }
+
+    function updateShiftUI(isCheckedIn, since, duration) {
+        var label = document.getElementById('deskShiftLabel');
+        var dur = document.getElementById('deskShiftDuration');
+        var iconWrap = document.getElementById('deskShiftIconWrap');
+        var playIcon = document.getElementById('deskShiftPlayIcon');
+        var stopIcon = document.getElementById('deskShiftStopIcon');
+        var inactiveIcon = document.getElementById('deskShiftIconInactive');
+        var activeIcon = document.getElementById('deskShiftIconActive');
+        if (!label) return;
+        if (isCheckedIn) {
+            label.textContent = 'На работе с ' + since;
+            label.className = 'text-xs text-green-600';
+            dur.textContent = duration || '--:--:--';
+            if (iconWrap) iconWrap.className = 'w-9 h-9 bg-green-50 rounded-full flex items-center justify-center flex-shrink-0';
+            if (inactiveIcon) inactiveIcon.classList.add('hidden');
+            if (activeIcon) activeIcon.classList.remove('hidden');
+            if (playIcon) playIcon.classList.add('hidden');
+            if (stopIcon) stopIcon.classList.remove('hidden');
+        } else {
+            label.textContent = 'Смена не начата';
+            label.className = 'text-xs text-gray-400';
+            dur.textContent = '--:--:--';
+            if (iconWrap) iconWrap.className = 'w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0';
+            if (inactiveIcon) inactiveIcon.classList.remove('hidden');
+            if (activeIcon) activeIcon.classList.add('hidden');
+            if (playIcon) playIcon.classList.remove('hidden');
+            if (stopIcon) stopIcon.classList.add('hidden');
+        }
+    }
+
+    window.toggleCheckin = async function() {
+        try {
+            var res = await fetch('/api/manager/checkin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken }
+            });
+            var data = await res.json();
+            if (data.success) {
+                if (data.status === 'checked_in') updateShiftUI(true, data.time, '0м');
+                else updateShiftUI(false, '', '');
+            }
+        } catch(e) { console.error('Checkin error:', e); }
+    };
+
+    async function loadShiftStatus() {
+        try {
+            var res = await fetch('/api/manager/checkin/status');
+            var data = await res.json();
+            if (data.success) updateShiftUI(data.is_checked_in, data.since || '', data.duration || '');
+        } catch(e) {}
+    }
+    loadShiftStatus();
+
+    var mobileActiveStage = 'all';
+    window.mobileFilterStage = function(stage, btn) {
+        mobileActiveStage = stage;
+        document.querySelectorAll('.mobile-stage-chip').forEach(function(c) { c.classList.remove('active'); });
+        btn.classList.add('active');
+        applyMobileFilters();
+        if (stage !== 'all') {
+            var columns = document.querySelectorAll('.kanban-column');
+            for (var i = 0; i < columns.length; i++) {
+                if (columns[i].dataset.stage === stage && columns[i].style.display !== 'none') {
+                    columns[i].scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+                    break;
+                }
+            }
+        }
+    };
+
+    window.mobileFilterKanban = function() {
+        var input = document.getElementById('mobileKanbanSearch');
+        var clearBtn = document.getElementById('mobileSearchClear');
+        clearBtn.classList.toggle('hidden', !input.value);
+        applyMobileFilters();
+    };
+
+    window.clearMobileSearch = function() {
+        var input = document.getElementById('mobileKanbanSearch');
+        input.value = '';
+        document.getElementById('mobileSearchClear').classList.add('hidden');
+        applyMobileFilters();
+    };
+
+    function applyMobileFilters() {
+        var searchEl = document.getElementById('mobileKanbanSearch');
+        var query = searchEl ? searchEl.value.toLowerCase().trim() : '';
+        document.querySelectorAll('.kanban-column').forEach(function(col) {
+            var stageKey = col.dataset.stage;
+            if (mobileActiveStage !== 'all' && stageKey !== mobileActiveStage) {
+                col.style.display = 'none';
+                return;
+            }
+            col.style.display = '';
+            var cards = col.querySelectorAll('.kanban-card');
+            var visibleCount = 0;
+            cards.forEach(function(card) {
+                if (!query) { card.style.display = ''; visibleCount++; return; }
+                var text = card.textContent.toLowerCase();
+                if (text.includes(query)) { card.style.display = ''; visibleCount++; }
+                else { card.style.display = 'none'; }
+            });
+            if (query && visibleCount === 0 && cards.length > 0) {
+                col.style.display = 'none';
+            }
+        });
+    }
+})();
+</script>
+
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+
+<style>
+@media (max-width: 767px) {
+    .kanban-container { padding-bottom: 80px; }
+    .kanban-tab-section { display: none !important; }
+    .kanban-top-header { display: none !important; }
+    body > footer, body > .footer, #footer-section { display: none !important; }
+    header, #header-section, .site-header { display: none !important; }
+    .kanban-container { padding-left: 8px !important; padding-right: 8px !important; }
+    .kanban-desktop-controls { display: none !important; }
+}
+#kanbanCalendar .fc .fc-button-primary {
+    background-color: var(--brand) !important;
+    border-color: var(--brand) !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    padding: 6px 14px !important;
+    text-transform: none !important;
+}
+#kanbanCalendar .fc .fc-button-primary:hover {
+    background-color: var(--brand-dark) !important;
+}
+#kanbanCalendar .fc .fc-button-primary:not(:disabled).fc-button-active {
+    background-color: var(--brand-dark) !important;
+    border-color: var(--brand-dark) !important;
+}
+#kanbanCalendar .fc .fc-button-group > .fc-button { border-radius: 0 !important; }
+#kanbanCalendar .fc .fc-button-group > .fc-button:first-child { border-radius: 8px 0 0 8px !important; }
+#kanbanCalendar .fc .fc-button-group > .fc-button:last-child { border-radius: 0 8px 8px 0 !important; }
+#kanbanCalendar .fc .fc-toolbar-title { font-size: 1.1rem !important; font-weight: 700 !important; text-transform: capitalize !important; }
+#kanbanCalendar .fc .fc-daygrid-day-number { font-size: 13px !important; font-weight: 500 !important; padding: 4px 8px !important; }
+#kanbanCalendar .fc .fc-event { border-radius: 6px !important; padding: 2px 6px !important; font-size: 12px !important; border: none !important; }
+</style>
+{% set active_tab = 'deals' %}
+{% include 'components/manager_mobile_nav.html' %}
+{% endblock %}

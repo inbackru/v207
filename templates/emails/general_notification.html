@@ -1,0 +1,21 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}{{ subject }} | InBack{% endblock %}
+
+{% block content %}
+<h1>{{ subject }}</h1>
+
+<p>Здравствуйте{% if user_name %}, {{ user_name.split()[0] }}{% elif user and user.full_name %}, {{ user.full_name.split()[0] }}{% endif %}!</p>
+
+<div class="highlight-box">
+    {{ message|safe }}
+</div>
+
+{% if action_url %}
+<div style="text-align: center; margin: 32px 0;">
+    <a href="{{ action_url }}" class="btn-primary">
+        {{ action_text or 'Перейти' }}
+    </a>
+</div>
+{% endif %}
+{% endblock %}

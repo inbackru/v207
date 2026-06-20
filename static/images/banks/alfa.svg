@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80">
+  <rect width="200" height="80" fill="white" rx="8"/>
+  <rect x="14" y="14" width="52" height="52" rx="10" fill="#EF3124"/>
+  <text x="40" y="48" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="white" text-anchor="middle">A</text>
+  <text x="78" y="34" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#EF3124">Альфа</text>
+  <text x="78" y="54" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#EF3124">Банк</text>
+</svg>

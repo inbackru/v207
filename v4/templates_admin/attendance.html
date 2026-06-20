@@ -1,0 +1,109 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Посещаемость менеджеров — Админ | InBack{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-6">
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Посещаемость менеджеров</h1>
+            <p class="text-sm text-gray-500 mt-1">Отслеживание рабочего времени</p>
+        </div>
+        <form method="GET" class="flex items-center gap-3">
+            <input type="date" name="date" value="{{ selected_date.strftime('%Y-%m-%d') }}"
+                   class="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#0088CC] focus:border-transparent"
+                   onchange="this.form.submit()">
+            {% if selected_date != today %}
+            <a href="{{ url_for('admin_attendance') }}" class="px-4 py-2 bg-[#0088CC] text-white rounded-lg text-sm hover:bg-[#006699] transition-colors">
+                Сегодня
+            </a>
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+            <div class="text-2xl font-bold text-gray-900">{{ attendance_data|length }}</div>
+            <div class="text-xs text-gray-500">Всего менеджеров</div>
+        </div>
+        <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+            <div class="text-2xl font-bold text-green-600">{{ attendance_data|selectattr('is_currently_active')|list|length }}</div>
+            <div class="text-xs text-gray-500">Сейчас на работе</div>
+        </div>
+        <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+            <div class="text-2xl font-bold text-[#0088CC]">{{ attendance_data|selectattr('first_checkin')|list|length }}</div>
+            <div class="text-xs text-gray-500">Отметились за {{ selected_date.strftime('%d.%m.%Y') }}</div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <table class="w-full">
+            <thead>
+                <tr class="bg-gray-50 border-b border-gray-200">
+                    <th class="text-left px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Менеджер</th>
+                    <th class="text-center px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Статус</th>
+                    <th class="text-center px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Первый вход</th>
+                    <th class="text-center px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Последняя активность</th>
+                    <th class="text-center px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Общее время</th>
+                    <th class="text-center px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Сессии</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for item in attendance_data %}
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                                {% if item.manager.profile_image %}
+                                <img src="{{ item.manager.profile_image }}" alt="" class="w-full h-full object-cover">
+                                {% else %}
+                                <div class="w-full h-full bg-gradient-to-r from-[#0088CC] to-[#006699] flex items-center justify-center text-white font-bold text-sm">
+                                    {{ (item.manager.full_name or item.manager.email or '?')[0]|upper }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <div class="text-sm font-semibold text-gray-900">{{ item.manager.full_name or item.manager.email }}</div>
+                                <div class="text-xs text-gray-400">{{ item.manager.email }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-4 text-center">
+                        {% if item.is_currently_active %}
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-50 text-green-700">
+                            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                            На работе
+                        </span>
+                        {% elif item.first_checkin %}
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-500">
+                            Ушёл
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-50 text-red-400">
+                            Не отметился
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-4 text-center text-sm text-gray-600">
+                        {{ item.first_checkin or '—' }}
+                    </td>
+                    <td class="px-4 py-4 text-center text-sm text-gray-600">
+                        {{ item.last_activity or '—' }}
+                    </td>
+                    <td class="px-4 py-4 text-center">
+                        {% if item.first_checkin %}
+                        <span class="text-sm font-semibold text-gray-900">{{ item.total_time }}</span>
+                        {% else %}
+                        <span class="text-sm text-gray-400">—</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-4 text-center text-sm text-gray-500">
+                        {{ item.checkins|length if item.checkins else '0' }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

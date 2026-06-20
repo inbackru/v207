@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отписка от уведомлений</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex items-center justify-center px-4">
+        <div class="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
+            <!-- Success Icon -->
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-10 h-10 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+            </div>
+
+            <!-- Success Message -->
+            <h1 class="text-2xl font-bold text-gray-900 mb-2">Вы успешно отписались</h1>
+            <p class="text-gray-600 mb-6">
+                Уведомления для поиска <span class="font-semibold">«{{ search_name }}»</span> отключены.
+                Вы больше не будете получать сообщения о новых объектах по этому поиску.
+            </p>
+
+            <!-- Info Box -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-left">
+                <p class="text-sm text-blue-800">
+                    <strong>Что дальше?</strong><br>
+                    Вы можете в любой момент включить уведомления обратно в настройках вашего профиля.
+                </p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="space-y-3">
+                <a href="/user/dashboard" class="block w-full bg-[#0088CC] text-white px-6 py-3 rounded-lg hover:bg-[#006699] transition-colors font-medium">
+                    Перейти в личный кабинет
+                </a>
+                <a href="/" class="block w-full bg-gray-100 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+                    На главную
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,643 @@
+{% extends "base.html" %}
+
+{% block title %}Управление балансом - Админ-панель{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Управление балансом и выводом средств</h1>
+                    <p class="text-gray-600 mt-2">Администрирование кэшбэк-системы</p>
+                </div>
+                <a href="/admin/dashboard" class="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
+                    </svg>
+                    Назад в админ-панель
+                </a>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-white bg-opacity-20 rounded-lg">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-sm font-medium opacity-80 mb-1">Пользователи с балансом</p>
+                <p class="text-2xl font-bold">{{ total_users_with_balance }}</p>
+            </div>
+
+            <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-lg p-6 text-white">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-white bg-opacity-20 rounded-lg">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-sm font-medium opacity-80 mb-1">Всего заработано</p>
+                <p class="text-2xl font-bold">{{ "{:,.0f}".format(total_earned) }} ₽</p>
+            </div>
+
+            <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg p-6 text-white">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-white bg-opacity-20 rounded-lg">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-sm font-medium opacity-80 mb-1">В обработке</p>
+                <p class="text-2xl font-bold">{{ "{:,.0f}".format(total_pending) }} ₽</p>
+                <p class="text-xs opacity-75 mt-1">Заявки: {{ pending_count }}</p>
+            </div>
+
+            <div class="bg-gradient-to-br from-gray-500 to-gray-600 rounded-xl shadow-lg p-6 text-white">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-white bg-opacity-20 rounded-lg">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-sm font-medium opacity-80 mb-1">Всего выведено</p>
+                <p class="text-2xl font-bold">{{ "{:,.0f}".format(total_withdrawn) }} ₽</p>
+            </div>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="bg-white rounded-lg shadow mb-6">
+            <div class="border-b border-gray-200">
+                <nav class="flex -mb-px">
+                    <button class="admin-tab-btn active px-6 py-4 text-sm font-medium border-b-2 border-blue-500 text-blue-600" data-tab="withdrawals">
+                        Заявки на вывод
+                        <span class="ml-2 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">{{ pending_count }}</span>
+                    </button>
+                    <button class="admin-tab-btn px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="users">
+                        Пользователи
+                    </button>
+                    <button class="admin-tab-btn px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="credit">
+                        Начисление средств
+                    </button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Tab: Withdrawal Requests -->
+        <div class="admin-tab-content active" id="tab-withdrawals">
+            <!-- Filters -->
+            <div class="bg-white rounded-lg shadow mb-6 p-6">
+                <div class="flex flex-wrap gap-4">
+                    <select id="filter-status" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Все статусы</option>
+                        <option value="pending">На рассмотрении</option>
+                        <option value="approved">Одобрено</option>
+                        <option value="paid">Выплачено</option>
+                        <option value="rejected">Отклонено</option>
+                    </select>
+                    <button onclick="loadWithdrawals()" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition">
+                        Применить фильтр
+                    </button>
+                </div>
+            </div>
+
+            <!-- Withdrawals Table -->
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Пользователь</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Сумма</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Способ</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Статус</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="withdrawals-tbody" class="bg-white divide-y divide-gray-200">
+                        <!-- Loaded via JavaScript -->
+                    </tbody>
+                </table>
+                <div id="withdrawals-loading" class="text-center py-12">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <p class="text-gray-600 mt-4">Загрузка...</p>
+                </div>
+                <div id="withdrawals-empty" class="text-center py-12 hidden">
+                    <p class="text-gray-500">Заявок не найдено</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Users with Balance -->
+        <div class="admin-tab-content hidden" id="tab-users">
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="p-6">
+                    <div class="mb-4">
+                        <input type="text" id="search-user" placeholder="Поиск по email или имени..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Пользователь</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Доступно</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">В обработке</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Заработано</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Выведено</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-tbody" class="bg-white divide-y divide-gray-200">
+                        <!-- Loaded via JavaScript -->
+                    </tbody>
+                </table>
+                <div id="users-loading" class="text-center py-12">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <p class="text-gray-600 mt-4">Загрузка...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Credit Balance -->
+        <div class="admin-tab-content hidden" id="tab-credit">
+            <div class="bg-white rounded-lg shadow p-6 max-w-2xl">
+                <h3 class="text-xl font-bold text-gray-900 mb-6">Начисление средств пользователю</h3>
+                <form id="credit-form" onsubmit="creditBalance(event)">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Пользователь</label>
+                            <input type="text" id="credit-user-search" placeholder="Введите email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <input type="hidden" id="credit-user-id">
+                            <div id="user-search-results" class="mt-2 bg-white border border-gray-200 rounded-lg shadow-lg hidden max-h-60 overflow-y-auto"></div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Сумма (₽)</label>
+                            <input type="number" id="credit-amount" required min="1" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Тип операции</label>
+                            <select id="credit-type" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="cashback_earned">Кэшбэк</option>
+                                <option value="bonus">Бонус</option>
+                                <option value="adjustment">Корректировка</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Описание</label>
+                            <textarea id="credit-description" required rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">ID сделки (опционально)</label>
+                            <input type="number" id="credit-deal-id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <button type="submit" class="w-full px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition">
+                            Начислить средства
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modals -->
+<!-- Rejection Modal -->
+<div id="reject-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+        <h3 class="text-lg font-bold text-gray-900 mb-4">Отклонить заявку</h3>
+        <textarea id="rejection-reason" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-4" placeholder="Укажите причину отклонения..."></textarea>
+        <div class="flex gap-3">
+            <button onclick="confirmReject()" class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition">
+                Отклонить
+            </button>
+            <button onclick="closeRejectModal()" class="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium transition">
+                Отмена
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Transaction History Modal -->
+<div id="transaction-history-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+        <div class="p-6 border-b border-gray-200">
+            <h3 class="text-xl font-bold text-gray-900">История транзакций</h3>
+            <p class="text-gray-600 mt-1" id="transaction-user-info"></p>
+        </div>
+        <div class="overflow-y-auto flex-1">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50 sticky top-0">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Дата</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Тип</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Описание</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Сумма</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Баланс после</th>
+                    </tr>
+                </thead>
+                <tbody id="transaction-history-tbody" class="bg-white divide-y divide-gray-200">
+                    <!-- Loaded via JavaScript -->
+                </tbody>
+            </table>
+            <div id="transaction-history-loading" class="text-center py-12">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <p class="text-gray-600 mt-4">Загрузка...</p>
+            </div>
+            <div id="transaction-history-empty" class="text-center py-12 hidden">
+                <p class="text-gray-500">Нет транзакций</p>
+            </div>
+        </div>
+        <div class="p-4 border-t border-gray-200">
+            <button onclick="closeTransactionHistoryModal()" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium transition">
+                Закрыть
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// CSRF Token
+const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+// Tab switching
+document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.admin-tab-btn').forEach(b => {
+            b.classList.remove('active', 'border-blue-500', 'text-blue-600');
+            b.classList.add('border-transparent', 'text-gray-500');
+        });
+        this.classList.add('active', 'border-blue-500', 'text-blue-600');
+        this.classList.remove('border-transparent', 'text-gray-500');
+        
+        document.querySelectorAll('.admin-tab-content').forEach(content => content.classList.add('hidden'));
+        document.getElementById('tab-' + this.dataset.tab).classList.remove('hidden');
+        
+        if (this.dataset.tab === 'withdrawals') loadWithdrawals();
+        if (this.dataset.tab === 'users') loadUsers();
+    });
+});
+
+// Load withdrawals
+async function loadWithdrawals() {
+    const status = document.getElementById('filter-status').value;
+    const tbody = document.getElementById('withdrawals-tbody');
+    const loading = document.getElementById('withdrawals-loading');
+    const empty = document.getElementById('withdrawals-empty');
+    
+    tbody.innerHTML = '';
+    loading.classList.remove('hidden');
+    empty.classList.add('hidden');
+    
+    try {
+        const url = `/api/admin/withdrawals${status ? '?status=' + status : ''}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        loading.classList.add('hidden');
+        
+        if (data.success && data.requests.length > 0) {
+            data.requests.forEach(req => {
+                const statusColors = {
+                    pending: 'bg-yellow-100 text-yellow-800',
+                    approved: 'bg-blue-100 text-blue-800',
+                    paid: 'bg-green-100 text-green-800',
+                    rejected: 'bg-red-100 text-red-800'
+                };
+                const statusTexts = {
+                    pending: 'На рассмотрении',
+                    approved: 'Одобрено',
+                    paid: 'Выплачено',
+                    rejected: 'Отклонено'
+                };
+                
+                let actions = '';
+                if (req.status === 'pending') {
+                    actions = `
+                        <button onclick="approveWithdrawal(${req.id})" class="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs font-medium mr-2">Одобрить</button>
+                        <button onclick="openRejectModal(${req.id})" class="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-medium">Отклонить</button>
+                    `;
+                } else if (req.status === 'approved') {
+                    actions = `<button onclick="markPaid(${req.id})" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-medium">Выплачено</button>`;
+                }
+                
+                const row = `<tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#${req.id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${req.user_email || 'N/A'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">${Math.floor(req.amount).toLocaleString('ru-RU')} ₽</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${req.payout_method}</td>
+                    <td class="px-6 py-4 whitespace-nowrap"><span class="px-2 py-1 rounded-full text-xs font-medium ${statusColors[req.status]}">${statusTexts[req.status]}</span></td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(req.created_at).toLocaleDateString('ru-RU')}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">${actions}</td>
+                </tr>`;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+        } else {
+            empty.classList.remove('hidden');
+        }
+    } catch (error) {
+        loading.classList.add('hidden');
+        console.error('Error loading withdrawals:', error);
+        alert('Ошибка загрузки заявок');
+    }
+}
+
+// Load users with balance
+async function loadUsers() {
+    const tbody = document.getElementById('users-tbody');
+    const loading = document.getElementById('users-loading');
+    
+    tbody.innerHTML = '';
+    loading.classList.remove('hidden');
+    
+    try {
+        const response = await fetch('/api/admin/users-with-balance');
+        const data = await response.json();
+        
+        loading.classList.add('hidden');
+        
+        if (data.success && data.users.length > 0) {
+            data.users.forEach(user => {
+                const row = `<tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${user.email}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">${Math.floor(user.available).toLocaleString('ru-RU')} ₽</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-orange-600">${Math.floor(user.pending).toLocaleString('ru-RU')} ₽</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${Math.floor(user.total_earned).toLocaleString('ru-RU')} ₽</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${Math.floor(user.total_withdrawn).toLocaleString('ru-RU')} ₽</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm"><button onclick="viewUserTransactions(${user.user_id}, '${user.full_name || user.email}')" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition">История</button></td>
+                </tr>`;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+        }
+    } catch (error) {
+        loading.classList.add('hidden');
+        console.error('Error loading users:', error);
+    }
+}
+
+// Withdrawal actions
+let currentRejectId = null;
+
+async function approveWithdrawal(id) {
+    if (!confirm('Одобрить эту заявку на вывод?')) return;
+    
+    try {
+        const response = await fetch(`/api/admin/withdrawals/${id}/approve`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            }
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            alert('Заявка одобрена');
+            loadWithdrawals();
+        } else {
+            alert('Ошибка: ' + data.error);
+        }
+    } catch (error) {
+        console.error('Error approving withdrawal:', error);
+        alert('Произошла ошибка');
+    }
+}
+
+function openRejectModal(id) {
+    currentRejectId = id;
+    document.getElementById('reject-modal').classList.remove('hidden');
+    document.getElementById('reject-modal').classList.add('flex');
+}
+
+function closeRejectModal() {
+    currentRejectId = null;
+    document.getElementById('rejection-reason').value = '';
+    document.getElementById('reject-modal').classList.add('hidden');
+    document.getElementById('reject-modal').classList.remove('flex');
+}
+
+async function confirmReject() {
+    const reason = document.getElementById('rejection-reason').value.trim();
+    if (!reason) {
+        alert('Укажите причину отклонения');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/admin/withdrawals/${currentRejectId}/reject`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ rejection_reason: reason })
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            alert('Заявка отклонена');
+            closeRejectModal();
+            loadWithdrawals();
+        } else {
+            alert('Ошибка: ' + data.error);
+        }
+    } catch (error) {
+        console.error('Error rejecting withdrawal:', error);
+        alert('Произошла ошибка');
+    }
+}
+
+async function markPaid(id) {
+    if (!confirm('Отметить эту заявку как выплаченную?')) return;
+    
+    try {
+        const response = await fetch(`/api/admin/withdrawals/${id}/mark-paid`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            }
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            alert('Заявка отмечена как выплаченная');
+            loadWithdrawals();
+        } else {
+            alert('Ошибка: ' + data.error);
+        }
+    } catch (error) {
+        console.error('Error marking as paid:', error);
+        alert('Произошла ошибка');
+    }
+}
+
+// Credit balance
+async function creditBalance(event) {
+    event.preventDefault();
+    
+    const userId = document.getElementById('credit-user-id').value;
+    const amount = document.getElementById('credit-amount').value;
+    const type = document.getElementById('credit-type').value;
+    const description = document.getElementById('credit-description').value;
+    const dealId = document.getElementById('credit-deal-id').value || null;
+    
+    if (!userId) {
+        alert('Выберите пользователя');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/admin/balance/credit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                user_id: parseInt(userId),
+                amount: parseFloat(amount),
+                transaction_type: type,
+                description: description,
+                deal_id: dealId ? parseInt(dealId) : null
+            })
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            alert('Средства успешно начислены!');
+            document.getElementById('credit-form').reset();
+            document.getElementById('credit-user-id').value = '';
+            document.getElementById('credit-user-search').value = '';
+        } else {
+            alert('Ошибка: ' + data.error);
+        }
+    } catch (error) {
+        console.error('Error crediting balance:', error);
+        alert('Произошла ошибка');
+    }
+}
+
+// User search for credit
+let searchTimeout;
+document.getElementById('credit-user-search').addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    const query = this.value.trim();
+    
+    if (query.length < 3) {
+        document.getElementById('user-search-results').classList.add('hidden');
+        return;
+    }
+    
+    searchTimeout = setTimeout(async () => {
+        try {
+            const response = await fetch(`/api/admin/search-users?q=${encodeURIComponent(query)}`);
+            const data = await response.json();
+            
+            const results = document.getElementById('user-search-results');
+            results.innerHTML = '';
+            
+            if (data.success && data.users.length > 0) {
+                data.users.forEach(user => {
+                    const item = document.createElement('div');
+                    item.className = 'px-4 py-2 hover:bg-gray-100 cursor-pointer';
+                    item.textContent = `${user.email} - ${user.full_name || 'Без имени'}`;
+                    item.onclick = () => {
+                        document.getElementById('credit-user-id').value = user.id;
+                        document.getElementById('credit-user-search').value = user.email;
+                        results.classList.add('hidden');
+                    };
+                    results.appendChild(item);
+                });
+                results.classList.remove('hidden');
+            } else {
+                results.innerHTML = '<div class="px-4 py-2 text-gray-500">Пользователи не найдены</div>';
+                results.classList.remove('hidden');
+            }
+        } catch (error) {
+            console.error('Error searching users:', error);
+        }
+    }, 300);
+});
+
+// Placeholder function for viewing user transactions
+// View user transaction history
+function viewUserTransactions(userId, userName) {
+    const modal = document.getElementById('transaction-history-modal');
+    const userInfo = document.getElementById('transaction-user-info');
+    const tbody = document.getElementById('transaction-history-tbody');
+    const loading = document.getElementById('transaction-history-loading');
+    const empty = document.getElementById('transaction-history-empty');
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    userInfo.textContent = userName;
+    tbody.innerHTML = '';
+    loading.classList.remove('hidden');
+    empty.classList.add('hidden');
+    
+    fetch(`/api/admin/balance/transactions/${userId}`)
+        .then(res => res.json())
+        .then(data => {
+            loading.classList.add('hidden');
+            
+            if (data.success && data.transactions.length > 0) {
+                data.transactions.forEach(tx => {
+                    const tr = document.createElement('tr');
+                    const amountClass = tx.amount >= 0 ? 'text-green-600' : 'text-red-600';
+                    const typeLabels = {
+                        'cashback_earned': 'Кэшбэк',
+                        'bonus': 'Бонус',
+                        'withdrawal': 'Вывод',
+                        'adjustment': 'Корректировка',
+                        'registration_bonus': 'Регистрация'
+                    };
+                    
+                    tr.innerHTML = `
+                        <td class="px-4 py-3 text-sm text-gray-900">${tx.created_at}</td>
+                        <td class="px-4 py-3 text-sm">
+                            <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs">
+                                ${typeLabels[tx.transaction_type] || tx.transaction_type}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-600">${tx.description}</td>
+                        <td class="px-4 py-3 text-sm text-right font-medium ${amountClass}">
+                            ${tx.amount >= 0 ? '+' : ''}${tx.amount.toLocaleString()} ₽
+                        </td>
+                        <td class="px-4 py-3 text-sm text-right text-gray-900">
+                            ${tx.balance_after.toLocaleString()} ₽
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } else {
+                empty.classList.remove('hidden');
+            }
+        })
+        .catch(error => {
+            loading.classList.add('hidden');
+            empty.classList.remove('hidden');
+            console.error('Error loading transactions:', error);
+        });
+}
+
+function closeTransactionHistoryModal() {
+    const modal = document.getElementById('transaction-history-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+// Initialize
+loadWithdrawals();
+</script>
+
+{% endblock %}

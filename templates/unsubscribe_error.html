@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ошибка отписки</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex items-center justify-center px-4">
+        <div class="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
+            <!-- Error Icon -->
+            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-10 h-10 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                </svg>
+            </div>
+
+            <!-- Error Message -->
+            <h1 class="text-2xl font-bold text-gray-900 mb-2">Не удалось отписаться</h1>
+            <p class="text-gray-600 mb-6">
+                {{ error }}
+            </p>
+
+            <!-- Info Box -->
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 text-left">
+                <p class="text-sm text-yellow-800">
+                    <strong>Возможные причины:</strong><br>
+                    • Ссылка устарела или уже была использована<br>
+                    • Поиск был удалён из системы<br>
+                    • Ссылка была скопирована некорректно
+                </p>
+            </div>
+
+            <!-- Help Text -->
+            <p class="text-sm text-gray-500 mb-6">
+                Если вы хотите отключить уведомления, войдите в личный кабинет и измените настройки вручную.
+            </p>
+
+            <!-- Action Buttons -->
+            <div class="space-y-3">
+                <a href="/login" class="block w-full bg-[#0088CC] text-white px-6 py-3 rounded-lg hover:bg-[#006699] transition-colors font-medium">
+                    Войти в личный кабинет
+                </a>
+                <a href="/" class="block w-full bg-gray-100 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+                    На главную
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,206 @@
+<style>
+.mgr-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 9998;
+    background: white;
+    border-top: 1px solid #e5e7eb;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.08);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.mgr-bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 0;
+    font-size: 10px;
+    font-weight: 500;
+    color: #9ca3af;
+    text-decoration: none;
+    transition: color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.mgr-bottom-nav-item.active {
+    color: #0088CC;
+}
+
+.mgr-more-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: rgba(0,0,0,0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+.mgr-more-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.mgr-more-panel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10001;
+    background: white;
+    border-radius: 20px 20px 0 0;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.mgr-more-panel.open {
+    transform: translateY(0);
+}
+</style>
+
+<nav class="md:hidden mgr-bottom-nav" id="mgrBottomNav">
+    <div class="flex items-center justify-around py-1">
+        <a href="{{ url_for('mgr.manager_dashboard') }}" class="mgr-bottom-nav-item {% if active_tab == 'home' %}active{% endif %}">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            <span>Главная</span>
+        </a>
+        <a href="{{ url_for('mgr.manager_dashboard') }}#clients" class="mgr-bottom-nav-item {% if active_tab == 'clients' %}active{% endif %}">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            <span>Клиенты</span>
+        </a>
+        <div class="relative">
+            <button class="mgr-bottom-nav-item {% if active_tab == 'deals' %}active{% endif %}" onclick="toggleDealsSubmenu(event)" type="button" style="background: none; border: none; cursor: pointer;">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <span>Сделки</span>
+            </button>
+            <div id="dealsSubmenu" class="hidden absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-[10002]">
+                <a href="{{ url_for('mgr.manager_dashboard') }}#deals" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    Мои сделки
+                </a>
+                <a href="{{ url_for('mgr.manager_deals_kanban') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                    <svg class="w-4 h-4 text-[#0088CC]" fill="currentColor" viewBox="0 0 20 20"><path d="M2 4a1 1 0 011-1h3a1 1 0 011 1v12a1 1 0 01-1 1H3a1 1 0 01-1-1V4zm5 0a1 1 0 011-1h3a1 1 0 011 1v12a1 1 0 01-1 1H8a1 1 0 01-1-1V4zm6-1a1 1 0 00-1 1v12a1 1 0 001 1h3a1 1 0 001-1V4a1 1 0 00-1-1h-3z"/></svg>
+                    Канбан
+                </a>
+                <a href="{{ url_for('mgr.manager_deals_archive') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                    <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                    Архив сделок
+                </a>
+                <a href="{{ url_for('mgr.manager_deals_kanban') }}?view=tasks" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                    Дела
+                </a>
+                <a href="{{ url_for('mgr.manager_tasks_calendar') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                    <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    Календарь задач
+                </a>
+            </div>
+        </div>
+        <a href="{{ url_for('mgr.manager_dashboard') }}#presentations" class="mgr-bottom-nav-item {% if active_tab == 'presentations' or active_tab == 'collections' %}active{% endif %}">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+            <span>Презентации</span>
+        </a>
+        <button class="mgr-bottom-nav-item" onclick="openMgrMoreNav()" type="button" style="background: none; border: none; cursor: pointer; padding: 8px 0;">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"/></svg>
+            <span>Ещё</span>
+        </button>
+    </div>
+</nav>
+
+<div class="md:hidden mgr-more-overlay" id="mgrMoreNavOverlay" onclick="closeMgrMoreNav()"></div>
+<div class="md:hidden mgr-more-panel" id="mgrMoreNavPanel">
+    <div class="flex justify-center pt-3 pb-2">
+        <div class="w-10 h-1 bg-gray-300 rounded-full"></div>
+    </div>
+    <div class="px-4 pb-6 space-y-1">
+        <a href="{{ url_for('index') }}" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition-colors" onclick="closeMgrMoreNav()">
+            <div class="w-9 h-9 bg-sky-50 rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </div>
+            <span class="text-sm font-medium text-gray-900">Поиск объектов</span>
+        </a>
+        <a href="{{ url_for('mgr.manager_dashboard') }}#favorites" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition-colors" onclick="closeMgrMoreNav()">
+            <div class="w-9 h-9 bg-red-50 rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/></svg>
+            </div>
+            <span class="text-sm font-medium text-gray-900">Избранное</span>
+        </a>
+        <a href="{{ url_for('mgr.manager_dashboard') }}#comparison" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition-colors" onclick="closeMgrMoreNav()">
+            <div class="w-9 h-9 bg-orange-50 rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            </div>
+            <span class="text-sm font-medium text-gray-900">Сравнение</span>
+        </a>
+        <a href="{{ url_for('mgr.manager_dashboard') }}#saved-searches" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition-colors" onclick="closeMgrMoreNav()">
+            <div class="w-9 h-9 bg-cyan-50 rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-cyan-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/></svg>
+            </div>
+            <span class="text-sm font-medium text-gray-900">Сохраненные поиски</span>
+        </a>
+        <a href="{{ url_for('mgr.manager_dashboard') }}#presentations" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition-colors" onclick="closeMgrMoreNav()">
+            <div class="w-9 h-9 bg-emerald-50 rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1zM3 16a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1z"/><path d="M16 5a1 1 0 011 1v8a1 1 0 01-1 1h-4V5h4z"/></svg>
+            </div>
+            <span class="text-sm font-medium text-gray-900">Презентации</span>
+        </a>
+        <a href="{{ url_for('mgr.manager_deals_kanban') }}" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition-colors" onclick="closeMgrMoreNav()">
+            <div class="w-9 h-9 bg-sky-50 rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-[#0088CC]" fill="currentColor" viewBox="0 0 20 20"><path d="M2 4a1 1 0 011-1h3a1 1 0 011 1v12a1 1 0 01-1 1H3a1 1 0 01-1-1V4zm5 0a1 1 0 011-1h3a1 1 0 011 1v12a1 1 0 01-1 1H8a1 1 0 01-1-1V4zm6-1a1 1 0 00-1 1v12a1 1 0 001 1h3a1 1 0 001-1V4a1 1 0 00-1-1h-3z"/></svg>
+            </div>
+            <span class="text-sm font-medium text-gray-900">Канбан сделок</span>
+        </a>
+        <a href="{{ url_for('mgr.manager_tasks_calendar') }}" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition-colors" onclick="closeMgrMoreNav()">
+            <div class="w-9 h-9 bg-amber-50 rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            </div>
+            <span class="text-sm font-medium text-gray-900">Календарь задач</span>
+        </a>
+        <a href="{{ url_for('mgr.manager_dashboard') }}#notifications" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition-colors" onclick="closeMgrMoreNav()">
+            <div class="w-9 h-9 bg-blue-50 rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+            </div>
+            <span class="text-sm font-medium text-gray-900">Уведомления</span>
+        </a>
+        <a href="{{ url_for('mgr.manager_dashboard') }}#profile" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition-colors" onclick="closeMgrMoreNav()">
+            <div class="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            </div>
+            <span class="text-sm font-medium text-gray-900">Профиль</span>
+        </a>
+        <a href="{{ url_for('auth.logout') }}" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition-colors" onclick="closeMgrMoreNav()">
+            <div class="w-9 h-9 bg-red-50 rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            </div>
+            <span class="text-sm font-medium text-red-600">Выйти</span>
+        </a>
+    </div>
+</div>
+
+<script>
+function openMgrMoreNav() {
+    document.getElementById('mgrMoreNavOverlay').classList.add('open');
+    document.getElementById('mgrMoreNavPanel').classList.add('open');
+}
+function closeMgrMoreNav() {
+    document.getElementById('mgrMoreNavOverlay').classList.remove('open');
+    document.getElementById('mgrMoreNavPanel').classList.remove('open');
+}
+function toggleDealsSubmenu(e) {
+    e.stopPropagation();
+    var sub = document.getElementById('dealsSubmenu');
+    if (!sub) return;
+    sub.classList.toggle('hidden');
+}
+document.addEventListener('click', function(e) {
+    var sub = document.getElementById('dealsSubmenu');
+    if (sub && !sub.classList.contains('hidden') && !e.target.closest('#dealsSubmenu') && !e.target.closest('[onclick*="toggleDealsSubmenu"]')) {
+        sub.classList.add('hidden');
+    }
+});
+</script>

@@ -1,0 +1,6370 @@
+[
+  {
+    "name": "1 Мая",
+    "slug": "1-maya"
+  },
+  {
+    "name": "1 Мая (Пашковский)",
+    "slug": "1-maya-pashkovskiy"
+  },
+  {
+    "name": "1 Мая проезд",
+    "slug": "1-maya-proezd"
+  },
+  {
+    "name": "1-й Адыгейский пер.",
+    "slug": "1-y-adygeyskiy-per"
+  },
+  {
+    "name": "1-й Айвазовского проезд",
+    "slug": "1-y-ayvazovskogo-proezd"
+  },
+  {
+    "name": "1-й Артельный проезд",
+    "slug": "1-y-artelnyy-proezd"
+  },
+  {
+    "name": "1-й Архангельский проезд",
+    "slug": "1-y-arhangelskiy-proezd"
+  },
+  {
+    "name": "1-й Безымянный пер.",
+    "slug": "1-y-bezymyannyy-per"
+  },
+  {
+    "name": "1-й Болотникова проезд",
+    "slug": "1-y-bolotnikova-proezd"
+  },
+  {
+    "name": "1-й Ботанический проезд",
+    "slug": "1-y-botanicheskiy-proezd"
+  },
+  {
+    "name": "1-й Васнецова проезд",
+    "slug": "1-y-vasnetsova-proezd"
+  },
+  {
+    "name": "1-й Ведомственный проезд",
+    "slug": "1-y-vedomstvennyy-proezd"
+  },
+  {
+    "name": "1-й Верхний проезд",
+    "slug": "1-y-verhniy-proezd"
+  },
+  {
+    "name": "1-й Вишневый проезд",
+    "slug": "1-y-vishnevyy-proezd"
+  },
+  {
+    "name": "1-й Волгоградский проезд",
+    "slug": "1-y-volgogradskiy-proezd"
+  },
+  {
+    "name": "1-й Воронежский проезд",
+    "slug": "1-y-voronezhskiy-proezd"
+  },
+  {
+    "name": "1-й Восточный проезд",
+    "slug": "1-y-vostochnyy-proezd"
+  },
+  {
+    "name": "1-й Гаражный проезд",
+    "slug": "1-y-garazhnyy-proezd"
+  },
+  {
+    "name": "1-й Гастелло проезд",
+    "slug": "1-y-gastello-proezd"
+  },
+  {
+    "name": "1-й Грабина пер.",
+    "slug": "1-y-grabina-per"
+  },
+  {
+    "name": "1-й Гроссу проезд",
+    "slug": "1-y-grossu-proezd"
+  },
+  {
+    "name": "1-й Дежнёва проезд",
+    "slug": "1-y-dezhneva-proezd"
+  },
+  {
+    "name": "1-й Димитрова проезд",
+    "slug": "1-y-dimitrova-proezd"
+  },
+  {
+    "name": "1-й Достоевского проезд",
+    "slug": "1-y-dostoevskogo-proezd"
+  },
+  {
+    "name": "1-й Дунайский проезд",
+    "slug": "1-y-dunayskiy-proezd"
+  },
+  {
+    "name": "1-й Западный проезд",
+    "slug": "1-y-zapadnyy-proezd"
+  },
+  {
+    "name": "1-й Заречный проезд",
+    "slug": "1-y-zarechnyy-proezd"
+  },
+  {
+    "name": "1-й Звездный проезд",
+    "slug": "1-y-zvezdnyy-proezd"
+  },
+  {
+    "name": "1-й Звенигородский проезд",
+    "slug": "1-y-zvenigorodskiy-proezd"
+  },
+  {
+    "name": "1-й Зеленый проезд",
+    "slug": "1-y-zelenyy-proezd"
+  },
+  {
+    "name": "1-й Знаменский проезд",
+    "slug": "1-y-znamenskiy-proezd"
+  },
+  {
+    "name": "1-й Ивана Сусанина проезд",
+    "slug": "1-y-ivana-susanina-proezd"
+  },
+  {
+    "name": "1-й Кадетский пер.",
+    "slug": "1-y-kadetskiy-per"
+  },
+  {
+    "name": "1-й Колхозный проезд",
+    "slug": "1-y-kolhoznyy-proezd"
+  },
+  {
+    "name": "1-й Короленко проезд",
+    "slug": "1-y-korolenko-proezd"
+  },
+  {
+    "name": "1-й Красивый пер.",
+    "slug": "1-y-krasivyy-per"
+  },
+  {
+    "name": "1-й Красных Зорь проезд",
+    "slug": "1-y-krasnyh-zor-proezd"
+  },
+  {
+    "name": "1-й Кругликовский проезд",
+    "slug": "1-y-kruglikovskiy-proezd"
+  },
+  {
+    "name": "1-й Крупской проезд",
+    "slug": "1-y-krupskoy-proezd"
+  },
+  {
+    "name": "1-й Кубанонабережный проезд",
+    "slug": "1-y-kubanonaberezhnyy-proezd"
+  },
+  {
+    "name": "1-й Куликова Поля проезд",
+    "slug": "1-y-kulikova-polya-proezd"
+  },
+  {
+    "name": "1-й Лаперуза проезд",
+    "slug": "1-y-laperuza-proezd"
+  },
+  {
+    "name": "1-й Ленинградский проезд",
+    "slug": "1-y-leningradskiy-proezd"
+  },
+  {
+    "name": "1-й Лиговский проезд",
+    "slug": "1-y-ligovskiy-proezd"
+  },
+  {
+    "name": "1-й Линии проезд",
+    "slug": "1-y-linii-proezd"
+  },
+  {
+    "name": "1-й Ломоносова проезд",
+    "slug": "1-y-lomonosova-proezd"
+  },
+  {
+    "name": "1-й Лучистый проезд",
+    "slug": "1-y-luchistyy-proezd"
+  },
+  {
+    "name": "1-й Можайского проезд",
+    "slug": "1-y-mozhayskogo-proezd"
+  },
+  {
+    "name": "1-й Монтажный проезд",
+    "slug": "1-y-montazhnyy-proezd"
+  },
+  {
+    "name": "1-й Некрасова проезд",
+    "slug": "1-y-nekrasova-proezd"
+  },
+  {
+    "name": "1-й Нефтезаводской проезд",
+    "slug": "1-y-neftezavodskoy-proezd"
+  },
+  {
+    "name": "1-й Нижний проезд",
+    "slug": "1-y-nizhniy-proezd"
+  },
+  {
+    "name": "1-й Обрывной проезд",
+    "slug": "1-y-obryvnoy-proezd"
+  },
+  {
+    "name": "1-й Онежский проезд",
+    "slug": "1-y-onezhskiy-proezd"
+  },
+  {
+    "name": "1-й Первомайский проезд",
+    "slug": "1-y-pervomayskiy-proezd"
+  },
+  {
+    "name": "1-й Пионерский проезд",
+    "slug": "1-y-pionerskiy-proezd"
+  },
+  {
+    "name": "1-й Писателя Степанова проезд",
+    "slug": "1-y-pisatelya-stepanova-proezd"
+  },
+  {
+    "name": "1-й Пластунский проезд",
+    "slug": "1-y-plastunskiy-proezd"
+  },
+  {
+    "name": "1-й Пригородный проезд",
+    "slug": "1-y-prigorodnyy-proezd"
+  },
+  {
+    "name": "1-й Продольный проезд",
+    "slug": "1-y-prodolnyy-proezd"
+  },
+  {
+    "name": "1-й Раздельный проезд",
+    "slug": "1-y-razdelnyy-proezd"
+  },
+  {
+    "name": "1-й Сафонова проезд",
+    "slug": "1-y-safonova-proezd"
+  },
+  {
+    "name": "1-й Севастопольский проезд",
+    "slug": "1-y-sevastopolskiy-proezd"
+  },
+  {
+    "name": "1-й Слободской проезд",
+    "slug": "1-y-slobodskoy-proezd"
+  },
+  {
+    "name": "1-й Сормовский проезд",
+    "slug": "1-y-sormovskiy-proezd"
+  },
+  {
+    "name": "1-й Становой проезд",
+    "slug": "1-y-stanovoy-proezd"
+  },
+  {
+    "name": "1-й Станочный проезд",
+    "slug": "1-y-stanochnyy-proezd"
+  },
+  {
+    "name": "1-й Стасова проезд",
+    "slug": "1-y-stasova-proezd"
+  },
+  {
+    "name": "1-й Талалихина проезд",
+    "slug": "1-y-talalihina-proezd"
+  },
+  {
+    "name": "1-й Темрюкский проезд",
+    "slug": "1-y-temryukskiy-proezd"
+  },
+  {
+    "name": "1-й Теплый проезд",
+    "slug": "1-y-teplyy-proezd"
+  },
+  {
+    "name": "1-й Тихорецкий проезд",
+    "slug": "1-y-tihoretskiy-proezd"
+  },
+  {
+    "name": "1-й Толбухина проезд",
+    "slug": "1-y-tolbuhina-proezd"
+  },
+  {
+    "name": "1-й Узорный проезд",
+    "slug": "1-y-uzornyy-proezd"
+  },
+  {
+    "name": "1-й Утренний проезд",
+    "slug": "1-y-utrenniy-proezd"
+  },
+  {
+    "name": "1-й Филатова проезд",
+    "slug": "1-y-filatova-proezd"
+  },
+  {
+    "name": "1-й Черноморский проезд",
+    "slug": "1-y-chernomorskiy-proezd"
+  },
+  {
+    "name": "1-й Чернышевского проезд",
+    "slug": "1-y-chernyshevskogo-proezd"
+  },
+  {
+    "name": "1-й Шевченко проезд",
+    "slug": "1-y-shevchenko-proezd"
+  },
+  {
+    "name": "1-й Щорса проезд",
+    "slug": "1-y-schorsa-proezd"
+  },
+  {
+    "name": "1-й Ялтинский проезд",
+    "slug": "1-y-yaltinskiy-proezd"
+  },
+  {
+    "name": "1-я Дорожная",
+    "slug": "1-ya-dorozhnaya"
+  },
+  {
+    "name": "1-я Заречная",
+    "slug": "1-ya-zarechnaya"
+  },
+  {
+    "name": "1-я Заройная",
+    "slug": "1-ya-zaroynaya"
+  },
+  {
+    "name": "1-я Линия",
+    "slug": "1-ya-liniya"
+  },
+  {
+    "name": "1-я Линия Нефтяников",
+    "slug": "1-ya-liniya-neftyanikov"
+  },
+  {
+    "name": "1-я Линия Поймы реки Кубань",
+    "slug": "1-ya-liniya-poymy-reki-kuban"
+  },
+  {
+    "name": "1-я Тихая",
+    "slug": "1-ya-tihaya"
+  },
+  {
+    "name": "1-я Трудовая",
+    "slug": "1-ya-trudovaya"
+  },
+  {
+    "name": "1-я Урожайная",
+    "slug": "1-ya-urozhaynaya"
+  },
+  {
+    "name": "11-я Линия",
+    "slug": "11-ya-liniya"
+  },
+  {
+    "name": "12-я Линия",
+    "slug": "12-ya-liniya"
+  },
+  {
+    "name": "2-й 1 Мая проезд",
+    "slug": "2-y-1-maya-proezd"
+  },
+  {
+    "name": "2-й Адыгейский пер.",
+    "slug": "2-y-adygeyskiy-per"
+  },
+  {
+    "name": "2-й Айвазовского проезд",
+    "slug": "2-y-ayvazovskogo-proezd"
+  },
+  {
+    "name": "2-й Артельный проезд",
+    "slug": "2-y-artelnyy-proezd"
+  },
+  {
+    "name": "2-й Архангельский проезд",
+    "slug": "2-y-arhangelskiy-proezd"
+  },
+  {
+    "name": "2-й Безымянный пер.",
+    "slug": "2-y-bezymyannyy-per"
+  },
+  {
+    "name": "2-й Белый пер.",
+    "slug": "2-y-belyy-per"
+  },
+  {
+    "name": "2-й Болотникова проезд",
+    "slug": "2-y-bolotnikova-proezd"
+  },
+  {
+    "name": "2-й Ботанический проезд",
+    "slug": "2-y-botanicheskiy-proezd"
+  },
+  {
+    "name": "2-й Васнецова проезд",
+    "slug": "2-y-vasnetsova-proezd"
+  },
+  {
+    "name": "2-й Верхний проезд",
+    "slug": "2-y-verhniy-proezd"
+  },
+  {
+    "name": "2-й Вишневый проезд",
+    "slug": "2-y-vishnevyy-proezd"
+  },
+  {
+    "name": "2-й Волгоградский проезд",
+    "slug": "2-y-volgogradskiy-proezd"
+  },
+  {
+    "name": "2-й Воронежский проезд",
+    "slug": "2-y-voronezhskiy-proezd"
+  },
+  {
+    "name": "2-й Восточный проезд",
+    "slug": "2-y-vostochnyy-proezd"
+  },
+  {
+    "name": "2-й Гаражный проезд",
+    "slug": "2-y-garazhnyy-proezd"
+  },
+  {
+    "name": "2-й Гастелло проезд",
+    "slug": "2-y-gastello-proezd"
+  },
+  {
+    "name": "2-й Грабина пер.",
+    "slug": "2-y-grabina-per"
+  },
+  {
+    "name": "2-й Гроссу проезд",
+    "slug": "2-y-grossu-proezd"
+  },
+  {
+    "name": "2-й Дежнёва проезд",
+    "slug": "2-y-dezhneva-proezd"
+  },
+  {
+    "name": "2-й Димитрова проезд",
+    "slug": "2-y-dimitrova-proezd"
+  },
+  {
+    "name": "2-й Достоевского проезд",
+    "slug": "2-y-dostoevskogo-proezd"
+  },
+  {
+    "name": "2-й Дунайский проезд",
+    "slug": "2-y-dunayskiy-proezd"
+  },
+  {
+    "name": "2-й Западный проезд",
+    "slug": "2-y-zapadnyy-proezd"
+  },
+  {
+    "name": "2-й Заречный проезд",
+    "slug": "2-y-zarechnyy-proezd"
+  },
+  {
+    "name": "2-й Звездный проезд",
+    "slug": "2-y-zvezdnyy-proezd"
+  },
+  {
+    "name": "2-й Звенигородский проезд",
+    "slug": "2-y-zvenigorodskiy-proezd"
+  },
+  {
+    "name": "2-й Зеленый проезд",
+    "slug": "2-y-zelenyy-proezd"
+  },
+  {
+    "name": "2-й Знаменский проезд",
+    "slug": "2-y-znamenskiy-proezd"
+  },
+  {
+    "name": "2-й Кадетский пер.",
+    "slug": "2-y-kadetskiy-per"
+  },
+  {
+    "name": "2-й Колхозный проезд",
+    "slug": "2-y-kolhoznyy-proezd"
+  },
+  {
+    "name": "2-й Кореновский проезд",
+    "slug": "2-y-korenovskiy-proezd"
+  },
+  {
+    "name": "2-й Короленко проезд",
+    "slug": "2-y-korolenko-proezd"
+  },
+  {
+    "name": "2-й Красивый пер.",
+    "slug": "2-y-krasivyy-per"
+  },
+  {
+    "name": "2-й Красных Зорь проезд",
+    "slug": "2-y-krasnyh-zor-proezd"
+  },
+  {
+    "name": "2-й Кругликовский проезд",
+    "slug": "2-y-kruglikovskiy-proezd"
+  },
+  {
+    "name": "2-й Крупской проезд",
+    "slug": "2-y-krupskoy-proezd"
+  },
+  {
+    "name": "2-й Кубанонабережный проезд",
+    "slug": "2-y-kubanonaberezhnyy-proezd"
+  },
+  {
+    "name": "2-й Куликова Поля проезд",
+    "slug": "2-y-kulikova-polya-proezd"
+  },
+  {
+    "name": "2-й Лаперуза проезд",
+    "slug": "2-y-laperuza-proezd"
+  },
+  {
+    "name": "2-й Ленинградский проезд",
+    "slug": "2-y-leningradskiy-proezd"
+  },
+  {
+    "name": "2-й Лиговский проезд",
+    "slug": "2-y-ligovskiy-proezd"
+  },
+  {
+    "name": "2-й Линии проезд",
+    "slug": "2-y-linii-proezd"
+  },
+  {
+    "name": "2-й Лучистый проезд",
+    "slug": "2-y-luchistyy-proezd"
+  },
+  {
+    "name": "2-й Можайского проезд",
+    "slug": "2-y-mozhayskogo-proezd"
+  },
+  {
+    "name": "2-й Монтажный проезд",
+    "slug": "2-y-montazhnyy-proezd"
+  },
+  {
+    "name": "2-й Некрасова проезд",
+    "slug": "2-y-nekrasova-proezd"
+  },
+  {
+    "name": "2-й Нефтезаводской проезд",
+    "slug": "2-y-neftezavodskoy-proezd"
+  },
+  {
+    "name": "2-й Онежский проезд",
+    "slug": "2-y-onezhskiy-proezd"
+  },
+  {
+    "name": "2-й Первомайский проезд",
+    "slug": "2-y-pervomayskiy-proezd"
+  },
+  {
+    "name": "2-й Писателя Степанова проезд",
+    "slug": "2-y-pisatelya-stepanova-proezd"
+  },
+  {
+    "name": "2-й Пластунский проезд",
+    "slug": "2-y-plastunskiy-proezd"
+  },
+  {
+    "name": "2-й Пригородный проезд",
+    "slug": "2-y-prigorodnyy-proezd"
+  },
+  {
+    "name": "2-й Продольный проезд",
+    "slug": "2-y-prodolnyy-proezd"
+  },
+  {
+    "name": "2-й Раздельный проезд",
+    "slug": "2-y-razdelnyy-proezd"
+  },
+  {
+    "name": "2-й Сафонова проезд",
+    "slug": "2-y-safonova-proezd"
+  },
+  {
+    "name": "2-й Севастопольский проезд",
+    "slug": "2-y-sevastopolskiy-proezd"
+  },
+  {
+    "name": "2-й Слободской проезд",
+    "slug": "2-y-slobodskoy-proezd"
+  },
+  {
+    "name": "2-й Сормовский проезд",
+    "slug": "2-y-sormovskiy-proezd"
+  },
+  {
+    "name": "2-й Становой проезд",
+    "slug": "2-y-stanovoy-proezd"
+  },
+  {
+    "name": "2-й Станочный проезд",
+    "slug": "2-y-stanochnyy-proezd"
+  },
+  {
+    "name": "2-й Стасова проезд",
+    "slug": "2-y-stasova-proezd"
+  },
+  {
+    "name": "2-й Талалихина проезд",
+    "slug": "2-y-talalihina-proezd"
+  },
+  {
+    "name": "2-й Темрюкский проезд",
+    "slug": "2-y-temryukskiy-proezd"
+  },
+  {
+    "name": "2-й Теплый проезд",
+    "slug": "2-y-teplyy-proezd"
+  },
+  {
+    "name": "2-й Тихорецкий проезд",
+    "slug": "2-y-tihoretskiy-proezd"
+  },
+  {
+    "name": "2-й Толбухина проезд",
+    "slug": "2-y-tolbuhina-proezd"
+  },
+  {
+    "name": "2-й Узорный проезд",
+    "slug": "2-y-uzornyy-proezd"
+  },
+  {
+    "name": "2-й Филатова проезд",
+    "slug": "2-y-filatova-proezd"
+  },
+  {
+    "name": "2-й Черноморский проезд",
+    "slug": "2-y-chernomorskiy-proezd"
+  },
+  {
+    "name": "2-й Чернышевского проезд",
+    "slug": "2-y-chernyshevskogo-proezd"
+  },
+  {
+    "name": "2-й Шевченко проезд",
+    "slug": "2-y-shevchenko-proezd"
+  },
+  {
+    "name": "2-й Щорса проезд",
+    "slug": "2-y-schorsa-proezd"
+  },
+  {
+    "name": "2-й Ялтинский проезд",
+    "slug": "2-y-yaltinskiy-proezd"
+  },
+  {
+    "name": "2-я Арбатская",
+    "slug": "2-ya-arbatskaya"
+  },
+  {
+    "name": "2-я Дорожная",
+    "slug": "2-ya-dorozhnaya"
+  },
+  {
+    "name": "2-я Заречная",
+    "slug": "2-ya-zarechnaya"
+  },
+  {
+    "name": "2-я Заройная",
+    "slug": "2-ya-zaroynaya"
+  },
+  {
+    "name": "2-я Линия",
+    "slug": "2-ya-liniya"
+  },
+  {
+    "name": "2-я Линия Нефтяников",
+    "slug": "2-ya-liniya-neftyanikov"
+  },
+  {
+    "name": "2-я Линия Поймы реки Кубань",
+    "slug": "2-ya-liniya-poymy-reki-kuban"
+  },
+  {
+    "name": "2-я Полевая",
+    "slug": "2-ya-polevaya"
+  },
+  {
+    "name": "2-я Пятилетка",
+    "slug": "2-ya-pyatiletka"
+  },
+  {
+    "name": "2-я Российская",
+    "slug": "2-ya-rossiyskaya"
+  },
+  {
+    "name": "2-я Тихая",
+    "slug": "2-ya-tihaya"
+  },
+  {
+    "name": "2-я Трудовая",
+    "slug": "2-ya-trudovaya"
+  },
+  {
+    "name": "2-я Урожайная",
+    "slug": "2-ya-urozhaynaya"
+  },
+  {
+    "name": "2-я Целиноградская",
+    "slug": "2-ya-tselinogradskaya"
+  },
+  {
+    "name": "21 Партсъезда",
+    "slug": "21-partsezda"
+  },
+  {
+    "name": "21 Партсъезда проезд",
+    "slug": "21-partsezda-proezd"
+  },
+  {
+    "name": "3-й Артельный проезд",
+    "slug": "3-y-artelnyy-proezd"
+  },
+  {
+    "name": "3-й Архангельский проезд",
+    "slug": "3-y-arhangelskiy-proezd"
+  },
+  {
+    "name": "3-й Болотникова проезд",
+    "slug": "3-y-bolotnikova-proezd"
+  },
+  {
+    "name": "3-й Васнецова проезд",
+    "slug": "3-y-vasnetsova-proezd"
+  },
+  {
+    "name": "3-й Волгоградский проезд",
+    "slug": "3-y-volgogradskiy-proezd"
+  },
+  {
+    "name": "3-й Воронежский проезд",
+    "slug": "3-y-voronezhskiy-proezd"
+  },
+  {
+    "name": "3-й Достоевского проезд",
+    "slug": "3-y-dostoevskogo-proezd"
+  },
+  {
+    "name": "3-й Заречный проезд",
+    "slug": "3-y-zarechnyy-proezd"
+  },
+  {
+    "name": "3-й Звенигородский проезд",
+    "slug": "3-y-zvenigorodskiy-proezd"
+  },
+  {
+    "name": "3-й Зеленый проезд",
+    "slug": "3-y-zelenyy-proezd"
+  },
+  {
+    "name": "3-й Кадетский пер.",
+    "slug": "3-y-kadetskiy-per"
+  },
+  {
+    "name": "3-й Кореновский проезд",
+    "slug": "3-y-korenovskiy-proezd"
+  },
+  {
+    "name": "3-й Крупской проезд",
+    "slug": "3-y-krupskoy-proezd"
+  },
+  {
+    "name": "3-й Кузнечный Зарой",
+    "slug": "3-y-kuznechnyy-zaroy"
+  },
+  {
+    "name": "3-й Куликова Поля проезд",
+    "slug": "3-y-kulikova-polya-proezd"
+  },
+  {
+    "name": "3-й Лаперуза проезд",
+    "slug": "3-y-laperuza-proezd"
+  },
+  {
+    "name": "3-й Ленинградский проезд",
+    "slug": "3-y-leningradskiy-proezd"
+  },
+  {
+    "name": "3-й Линии проезд",
+    "slug": "3-y-linii-proezd"
+  },
+  {
+    "name": "3-й Лучистый проезд",
+    "slug": "3-y-luchistyy-proezd"
+  },
+  {
+    "name": "3-й Некрасова проезд",
+    "slug": "3-y-nekrasova-proezd"
+  },
+  {
+    "name": "3-й Нефтезаводской проезд",
+    "slug": "3-y-neftezavodskoy-proezd"
+  },
+  {
+    "name": "3-й Обрывной проезд",
+    "slug": "3-y-obryvnoy-proezd"
+  },
+  {
+    "name": "3-й Онежский проезд",
+    "slug": "3-y-onezhskiy-proezd"
+  },
+  {
+    "name": "3-й Писателя Степанова проезд",
+    "slug": "3-y-pisatelya-stepanova-proezd"
+  },
+  {
+    "name": "3-й Пригородный проезд",
+    "slug": "3-y-prigorodnyy-proezd"
+  },
+  {
+    "name": "3-й Сафонова проезд",
+    "slug": "3-y-safonova-proezd"
+  },
+  {
+    "name": "3-й Слободской проезд",
+    "slug": "3-y-slobodskoy-proezd"
+  },
+  {
+    "name": "3-й Становой проезд",
+    "slug": "3-y-stanovoy-proezd"
+  },
+  {
+    "name": "3-й Тихорецкий проезд",
+    "slug": "3-y-tihoretskiy-proezd"
+  },
+  {
+    "name": "3-й Толбухина проезд",
+    "slug": "3-y-tolbuhina-proezd"
+  },
+  {
+    "name": "3-й Чернышевского проезд",
+    "slug": "3-y-chernyshevskogo-proezd"
+  },
+  {
+    "name": "3-я Дорожная",
+    "slug": "3-ya-dorozhnaya"
+  },
+  {
+    "name": "3-я Заройная",
+    "slug": "3-ya-zaroynaya"
+  },
+  {
+    "name": "3-я Линия",
+    "slug": "3-ya-liniya"
+  },
+  {
+    "name": "3-я Линия Нефтяников",
+    "slug": "3-ya-liniya-neftyanikov"
+  },
+  {
+    "name": "3-я Линия Поймы реки Кубань",
+    "slug": "3-ya-liniya-poymy-reki-kuban"
+  },
+  {
+    "name": "3-я Тихая",
+    "slug": "3-ya-tihaya"
+  },
+  {
+    "name": "3-я Трудовая",
+    "slug": "3-ya-trudovaya"
+  },
+  {
+    "name": "3-я Урожайная",
+    "slug": "3-ya-urozhaynaya"
+  },
+  {
+    "name": "3-я Целиноградская",
+    "slug": "3-ya-tselinogradskaya"
+  },
+  {
+    "name": "30-й Иркутской Дивизии",
+    "slug": "30-y-irkutskoy-divizii"
+  },
+  {
+    "name": "4-й Артельный проезд",
+    "slug": "4-y-artelnyy-proezd"
+  },
+  {
+    "name": "4-й Архангельский проезд",
+    "slug": "4-y-arhangelskiy-proezd"
+  },
+  {
+    "name": "4-й Васнецова проезд",
+    "slug": "4-y-vasnetsova-proezd"
+  },
+  {
+    "name": "4-й Волгоградский проезд",
+    "slug": "4-y-volgogradskiy-proezd"
+  },
+  {
+    "name": "4-й Воронежский проезд",
+    "slug": "4-y-voronezhskiy-proezd"
+  },
+  {
+    "name": "4-й Достоевского проезд",
+    "slug": "4-y-dostoevskogo-proezd"
+  },
+  {
+    "name": "4-й Зеленый проезд",
+    "slug": "4-y-zelenyy-proezd"
+  },
+  {
+    "name": "4-й Кадетский пер.",
+    "slug": "4-y-kadetskiy-per"
+  },
+  {
+    "name": "4-й Кореновский проезд",
+    "slug": "4-y-korenovskiy-proezd"
+  },
+  {
+    "name": "4-й Куликова Поля проезд",
+    "slug": "4-y-kulikova-polya-proezd"
+  },
+  {
+    "name": "4-й Лаперуза проезд",
+    "slug": "4-y-laperuza-proezd"
+  },
+  {
+    "name": "4-й Ленинградский проезд",
+    "slug": "4-y-leningradskiy-proezd"
+  },
+  {
+    "name": "4-й Линии проезд",
+    "slug": "4-y-linii-proezd"
+  },
+  {
+    "name": "4-й Обрывной проезд",
+    "slug": "4-y-obryvnoy-proezd"
+  },
+  {
+    "name": "4-й Онежский проезд",
+    "slug": "4-y-onezhskiy-proezd"
+  },
+  {
+    "name": "4-й Писателя Степанова проезд",
+    "slug": "4-y-pisatelya-stepanova-proezd"
+  },
+  {
+    "name": "4-й Пригородный проезд",
+    "slug": "4-y-prigorodnyy-proezd"
+  },
+  {
+    "name": "4-й Сафонова проезд",
+    "slug": "4-y-safonova-proezd"
+  },
+  {
+    "name": "4-й Становой проезд",
+    "slug": "4-y-stanovoy-proezd"
+  },
+  {
+    "name": "4-й Тихорецкий проезд",
+    "slug": "4-y-tihoretskiy-proezd"
+  },
+  {
+    "name": "4-й Чернышевского проезд",
+    "slug": "4-y-chernyshevskogo-proezd"
+  },
+  {
+    "name": "4-я Дорожная",
+    "slug": "4-ya-dorozhnaya"
+  },
+  {
+    "name": "4-я Линия",
+    "slug": "4-ya-liniya"
+  },
+  {
+    "name": "4-я Линия Нефтяников",
+    "slug": "4-ya-liniya-neftyanikov"
+  },
+  {
+    "name": "4-я Линия Поймы реки Кубань",
+    "slug": "4-ya-liniya-poymy-reki-kuban"
+  },
+  {
+    "name": "4-я Тихая",
+    "slug": "4-ya-tihaya"
+  },
+  {
+    "name": "4-я Трудовая",
+    "slug": "4-ya-trudovaya"
+  },
+  {
+    "name": "4-я Урожайная",
+    "slug": "4-ya-urozhaynaya"
+  },
+  {
+    "name": "40 лет Победы",
+    "slug": "40-let-pobedy"
+  },
+  {
+    "name": "5-й Артельный проезд",
+    "slug": "5-y-artelnyy-proezd"
+  },
+  {
+    "name": "5-й Архангельский проезд",
+    "slug": "5-y-arhangelskiy-proezd"
+  },
+  {
+    "name": "5-й Васнецова проезд",
+    "slug": "5-y-vasnetsova-proezd"
+  },
+  {
+    "name": "5-й Воронежский проезд",
+    "slug": "5-y-voronezhskiy-proezd"
+  },
+  {
+    "name": "5-й Зеленый проезд",
+    "slug": "5-y-zelenyy-proezd"
+  },
+  {
+    "name": "5-й Кореновский проезд",
+    "slug": "5-y-korenovskiy-proezd"
+  },
+  {
+    "name": "5-й Куликова Поля проезд",
+    "slug": "5-y-kulikova-polya-proezd"
+  },
+  {
+    "name": "5-й Лаперуза проезд",
+    "slug": "5-y-laperuza-proezd"
+  },
+  {
+    "name": "5-й Линии Поймы реки Кубань проезд",
+    "slug": "5-y-linii-poymy-reki-kuban-proezd"
+  },
+  {
+    "name": "5-й Обрывной проезд",
+    "slug": "5-y-obryvnoy-proezd"
+  },
+  {
+    "name": "5-й Писателя Степанова проезд",
+    "slug": "5-y-pisatelya-stepanova-proezd"
+  },
+  {
+    "name": "5-й Становой проезд",
+    "slug": "5-y-stanovoy-proezd"
+  },
+  {
+    "name": "5-й Чернышевского проезд",
+    "slug": "5-y-chernyshevskogo-proezd"
+  },
+  {
+    "name": "5-я Дорожная",
+    "slug": "5-ya-dorozhnaya"
+  },
+  {
+    "name": "5-я Линия",
+    "slug": "5-ya-liniya"
+  },
+  {
+    "name": "5-я Линия Поймы реки Кубань",
+    "slug": "5-ya-liniya-poymy-reki-kuban"
+  },
+  {
+    "name": "5-я Тихая",
+    "slug": "5-ya-tihaya"
+  },
+  {
+    "name": "5-я Трудовая",
+    "slug": "5-ya-trudovaya"
+  },
+  {
+    "name": "5-я Урожайная",
+    "slug": "5-ya-urozhaynaya"
+  },
+  {
+    "name": "6-й Архангельский проезд",
+    "slug": "6-y-arhangelskiy-proezd"
+  },
+  {
+    "name": "6-й Кореновский проезд",
+    "slug": "6-y-korenovskiy-proezd"
+  },
+  {
+    "name": "6-й Лаперуза проезд",
+    "slug": "6-y-laperuza-proezd"
+  },
+  {
+    "name": "6-я Дорожная",
+    "slug": "6-ya-dorozhnaya"
+  },
+  {
+    "name": "6-я Линия Поймы реки Кубань",
+    "slug": "6-ya-liniya-poymy-reki-kuban"
+  },
+  {
+    "name": "6-я Тихая",
+    "slug": "6-ya-tihaya"
+  },
+  {
+    "name": "6-я Урожайная",
+    "slug": "6-ya-urozhaynaya"
+  },
+  {
+    "name": "60-летия Победы",
+    "slug": "60-letiya-pobedy"
+  },
+  {
+    "name": "7-й Кореновский проезд",
+    "slug": "7-y-korenovskiy-proezd"
+  },
+  {
+    "name": "7-я Дорожная",
+    "slug": "7-ya-dorozhnaya"
+  },
+  {
+    "name": "7-я Тихая",
+    "slug": "7-ya-tihaya"
+  },
+  {
+    "name": "7-я Урожайная",
+    "slug": "7-ya-urozhaynaya"
+  },
+  {
+    "name": "70-летия Октября",
+    "slug": "70-letiya-oktyabrya"
+  },
+  {
+    "name": "8 Марта",
+    "slug": "8-marta"
+  },
+  {
+    "name": "8 Марта (Пашковский)",
+    "slug": "8-marta-pashkovskiy"
+  },
+  {
+    "name": "8-я Тихая",
+    "slug": "8-ya-tihaya"
+  },
+  {
+    "name": "8-я Урожайная",
+    "slug": "8-ya-urozhaynaya"
+  },
+  {
+    "name": "9 Мая",
+    "slug": "9-maya"
+  },
+  {
+    "name": "9 Января",
+    "slug": "9-yanvarya"
+  },
+  {
+    "name": "9 Января проезд",
+    "slug": "9-yanvarya-proezd"
+  },
+  {
+    "name": "9-я Тихая",
+    "slug": "9-ya-tihaya"
+  },
+  {
+    "name": "Абаканская",
+    "slug": "abakanskaya"
+  },
+  {
+    "name": "Абинский",
+    "slug": "abinskiy"
+  },
+  {
+    "name": "Абрикосовая",
+    "slug": "abrikosovaya"
+  },
+  {
+    "name": "Авиагородок",
+    "slug": "aviagorodok"
+  },
+  {
+    "name": "Авиаторов сквер",
+    "slug": "aviatorov-skver"
+  },
+  {
+    "name": "Автолюбителей",
+    "slug": "avtolyubiteley"
+  },
+  {
+    "name": "Автомобильная",
+    "slug": "avtomobilnaya"
+  },
+  {
+    "name": "Аграрная",
+    "slug": "agrarnaya"
+  },
+  {
+    "name": "Агрономическая",
+    "slug": "agronomicheskaya"
+  },
+  {
+    "name": "Агрохимическая",
+    "slug": "agrohimicheskaya"
+  },
+  {
+    "name": "Адлерская",
+    "slug": "adlerskaya"
+  },
+  {
+    "name": "Адыгейская набережная",
+    "slug": "adygeyskaya-naberezhnaya"
+  },
+  {
+    "name": "Азовская",
+    "slug": "azovskaya"
+  },
+  {
+    "name": "Айвазовского",
+    "slug": "ayvazovskogo"
+  },
+  {
+    "name": "Академика Губкина",
+    "slug": "akademika-gubkina"
+  },
+  {
+    "name": "Академика Лукьяненко",
+    "slug": "akademika-lukyanenko"
+  },
+  {
+    "name": "Академика Павлова",
+    "slug": "akademika-pavlova"
+  },
+  {
+    "name": "Академика Пустовойта",
+    "slug": "akademika-pustovoyta"
+  },
+  {
+    "name": "Академика Трубилина",
+    "slug": "akademika-trubilina"
+  },
+  {
+    "name": "Академическая",
+    "slug": "akademicheskaya"
+  },
+  {
+    "name": "Аксайская",
+    "slug": "aksayskaya"
+  },
+  {
+    "name": "Алая",
+    "slug": "alaya"
+  },
+  {
+    "name": "Александра Берлизова",
+    "slug": "aleksandra-berlizova"
+  },
+  {
+    "name": "Александра Исаева",
+    "slug": "aleksandra-isaeva"
+  },
+  {
+    "name": "Александра Матросова",
+    "slug": "aleksandra-matrosova"
+  },
+  {
+    "name": "Александра Матросова проезд",
+    "slug": "aleksandra-matrosova-proezd"
+  },
+  {
+    "name": "Александра Невского",
+    "slug": "aleksandra-nevskogo"
+  },
+  {
+    "name": "Александра Пархоменко",
+    "slug": "aleksandra-parhomenko"
+  },
+  {
+    "name": "Александра Покрышкина",
+    "slug": "aleksandra-pokryshkina"
+  },
+  {
+    "name": "Александра Чекалина",
+    "slug": "aleksandra-chekalina"
+  },
+  {
+    "name": "Александровская",
+    "slug": "aleksandrovskaya"
+  },
+  {
+    "name": "Александровский бульвар",
+    "slug": "aleksandrovskiy-bulvar"
+  },
+  {
+    "name": "Алексеевская",
+    "slug": "alekseevskaya"
+  },
+  {
+    "name": "Аллейный",
+    "slug": "alleynyy"
+  },
+  {
+    "name": "Алма-Атинская",
+    "slug": "alma-atinskaya"
+  },
+  {
+    "name": "Алма-Атинский",
+    "slug": "alma-atinskiy"
+  },
+  {
+    "name": "Алмазная",
+    "slug": "almaznaya"
+  },
+  {
+    "name": "Алмазный",
+    "slug": "almaznyy"
+  },
+  {
+    "name": "Алтайская",
+    "slug": "altayskaya"
+  },
+  {
+    "name": "Алтайский",
+    "slug": "altayskiy"
+  },
+  {
+    "name": "Алуштинская",
+    "slug": "alushtinskaya"
+  },
+  {
+    "name": "Алуштинский",
+    "slug": "alushtinskiy"
+  },
+  {
+    "name": "Амурская",
+    "slug": "amurskaya"
+  },
+  {
+    "name": "Анапская",
+    "slug": "anapskaya"
+  },
+  {
+    "name": "Анапский проезд",
+    "slug": "anapskiy-proezd"
+  },
+  {
+    "name": "Анатолия Савельева",
+    "slug": "anatoliya-saveleva"
+  },
+  {
+    "name": "Ангарская",
+    "slug": "angarskaya"
+  },
+  {
+    "name": "Ангарский проезд",
+    "slug": "angarskiy-proezd"
+  },
+  {
+    "name": "Андреевская",
+    "slug": "andreevskaya"
+  },
+  {
+    "name": "Андреевская (Новознаменский)",
+    "slug": "andreevskaya-novoznamenskiy"
+  },
+  {
+    "name": "Андрея Туркина",
+    "slug": "andreya-turkina"
+  },
+  {
+    "name": "Анисовая",
+    "slug": "anisovaya"
+  },
+  {
+    "name": "Античная",
+    "slug": "antichnaya"
+  },
+  {
+    "name": "Апельсиновая",
+    "slug": "apelsinovaya"
+  },
+  {
+    "name": "Апрельская",
+    "slug": "aprelskaya"
+  },
+  {
+    "name": "Аральская",
+    "slug": "aralskaya"
+  },
+  {
+    "name": "Арбат сквер",
+    "slug": "arbat-skver"
+  },
+  {
+    "name": "Арбатский",
+    "slug": "arbatskiy"
+  },
+  {
+    "name": "Армавирская",
+    "slug": "armavirskaya"
+  },
+  {
+    "name": "Армавирский проезд",
+    "slug": "armavirskiy-proezd"
+  },
+  {
+    "name": "Ароматная",
+    "slug": "aromatnaya"
+  },
+  {
+    "name": "Артезианская",
+    "slug": "artezianskaya"
+  },
+  {
+    "name": "Артемовская",
+    "slug": "artemovskaya"
+  },
+  {
+    "name": "Артиллерийская",
+    "slug": "artilleriyskaya"
+  },
+  {
+    "name": "Артюшкова",
+    "slug": "artyushkova"
+  },
+  {
+    "name": "Архангельская",
+    "slug": "arhangelskaya"
+  },
+  {
+    "name": "Архитектора Ишунина",
+    "slug": "arhitektora-ishunina"
+  },
+  {
+    "name": "Архитектора Петина",
+    "slug": "arhitektora-petina"
+  },
+  {
+    "name": "Архитектора Петина пер.",
+    "slug": "arhitektora-petina-per"
+  },
+  {
+    "name": "Архитекторов",
+    "slug": "arhitektorov"
+  },
+  {
+    "name": "Аршинцева",
+    "slug": "arshintseva"
+  },
+  {
+    "name": "Астраханская",
+    "slug": "astrahanskaya"
+  },
+  {
+    "name": "Атамана Бурсака",
+    "slug": "atamana-bursaka"
+  },
+  {
+    "name": "Атамана Головатого",
+    "slug": "atamana-golovatogo"
+  },
+  {
+    "name": "Атамана Евдокимова",
+    "slug": "atamana-evdokimova"
+  },
+  {
+    "name": "Атамана Лысенко",
+    "slug": "atamana-lysenko"
+  },
+  {
+    "name": "Атамана Чепиги",
+    "slug": "atamana-chepigi"
+  },
+  {
+    "name": "Атаманская",
+    "slug": "atamanskaya"
+  },
+  {
+    "name": "Атарбекова",
+    "slug": "atarbekova"
+  },
+  {
+    "name": "Афипский",
+    "slug": "afipskiy"
+  },
+  {
+    "name": "Ахтарская",
+    "slug": "ahtarskaya"
+  },
+  {
+    "name": "Аэродромная",
+    "slug": "aerodromnaya"
+  },
+  {
+    "name": "Аэропортовская",
+    "slug": "aeroportovskaya"
+  },
+  {
+    "name": "Аэропортовский проезд",
+    "slug": "aeroportovskiy-proezd"
+  },
+  {
+    "name": "Бабушкина",
+    "slug": "babushkina"
+  },
+  {
+    "name": "Баварская",
+    "slug": "bavarskaya"
+  },
+  {
+    "name": "Багряная",
+    "slug": "bagryanaya"
+  },
+  {
+    "name": "Баден-аллея",
+    "slug": "baden-alleya"
+  },
+  {
+    "name": "Базарная",
+    "slug": "bazarnaya"
+  },
+  {
+    "name": "Базарный",
+    "slug": "bazarnyy"
+  },
+  {
+    "name": "Базовская",
+    "slug": "bazovskaya"
+  },
+  {
+    "name": "Базовская Дамба",
+    "slug": "bazovskaya-damba"
+  },
+  {
+    "name": "Байбакова",
+    "slug": "baybakova"
+  },
+  {
+    "name": "Баканская",
+    "slug": "bakanskaya"
+  },
+  {
+    "name": "Бакинская",
+    "slug": "bakinskaya"
+  },
+  {
+    "name": "Балетная",
+    "slug": "baletnaya"
+  },
+  {
+    "name": "Балканская",
+    "slug": "balkanskaya"
+  },
+  {
+    "name": "Балтийская",
+    "slug": "baltiyskaya"
+  },
+  {
+    "name": "Батайская",
+    "slug": "batayskaya"
+  },
+  {
+    "name": "Батуринская",
+    "slug": "baturinskaya"
+  },
+  {
+    "name": "Баумана",
+    "slug": "baumana"
+  },
+  {
+    "name": "Баха",
+    "slug": "baha"
+  },
+  {
+    "name": "Бахчиванджи",
+    "slug": "bahchivandzhi"
+  },
+  {
+    "name": "Беговая",
+    "slug": "begovaya"
+  },
+  {
+    "name": "Безкровного",
+    "slug": "bezkrovnogo"
+  },
+  {
+    "name": "Безлесная",
+    "slug": "bezlesnaya"
+  },
+  {
+    "name": "Безназванный",
+    "slug": "beznazvannyy"
+  },
+  {
+    "name": "Бейсугская",
+    "slug": "beysugskaya"
+  },
+  {
+    "name": "Бейсугская (Новознаменский)",
+    "slug": "beysugskaya-novoznamenskiy"
+  },
+  {
+    "name": "Белгородская",
+    "slug": "belgorodskaya"
+  },
+  {
+    "name": "Белозерная",
+    "slug": "belozernaya"
+  },
+  {
+    "name": "Беломорская",
+    "slug": "belomorskaya"
+  },
+  {
+    "name": "Беломорский проезд",
+    "slug": "belomorskiy-proezd"
+  },
+  {
+    "name": "Белорусская",
+    "slug": "belorusskaya"
+  },
+  {
+    "name": "Белый",
+    "slug": "belyy"
+  },
+  {
+    "name": "Береговая",
+    "slug": "beregovaya"
+  },
+  {
+    "name": "Береговой проезд",
+    "slug": "beregovoy-proezd"
+  },
+  {
+    "name": "Березанская",
+    "slug": "berezanskaya"
+  },
+  {
+    "name": "Березанский проезд",
+    "slug": "berezanskiy-proezd"
+  },
+  {
+    "name": "Березовая",
+    "slug": "berezovaya"
+  },
+  {
+    "name": "Берлинская",
+    "slug": "berlinskaya"
+  },
+  {
+    "name": "Бийская",
+    "slug": "biyskaya"
+  },
+  {
+    "name": "Биологическая",
+    "slug": "biologicheskaya"
+  },
+  {
+    "name": "Бирюзовая",
+    "slug": "biryuzovaya"
+  },
+  {
+    "name": "Бискайская",
+    "slug": "biskayskaya"
+  },
+  {
+    "name": "Благовещенская",
+    "slug": "blagoveschenskaya"
+  },
+  {
+    "name": "Благодарная",
+    "slug": "blagodarnaya"
+  },
+  {
+    "name": "Благодатная",
+    "slug": "blagodatnaya"
+  },
+  {
+    "name": "Богатая",
+    "slug": "bogataya"
+  },
+  {
+    "name": "Богатырская",
+    "slug": "bogatyrskaya"
+  },
+  {
+    "name": "Богдана Хмельницкого",
+    "slug": "bogdana-hmelnitskogo"
+  },
+  {
+    "name": "Бойлерная",
+    "slug": "boylernaya"
+  },
+  {
+    "name": "Болотникова",
+    "slug": "bolotnikova"
+  },
+  {
+    "name": "Большевистская",
+    "slug": "bolshevistskaya"
+  },
+  {
+    "name": "Боннская",
+    "slug": "bonnskaya"
+  },
+  {
+    "name": "Борисовская",
+    "slug": "borisovskaya"
+  },
+  {
+    "name": "Бородина",
+    "slug": "borodina"
+  },
+  {
+    "name": "Бородина проезд",
+    "slug": "borodina-proezd"
+  },
+  {
+    "name": "Бородинская",
+    "slug": "borodinskaya"
+  },
+  {
+    "name": "Бородинский",
+    "slug": "borodinskiy"
+  },
+  {
+    "name": "Братская",
+    "slug": "bratskaya"
+  },
+  {
+    "name": "Братьев Дроздовых",
+    "slug": "bratev-drozdovyh"
+  },
+  {
+    "name": "Братьев Игнатовых",
+    "slug": "bratev-ignatovyh"
+  },
+  {
+    "name": "Братьев Черников",
+    "slug": "bratev-chernikov"
+  },
+  {
+    "name": "Бременская",
+    "slug": "bremenskaya"
+  },
+  {
+    "name": "Брестская",
+    "slug": "brestskaya"
+  },
+  {
+    "name": "Брестский",
+    "slug": "brestskiy"
+  },
+  {
+    "name": "Брюсова",
+    "slug": "bryusova"
+  },
+  {
+    "name": "Брюсова проезд",
+    "slug": "bryusova-proezd"
+  },
+  {
+    "name": "Брюховецкая",
+    "slug": "bryuhovetskaya"
+  },
+  {
+    "name": "Брянская",
+    "slug": "bryanskaya"
+  },
+  {
+    "name": "Будённого",
+    "slug": "budennogo"
+  },
+  {
+    "name": "Букетная",
+    "slug": "buketnaya"
+  },
+  {
+    "name": "Буковая",
+    "slug": "bukovaya"
+  },
+  {
+    "name": "Булатная",
+    "slug": "bulatnaya"
+  },
+  {
+    "name": "Булатный проезд",
+    "slug": "bulatnyy-proezd"
+  },
+  {
+    "name": "Булгакова",
+    "slug": "bulgakova"
+  },
+  {
+    "name": "Булонская",
+    "slug": "bulonskaya"
+  },
+  {
+    "name": "Бульвар Евскина",
+    "slug": "bulvar-evskina"
+  },
+  {
+    "name": "Бульварная",
+    "slug": "bulvarnaya"
+  },
+  {
+    "name": "Бульварное Кольцо",
+    "slug": "bulvarnoe-koltso"
+  },
+  {
+    "name": "Бургасская",
+    "slug": "burgasskaya"
+  },
+  {
+    "name": "Бургундская",
+    "slug": "burgundskaya"
+  },
+  {
+    "name": "Бурсаковская",
+    "slug": "bursakovskaya"
+  },
+  {
+    "name": "Былинная",
+    "slug": "bylinnaya"
+  },
+  {
+    "name": "Вавилова",
+    "slug": "vavilova"
+  },
+  {
+    "name": "Вагнера",
+    "slug": "vagnera"
+  },
+  {
+    "name": "Валентина Варенникова",
+    "slug": "valentina-varennikova"
+  },
+  {
+    "name": "Валентины Котика",
+    "slug": "valentiny-kotika"
+  },
+  {
+    "name": "Валерия Гассия",
+    "slug": "valeriya-gassiya"
+  },
+  {
+    "name": "Василия Колесника",
+    "slug": "vasiliya-kolesnika"
+  },
+  {
+    "name": "Васнецова",
+    "slug": "vasnetsova"
+  },
+  {
+    "name": "Васюринский",
+    "slug": "vasyurinskiy"
+  },
+  {
+    "name": "Ватутина проезд",
+    "slug": "vatutina-proezd"
+  },
+  {
+    "name": "Ведомственная",
+    "slug": "vedomstvennaya"
+  },
+  {
+    "name": "Величковская",
+    "slug": "velichkovskaya"
+  },
+  {
+    "name": "Величковский проезд",
+    "slug": "velichkovskiy-proezd"
+  },
+  {
+    "name": "Венецианская",
+    "slug": "venetsianskaya"
+  },
+  {
+    "name": "Венская",
+    "slug": "venskaya"
+  },
+  {
+    "name": "Венский проезд",
+    "slug": "venskiy-proezd"
+  },
+  {
+    "name": "Вербная",
+    "slug": "verbnaya"
+  },
+  {
+    "name": "Верная",
+    "slug": "vernaya"
+  },
+  {
+    "name": "Веронская",
+    "slug": "veronskaya"
+  },
+  {
+    "name": "Верхняя",
+    "slug": "verhnyaya"
+  },
+  {
+    "name": "Веселый",
+    "slug": "veselyy"
+  },
+  {
+    "name": "Весенняя",
+    "slug": "vesennyaya"
+  },
+  {
+    "name": "Ветеранов",
+    "slug": "veteranov"
+  },
+  {
+    "name": "Ветеринарная",
+    "slug": "veterinarnaya"
+  },
+  {
+    "name": "Вечная",
+    "slug": "vechnaya"
+  },
+  {
+    "name": "Взлетная",
+    "slug": "vzletnaya"
+  },
+  {
+    "name": "Видная",
+    "slug": "vidnaya"
+  },
+  {
+    "name": "Византийская",
+    "slug": "vizantiyskaya"
+  },
+  {
+    "name": "Виктора Гришина",
+    "slug": "viktora-grishina"
+  },
+  {
+    "name": "Виноградная",
+    "slug": "vinogradnaya"
+  },
+  {
+    "name": "Виноградная (Новый)",
+    "slug": "vinogradnaya-novyy"
+  },
+  {
+    "name": "Виноградная (Пашковский)",
+    "slug": "vinogradnaya-pashkovskiy"
+  },
+  {
+    "name": "Виноградная (Ростовское Шоссе)",
+    "slug": "vinogradnaya-rostovskoe-shosse"
+  },
+  {
+    "name": "Виноградная (СХИ)",
+    "slug": "vinogradnaya-shi"
+  },
+  {
+    "name": "Виноградная (Северный)",
+    "slug": "vinogradnaya-severnyy"
+  },
+  {
+    "name": "Виноградный проезд",
+    "slug": "vinogradnyy-proezd"
+  },
+  {
+    "name": "Вишняковой",
+    "slug": "vishnyakovoy"
+  },
+  {
+    "name": "Вишняковский сквер",
+    "slug": "vishnyakovskiy-skver"
+  },
+  {
+    "name": "Вишнёвая (Новый)",
+    "slug": "vishnevaya-novyy"
+  },
+  {
+    "name": "Вишнёвая (СХИ)",
+    "slug": "vishnevaya-shi"
+  },
+  {
+    "name": "Вишнёвая (Северный)",
+    "slug": "vishnevaya-severnyy"
+  },
+  {
+    "name": "Владимирская",
+    "slug": "vladimirskaya"
+  },
+  {
+    "name": "Водоводная",
+    "slug": "vodovodnaya"
+  },
+  {
+    "name": "Возрождения",
+    "slug": "vozrozhdeniya"
+  },
+  {
+    "name": "Войсковая",
+    "slug": "voyskovaya"
+  },
+  {
+    "name": "Вокзальная",
+    "slug": "vokzalnaya"
+  },
+  {
+    "name": "Волгоградская",
+    "slug": "volgogradskaya"
+  },
+  {
+    "name": "Волгоградская (Пашковский)",
+    "slug": "volgogradskaya-pashkovskiy"
+  },
+  {
+    "name": "Волжская",
+    "slug": "volzhskaya"
+  },
+  {
+    "name": "Вологодская",
+    "slug": "vologodskaya"
+  },
+  {
+    "name": "Володарского",
+    "slug": "volodarskogo"
+  },
+  {
+    "name": "Володарского проезд",
+    "slug": "volodarskogo-proezd"
+  },
+  {
+    "name": "Володи Головатого",
+    "slug": "volodi-golovatogo"
+  },
+  {
+    "name": "Вольная (СХИ)",
+    "slug": "volnaya-shi"
+  },
+  {
+    "name": "Вольная (Северный)",
+    "slug": "volnaya-severnyy"
+  },
+  {
+    "name": "Воровского",
+    "slug": "vorovskogo"
+  },
+  {
+    "name": "Воронежская",
+    "slug": "voronezhskaya"
+  },
+  {
+    "name": "Воронежский Бугор",
+    "slug": "voronezhskiy-bugor"
+  },
+  {
+    "name": "Воронежский проезд",
+    "slug": "voronezhskiy-proezd"
+  },
+  {
+    "name": "Ворошилова",
+    "slug": "voroshilova"
+  },
+  {
+    "name": "Воскресенская",
+    "slug": "voskresenskaya"
+  },
+  {
+    "name": "Восточная",
+    "slug": "vostochnaya"
+  },
+  {
+    "name": "Восточная (Пашковский)",
+    "slug": "vostochnaya-pashkovskiy"
+  },
+  {
+    "name": "Восточная (СХИ)",
+    "slug": "vostochnaya-shi"
+  },
+  {
+    "name": "Восточно-Кругликовская",
+    "slug": "vostochno-kruglikovskaya"
+  },
+  {
+    "name": "Восточный",
+    "slug": "vostochnyy"
+  },
+  {
+    "name": "Восточный Обход",
+    "slug": "vostochnyy-obhod"
+  },
+  {
+    "name": "Выгонная",
+    "slug": "vygonnaya"
+  },
+  {
+    "name": "Высотная",
+    "slug": "vysotnaya"
+  },
+  {
+    "name": "Выставочная",
+    "slug": "vystavochnaya"
+  },
+  {
+    "name": "Вячеслава Ткачева",
+    "slug": "vyacheslava-tkacheva"
+  },
+  {
+    "name": "Гаврилова ул.",
+    "slug": "gavrilova-ul"
+  },
+  {
+    "name": "Гагарина ул.",
+    "slug": "gagarina-ul"
+  },
+  {
+    "name": "Гагаринский бульвар",
+    "slug": "gagarinskiy-bulvar"
+  },
+  {
+    "name": "Газовиков ул.",
+    "slug": "gazovikov-ul"
+  },
+  {
+    "name": "Галльская ул.",
+    "slug": "gallskaya-ul"
+  },
+  {
+    "name": "Гамбургская ул.",
+    "slug": "gamburgskaya-ul"
+  },
+  {
+    "name": "Ганноверская ул.",
+    "slug": "gannoverskaya-ul"
+  },
+  {
+    "name": "Гаражная ул.",
+    "slug": "garazhnaya-ul"
+  },
+  {
+    "name": "Гаражный пер.",
+    "slug": "garazhnyy-per"
+  },
+  {
+    "name": "Гасконская ул.",
+    "slug": "gaskonskaya-ul"
+  },
+  {
+    "name": "Гастелло ул.",
+    "slug": "gastello-ul"
+  },
+  {
+    "name": "Геленджикская ул.",
+    "slug": "gelendzhikskaya-ul"
+  },
+  {
+    "name": "Геленджикский проезд",
+    "slug": "gelendzhikskiy-proezd"
+  },
+  {
+    "name": "Генерала Мищенко ул.",
+    "slug": "generala-mischenko-ul"
+  },
+  {
+    "name": "Генерала Петрова ул.",
+    "slug": "generala-petrova-ul"
+  },
+  {
+    "name": "Генерала Трошева ул.",
+    "slug": "generala-trosheva-ul"
+  },
+  {
+    "name": "Генеральная ул.",
+    "slug": "generalnaya-ul"
+  },
+  {
+    "name": "Геодезическая ул.",
+    "slug": "geodezicheskaya-ul"
+  },
+  {
+    "name": "Геологическая ул.",
+    "slug": "geologicheskaya-ul"
+  },
+  {
+    "name": "Геологический пер.",
+    "slug": "geologicheskiy-per"
+  },
+  {
+    "name": "Георгия Димитрова пл.",
+    "slug": "georgiya-dimitrova-pl"
+  },
+  {
+    "name": "Героев-Разведчиков ул.",
+    "slug": "geroev-razvedchikov-ul"
+  },
+  {
+    "name": "Героя Аверкиева ул.",
+    "slug": "geroya-averkieva-ul"
+  },
+  {
+    "name": "Героя Владислава Посадского ул.",
+    "slug": "geroya-vladislava-posadskogo-ul"
+  },
+  {
+    "name": "Героя Сарабеева ул.",
+    "slug": "geroya-sarabeeva-ul"
+  },
+  {
+    "name": "Героя Яцкова ул.",
+    "slug": "geroya-yatskova-ul"
+  },
+  {
+    "name": "Герцена проезд",
+    "slug": "gertsena-proezd"
+  },
+  {
+    "name": "Герцена ул.",
+    "slug": "gertsena-ul"
+  },
+  {
+    "name": "Гиагинская ул.",
+    "slug": "giaginskaya-ul"
+  },
+  {
+    "name": "Гидростроителей ул.",
+    "slug": "gidrostroiteley-ul"
+  },
+  {
+    "name": "Гимназическая ул.",
+    "slug": "gimnazicheskaya-ul"
+  },
+  {
+    "name": "Глинки ул.",
+    "slug": "glinki-ul"
+  },
+  {
+    "name": "Глиняный пер.",
+    "slug": "glinyanyy-per"
+  },
+  {
+    "name": "Глубинный пер.",
+    "slug": "glubinnyy-per"
+  },
+  {
+    "name": "Глухой пер.",
+    "slug": "gluhoy-per"
+  },
+  {
+    "name": "Гоголя (Пашковский) ул.",
+    "slug": "gogolya-pashkovskiy-ul"
+  },
+  {
+    "name": "Гоголя пер.",
+    "slug": "gogolya-per"
+  },
+  {
+    "name": "Гоголя ул.",
+    "slug": "gogolya-ul"
+  },
+  {
+    "name": "Голубиная ул.",
+    "slug": "golubinaya-ul"
+  },
+  {
+    "name": "Голубицкая ул.",
+    "slug": "golubitskaya-ul"
+  },
+  {
+    "name": "Гомельская ул.",
+    "slug": "gomelskaya-ul"
+  },
+  {
+    "name": "Гончарная ул.",
+    "slug": "goncharnaya-ul"
+  },
+  {
+    "name": "Горная ул.",
+    "slug": "gornaya-ul"
+  },
+  {
+    "name": "Горогороды ул.",
+    "slug": "gorogorody-ul"
+  },
+  {
+    "name": "Горького сквер",
+    "slug": "gorkogo-skver"
+  },
+  {
+    "name": "Горького ул.",
+    "slug": "gorkogo-ul"
+  },
+  {
+    "name": "Горячеключевская ул.",
+    "slug": "goryacheklyuchevskaya-ul"
+  },
+  {
+    "name": "Грабина ул.",
+    "slug": "grabina-ul"
+  },
+  {
+    "name": "Гражданская ул.",
+    "slug": "grazhdanskaya-ul"
+  },
+  {
+    "name": "Гранатовая ул.",
+    "slug": "granatovaya-ul"
+  },
+  {
+    "name": "Гренадерская ул.",
+    "slug": "grenaderskaya-ul"
+  },
+  {
+    "name": "Грибоедова ул.",
+    "slug": "griboedova-ul"
+  },
+  {
+    "name": "Григория Пономаренко ул.",
+    "slug": "grigoriya-ponomarenko-ul"
+  },
+  {
+    "name": "Грозненская ул.",
+    "slug": "groznenskaya-ul"
+  },
+  {
+    "name": "Грушевая (СНТ Ветерок) ул.",
+    "slug": "grushevaya-snt-veterok-ul"
+  },
+  {
+    "name": "Грушевая (СНТ Животновод) ул.",
+    "slug": "grushevaya-snt-zhivotnovod-ul"
+  },
+  {
+    "name": "Грушевая (СНТ Радист) ул.",
+    "slug": "grushevaya-snt-radist-ul"
+  },
+  {
+    "name": "Грушевая (СНТ Урожай) ул.",
+    "slug": "grushevaya-snt-urozhay-ul"
+  },
+  {
+    "name": "Грушевая (СНТ Янтарь) ул.",
+    "slug": "grushevaya-snt-yantar-ul"
+  },
+  {
+    "name": "Грушевая ул.",
+    "slug": "grushevaya-ul"
+  },
+  {
+    "name": "Гуденко ул.",
+    "slug": "gudenko-ul"
+  },
+  {
+    "name": "Гудимы ул.",
+    "slug": "gudimy-ul"
+  },
+  {
+    "name": "Гёте пр-кт.",
+    "slug": "gete-pr-kt"
+  },
+  {
+    "name": "Дагестанская ул.",
+    "slug": "dagestanskaya-ul"
+  },
+  {
+    "name": "Дальний бульвар",
+    "slug": "dalniy-bulvar"
+  },
+  {
+    "name": "Дальний проезд",
+    "slug": "dalniy-proezd"
+  },
+  {
+    "name": "Дальняя (СНТ Солнышко) ул.",
+    "slug": "dalnyaya-snt-solnyshko-ul"
+  },
+  {
+    "name": "Дальняя ул.",
+    "slug": "dalnyaya-ul"
+  },
+  {
+    "name": "Дамаева ул.",
+    "slug": "damaeva-ul"
+  },
+  {
+    "name": "Дачная ул.",
+    "slug": "dachnaya-ul"
+  },
+  {
+    "name": "Дворцовая ул.",
+    "slug": "dvortsovaya-ul"
+  },
+  {
+    "name": "Дежнёва ул.",
+    "slug": "dezhneva-ul"
+  },
+  {
+    "name": "Декабристов ул.",
+    "slug": "dekabristov-ul"
+  },
+  {
+    "name": "Декоративная ул.",
+    "slug": "dekorativnaya-ul"
+  },
+  {
+    "name": "Дементия Красюка ул.",
+    "slug": "dementiya-krasyuka-ul"
+  },
+  {
+    "name": "Демидовская ул.",
+    "slug": "demidovskaya-ul"
+  },
+  {
+    "name": "Демидовский проезд",
+    "slug": "demidovskiy-proezd"
+  },
+  {
+    "name": "Демуса ул.",
+    "slug": "demusa-ul"
+  },
+  {
+    "name": "Деповская ул.",
+    "slug": "depovskaya-ul"
+  },
+  {
+    "name": "Деповской проезд",
+    "slug": "depovskoy-proezd"
+  },
+  {
+    "name": "Депутатская ул.",
+    "slug": "deputatskaya-ul"
+  },
+  {
+    "name": "Дербентская ул.",
+    "slug": "derbentskaya-ul"
+  },
+  {
+    "name": "Дербентский проезд",
+    "slug": "derbentskiy-proezd"
+  },
+  {
+    "name": "Детский сквер",
+    "slug": "detskiy-skver"
+  },
+  {
+    "name": "Джубгинская ул.",
+    "slug": "dzhubginskaya-ul"
+  },
+  {
+    "name": "Дзержинского ул.",
+    "slug": "dzerzhinskogo-ul"
+  },
+  {
+    "name": "Дикуна ул.",
+    "slug": "dikuna-ul"
+  },
+  {
+    "name": "Димитрова ул.",
+    "slug": "dimitrova-ul"
+  },
+  {
+    "name": "Динской проезд",
+    "slug": "dinskoy-proezd"
+  },
+  {
+    "name": "Длинная ул.",
+    "slug": "dlinnaya-ul"
+  },
+  {
+    "name": "Дмитриевская Дамба ул.",
+    "slug": "dmitrievskaya-damba-ul"
+  },
+  {
+    "name": "Дмитрия Благоева ул.",
+    "slug": "dmitriya-blagoeva-ul"
+  },
+  {
+    "name": "Дмитрия Донского ул.",
+    "slug": "dmitriya-donskogo-ul"
+  },
+  {
+    "name": "Дмитрия Пожарского ул.",
+    "slug": "dmitriya-pozharskogo-ul"
+  },
+  {
+    "name": "Днепровская ул.",
+    "slug": "dneprovskaya-ul"
+  },
+  {
+    "name": "Днестровская ул.",
+    "slug": "dnestrovskaya-ul"
+  },
+  {
+    "name": "Добрая ул.",
+    "slug": "dobraya-ul"
+  },
+  {
+    "name": "Дозорная ул.",
+    "slug": "dozornaya-ul"
+  },
+  {
+    "name": "Докучаева пер.",
+    "slug": "dokuchaeva-per"
+  },
+  {
+    "name": "Должанская ул.",
+    "slug": "dolzhanskaya-ul"
+  },
+  {
+    "name": "Домбайская ул.",
+    "slug": "dombayskaya-ul"
+  },
+  {
+    "name": "Донская ул.",
+    "slug": "donskaya-ul"
+  },
+  {
+    "name": "Дорожная ул.",
+    "slug": "dorozhnaya-ul"
+  },
+  {
+    "name": "Достоевского ул.",
+    "slug": "dostoevskogo-ul"
+  },
+  {
+    "name": "Драгунская ул.",
+    "slug": "dragunskaya-ul"
+  },
+  {
+    "name": "Драгунский проезд",
+    "slug": "dragunskiy-proezd"
+  },
+  {
+    "name": "Дрезденская ул.",
+    "slug": "drezdenskaya-ul"
+  },
+  {
+    "name": "Дружная ул.",
+    "slug": "druzhnaya-ul"
+  },
+  {
+    "name": "Дружный проезд",
+    "slug": "druzhnyy-proezd"
+  },
+  {
+    "name": "Дубинский пер.",
+    "slug": "dubinskiy-per"
+  },
+  {
+    "name": "Дубинский сквер",
+    "slug": "dubinskiy-skver"
+  },
+  {
+    "name": "Дубравная ул.",
+    "slug": "dubravnaya-ul"
+  },
+  {
+    "name": "Думенко ул.",
+    "slug": "dumenko-ul"
+  },
+  {
+    "name": "Думская ул.",
+    "slug": "dumskaya-ul"
+  },
+  {
+    "name": "Думский пер.",
+    "slug": "dumskiy-per"
+  },
+  {
+    "name": "Дунаевского ул.",
+    "slug": "dunaevskogo-ul"
+  },
+  {
+    "name": "Дунайская ул.",
+    "slug": "dunayskaya-ul"
+  },
+  {
+    "name": "Душистая ул.",
+    "slug": "dushistaya-ul"
+  },
+  {
+    "name": "Дядьковская ул.",
+    "slug": "dyadkovskaya-ul"
+  },
+  {
+    "name": "Дёмина ул.",
+    "slug": "demina-ul"
+  },
+  {
+    "name": "Евгении Жигуленко ул.",
+    "slug": "evgenii-zhigulenko-ul"
+  },
+  {
+    "name": "Евгения Сизоненко ул.",
+    "slug": "evgeniya-sizonenko-ul"
+  },
+  {
+    "name": "Евдокии Бершанской ул.",
+    "slug": "evdokii-bershanskoy-ul"
+  },
+  {
+    "name": "Евдокии Сокол ул.",
+    "slug": "evdokii-sokol-ul"
+  },
+  {
+    "name": "Европейский ул.",
+    "slug": "evropeyskiy-ul"
+  },
+  {
+    "name": "Ейская ул.",
+    "slug": "eyskaya-ul"
+  },
+  {
+    "name": "Екатериновская ул.",
+    "slug": "ekaterinovskaya-ul"
+  },
+  {
+    "name": "Екатеринодарская ул.",
+    "slug": "ekaterinodarskaya-ul"
+  },
+  {
+    "name": "Екатерины Великой ул.",
+    "slug": "ekateriny-velikoy-ul"
+  },
+  {
+    "name": "Екатерины пл.",
+    "slug": "ekateriny-pl"
+  },
+  {
+    "name": "Елецкая ул.",
+    "slug": "eletskaya-ul"
+  },
+  {
+    "name": "Елизаветинская ул.",
+    "slug": "elizavetinskaya-ul"
+  },
+  {
+    "name": "Елисейская ул.",
+    "slug": "eliseyskaya-ul"
+  },
+  {
+    "name": "Еловая ул.",
+    "slug": "elovaya-ul"
+  },
+  {
+    "name": "Енисейская ул.",
+    "slug": "eniseyskaya-ul"
+  },
+  {
+    "name": "Есаульская ул.",
+    "slug": "esaulskaya-ul"
+  },
+  {
+    "name": "Есенина пер.",
+    "slug": "esenina-per"
+  },
+  {
+    "name": "Есенина ул.",
+    "slug": "esenina-ul"
+  },
+  {
+    "name": "Ессентукская ул.",
+    "slug": "essentukskaya-ul"
+  },
+  {
+    "name": "Железнодорожная (Индустриальный) ул.",
+    "slug": "zheleznodorozhnaya-industrialnyy-ul"
+  },
+  {
+    "name": "Железнодорожная ул.",
+    "slug": "zheleznodorozhnaya-ul"
+  },
+  {
+    "name": "Жемчужная ул.",
+    "slug": "zhemchuzhnaya-ul"
+  },
+  {
+    "name": "Живило ул.",
+    "slug": "zhivilo-ul"
+  },
+  {
+    "name": "Живописная ул.",
+    "slug": "zhivopisnaya-ul"
+  },
+  {
+    "name": "Жигулёвская ул.",
+    "slug": "zhigulevskaya-ul"
+  },
+  {
+    "name": "Жлобы ул.",
+    "slug": "zhloby-ul"
+  },
+  {
+    "name": "Жуковского ул.",
+    "slug": "zhukovskogo-ul"
+  },
+  {
+    "name": "Журавлиная ул.",
+    "slug": "zhuravlinaya-ul"
+  },
+  {
+    "name": "Заводская (Пашковский) ул.",
+    "slug": "zavodskaya-pashkovskiy-ul"
+  },
+  {
+    "name": "Заводская ул.",
+    "slug": "zavodskaya-ul"
+  },
+  {
+    "name": "Загорская ул.",
+    "slug": "zagorskaya-ul"
+  },
+  {
+    "name": "Закатная ул.",
+    "slug": "zakatnaya-ul"
+  },
+  {
+    "name": "Западная ул.",
+    "slug": "zapadnaya-ul"
+  },
+  {
+    "name": "Западно-Кругликовская ул.",
+    "slug": "zapadno-kruglikovskaya-ul"
+  },
+  {
+    "name": "Западный Обход ул.",
+    "slug": "zapadnyy-obhod-ul"
+  },
+  {
+    "name": "Заполярная ул.",
+    "slug": "zapolyarnaya-ul"
+  },
+  {
+    "name": "Запорожская ул.",
+    "slug": "zaporozhskaya-ul"
+  },
+  {
+    "name": "Заречный пер.",
+    "slug": "zarechnyy-per"
+  },
+  {
+    "name": "Затонная ул.",
+    "slug": "zatonnaya-ul"
+  },
+  {
+    "name": "Затонный проезд",
+    "slug": "zatonnyy-proezd"
+  },
+  {
+    "name": "Захарова ул.",
+    "slug": "zaharova-ul"
+  },
+  {
+    "name": "Защитников Отечества ул.",
+    "slug": "zaschitnikov-otechestva-ul"
+  },
+  {
+    "name": "Званая ул.",
+    "slug": "zvanaya-ul"
+  },
+  {
+    "name": "Звездная ул.",
+    "slug": "zvezdnaya-ul"
+  },
+  {
+    "name": "Звездный пер.",
+    "slug": "zvezdnyy-per"
+  },
+  {
+    "name": "Звездопадная ул.",
+    "slug": "zvezdopadnaya-ul"
+  },
+  {
+    "name": "Звенигородская ул.",
+    "slug": "zvenigorodskaya-ul"
+  },
+  {
+    "name": "Звенящая ул.",
+    "slug": "zvenyaschaya-ul"
+  },
+  {
+    "name": "Зеленоградская ул.",
+    "slug": "zelenogradskaya-ul"
+  },
+  {
+    "name": "Земляничная (Северный) ул.",
+    "slug": "zemlyanichnaya-severnyy-ul"
+  },
+  {
+    "name": "Земляничная ул.",
+    "slug": "zemlyanichnaya-ul"
+  },
+  {
+    "name": "Зенитчиков сквер",
+    "slug": "zenitchikov-skver"
+  },
+  {
+    "name": "Зины Портновой ул.",
+    "slug": "ziny-portnovoy-ul"
+  },
+  {
+    "name": "Зиповская ул.",
+    "slug": "zipovskaya-ul"
+  },
+  {
+    "name": "Знаменская ул.",
+    "slug": "znamenskaya-ul"
+  },
+  {
+    "name": "Зои Космодемьянской ул.",
+    "slug": "zoi-kosmodemyanskoy-ul"
+  },
+  {
+    "name": "Зональная ул.",
+    "slug": "zonalnaya-ul"
+  },
+  {
+    "name": "Зоотехническая ул.",
+    "slug": "zootehnicheskaya-ul"
+  },
+  {
+    "name": "Ивана Кияшко пер.",
+    "slug": "ivana-kiyashko-per"
+  },
+  {
+    "name": "Ивана Кияшко ул.",
+    "slug": "ivana-kiyashko-ul"
+  },
+  {
+    "name": "Ивана Кожедуба ул.",
+    "slug": "ivana-kozheduba-ul"
+  },
+  {
+    "name": "Ивана Рослого ул.",
+    "slug": "ivana-roslogo-ul"
+  },
+  {
+    "name": "Ивана Сусанина ул.",
+    "slug": "ivana-susanina-ul"
+  },
+  {
+    "name": "Ивановская ул.",
+    "slug": "ivanovskaya-ul"
+  },
+  {
+    "name": "Ивдельская ул.",
+    "slug": "ivdelskaya-ul"
+  },
+  {
+    "name": "Игнатова ул.",
+    "slug": "ignatova-ul"
+  },
+  {
+    "name": "Игоря Агаркова ул.",
+    "slug": "igorya-agarkova-ul"
+  },
+  {
+    "name": "Измаильская ул.",
+    "slug": "izmailskaya-ul"
+  },
+  {
+    "name": "Изобильная ул.",
+    "slug": "izobilnaya-ul"
+  },
+  {
+    "name": "Изосимова ул.",
+    "slug": "izosimova-ul"
+  },
+  {
+    "name": "Изумрудная ул.",
+    "slug": "izumrudnaya-ul"
+  },
+  {
+    "name": "Изумрудный проезд",
+    "slug": "izumrudnyy-proezd"
+  },
+  {
+    "name": "Ильинская ул.",
+    "slug": "ilinskaya-ul"
+  },
+  {
+    "name": "Ильский пер.",
+    "slug": "ilskiy-per"
+  },
+  {
+    "name": "Индустриальная ул.",
+    "slug": "industrialnaya-ul"
+  },
+  {
+    "name": "Индустриальный проезд",
+    "slug": "industrialnyy-proezd"
+  },
+  {
+    "name": "Инициативная ул.",
+    "slug": "initsiativnaya-ul"
+  },
+  {
+    "name": "Институтская ул.",
+    "slug": "institutskaya-ul"
+  },
+  {
+    "name": "Интернациональный бульвар",
+    "slug": "internatsionalnyy-bulvar"
+  },
+  {
+    "name": "Ипподромная (СНТ Урожай) ул.",
+    "slug": "ippodromnaya-snt-urozhay-ul"
+  },
+  {
+    "name": "Ипподромная ул.",
+    "slug": "ippodromnaya-ul"
+  },
+  {
+    "name": "Ипподромный проезд",
+    "slug": "ippodromnyy-proezd"
+  },
+  {
+    "name": "Ирклиевская ул.",
+    "slug": "irklievskaya-ul"
+  },
+  {
+    "name": "Иркутская ул.",
+    "slug": "irkutskaya-ul"
+  },
+  {
+    "name": "Историческая ул.",
+    "slug": "istoricheskaya-ul"
+  },
+  {
+    "name": "Ишунина пер.",
+    "slug": "ishunina-per"
+  },
+  {
+    "name": "Кавказская",
+    "slug": "kavkazskaya"
+  },
+  {
+    "name": "Кадетская",
+    "slug": "kadetskaya"
+  },
+  {
+    "name": "Казанская",
+    "slug": "kazanskaya"
+  },
+  {
+    "name": "Казачий пр-кт.",
+    "slug": "kazachiy-pr-kt"
+  },
+  {
+    "name": "Казачьей славы сквер",
+    "slug": "kazachey-slavy-skver"
+  },
+  {
+    "name": "Казачья",
+    "slug": "kazachya"
+  },
+  {
+    "name": "Казбекская",
+    "slug": "kazbekskaya"
+  },
+  {
+    "name": "Калинина",
+    "slug": "kalinina"
+  },
+  {
+    "name": "Калинина (ТЭЦ)",
+    "slug": "kalinina-tets"
+  },
+  {
+    "name": "Калинина пер.",
+    "slug": "kalinina-per"
+  },
+  {
+    "name": "Калининградская",
+    "slug": "kaliningradskaya"
+  },
+  {
+    "name": "Калининский пер.",
+    "slug": "kalininskiy-per"
+  },
+  {
+    "name": "Калиновая",
+    "slug": "kalinovaya"
+  },
+  {
+    "name": "Калужская",
+    "slug": "kaluzhskaya"
+  },
+  {
+    "name": "Каляева",
+    "slug": "kalyaeva"
+  },
+  {
+    "name": "Каляева проезд",
+    "slug": "kalyaeva-proezd"
+  },
+  {
+    "name": "Камвольная",
+    "slug": "kamvolnaya"
+  },
+  {
+    "name": "Каменная",
+    "slug": "kamennaya"
+  },
+  {
+    "name": "Камская",
+    "slug": "kamskaya"
+  },
+  {
+    "name": "Каневской проезд",
+    "slug": "kanevskoy-proezd"
+  },
+  {
+    "name": "Канеловская",
+    "slug": "kanelovskaya"
+  },
+  {
+    "name": "Каравайная",
+    "slug": "karavaynaya"
+  },
+  {
+    "name": "Карантинная",
+    "slug": "karantinnaya"
+  },
+  {
+    "name": "Карасунская",
+    "slug": "karasunskaya"
+  },
+  {
+    "name": "Карасунская (Пашковский)",
+    "slug": "karasunskaya-pashkovskiy"
+  },
+  {
+    "name": "Карасунская наб.",
+    "slug": "karasunskaya-nab"
+  },
+  {
+    "name": "Карасунский пер.",
+    "slug": "karasunskiy-per"
+  },
+  {
+    "name": "Карасунский проезд",
+    "slug": "karasunskiy-proezd"
+  },
+  {
+    "name": "Карельская",
+    "slug": "karelskaya"
+  },
+  {
+    "name": "Каретный пер.",
+    "slug": "karetnyy-per"
+  },
+  {
+    "name": "Карла Маркса",
+    "slug": "karla-marksa"
+  },
+  {
+    "name": "Карлсруэвская",
+    "slug": "karlsruevskaya"
+  },
+  {
+    "name": "Кармалина",
+    "slug": "karmalina"
+  },
+  {
+    "name": "Карпатская",
+    "slug": "karpatskaya"
+  },
+  {
+    "name": "Карякина",
+    "slug": "karyakina"
+  },
+  {
+    "name": "Каштановая",
+    "slug": "kashtanovaya"
+  },
+  {
+    "name": "Кельтская",
+    "slug": "keltskaya"
+  },
+  {
+    "name": "Керченская",
+    "slug": "kerchenskaya"
+  },
+  {
+    "name": "Киевская",
+    "slug": "kievskaya"
+  },
+  {
+    "name": "Киевский проезд",
+    "slug": "kievskiy-proezd"
+  },
+  {
+    "name": "Кизлярская",
+    "slug": "kizlyarskaya"
+  },
+  {
+    "name": "Кильская",
+    "slug": "kilskaya"
+  },
+  {
+    "name": "Киргизская",
+    "slug": "kirgizskaya"
+  },
+  {
+    "name": "Кирилла Россинского",
+    "slug": "kirilla-rossinskogo"
+  },
+  {
+    "name": "Кирова",
+    "slug": "kirova"
+  },
+  {
+    "name": "Кировский пер.",
+    "slug": "kirovskiy-per"
+  },
+  {
+    "name": "Кирпильская",
+    "slug": "kirpilskaya"
+  },
+  {
+    "name": "Кирпичная",
+    "slug": "kirpichnaya"
+  },
+  {
+    "name": "Кирпичный пер.",
+    "slug": "kirpichnyy-per"
+  },
+  {
+    "name": "Кисляковская",
+    "slug": "kislyakovskaya"
+  },
+  {
+    "name": "Клары Лучко бульвар",
+    "slug": "klary-luchko-bulvar"
+  },
+  {
+    "name": "Клеверная",
+    "slug": "klevernaya"
+  },
+  {
+    "name": "Кленовая",
+    "slug": "klenovaya"
+  },
+  {
+    "name": "Кленовый сквер",
+    "slug": "klenovyy-skver"
+  },
+  {
+    "name": "Климова",
+    "slug": "klimova"
+  },
+  {
+    "name": "Клиническая",
+    "slug": "klinicheskaya"
+  },
+  {
+    "name": "Клубная",
+    "slug": "klubnaya"
+  },
+  {
+    "name": "Клубничная",
+    "slug": "klubnichnaya"
+  },
+  {
+    "name": "Клубничная (СНТ Калина)",
+    "slug": "klubnichnaya-snt-kalina"
+  },
+  {
+    "name": "Клюева",
+    "slug": "klyueva"
+  },
+  {
+    "name": "Ключевая",
+    "slug": "klyuchevaya"
+  },
+  {
+    "name": "Ключевской пер.",
+    "slug": "klyuchevskoy-per"
+  },
+  {
+    "name": "Книжная",
+    "slug": "knizhnaya"
+  },
+  {
+    "name": "Ковалева",
+    "slug": "kovaleva"
+  },
+  {
+    "name": "Ковтюха",
+    "slug": "kovtyuha"
+  },
+  {
+    "name": "Ковтюха проезд",
+    "slug": "kovtyuha-proezd"
+  },
+  {
+    "name": "Кожевенная",
+    "slug": "kozhevennaya"
+  },
+  {
+    "name": "Коллективная",
+    "slug": "kollektivnaya"
+  },
+  {
+    "name": "Коллективный пер.",
+    "slug": "kollektivnyy-per"
+  },
+  {
+    "name": "Коллекторная",
+    "slug": "kollektornaya"
+  },
+  {
+    "name": "Коломенская",
+    "slug": "kolomenskaya"
+  },
+  {
+    "name": "Колосистая",
+    "slug": "kolosistaya"
+  },
+  {
+    "name": "Колхозная",
+    "slug": "kolhoznaya"
+  },
+  {
+    "name": "Колхозная (Пашковский)",
+    "slug": "kolhoznaya-pashkovskiy"
+  },
+  {
+    "name": "Колхозный пер.",
+    "slug": "kolhoznyy-per"
+  },
+  {
+    "name": "Кольцевая",
+    "slug": "koltsevaya"
+  },
+  {
+    "name": "Кольцевой проезд",
+    "slug": "koltsevoy-proezd"
+  },
+  {
+    "name": "Командорская",
+    "slug": "komandorskaya"
+  },
+  {
+    "name": "Комарова",
+    "slug": "komarova"
+  },
+  {
+    "name": "Коммунаров",
+    "slug": "kommunarov"
+  },
+  {
+    "name": "Компрессорная",
+    "slug": "kompressornaya"
+  },
+  {
+    "name": "Комсомольская",
+    "slug": "komsomolskaya"
+  },
+  {
+    "name": "Комсомольская (Пашковский)",
+    "slug": "komsomolskaya-pashkovskiy"
+  },
+  {
+    "name": "Комсомольский сквер",
+    "slug": "komsomolskiy-skver"
+  },
+  {
+    "name": "Конгрессная",
+    "slug": "kongressnaya"
+  },
+  {
+    "name": "Кондратенко",
+    "slug": "kondratenko"
+  },
+  {
+    "name": "Конечная",
+    "slug": "konechnaya"
+  },
+  {
+    "name": "Конечная (Пашковский)",
+    "slug": "konechnaya-pashkovskiy"
+  },
+  {
+    "name": "Конечная (СНТ Российский)",
+    "slug": "konechnaya-snt-rossiyskiy"
+  },
+  {
+    "name": "Константина Образцова пр-кт.",
+    "slug": "konstantina-obraztsova-pr-kt"
+  },
+  {
+    "name": "Константина Симонова",
+    "slug": "konstantina-simonova"
+  },
+  {
+    "name": "Константиновская",
+    "slug": "konstantinovskaya"
+  },
+  {
+    "name": "Константиновский пер.",
+    "slug": "konstantinovskiy-per"
+  },
+  {
+    "name": "Концевича",
+    "slug": "kontsevicha"
+  },
+  {
+    "name": "Кореновская",
+    "slug": "korenovskaya"
+  },
+  {
+    "name": "Кореновский проезд",
+    "slug": "korenovskiy-proezd"
+  },
+  {
+    "name": "Корнилова",
+    "slug": "kornilova"
+  },
+  {
+    "name": "Корницкого",
+    "slug": "kornitskogo"
+  },
+  {
+    "name": "Короленко",
+    "slug": "korolenko"
+  },
+  {
+    "name": "Корсиканская",
+    "slug": "korsikanskaya"
+  },
+  {
+    "name": "Корсунский пер.",
+    "slug": "korsunskiy-per"
+  },
+  {
+    "name": "Корчагинский пер.",
+    "slug": "korchaginskiy-per"
+  },
+  {
+    "name": "Корчагинцев",
+    "slug": "korchagintsev"
+  },
+  {
+    "name": "Косенко",
+    "slug": "kosenko"
+  },
+  {
+    "name": "Космонавтов",
+    "slug": "kosmonavtov"
+  },
+  {
+    "name": "Космоса",
+    "slug": "kosmosa"
+  },
+  {
+    "name": "Косогорная",
+    "slug": "kosogornaya"
+  },
+  {
+    "name": "Костылёва",
+    "slug": "kostyleva"
+  },
+  {
+    "name": "Костычева пер.",
+    "slug": "kostycheva-per"
+  },
+  {
+    "name": "Косякина",
+    "slug": "kosyakina"
+  },
+  {
+    "name": "Котлярова",
+    "slug": "kotlyarova"
+  },
+  {
+    "name": "Котовского",
+    "slug": "kotovskogo"
+  },
+  {
+    "name": "Кочубея",
+    "slug": "kochubeya"
+  },
+  {
+    "name": "Кошевая",
+    "slug": "koshevaya"
+  },
+  {
+    "name": "Кошкина",
+    "slug": "koshkina"
+  },
+  {
+    "name": "Краевая",
+    "slug": "kraevaya"
+  },
+  {
+    "name": "Краеведа Соловьёва",
+    "slug": "kraeveda-soloveva"
+  },
+  {
+    "name": "Крайняя",
+    "slug": "kraynyaya"
+  },
+  {
+    "name": "Крайняя (Знаменский)",
+    "slug": "kraynyaya-znamenskiy"
+  },
+  {
+    "name": "Крайняя (Краснолит)",
+    "slug": "kraynyaya-krasnolit"
+  },
+  {
+    "name": "Крайняя (Пашковский)",
+    "slug": "kraynyaya-pashkovskiy"
+  },
+  {
+    "name": "Крайняя (учхоз Кубань)",
+    "slug": "kraynyaya-uchhoz-kuban"
+  },
+  {
+    "name": "Красивая",
+    "slug": "krasivaya"
+  },
+  {
+    "name": "Красина",
+    "slug": "krasina"
+  },
+  {
+    "name": "Красная",
+    "slug": "krasnaya"
+  },
+  {
+    "name": "Красная (учхоз Кубань)",
+    "slug": "krasnaya-uchhoz-kuban"
+  },
+  {
+    "name": "Красноармейская",
+    "slug": "krasnoarmeyskaya"
+  },
+  {
+    "name": "Краснодарская",
+    "slug": "krasnodarskaya"
+  },
+  {
+    "name": "Краснодонская",
+    "slug": "krasnodonskaya"
+  },
+  {
+    "name": "Краснодонский проезд",
+    "slug": "krasnodonskiy-proezd"
+  },
+  {
+    "name": "Краснознаменная",
+    "slug": "krasnoznamennaya"
+  },
+  {
+    "name": "Краснофлотская",
+    "slug": "krasnoflotskaya"
+  },
+  {
+    "name": "Красноярская",
+    "slug": "krasnoyarskaya"
+  },
+  {
+    "name": "Красных Зорь",
+    "slug": "krasnyh-zor"
+  },
+  {
+    "name": "Красных Партизан",
+    "slug": "krasnyh-partizan"
+  },
+  {
+    "name": "Красных Партизан проезд",
+    "slug": "krasnyh-partizan-proezd"
+  },
+  {
+    "name": "Крепостная",
+    "slug": "krepostnaya"
+  },
+  {
+    "name": "Крестьянский пер.",
+    "slug": "krestyanskiy-per"
+  },
+  {
+    "name": "Кривой пер.",
+    "slug": "krivoy-per"
+  },
+  {
+    "name": "Криничная",
+    "slug": "krinichnaya"
+  },
+  {
+    "name": "Кристальная",
+    "slug": "kristalnaya"
+  },
+  {
+    "name": "Кропоткина",
+    "slug": "kropotkina"
+  },
+  {
+    "name": "Кропоткина проезд",
+    "slug": "kropotkina-proezd"
+  },
+  {
+    "name": "Круглика тупик",
+    "slug": "kruglika-tupik"
+  },
+  {
+    "name": "Кругликовская",
+    "slug": "kruglikovskaya"
+  },
+  {
+    "name": "Кругликовский бульвар",
+    "slug": "kruglikovskiy-bulvar"
+  },
+  {
+    "name": "Круговая",
+    "slug": "krugovaya"
+  },
+  {
+    "name": "Кружевная",
+    "slug": "kruzhevnaya"
+  },
+  {
+    "name": "Крупской",
+    "slug": "krupskoy"
+  },
+  {
+    "name": "Крупской (Пашковский)",
+    "slug": "krupskoy-pashkovskiy"
+  },
+  {
+    "name": "Крупской пер.",
+    "slug": "krupskoy-per"
+  },
+  {
+    "name": "Крупской проезд",
+    "slug": "krupskoy-proezd"
+  },
+  {
+    "name": "Крылатая",
+    "slug": "krylataya"
+  },
+  {
+    "name": "Крылатская",
+    "slug": "krylatskaya"
+  },
+  {
+    "name": "Крыловская",
+    "slug": "krylovskaya"
+  },
+  {
+    "name": "Крымская",
+    "slug": "krymskaya"
+  },
+  {
+    "name": "Крымский проезд",
+    "slug": "krymskiy-proezd"
+  },
+  {
+    "name": "Кубанка",
+    "slug": "kubanka"
+  },
+  {
+    "name": "Кубанонабережная",
+    "slug": "kubanonaberezhnaya"
+  },
+  {
+    "name": "Кубанонабережный пер.",
+    "slug": "kubanonaberezhnyy-per"
+  },
+  {
+    "name": "Кубанская",
+    "slug": "kubanskaya"
+  },
+  {
+    "name": "Кубанская (Пашковский)",
+    "slug": "kubanskaya-pashkovskiy"
+  },
+  {
+    "name": "Кубанская наб.",
+    "slug": "kubanskaya-nab"
+  },
+  {
+    "name": "Кудухова",
+    "slug": "kuduhova"
+  },
+  {
+    "name": "Кузнечная",
+    "slug": "kuznechnaya"
+  },
+  {
+    "name": "Кузнечные Ряды",
+    "slug": "kuznechnye-ryady"
+  },
+  {
+    "name": "Кузнечный пер.",
+    "slug": "kuznechnyy-per"
+  },
+  {
+    "name": "Кузьмы Минина",
+    "slug": "kuzmy-minina"
+  },
+  {
+    "name": "Куйбышева",
+    "slug": "kuybysheva"
+  },
+  {
+    "name": "Куйбышева проезд",
+    "slug": "kuybysheva-proezd"
+  },
+  {
+    "name": "Куликова Поля",
+    "slug": "kulikova-polya"
+  },
+  {
+    "name": "Куликовская",
+    "slug": "kulikovskaya"
+  },
+  {
+    "name": "Куликовского",
+    "slug": "kulikovskogo"
+  },
+  {
+    "name": "Курганный пер.",
+    "slug": "kurgannyy-per"
+  },
+  {
+    "name": "Куренная",
+    "slug": "kurennaya"
+  },
+  {
+    "name": "Курортная",
+    "slug": "kurortnaya"
+  },
+  {
+    "name": "Курортный Поселок",
+    "slug": "kurortnyy-poselok"
+  },
+  {
+    "name": "Курская",
+    "slug": "kurskaya"
+  },
+  {
+    "name": "Курчатова",
+    "slug": "kurchatova"
+  },
+  {
+    "name": "Кутовая",
+    "slug": "kutovaya"
+  },
+  {
+    "name": "Кутузова",
+    "slug": "kutuzova"
+  },
+  {
+    "name": "Кухаренко",
+    "slug": "kuharenko"
+  },
+  {
+    "name": "Кущевская",
+    "slug": "kuschevskaya"
+  },
+  {
+    "name": "Кёльнская",
+    "slug": "kelnskaya"
+  },
+  {
+    "name": "Лабинский проезд",
+    "slug": "labinskiy-proezd"
+  },
+  {
+    "name": "Лавочкина",
+    "slug": "lavochkina"
+  },
+  {
+    "name": "Лавриненко",
+    "slug": "lavrinenko"
+  },
+  {
+    "name": "Ладожская",
+    "slug": "ladozhskaya"
+  },
+  {
+    "name": "Ладожский пер.",
+    "slug": "ladozhskiy-per"
+  },
+  {
+    "name": "Лазарева",
+    "slug": "lazareva"
+  },
+  {
+    "name": "Лазоревый пер.",
+    "slug": "lazorevyy-per"
+  },
+  {
+    "name": "Лазурная",
+    "slug": "lazurnaya"
+  },
+  {
+    "name": "Лаперуза",
+    "slug": "laperuza"
+  },
+  {
+    "name": "Латышская",
+    "slug": "latyshskaya"
+  },
+  {
+    "name": "Леваневского",
+    "slug": "levanevskogo"
+  },
+  {
+    "name": "Ленина",
+    "slug": "lenina"
+  },
+  {
+    "name": "Ленина (Пашковский)",
+    "slug": "lenina-pashkovskiy"
+  },
+  {
+    "name": "Ленина пл.",
+    "slug": "lenina-pl"
+  },
+  {
+    "name": "Ленинградская",
+    "slug": "leningradskaya"
+  },
+  {
+    "name": "Ленинский пер.",
+    "slug": "leninskiy-per"
+  },
+  {
+    "name": "Ленская",
+    "slug": "lenskaya"
+  },
+  {
+    "name": "Ленский пер.",
+    "slug": "lenskiy-per"
+  },
+  {
+    "name": "Леонида Лаврова",
+    "slug": "leonida-lavrova"
+  },
+  {
+    "name": "Леонида Лаврова проезд",
+    "slug": "leonida-lavrova-proezd"
+  },
+  {
+    "name": "Лермонтова",
+    "slug": "lermontova"
+  },
+  {
+    "name": "Лесная",
+    "slug": "lesnaya"
+  },
+  {
+    "name": "Лесопарковая",
+    "slug": "lesoparkovaya"
+  },
+  {
+    "name": "Лесопосадочная",
+    "slug": "lesoposadochnaya"
+  },
+  {
+    "name": "Летняя",
+    "slug": "letnyaya"
+  },
+  {
+    "name": "Леушковская",
+    "slug": "leushkovskaya"
+  },
+  {
+    "name": "Лиговская",
+    "slug": "ligovskaya"
+  },
+  {
+    "name": "Лизы Чайкиной",
+    "slug": "lizy-chaykinoy"
+  },
+  {
+    "name": "Лимонная",
+    "slug": "limonnaya"
+  },
+  {
+    "name": "Линейная",
+    "slug": "lineynaya"
+  },
+  {
+    "name": "Липовая",
+    "slug": "lipovaya"
+  },
+  {
+    "name": "Листопадная",
+    "slug": "listopadnaya"
+  },
+  {
+    "name": "Листопадный пер.",
+    "slug": "listopadnyy-per"
+  },
+  {
+    "name": "Литовская",
+    "slug": "litovskaya"
+  },
+  {
+    "name": "Лицейская",
+    "slug": "litseyskaya"
+  },
+  {
+    "name": "Ломоносова проезд",
+    "slug": "lomonosova-proezd"
+  },
+  {
+    "name": "Лубяная",
+    "slug": "lubyanaya"
+  },
+  {
+    "name": "Лубяной проезд",
+    "slug": "lubyanoy-proezd"
+  },
+  {
+    "name": "Луганская",
+    "slug": "luganskaya"
+  },
+  {
+    "name": "Луговой проезд",
+    "slug": "lugovoy-proezd"
+  },
+  {
+    "name": "Луначарского",
+    "slug": "lunacharskogo"
+  },
+  {
+    "name": "Лунный пер.",
+    "slug": "lunnyy-per"
+  },
+  {
+    "name": "Лусиняна",
+    "slug": "lusinyana"
+  },
+  {
+    "name": "Лучезарная",
+    "slug": "luchezarnaya"
+  },
+  {
+    "name": "Лучистая",
+    "slug": "luchistaya"
+  },
+  {
+    "name": "Лысенко (ДНТ Казачий)",
+    "slug": "lysenko-dnt-kazachiy"
+  },
+  {
+    "name": "Лёни Голикова",
+    "slug": "leni-golikova"
+  },
+  {
+    "name": "Лётчика Краснопёрова",
+    "slug": "letchika-krasnoperova"
+  },
+  {
+    "name": "Лётчика Маресьева",
+    "slug": "letchika-mareseva"
+  },
+  {
+    "name": "Лётчика Маресьева проезд",
+    "slug": "letchika-mareseva-proezd"
+  },
+  {
+    "name": "Лётчика Матвеева",
+    "slug": "letchika-matveeva"
+  },
+  {
+    "name": "Лётчика Пащевского",
+    "slug": "letchika-paschevskogo"
+  },
+  {
+    "name": "Лётчика Позднякова",
+    "slug": "letchika-pozdnyakova"
+  },
+  {
+    "name": "Лётчика Полякова",
+    "slug": "letchika-polyakova"
+  },
+  {
+    "name": "МОПР",
+    "slug": "mopr"
+  },
+  {
+    "name": "Магистральная",
+    "slug": "magistralnaya"
+  },
+  {
+    "name": "Майкопская",
+    "slug": "maykopskaya"
+  },
+  {
+    "name": "Майская",
+    "slug": "mayskaya"
+  },
+  {
+    "name": "Майский проезд",
+    "slug": "mayskiy-proezd"
+  },
+  {
+    "name": "Майский сквер",
+    "slug": "mayskiy-skver"
+  },
+  {
+    "name": "Максима Горького (Пашковский)",
+    "slug": "maksima-gorkogo-pashkovskiy"
+  },
+  {
+    "name": "Малая",
+    "slug": "malaya"
+  },
+  {
+    "name": "Малиновая",
+    "slug": "malinovaya"
+  },
+  {
+    "name": "Малороссийский проезд",
+    "slug": "malorossiyskiy-proezd"
+  },
+  {
+    "name": "Малый проезд",
+    "slug": "malyy-proezd"
+  },
+  {
+    "name": "Мальгерба",
+    "slug": "malgerba"
+  },
+  {
+    "name": "Марата Казея",
+    "slug": "marata-kazeya"
+  },
+  {
+    "name": "Марии Демченко",
+    "slug": "marii-demchenko"
+  },
+  {
+    "name": "Мариинский бульвар",
+    "slug": "mariinskiy-bulvar"
+  },
+  {
+    "name": "Марины Цветаевой",
+    "slug": "mariny-tsvetaevoy"
+  },
+  {
+    "name": "Мариупольская",
+    "slug": "mariupolskaya"
+  },
+  {
+    "name": "Мартыновская",
+    "slug": "martynovskaya"
+  },
+  {
+    "name": "Марьянская",
+    "slug": "maryanskaya"
+  },
+  {
+    "name": "Марьянская (Новознаменский)",
+    "slug": "maryanskaya-novoznamenskiy"
+  },
+  {
+    "name": "Масличная",
+    "slug": "maslichnaya"
+  },
+  {
+    "name": "Мачуги",
+    "slug": "machugi"
+  },
+  {
+    "name": "Маяковского",
+    "slug": "mayakovskogo"
+  },
+  {
+    "name": "Медведовский пер.",
+    "slug": "medvedovskiy-per"
+  },
+  {
+    "name": "Медицинский проезд",
+    "slug": "meditsinskiy-proezd"
+  },
+  {
+    "name": "Медовая",
+    "slug": "medovaya"
+  },
+  {
+    "name": "Меланжевая",
+    "slug": "melanzhevaya"
+  },
+  {
+    "name": "Мельничный пер.",
+    "slug": "melnichnyy-per"
+  },
+  {
+    "name": "Менделеева",
+    "slug": "mendeleeva"
+  },
+  {
+    "name": "Механическая",
+    "slug": "mehanicheskaya"
+  },
+  {
+    "name": "Микешина",
+    "slug": "mikeshina"
+  },
+  {
+    "name": "Миланская",
+    "slug": "milanskaya"
+  },
+  {
+    "name": "Милая",
+    "slug": "milaya"
+  },
+  {
+    "name": "Милицейская",
+    "slug": "militseyskaya"
+  },
+  {
+    "name": "Минская",
+    "slug": "minskaya"
+  },
+  {
+    "name": "Мира",
+    "slug": "mira"
+  },
+  {
+    "name": "Мира (Пашковский)",
+    "slug": "mira-pashkovskiy"
+  },
+  {
+    "name": "Мирный проезд",
+    "slug": "mirnyy-proezd"
+  },
+  {
+    "name": "Митинская",
+    "slug": "mitinskaya"
+  },
+  {
+    "name": "Митрофана Седина",
+    "slug": "mitrofana-sedina"
+  },
+  {
+    "name": "Михаила Власова",
+    "slug": "mihaila-vlasova"
+  },
+  {
+    "name": "Михайловская",
+    "slug": "mihaylovskaya"
+  },
+  {
+    "name": "Мичурина",
+    "slug": "michurina"
+  },
+  {
+    "name": "Мичурина (Российский)",
+    "slug": "michurina-rossiyskiy"
+  },
+  {
+    "name": "Можайского",
+    "slug": "mozhayskogo"
+  },
+  {
+    "name": "Моздокская",
+    "slug": "mozdokskaya"
+  },
+  {
+    "name": "Мокия Гулика",
+    "slug": "mokiya-gulika"
+  },
+  {
+    "name": "Молдавская",
+    "slug": "moldavskaya"
+  },
+  {
+    "name": "Молодежная",
+    "slug": "molodezhnaya"
+  },
+  {
+    "name": "Молодежная (Горхутор)",
+    "slug": "molodezhnaya-gorhutor"
+  },
+  {
+    "name": "Молодежный (Горхутор) проезд",
+    "slug": "molodezhnyy-gorhutor-proezd"
+  },
+  {
+    "name": "Молодежный проезд",
+    "slug": "molodezhnyy-proezd"
+  },
+  {
+    "name": "Монтажная",
+    "slug": "montazhnaya"
+  },
+  {
+    "name": "Монтажников",
+    "slug": "montazhnikov"
+  },
+  {
+    "name": "Морская",
+    "slug": "morskaya"
+  },
+  {
+    "name": "Морская (Пашковский)",
+    "slug": "morskaya-pashkovskiy"
+  },
+  {
+    "name": "Московская",
+    "slug": "moskovskaya"
+  },
+  {
+    "name": "Мостовая",
+    "slug": "mostovaya"
+  },
+  {
+    "name": "Мостовской пер.",
+    "slug": "mostovskoy-per"
+  },
+  {
+    "name": "Мурманская",
+    "slug": "murmanskaya"
+  },
+  {
+    "name": "Муромская",
+    "slug": "muromskaya"
+  },
+  {
+    "name": "Муромский проезд",
+    "slug": "muromskiy-proezd"
+  },
+  {
+    "name": "Мусоргского",
+    "slug": "musorgskogo"
+  },
+  {
+    "name": "Мюнхенская",
+    "slug": "myunhenskaya"
+  },
+  {
+    "name": "Набережная",
+    "slug": "naberezhnaya"
+  },
+  {
+    "name": "Нагорная",
+    "slug": "nagornaya"
+  },
+  {
+    "name": "Нагорный проезд",
+    "slug": "nagornyy-proezd"
+  },
+  {
+    "name": "Надежды",
+    "slug": "nadezhdy"
+  },
+  {
+    "name": "Надёжная",
+    "slug": "nadezhnaya"
+  },
+  {
+    "name": "Народная",
+    "slug": "narodnaya"
+  },
+  {
+    "name": "Народный пер.",
+    "slug": "narodnyy-per"
+  },
+  {
+    "name": "Насыпной пер.",
+    "slug": "nasypnoy-per"
+  },
+  {
+    "name": "Нахимова",
+    "slug": "nahimova"
+  },
+  {
+    "name": "Невкипелого",
+    "slug": "nevkipelogo"
+  },
+  {
+    "name": "Невский пер.",
+    "slug": "nevskiy-per"
+  },
+  {
+    "name": "Нежинская",
+    "slug": "nezhinskaya"
+  },
+  {
+    "name": "Нежная",
+    "slug": "nezhnaya"
+  },
+  {
+    "name": "Незамаевская",
+    "slug": "nezamaevskaya"
+  },
+  {
+    "name": "Некрасова",
+    "slug": "nekrasova"
+  },
+  {
+    "name": "Некрасова пер.",
+    "slug": "nekrasova-per"
+  },
+  {
+    "name": "Нестерова",
+    "slug": "nesterova"
+  },
+  {
+    "name": "Нестерова проезд",
+    "slug": "nesterova-proezd"
+  },
+  {
+    "name": "Неустроева",
+    "slug": "neustroeva"
+  },
+  {
+    "name": "Нефтяная",
+    "slug": "neftyanaya"
+  },
+  {
+    "name": "Нефтяников шоссе",
+    "slug": "neftyanikov-shosse"
+  },
+  {
+    "name": "Нижний тупик",
+    "slug": "nizhniy-tupik"
+  },
+  {
+    "name": "Нижняя",
+    "slug": "nizhnyaya"
+  },
+  {
+    "name": "Николаевская",
+    "slug": "nikolaevskaya"
+  },
+  {
+    "name": "Николая Борового",
+    "slug": "nikolaya-borovogo"
+  },
+  {
+    "name": "Новаторов",
+    "slug": "novatorov"
+  },
+  {
+    "name": "Новая",
+    "slug": "novaya"
+  },
+  {
+    "name": "Новая (КСК)",
+    "slug": "novaya-ksk"
+  },
+  {
+    "name": "Новгородская",
+    "slug": "novgorodskaya"
+  },
+  {
+    "name": "Новгородский пер.",
+    "slug": "novgorodskiy-per"
+  },
+  {
+    "name": "Новгородский проезд",
+    "slug": "novgorodskiy-proezd"
+  },
+  {
+    "name": "Новицкого",
+    "slug": "novitskogo"
+  },
+  {
+    "name": "Новоафонская",
+    "slug": "novoafonskaya"
+  },
+  {
+    "name": "Новодонецкая",
+    "slug": "novodonetskaya"
+  },
+  {
+    "name": "Новокубанский пер.",
+    "slug": "novokubanskiy-per"
+  },
+  {
+    "name": "Новокузнечная",
+    "slug": "novokuznechnaya"
+  },
+  {
+    "name": "Новомарьянский проезд",
+    "slug": "novomaryanskiy-proezd"
+  },
+  {
+    "name": "Новороссийская",
+    "slug": "novorossiyskaya"
+  },
+  {
+    "name": "Новороссийский проезд",
+    "slug": "novorossiyskiy-proezd"
+  },
+  {
+    "name": "Новосадовый пер.",
+    "slug": "novosadovyy-per"
+  },
+  {
+    "name": "Новосельский проезд",
+    "slug": "novoselskiy-proezd"
+  },
+  {
+    "name": "Новосибирская",
+    "slug": "novosibirskaya"
+  },
+  {
+    "name": "Новостроек",
+    "slug": "novostroek"
+  },
+  {
+    "name": "Новочеркасская",
+    "slug": "novocherkasskaya"
+  },
+  {
+    "name": "Новый пер.",
+    "slug": "novyy-per"
+  },
+  {
+    "name": "Норильская",
+    "slug": "norilskaya"
+  },
+  {
+    "name": "Нормандская",
+    "slug": "normandskaya"
+  },
+  {
+    "name": "Обозный пер.",
+    "slug": "oboznyy-per"
+  },
+  {
+    "name": "Обрывная",
+    "slug": "obryvnaya"
+  },
+  {
+    "name": "Обский пер.",
+    "slug": "obskiy-per"
+  },
+  {
+    "name": "Огуречная",
+    "slug": "ogurechnaya"
+  },
+  {
+    "name": "Одесская",
+    "slug": "odesskaya"
+  },
+  {
+    "name": "Одесский проезд",
+    "slug": "odesskiy-proezd"
+  },
+  {
+    "name": "Озерная",
+    "slug": "ozernaya"
+  },
+  {
+    "name": "Озерный проезд",
+    "slug": "ozernyy-proezd"
+  },
+  {
+    "name": "Окраинная",
+    "slug": "okrainnaya"
+  },
+  {
+    "name": "Октябрьская",
+    "slug": "oktyabrskaya"
+  },
+  {
+    "name": "Октябрьская (Пашковский)",
+    "slug": "oktyabrskaya-pashkovskiy"
+  },
+  {
+    "name": "Октябрьский пер.",
+    "slug": "oktyabrskiy-per"
+  },
+  {
+    "name": "Олега Кошевого",
+    "slug": "olega-koshevogo"
+  },
+  {
+    "name": "Олега Кошевого проезд",
+    "slug": "olega-koshevogo-proezd"
+  },
+  {
+    "name": "Олимпийская",
+    "slug": "olimpiyskaya"
+  },
+  {
+    "name": "Ольгинский проезд",
+    "slug": "olginskiy-proezd"
+  },
+  {
+    "name": "Ольденбуржская",
+    "slug": "oldenburzhskaya"
+  },
+  {
+    "name": "Ольховая",
+    "slug": "olhovaya"
+  },
+  {
+    "name": "Омская",
+    "slug": "omskaya"
+  },
+  {
+    "name": "Онежская",
+    "slug": "onezhskaya"
+  },
+  {
+    "name": "Опытная",
+    "slug": "opytnaya"
+  },
+  {
+    "name": "Оранжерейная",
+    "slug": "oranzhereynaya"
+  },
+  {
+    "name": "Орджоникидзе",
+    "slug": "ordzhonikidze"
+  },
+  {
+    "name": "Орджоникидзе (Пашковский)",
+    "slug": "ordzhonikidze-pashkovskiy"
+  },
+  {
+    "name": "Оренбургская",
+    "slug": "orenburgskaya"
+  },
+  {
+    "name": "Ореховая",
+    "slug": "orehovaya"
+  },
+  {
+    "name": "Ореховая (Северный)",
+    "slug": "orehovaya-severnyy"
+  },
+  {
+    "name": "Орловская",
+    "slug": "orlovskaya"
+  },
+  {
+    "name": "Орловский пер.",
+    "slug": "orlovskiy-per"
+  },
+  {
+    "name": "Осенняя",
+    "slug": "osennyaya"
+  },
+  {
+    "name": "Осетинская",
+    "slug": "osetinskaya"
+  },
+  {
+    "name": "Осторожный пер.",
+    "slug": "ostorozhnyy-per"
+  },
+  {
+    "name": "Островная",
+    "slug": "ostrovnaya"
+  },
+  {
+    "name": "Островной пер.",
+    "slug": "ostrovnoy-per"
+  },
+  {
+    "name": "Островского",
+    "slug": "ostrovskogo"
+  },
+  {
+    "name": "Островского пер.",
+    "slug": "ostrovskogo-per"
+  },
+  {
+    "name": "Отделение №2 совхоза Солнечный тер.",
+    "slug": "otdelenie-n2-sovhoza-solnechnyy-ter"
+  },
+  {
+    "name": "Отрадная",
+    "slug": "otradnaya"
+  },
+  {
+    "name": "Отрадный проезд",
+    "slug": "otradnyy-proezd"
+  },
+  {
+    "name": "Офицерская",
+    "slug": "ofitserskaya"
+  },
+  {
+    "name": "Офицерский проезд",
+    "slug": "ofitserskiy-proezd"
+  },
+  {
+    "name": "Охотничья",
+    "slug": "ohotnichya"
+  },
+  {
+    "name": "Очаковская",
+    "slug": "ochakovskaya"
+  },
+  {
+    "name": "Павловская",
+    "slug": "pavlovskaya"
+  },
+  {
+    "name": "Палаточная",
+    "slug": "palatochnaya"
+  },
+  {
+    "name": "Палаточный пер.",
+    "slug": "palatochnyy-per"
+  },
+  {
+    "name": "Памирская",
+    "slug": "pamirskaya"
+  },
+  {
+    "name": "Памяти Героев пл.",
+    "slug": "pamyati-geroev-pl"
+  },
+  {
+    "name": "Памяти Чернобыльцев",
+    "slug": "pamyati-chernobyltsev"
+  },
+  {
+    "name": "Памяти жертв Гражданской войны сквер",
+    "slug": "pamyati-zhertv-grazhdanskoy-voyny-skver"
+  },
+  {
+    "name": "Панфилова",
+    "slug": "panfilova"
+  },
+  {
+    "name": "Парковая",
+    "slug": "parkovaya"
+  },
+  {
+    "name": "Парковый проезд",
+    "slug": "parkovyy-proezd"
+  },
+  {
+    "name": "Парниковая",
+    "slug": "parnikovaya"
+  },
+  {
+    "name": "Парусная",
+    "slug": "parusnaya"
+  },
+  {
+    "name": "Пасхальная",
+    "slug": "pashalnaya"
+  },
+  {
+    "name": "Пашковская",
+    "slug": "pashkovskaya"
+  },
+  {
+    "name": "Пашковская (Пашковский)",
+    "slug": "pashkovskaya-pashkovskiy"
+  },
+  {
+    "name": "Пашковский перекат",
+    "slug": "pashkovskiy-perekat"
+  },
+  {
+    "name": "Первомайская",
+    "slug": "pervomayskaya"
+  },
+  {
+    "name": "Первомайская (Знаменский)",
+    "slug": "pervomayskaya-znamenskiy"
+  },
+  {
+    "name": "Первомайская (КСК)",
+    "slug": "pervomayskaya-ksk"
+  },
+  {
+    "name": "Передерия",
+    "slug": "perederiya"
+  },
+  {
+    "name": "Передовая",
+    "slug": "peredovaya"
+  },
+  {
+    "name": "Переездный пер.",
+    "slug": "pereezdnyy-per"
+  },
+  {
+    "name": "Перекрестная",
+    "slug": "perekrestnaya"
+  },
+  {
+    "name": "Переправный пер.",
+    "slug": "perepravnyy-per"
+  },
+  {
+    "name": "Переходная",
+    "slug": "perehodnaya"
+  },
+  {
+    "name": "Переяславская",
+    "slug": "pereyaslavskaya"
+  },
+  {
+    "name": "Пермский пер.",
+    "slug": "permskiy-per"
+  },
+  {
+    "name": "Персиковая",
+    "slug": "persikovaya"
+  },
+  {
+    "name": "Персиковая (Новый)",
+    "slug": "persikovaya-novyy"
+  },
+  {
+    "name": "Персиковая (Северный)",
+    "slug": "persikovaya-severnyy"
+  },
+  {
+    "name": "Песчаная",
+    "slug": "peschanaya"
+  },
+  {
+    "name": "Песчаный проезд",
+    "slug": "peschanyy-proezd"
+  },
+  {
+    "name": "Петра Метальникова",
+    "slug": "petra-metalnikova"
+  },
+  {
+    "name": "Петровский пер.",
+    "slug": "petrovskiy-per"
+  },
+  {
+    "name": "Петровский сквер",
+    "slug": "petrovskiy-skver"
+  },
+  {
+    "name": "Петроградская",
+    "slug": "petrogradskaya"
+  },
+  {
+    "name": "Петуховский пер.",
+    "slug": "petuhovskiy-per"
+  },
+  {
+    "name": "Пионерская",
+    "slug": "pionerskaya"
+  },
+  {
+    "name": "Пионерский проезд",
+    "slug": "pionerskiy-proezd"
+  },
+  {
+    "name": "Пиренейская",
+    "slug": "pireneyskaya"
+  },
+  {
+    "name": "Пирогова",
+    "slug": "pirogova"
+  },
+  {
+    "name": "Писателя Бардадыма",
+    "slug": "pisatelya-bardadyma"
+  },
+  {
+    "name": "Писателя Вараввы",
+    "slug": "pisatelya-varavvy"
+  },
+  {
+    "name": "Писателя Василенко",
+    "slug": "pisatelya-vasilenko"
+  },
+  {
+    "name": "Писателя Знаменского пр-кт.",
+    "slug": "pisatelya-znamenskogo-pr-kt"
+  },
+  {
+    "name": "Писателя Неподобы",
+    "slug": "pisatelya-nepodoby"
+  },
+  {
+    "name": "Писателя Первенцева",
+    "slug": "pisatelya-perventseva"
+  },
+  {
+    "name": "Писателя Придиуса",
+    "slug": "pisatelya-pridiusa"
+  },
+  {
+    "name": "Писателя Степанова",
+    "slug": "pisatelya-stepanova"
+  },
+  {
+    "name": "Питерская",
+    "slug": "piterskaya"
+  },
+  {
+    "name": "Плановый пер.",
+    "slug": "planovyy-per"
+  },
+  {
+    "name": "Плановый проезд",
+    "slug": "planovyy-proezd"
+  },
+  {
+    "name": "Пластуновская",
+    "slug": "plastunovskaya"
+  },
+  {
+    "name": "Пластунская",
+    "slug": "plastunskaya"
+  },
+  {
+    "name": "Платановая",
+    "slug": "platanovaya"
+  },
+  {
+    "name": "Платановый бульвар",
+    "slug": "platanovyy-bulvar"
+  },
+  {
+    "name": "Платнировский пер.",
+    "slug": "platnirovskiy-per"
+  },
+  {
+    "name": "Плиева",
+    "slug": "plieva"
+  },
+  {
+    "name": "Плотниченко",
+    "slug": "plotnichenko"
+  },
+  {
+    "name": "Победы пл.",
+    "slug": "pobedy-pl"
+  },
+  {
+    "name": "Побережный пер.",
+    "slug": "poberezhnyy-per"
+  },
+  {
+    "name": "Пограничная",
+    "slug": "pogranichnaya"
+  },
+  {
+    "name": "Пограничников сквер",
+    "slug": "pogranichnikov-skver"
+  },
+  {
+    "name": "Подводника Маринеско",
+    "slug": "podvodnika-marinesko"
+  },
+  {
+    "name": "Подольская",
+    "slug": "podolskaya"
+  },
+  {
+    "name": "Подсолнечная",
+    "slug": "podsolnechnaya"
+  },
+  {
+    "name": "Покровская",
+    "slug": "pokrovskaya"
+  },
+  {
+    "name": "Полевая",
+    "slug": "polevaya"
+  },
+  {
+    "name": "Полевая (Лазурный)",
+    "slug": "polevaya-lazurnyy"
+  },
+  {
+    "name": "Полевая (Пашковский)",
+    "slug": "polevaya-pashkovskiy"
+  },
+  {
+    "name": "Полевой (Старокорсунская) проезд",
+    "slug": "polevoy-starokorsunskaya-proezd"
+  },
+  {
+    "name": "Полевой пер.",
+    "slug": "polevoy-per"
+  },
+  {
+    "name": "Полевой проезд",
+    "slug": "polevoy-proezd"
+  },
+  {
+    "name": "Полесская",
+    "slug": "polesskaya"
+  },
+  {
+    "name": "Поливная",
+    "slug": "polivnaya"
+  },
+  {
+    "name": "Полины Осипенко",
+    "slug": "poliny-osipenko"
+  },
+  {
+    "name": "Полины Осипенко проезд",
+    "slug": "poliny-osipenko-proezd"
+  },
+  {
+    "name": "Полоцкая",
+    "slug": "polotskaya"
+  },
+  {
+    "name": "Полтавская",
+    "slug": "poltavskaya"
+  },
+  {
+    "name": "Померанская",
+    "slug": "pomeranskaya"
+  },
+  {
+    "name": "Поморская",
+    "slug": "pomorskaya"
+  },
+  {
+    "name": "Понтийская",
+    "slug": "pontiyskaya"
+  },
+  {
+    "name": "Понтрягина",
+    "slug": "pontryagina"
+  },
+  {
+    "name": "Понурская",
+    "slug": "ponurskaya"
+  },
+  {
+    "name": "Попутная",
+    "slug": "poputnaya"
+  },
+  {
+    "name": "Посадская",
+    "slug": "posadskaya"
+  },
+  {
+    "name": "Поселковая",
+    "slug": "poselkovaya"
+  },
+  {
+    "name": "Постовая",
+    "slug": "postovaya"
+  },
+  {
+    "name": "Потсдамская",
+    "slug": "potsdamskaya"
+  },
+  {
+    "name": "Почтовая",
+    "slug": "pochtovaya"
+  },
+  {
+    "name": "Почтовое отделение 27",
+    "slug": "pochtovoe-otdelenie-27"
+  },
+  {
+    "name": "Почтовый (Пашковский) пер.",
+    "slug": "pochtovyy-pashkovskiy-per"
+  },
+  {
+    "name": "Почтовый пер.",
+    "slug": "pochtovyy-per"
+  },
+  {
+    "name": "Правды",
+    "slug": "pravdy"
+  },
+  {
+    "name": "Правды пер.",
+    "slug": "pravdy-per"
+  },
+  {
+    "name": "Правобережная",
+    "slug": "pravoberezhnaya"
+  },
+  {
+    "name": "Православная",
+    "slug": "pravoslavnaya"
+  },
+  {
+    "name": "Пречистая",
+    "slug": "prechistaya"
+  },
+  {
+    "name": "Приазовская",
+    "slug": "priazovskaya"
+  },
+  {
+    "name": "Привокзальная пл.",
+    "slug": "privokzalnaya-pl"
+  },
+  {
+    "name": "Привольная",
+    "slug": "privolnaya"
+  },
+  {
+    "name": "Пригородная",
+    "slug": "prigorodnaya"
+  },
+  {
+    "name": "Придорожная",
+    "slug": "pridorozhnaya"
+  },
+  {
+    "name": "Прикубанская",
+    "slug": "prikubanskaya"
+  },
+  {
+    "name": "Приозерная",
+    "slug": "priozernaya"
+  },
+  {
+    "name": "Припутевая",
+    "slug": "priputevaya"
+  },
+  {
+    "name": "Прованская",
+    "slug": "provanskaya"
+  },
+  {
+    "name": "Продольная",
+    "slug": "prodolnaya"
+  },
+  {
+    "name": "Проездная",
+    "slug": "proezdnaya"
+  },
+  {
+    "name": "Проезжая",
+    "slug": "proezzhaya"
+  },
+  {
+    "name": "Производственная",
+    "slug": "proizvodstvennaya"
+  },
+  {
+    "name": "Прокофьева",
+    "slug": "prokofeva"
+  },
+  {
+    "name": "Пролетарская",
+    "slug": "proletarskaya"
+  },
+  {
+    "name": "Пролетарский пер.",
+    "slug": "proletarskiy-per"
+  },
+  {
+    "name": "Промышленная",
+    "slug": "promyshlennaya"
+  },
+  {
+    "name": "Промышленный проезд",
+    "slug": "promyshlennyy-proezd"
+  },
+  {
+    "name": "Просторная",
+    "slug": "prostornaya"
+  },
+  {
+    "name": "Проточная",
+    "slug": "protochnaya"
+  },
+  {
+    "name": "Профсоюзная",
+    "slug": "profsoyuznaya"
+  },
+  {
+    "name": "Прохладная",
+    "slug": "prohladnaya"
+  },
+  {
+    "name": "Прочноокопская",
+    "slug": "prochnookopskaya"
+  },
+  {
+    "name": "Прудовая",
+    "slug": "prudovaya"
+  },
+  {
+    "name": "Пугачева",
+    "slug": "pugacheva"
+  },
+  {
+    "name": "Пугачева проезд",
+    "slug": "pugacheva-proezd"
+  },
+  {
+    "name": "Путевая",
+    "slug": "putevaya"
+  },
+  {
+    "name": "Путейская",
+    "slug": "puteyskaya"
+  },
+  {
+    "name": "Пушкина",
+    "slug": "pushkina"
+  },
+  {
+    "name": "Пушкина (Пашковский)",
+    "slug": "pushkina-pashkovskiy"
+  },
+  {
+    "name": "Пушкинская пл.",
+    "slug": "pushkinskaya-pl"
+  },
+  {
+    "name": "Пшеничная",
+    "slug": "pshenichnaya"
+  },
+  {
+    "name": "Пятигорская",
+    "slug": "pyatigorskaya"
+  },
+  {
+    "name": "Рабочая",
+    "slug": "rabochaya"
+  },
+  {
+    "name": "Рабочая (СХИ)",
+    "slug": "rabochaya-shi"
+  },
+  {
+    "name": "Рабочий пер.",
+    "slug": "rabochiy-per"
+  },
+  {
+    "name": "Радио",
+    "slug": "radio"
+  },
+  {
+    "name": "Радистов",
+    "slug": "radistov"
+  },
+  {
+    "name": "Радищева",
+    "slug": "radischeva"
+  },
+  {
+    "name": "Радужный бульвар",
+    "slug": "raduzhnyy-bulvar"
+  },
+  {
+    "name": "Разведчика Леонова",
+    "slug": "razvedchika-leonova"
+  },
+  {
+    "name": "Раздельная",
+    "slug": "razdelnaya"
+  },
+  {
+    "name": "Раздельный проезд",
+    "slug": "razdelnyy-proezd"
+  },
+  {
+    "name": "Раздольная",
+    "slug": "razdolnaya"
+  },
+  {
+    "name": "Райская",
+    "slug": "rayskaya"
+  },
+  {
+    "name": "Рассветная",
+    "slug": "rassvetnaya"
+  },
+  {
+    "name": "Рахманинова",
+    "slug": "rahmaninova"
+  },
+  {
+    "name": "Рашпилевская",
+    "slug": "rashpilevskaya"
+  },
+  {
+    "name": "Революционная",
+    "slug": "revolyutsionnaya"
+  },
+  {
+    "name": "Ремесленная",
+    "slug": "remeslennaya"
+  },
+  {
+    "name": "Репина",
+    "slug": "repina"
+  },
+  {
+    "name": "Репина проезд",
+    "slug": "repina-proezd"
+  },
+  {
+    "name": "Репинская",
+    "slug": "repinskaya"
+  },
+  {
+    "name": "Речная",
+    "slug": "rechnaya"
+  },
+  {
+    "name": "Римский пр-кт.",
+    "slug": "rimskiy-pr-kt"
+  },
+  {
+    "name": "Ровная",
+    "slug": "rovnaya"
+  },
+  {
+    "name": "Роговская",
+    "slug": "rogovskaya"
+  },
+  {
+    "name": "Родная",
+    "slug": "rodnaya"
+  },
+  {
+    "name": "Родниковская",
+    "slug": "rodnikovskaya"
+  },
+  {
+    "name": "Рождественская наб.",
+    "slug": "rozhdestvenskaya-nab"
+  },
+  {
+    "name": "Рождественский парк",
+    "slug": "rozhdestvenskiy-park"
+  },
+  {
+    "name": "Розовая",
+    "slug": "rozovaya"
+  },
+  {
+    "name": "Романовская",
+    "slug": "romanovskaya"
+  },
+  {
+    "name": "Ромашковая",
+    "slug": "romashkovaya"
+  },
+  {
+    "name": "Российская",
+    "slug": "rossiyskaya"
+  },
+  {
+    "name": "Российский проезд",
+    "slug": "rossiyskiy-proezd"
+  },
+  {
+    "name": "Ростовская",
+    "slug": "rostovskaya"
+  },
+  {
+    "name": "Ростовское шоссе",
+    "slug": "rostovskoe-shosse"
+  },
+  {
+    "name": "Ростокская",
+    "slug": "rostokskaya"
+  },
+  {
+    "name": "Рощинская",
+    "slug": "roschinskaya"
+  },
+  {
+    "name": "Рыбачья",
+    "slug": "rybachya"
+  },
+  {
+    "name": "Рылеева",
+    "slug": "ryleeva"
+  },
+  {
+    "name": "Рябиновая",
+    "slug": "ryabinovaya"
+  },
+  {
+    "name": "Рябиновый пер.",
+    "slug": "ryabinovyy-per"
+  },
+  {
+    "name": "Рясная",
+    "slug": "ryasnaya"
+  },
+  {
+    "name": "Рясный пер.",
+    "slug": "ryasnyy-per"
+  },
+  {
+    "name": "Садовая",
+    "slug": "sadovaya"
+  },
+  {
+    "name": "Садовая (Пашковский)",
+    "slug": "sadovaya-pashkovskiy"
+  },
+  {
+    "name": "Садоводов",
+    "slug": "sadovodov"
+  },
+  {
+    "name": "Садовый пер.",
+    "slug": "sadovyy-per"
+  },
+  {
+    "name": "Саксонская",
+    "slug": "saksonskaya"
+  },
+  {
+    "name": "Салтыкова-Щедрина",
+    "slug": "saltykova-schedrina"
+  },
+  {
+    "name": "Санитарная",
+    "slug": "sanitarnaya"
+  },
+  {
+    "name": "Саратовский проезд",
+    "slug": "saratovskiy-proezd"
+  },
+  {
+    "name": "Сафонова",
+    "slug": "safonova"
+  },
+  {
+    "name": "Саянская",
+    "slug": "sayanskaya"
+  },
+  {
+    "name": "Светлая",
+    "slug": "svetlaya"
+  },
+  {
+    "name": "Светлый сквер",
+    "slug": "svetlyy-skver"
+  },
+  {
+    "name": "Свободная",
+    "slug": "svobodnaya"
+  },
+  {
+    "name": "Свободы",
+    "slug": "svobody"
+  },
+  {
+    "name": "Святопокровская",
+    "slug": "svyatopokrovskaya"
+  },
+  {
+    "name": "Севастопольская",
+    "slug": "sevastopolskaya"
+  },
+  {
+    "name": "Севастьянова",
+    "slug": "sevastyanova"
+  },
+  {
+    "name": "Северная",
+    "slug": "severnaya"
+  },
+  {
+    "name": "Северная (Елизаветинская)",
+    "slug": "severnaya-elizavetinskaya"
+  },
+  {
+    "name": "Северная (КСК)",
+    "slug": "severnaya-ksk"
+  },
+  {
+    "name": "Северная (СХИ)",
+    "slug": "severnaya-shi"
+  },
+  {
+    "name": "Северный проезд",
+    "slug": "severnyy-proezd"
+  },
+  {
+    "name": "Североморская",
+    "slug": "severomorskaya"
+  },
+  {
+    "name": "Северский проезд",
+    "slug": "severskiy-proezd"
+  },
+  {
+    "name": "Седина",
+    "slug": "sedina"
+  },
+  {
+    "name": "Седина (Пашковский)",
+    "slug": "sedina-pashkovskiy"
+  },
+  {
+    "name": "Седина пер.",
+    "slug": "sedina-per"
+  },
+  {
+    "name": "Селезнева",
+    "slug": "selezneva"
+  },
+  {
+    "name": "Сельский пер.",
+    "slug": "selskiy-per"
+  },
+  {
+    "name": "Семеновская",
+    "slug": "semenovskaya"
+  },
+  {
+    "name": "Семеновская (Новознаменский)",
+    "slug": "semenovskaya-novoznamenskiy"
+  },
+  {
+    "name": "Семеновский проезд",
+    "slug": "semenovskiy-proezd"
+  },
+  {
+    "name": "Семигорская",
+    "slug": "semigorskaya"
+  },
+  {
+    "name": "Сенная",
+    "slug": "sennaya"
+  },
+  {
+    "name": "Сергея Есенина",
+    "slug": "sergeya-esenina"
+  },
+  {
+    "name": "Сергея Лазо",
+    "slug": "sergeya-lazo"
+  },
+  {
+    "name": "Сергея Михалева",
+    "slug": "sergeya-mihaleva"
+  },
+  {
+    "name": "Сергиевская",
+    "slug": "sergievskaya"
+  },
+  {
+    "name": "Сергия Радонежского",
+    "slug": "sergiya-radonezhskogo"
+  },
+  {
+    "name": "Серебристая",
+    "slug": "serebristaya"
+  },
+  {
+    "name": "Серова",
+    "slug": "serova"
+  },
+  {
+    "name": "Серёгина",
+    "slug": "seregina"
+  },
+  {
+    "name": "Сечевая",
+    "slug": "sechevaya"
+  },
+  {
+    "name": "Сечевой проезд",
+    "slug": "sechevoy-proezd"
+  },
+  {
+    "name": "Сидоренко",
+    "slug": "sidorenko"
+  },
+  {
+    "name": "Сидоренко проезд",
+    "slug": "sidorenko-proezd"
+  },
+  {
+    "name": "Силантьева",
+    "slug": "silanteva"
+  },
+  {
+    "name": "Симиренко",
+    "slug": "simirenko"
+  },
+  {
+    "name": "Симферопольская",
+    "slug": "simferopolskaya"
+  },
+  {
+    "name": "Симферопольский бульвар",
+    "slug": "simferopolskiy-bulvar"
+  },
+  {
+    "name": "Сиреневая",
+    "slug": "sirenevaya"
+  },
+  {
+    "name": "Сиреневая (Знаменский)",
+    "slug": "sirenevaya-znamenskiy"
+  },
+  {
+    "name": "Сиреневая (СХИ)",
+    "slug": "sirenevaya-shi"
+  },
+  {
+    "name": "Сиреневая (Северный)",
+    "slug": "sirenevaya-severnyy"
+  },
+  {
+    "name": "Сквозная",
+    "slug": "skvoznaya"
+  },
+  {
+    "name": "Сквозной пер.",
+    "slug": "skvoznoy-per"
+  },
+  {
+    "name": "Скобелева",
+    "slug": "skobeleva"
+  },
+  {
+    "name": "Скорикова",
+    "slug": "skorikova"
+  },
+  {
+    "name": "Скорняжная",
+    "slug": "skornyazhnaya"
+  },
+  {
+    "name": "Скрябина",
+    "slug": "skryabina"
+  },
+  {
+    "name": "Славная",
+    "slug": "slavnaya"
+  },
+  {
+    "name": "Славянская",
+    "slug": "slavyanskaya"
+  },
+  {
+    "name": "Славянский проезд",
+    "slug": "slavyanskiy-proezd"
+  },
+  {
+    "name": "Сливовая",
+    "slug": "slivovaya"
+  },
+  {
+    "name": "Сливовая (Новый)",
+    "slug": "slivovaya-novyy"
+  },
+  {
+    "name": "Слободская",
+    "slug": "slobodskaya"
+  },
+  {
+    "name": "Смирновская",
+    "slug": "smirnovskaya"
+  },
+  {
+    "name": "Смоленская",
+    "slug": "smolenskaya"
+  },
+  {
+    "name": "Смородиновая",
+    "slug": "smorodinovaya"
+  },
+  {
+    "name": "Снежная",
+    "slug": "snezhnaya"
+  },
+  {
+    "name": "Снежный пер.",
+    "slug": "snezhnyy-per"
+  },
+  {
+    "name": "Снесарева",
+    "slug": "snesareva"
+  },
+  {
+    "name": "Соборная",
+    "slug": "sobornaya"
+  },
+  {
+    "name": "Соборная пл.",
+    "slug": "sobornaya-pl"
+  },
+  {
+    "name": "Соборный проезд",
+    "slug": "sobornyy-proezd"
+  },
+  {
+    "name": "Советская",
+    "slug": "sovetskaya"
+  },
+  {
+    "name": "Совхозная",
+    "slug": "sovhoznaya"
+  },
+  {
+    "name": "Совхозный пер.",
+    "slug": "sovhoznyy-per"
+  },
+  {
+    "name": "Созвездий сквер",
+    "slug": "sozvezdiy-skver"
+  },
+  {
+    "name": "Соколиный пер.",
+    "slug": "sokolinyy-per"
+  },
+  {
+    "name": "Соколова",
+    "slug": "sokolova"
+  },
+  {
+    "name": "Солнечная",
+    "slug": "solnechnaya"
+  },
+  {
+    "name": "Солнечный бульвар",
+    "slug": "solnechnyy-bulvar"
+  },
+  {
+    "name": "Сормовская",
+    "slug": "sormovskaya"
+  },
+  {
+    "name": "Сормовский бульвар",
+    "slug": "sormovskiy-bulvar"
+  },
+  {
+    "name": "Сорока",
+    "slug": "soroka"
+  },
+  {
+    "name": "Сортировка",
+    "slug": "sortirovka"
+  },
+  {
+    "name": "Сосновая",
+    "slug": "sosnovaya"
+  },
+  {
+    "name": "Сочинская",
+    "slug": "sochinskaya"
+  },
+  {
+    "name": "Спасская",
+    "slug": "spasskaya"
+  },
+  {
+    "name": "Спокойная",
+    "slug": "spokoynaya"
+  },
+  {
+    "name": "Спортивная",
+    "slug": "sportivnaya"
+  },
+  {
+    "name": "Средняя",
+    "slug": "srednyaya"
+  },
+  {
+    "name": "Средняя (Калинино)",
+    "slug": "srednyaya-kalinino"
+  },
+  {
+    "name": "Ставропольская",
+    "slug": "stavropolskaya"
+  },
+  {
+    "name": "Ставропольский сквер",
+    "slug": "stavropolskiy-skver"
+  },
+  {
+    "name": "Стадионная",
+    "slug": "stadionnaya"
+  },
+  {
+    "name": "Сталинградская",
+    "slug": "stalingradskaya"
+  },
+  {
+    "name": "Станичная",
+    "slug": "stanichnaya"
+  },
+  {
+    "name": "Станкостроительная",
+    "slug": "stankostroitelnaya"
+  },
+  {
+    "name": "Становая",
+    "slug": "stanovaya"
+  },
+  {
+    "name": "Станочная",
+    "slug": "stanochnaya"
+  },
+  {
+    "name": "Старокорсунская",
+    "slug": "starokorsunskaya"
+  },
+  {
+    "name": "Старокубанская",
+    "slug": "starokubanskaya"
+  },
+  {
+    "name": "Стасова",
+    "slug": "stasova"
+  },
+  {
+    "name": "Стахановская",
+    "slug": "stahanovskaya"
+  },
+  {
+    "name": "Стеблиевская",
+    "slug": "steblievskaya"
+  },
+  {
+    "name": "Стеклотарный пер.",
+    "slug": "steklotarnyy-per"
+  },
+  {
+    "name": "Степана Коцура",
+    "slug": "stepana-kotsura"
+  },
+  {
+    "name": "Степана Разина",
+    "slug": "stepana-razina"
+  },
+  {
+    "name": "Степана Разина проезд",
+    "slug": "stepana-razina-proezd"
+  },
+  {
+    "name": "Степная",
+    "slug": "stepnaya"
+  },
+  {
+    "name": "Степная (Демьяна Бедного)",
+    "slug": "stepnaya-demyana-bednogo"
+  },
+  {
+    "name": "Степная (Пашковский)",
+    "slug": "stepnaya-pashkovskiy"
+  },
+  {
+    "name": "Столыпинская",
+    "slug": "stolypinskaya"
+  },
+  {
+    "name": "Стрелецкая",
+    "slug": "streletskaya"
+  },
+  {
+    "name": "Строителей",
+    "slug": "stroiteley"
+  },
+  {
+    "name": "Строителей бульвар",
+    "slug": "stroiteley-bulvar"
+  },
+  {
+    "name": "Строительная",
+    "slug": "stroitelnaya"
+  },
+  {
+    "name": "Строительный проезд",
+    "slug": "stroitelnyy-proezd"
+  },
+  {
+    "name": "Струнная",
+    "slug": "strunnaya"
+  },
+  {
+    "name": "Студенческая",
+    "slug": "studencheskaya"
+  },
+  {
+    "name": "Студенческий сквер",
+    "slug": "studencheskiy-skver"
+  },
+  {
+    "name": "Суворова",
+    "slug": "suvorova"
+  },
+  {
+    "name": "Суворовский пер.",
+    "slug": "suvorovskiy-per"
+  },
+  {
+    "name": "Суздальская",
+    "slug": "suzdalskaya"
+  },
+  {
+    "name": "Сумская",
+    "slug": "sumskaya"
+  },
+  {
+    "name": "Сургутская",
+    "slug": "surgutskaya"
+  },
+  {
+    "name": "Сычевая",
+    "slug": "sychevaya"
+  },
+  {
+    "name": "Табачная",
+    "slug": "tabachnaya"
+  },
+  {
+    "name": "Таганрогская",
+    "slug": "taganrogskaya"
+  },
+  {
+    "name": "Таймырская",
+    "slug": "taymyrskaya"
+  },
+  {
+    "name": "Талалихина",
+    "slug": "talalihina"
+  },
+  {
+    "name": "Таманская",
+    "slug": "tamanskaya"
+  },
+  {
+    "name": "Танкиста Яксаргина",
+    "slug": "tankista-yaksargina"
+  },
+  {
+    "name": "Тараса Бульбы",
+    "slug": "tarasa-bulby"
+  },
+  {
+    "name": "Тарасовская",
+    "slug": "tarasovskaya"
+  },
+  {
+    "name": "Тахтамукайская",
+    "slug": "tahtamukayskaya"
+  },
+  {
+    "name": "Ташкентская",
+    "slug": "tashkentskaya"
+  },
+  {
+    "name": "Тбилисский пер.",
+    "slug": "tbilisskiy-per"
+  },
+  {
+    "name": "Театральная пл.",
+    "slug": "teatralnaya-pl"
+  },
+  {
+    "name": "Тебердинская",
+    "slug": "teberdinskaya"
+  },
+  {
+    "name": "Текстильная",
+    "slug": "tekstilnaya"
+  },
+  {
+    "name": "Текстильный проезд",
+    "slug": "tekstilnyy-proezd"
+  },
+  {
+    "name": "Темнолесская",
+    "slug": "temnolesskaya"
+  },
+  {
+    "name": "Темрюкская",
+    "slug": "temryukskaya"
+  },
+  {
+    "name": "Тенгинская",
+    "slug": "tenginskaya"
+  },
+  {
+    "name": "Тенистая",
+    "slug": "tenistaya"
+  },
+  {
+    "name": "Тепличная",
+    "slug": "teplichnaya"
+  },
+  {
+    "name": "Терновая",
+    "slug": "ternovaya"
+  },
+  {
+    "name": "Терская",
+    "slug": "terskaya"
+  },
+  {
+    "name": "Тимашевский пер.",
+    "slug": "timashevskiy-per"
+  },
+  {
+    "name": "Тимирязева",
+    "slug": "timiryazeva"
+  },
+  {
+    "name": "Тимирязева пер.",
+    "slug": "timiryazeva-per"
+  },
+  {
+    "name": "Тирольская",
+    "slug": "tirolskaya"
+  },
+  {
+    "name": "Титаровская",
+    "slug": "titarovskaya"
+  },
+  {
+    "name": "Титова",
+    "slug": "titova"
+  },
+  {
+    "name": "Тихая",
+    "slug": "tihaya"
+  },
+  {
+    "name": "Тихий пер.",
+    "slug": "tihiy-per"
+  },
+  {
+    "name": "Тихий проезд",
+    "slug": "tihiy-proezd"
+  },
+  {
+    "name": "Тихорецкая",
+    "slug": "tihoretskaya"
+  },
+  {
+    "name": "Товарная",
+    "slug": "tovarnaya"
+  },
+  {
+    "name": "Толбухина",
+    "slug": "tolbuhina"
+  },
+  {
+    "name": "Толстого",
+    "slug": "tolstogo"
+  },
+  {
+    "name": "Томский пер.",
+    "slug": "tomskiy-per"
+  },
+  {
+    "name": "Тополиная",
+    "slug": "topolinaya"
+  },
+  {
+    "name": "Тополиная Аллея",
+    "slug": "topolinaya-alleya"
+  },
+  {
+    "name": "Топольковый пер.",
+    "slug": "topolkovyy-per"
+  },
+  {
+    "name": "Тосканская",
+    "slug": "toskanskaya"
+  },
+  {
+    "name": "Тракторный пер.",
+    "slug": "traktornyy-per"
+  },
+  {
+    "name": "Трамвайная",
+    "slug": "tramvaynaya"
+  },
+  {
+    "name": "Трамвайный проезд",
+    "slug": "tramvaynyy-proezd"
+  },
+  {
+    "name": "Троицкая",
+    "slug": "troitskaya"
+  },
+  {
+    "name": "Троицкая (Верхний казачий хутор)",
+    "slug": "troitskaya-verhniy-kazachiy-hutor"
+  },
+  {
+    "name": "Труда",
+    "slug": "truda"
+  },
+  {
+    "name": "Труда пл.",
+    "slug": "truda-pl"
+  },
+  {
+    "name": "Труда проезд",
+    "slug": "truda-proezd"
+  },
+  {
+    "name": "Трудовой Славы",
+    "slug": "trudovoy-slavy"
+  },
+  {
+    "name": "Тружеников",
+    "slug": "truzhenikov"
+  },
+  {
+    "name": "Туапсинская",
+    "slug": "tuapsinskaya"
+  },
+  {
+    "name": "Тувинская",
+    "slug": "tuvinskaya"
+  },
+  {
+    "name": "Тульская",
+    "slug": "tulskaya"
+  },
+  {
+    "name": "Тургенева",
+    "slug": "turgeneva"
+  },
+  {
+    "name": "Тургенева проезд",
+    "slug": "turgeneva-proezd"
+  },
+  {
+    "name": "Тургеневский сквер",
+    "slug": "turgenevskiy-skver"
+  },
+  {
+    "name": "Туркменская",
+    "slug": "turkmenskaya"
+  },
+  {
+    "name": "Тюльпанная",
+    "slug": "tyulpannaya"
+  },
+  {
+    "name": "Тюляева",
+    "slug": "tyulyaeva"
+  },
+  {
+    "name": "Тюляевский бульвар",
+    "slug": "tyulyaevskiy-bulvar"
+  },
+  {
+    "name": "Тюрингская",
+    "slug": "tyuringskaya"
+  },
+  {
+    "name": "Убинская",
+    "slug": "ubinskaya"
+  },
+  {
+    "name": "Угольный пер.",
+    "slug": "ugolnyy-per"
+  },
+  {
+    "name": "Удобная",
+    "slug": "udobnaya"
+  },
+  {
+    "name": "Узбекская",
+    "slug": "uzbekskaya"
+  },
+  {
+    "name": "Узорная",
+    "slug": "uzornaya"
+  },
+  {
+    "name": "Украинская",
+    "slug": "ukrainskaya"
+  },
+  {
+    "name": "Уланская",
+    "slug": "ulanskaya"
+  },
+  {
+    "name": "Уманский проезд",
+    "slug": "umanskiy-proezd"
+  },
+  {
+    "name": "Упорная",
+    "slug": "upornaya"
+  },
+  {
+    "name": "Уральская",
+    "slug": "uralskaya"
+  },
+  {
+    "name": "Уральский пер.",
+    "slug": "uralskiy-per"
+  },
+  {
+    "name": "Урицкого",
+    "slug": "uritskogo"
+  },
+  {
+    "name": "Урожайная",
+    "slug": "urozhaynaya"
+  },
+  {
+    "name": "Урожайная (Пашковский)",
+    "slug": "urozhaynaya-pashkovskiy"
+  },
+  {
+    "name": "Уссурийская",
+    "slug": "ussuriyskaya"
+  },
+  {
+    "name": "Утренняя",
+    "slug": "utrennyaya"
+  },
+  {
+    "name": "Ушакова",
+    "slug": "ushakova"
+  },
+  {
+    "name": "Фабричная",
+    "slug": "fabrichnaya"
+  },
+  {
+    "name": "Фабричная (КСК)",
+    "slug": "fabrichnaya-ksk"
+  },
+  {
+    "name": "Фадеева",
+    "slug": "fadeeva"
+  },
+  {
+    "name": "Федора Лузана",
+    "slug": "fedora-luzana"
+  },
+  {
+    "name": "Федоровская",
+    "slug": "fedorovskaya"
+  },
+  {
+    "name": "Федосеева",
+    "slug": "fedoseeva"
+  },
+  {
+    "name": "Фелицына",
+    "slug": "felitsyna"
+  },
+  {
+    "name": "Фелицына пер.",
+    "slug": "felitsyna-per"
+  },
+  {
+    "name": "Фермерская",
+    "slug": "fermerskaya"
+  },
+  {
+    "name": "Феррарская",
+    "slug": "ferrarskaya"
+  },
+  {
+    "name": "Фестивальная",
+    "slug": "festivalnaya"
+  },
+  {
+    "name": "Фестивальная (КСК)",
+    "slug": "festivalnaya-ksk"
+  },
+  {
+    "name": "Фестивальный сквер",
+    "slug": "festivalnyy-skver"
+  },
+  {
+    "name": "Фиалковая",
+    "slug": "fialkovaya"
+  },
+  {
+    "name": "Филатова",
+    "slug": "filatova"
+  },
+  {
+    "name": "Флорентийская",
+    "slug": "florentiyskaya"
+  },
+  {
+    "name": "Фрунзе",
+    "slug": "frunze"
+  },
+  {
+    "name": "Фрунзе (Пашковский)",
+    "slug": "frunze-pashkovskiy"
+  },
+  {
+    "name": "Фурманова",
+    "slug": "furmanova"
+  },
+  {
+    "name": "Фурманова проезд",
+    "slug": "furmanova-proezd"
+  },
+  {
+    "name": "Хабаровская",
+    "slug": "habarovskaya"
+  },
+  {
+    "name": "Хаджинова",
+    "slug": "hadzhinova"
+  },
+  {
+    "name": "Хакурате",
+    "slug": "hakurate"
+  },
+  {
+    "name": "Харьковская",
+    "slug": "harkovskaya"
+  },
+  {
+    "name": "Химзаводская",
+    "slug": "himzavodskaya"
+  },
+  {
+    "name": "Хлебная",
+    "slug": "hlebnaya"
+  },
+  {
+    "name": "Хлебосольная",
+    "slug": "hlebosolnaya"
+  },
+  {
+    "name": "Холмогорская",
+    "slug": "holmogorskaya"
+  },
+  {
+    "name": "Холмская",
+    "slug": "holmskaya"
+  },
+  {
+    "name": "Хоперского Полка",
+    "slug": "hoperskogo-polka"
+  },
+  {
+    "name": "Хрустальная",
+    "slug": "hrustalnaya"
+  },
+  {
+    "name": "Хуторская",
+    "slug": "hutorskaya"
+  },
+  {
+    "name": "Цветная",
+    "slug": "tsvetnaya"
+  },
+  {
+    "name": "Цветной пер.",
+    "slug": "tsvetnoy-per"
+  },
+  {
+    "name": "Цветочная",
+    "slug": "tsvetochnaya"
+  },
+  {
+    "name": "Цветочная (Дружба)",
+    "slug": "tsvetochnaya-druzhba"
+  },
+  {
+    "name": "Цветочная (Животновод)",
+    "slug": "tsvetochnaya-zhivotnovod"
+  },
+  {
+    "name": "Цветочная (Калинино)",
+    "slug": "tsvetochnaya-kalinino"
+  },
+  {
+    "name": "Цветочная (Солнышко)",
+    "slug": "tsvetochnaya-solnyshko"
+  },
+  {
+    "name": "Цветочная (Топольки-4)",
+    "slug": "tsvetochnaya-topolki-4"
+  },
+  {
+    "name": "Цезаря Куникова",
+    "slug": "tsezarya-kunikova"
+  },
+  {
+    "name": "Целинная",
+    "slug": "tselinnaya"
+  },
+  {
+    "name": "Центральная",
+    "slug": "tsentralnaya"
+  },
+  {
+    "name": "Центральная (Ростовское шоссе)",
+    "slug": "tsentralnaya-rostovskoe-shosse"
+  },
+  {
+    "name": "Центральная (Солнышко)",
+    "slug": "tsentralnaya-solnyshko"
+  },
+  {
+    "name": "Центральная (Транспортник)",
+    "slug": "tsentralnaya-transportnik"
+  },
+  {
+    "name": "Циолковского",
+    "slug": "tsiolkovskogo"
+  },
+  {
+    "name": "Циолковского проезд",
+    "slug": "tsiolkovskogo-proezd"
+  },
+  {
+    "name": "Чайковского",
+    "slug": "chaykovskogo"
+  },
+  {
+    "name": "Чайная",
+    "slug": "chaynaya"
+  },
+  {
+    "name": "Чапаева",
+    "slug": "chapaeva"
+  },
+  {
+    "name": "Чепигинская",
+    "slug": "chepiginskaya"
+  },
+  {
+    "name": "Черепичная",
+    "slug": "cherepichnaya"
+  },
+  {
+    "name": "Черешневая",
+    "slug": "chereshnevaya"
+  },
+  {
+    "name": "Черняховского",
+    "slug": "chernyahovskogo"
+  },
+  {
+    "name": "Черёмуховая",
+    "slug": "cheremuhovaya"
+  },
+  {
+    "name": "Чистопрудный проезд",
+    "slug": "chistoprudnyy-proezd"
+  },
+  {
+    "name": "Чистый пер.",
+    "slug": "chistyy-per"
+  },
+  {
+    "name": "Чудный пер.",
+    "slug": "chudnyy-per"
+  },
+  {
+    "name": "Широкий пер.",
+    "slug": "shirokiy-per"
+  },
+  {
+    "name": "Шишкина",
+    "slug": "shishkina"
+  },
+  {
+    "name": "Шмалько",
+    "slug": "shmalko"
+  },
+  {
+    "name": "Шоссейная",
+    "slug": "shosseynaya"
+  },
+  {
+    "name": "Шумана",
+    "slug": "shumana"
+  },
+  {
+    "name": "Эль Греко",
+    "slug": "el-greko"
+  },
+  {
+    "name": "Энергетиков",
+    "slug": "energetikov"
+  },
+  {
+    "name": "Эрмитажная",
+    "slug": "ermitazhnaya"
+  },
+  {
+    "name": "Эстонская",
+    "slug": "estonskaya"
+  },
+  {
+    "name": "Югорская",
+    "slug": "yugorskaya"
+  },
+  {
+    "name": "Южная (Российский)",
+    "slug": "yuzhnaya-rossiyskiy"
+  },
+  {
+    "name": "Южная (ТЭЦ)",
+    "slug": "yuzhnaya-tets"
+  },
+  {
+    "name": "Юрьевская",
+    "slug": "yurevskaya"
+  },
+  {
+    "name": "Юшковский",
+    "slug": "yushkovskiy"
+  },
+  {
+    "name": "Яблоневая (Новый)",
+    "slug": "yablonevaya-novyy"
+  },
+  {
+    "name": "Яблоновская",
+    "slug": "yablonovskaya"
+  },
+  {
+    "name": "Ягодная (Северный)",
+    "slug": "yagodnaya-severnyy"
+  },
+  {
+    "name": "Ягодная (Солнышко)",
+    "slug": "yagodnaya-solnyshko"
+  },
+  {
+    "name": "Якова Жарко",
+    "slug": "yakova-zharko"
+  },
+  {
+    "name": "Ямская",
+    "slug": "yamskaya"
+  },
+  {
+    "name": "Янтарная",
+    "slug": "yantarnaya"
+  },
+  {
+    "name": "Ясенская",
+    "slug": "yasenskaya"
+  },
+  {
+    "name": "Ясная",
+    "slug": "yasnaya"
+  },
+  {
+    "name": "Яхонтовая",
+    "slug": "yahontovaya"
+  },
+  {
+    "name": "имени Доватора ул.",
+    "slug": "imeni-dovatora-ul"
+  },
+  {
+    "name": "имени Ф.Э. Дзержинского сквер",
+    "slug": "imeni-fe-dzerzhinskogo-skver"
+  },
+  {
+    "name": "имени Челюскина ул.",
+    "slug": "imeni-chelyuskina-ul"
+  }
+]

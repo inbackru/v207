@@ -1,0 +1,344 @@
+{% extends "admin/base.html" %}
+{% block title %}Управление адресами ЖК{% endblock %}
+{% block content %}
+<div class="space-y-6">
+
+  <div class="bg-white shadow rounded-lg p-6">
+    <div class="flex items-center justify-between flex-wrap gap-3 mb-2">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">🏠 Адреса ЖК и квартир</h1>
+        <p class="text-gray-500 mt-1 text-sm">Обогащение через DaData, синхронизация адресов с корпусами и квартирами.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Step 1: DaData Enrichment ══ -->
+  <div class="bg-white shadow rounded-lg p-6">
+    <h2 class="text-lg font-semibold text-gray-800 mb-1 flex items-center gap-2">
+      <span class="text-2xl">🔍</span> Шаг 1 — DaData: обогатить ЖК (район и микрорайон)
+    </h2>
+    <p class="text-sm text-gray-500 mb-4">
+      Для каждого ЖК определяет <strong>address_city_district</strong> (Прикубанский, Адлерский…)
+      и <strong>address_quarter</strong> (мкр Горхутор, Кудепста…) через DaData /clean + /geolocate.
+      Скорость ~1 ЖК/сек — для 272 ЖК Краснодара займёт ~5 мин.
+    </p>
+
+    <div class="flex flex-wrap gap-3 items-center mb-4">
+      <select id="enrich-city-id" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        {% for city in cities %}
+        <option value="{{ city.id }}">{{ city.name }}</option>
+        {% endfor %}
+      </select>
+      <button onclick="startEnrich()" id="enrich-btn"
+        class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+        ▶ Запустить обогащение
+      </button>
+      <span id="enrich-status" class="text-sm text-gray-500"></span>
+    </div>
+
+    <div id="enrich-progress" class="hidden mb-3">
+      <div class="w-full bg-gray-100 rounded-full h-2 mb-1">
+        <div id="enrich-bar" class="bg-blue-500 h-2 rounded-full transition-all duration-300" style="width:0%"></div>
+      </div>
+      <p id="enrich-progress-text" class="text-xs text-gray-500"></p>
+    </div>
+
+    <pre id="enrich-log" class="hidden bg-gray-900 text-green-400 text-xs rounded-lg p-4 overflow-auto max-h-60 font-mono whitespace-pre-wrap"></pre>
+  </div>
+
+  <!-- ══ Step 1b: Bbox assign (Krasnodar only) ══ -->
+  <div class="bg-white shadow rounded-lg p-6">
+    <h2 class="text-lg font-semibold text-gray-800 mb-1 flex items-center gap-2">
+      <span class="text-2xl">📐</span> Шаг 1б — Bbox-назначение округов (Краснодар)
+    </h2>
+    <p class="text-sm text-gray-500 mb-4">
+      Быстро назначает <strong>Прикубанский / Карасунский / Западный / Центральный округ</strong> ЖК Краснодара,
+      у которых после DaData остался пустой район — по координатам. Не перезаписывает уже заполненные поля.
+    </p>
+    <div class="flex flex-wrap gap-3 items-center">
+      <button onclick="runBbox()" id="bbox-btn"
+        class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors">
+        📐 Назначить округа по координатам
+      </button>
+      <span id="bbox-status" class="text-sm text-gray-500"></span>
+    </div>
+    <div id="bbox-result" class="hidden mt-3 text-sm rounded-lg p-3 bg-indigo-50 border border-indigo-200 text-indigo-800"></div>
+  </div>
+
+  <!-- ══ Step 2: Sync to Properties ══ -->
+  <div class="bg-white shadow rounded-lg p-6">
+    <h2 class="text-lg font-semibold text-gray-800 mb-1 flex items-center gap-2">
+      <span class="text-2xl">🔄</span> Шаг 2 — Синхронизировать адреса в квартиры
+    </h2>
+    <p class="text-sm text-gray-500 mb-4">
+      Копирует <strong>address_city_district → parsed_district</strong> и <strong>address_quarter → parsed_settlement</strong>
+      из ЖК во все квартиры этого ЖК. Также заполняет <strong>address</strong> квартир из таблицы корпусов.
+    </p>
+
+    <div class="flex flex-wrap gap-3 items-center mb-4">
+      <select id="sync-city-id" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        {% for city in cities %}
+        <option value="{{ city.id }}">{{ city.name }}</option>
+        {% endfor %}
+      </select>
+      <button onclick="startSync()" id="sync-btn"
+        class="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors">
+        ↓ Синхронизировать
+      </button>
+      <span id="sync-status" class="text-sm text-gray-500"></span>
+    </div>
+
+    <div id="sync-result" class="hidden text-sm rounded-lg p-3 bg-emerald-50 border border-emerald-200 text-emerald-800"></div>
+  </div>
+
+  <!-- ══ Coverage Stats ══ -->
+  <div class="bg-white shadow rounded-lg p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+        <span class="text-2xl">📊</span> Покрытие адресами по городам
+      </h2>
+      <button onclick="loadStats()" class="text-sm text-blue-600 hover:text-blue-700 font-medium">↺ Обновить</button>
+    </div>
+    <div id="stats-table" class="overflow-x-auto">
+      <div class="text-center py-6 text-gray-400 text-sm">Загрузка...</div>
+    </div>
+  </div>
+
+  <!-- ══ District / Quarter Breakdown ══ -->
+  <div class="bg-white shadow rounded-lg p-6">
+    <h2 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+      <span class="text-2xl">📍</span> Разбивка по районам и микрорайонам
+    </h2>
+    <div class="flex flex-wrap gap-3 mb-4">
+      <select id="breakdown-city-id" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        onchange="loadBreakdown()">
+        {% for city in cities %}
+        <option value="{{ city.id }}">{{ city.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div id="breakdown-content" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="text-center py-6 text-gray-400 text-sm col-span-2">Выберите город...</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let enrichPollInterval = null;
+
+function getCsrf() {
+  const m = document.cookie.match(/csrf_token=([^;]+)/);
+  return m ? m[1] : '';
+}
+
+async function startEnrich() {
+  const cityId = document.getElementById('enrich-city-id').value;
+  const btn = document.getElementById('enrich-btn');
+  const status = document.getElementById('enrich-status');
+  btn.disabled = true;
+  btn.textContent = '⏳ Запуск...';
+  status.textContent = '';
+
+  try {
+    const r = await fetch('/admin/addresses/enrich-rc-dadata', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCsrf()},
+      body: JSON.stringify({city_id: parseInt(cityId)})
+    });
+    const d = await r.json();
+    if (d.success) {
+      btn.textContent = '⏳ Идёт обогащение...';
+      document.getElementById('enrich-progress').classList.remove('hidden');
+      document.getElementById('enrich-log').classList.remove('hidden');
+      status.textContent = d.message || 'Запущено';
+      enrichPollInterval = setInterval(() => pollEnrichStatus(cityId), 2000);
+    } else {
+      btn.disabled = false;
+      btn.textContent = '▶ Запустить';
+      status.textContent = '❌ ' + (d.error || 'Ошибка');
+    }
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = '▶ Запустить';
+    status.textContent = '❌ ' + e.message;
+  }
+}
+
+async function pollEnrichStatus(cityId) {
+  try {
+    const r = await fetch(`/admin/addresses/enrich-rc-dadata/status?city_id=${cityId}`);
+    const d = await r.json();
+    const bar = document.getElementById('enrich-bar');
+    const pct = d.total > 0 ? Math.round(d.done / d.total * 100) : 0;
+    bar.style.width = pct + '%';
+    document.getElementById('enrich-progress-text').textContent =
+      `${d.done} / ${d.total} ЖК (${pct}%)`;
+    document.getElementById('enrich-log').textContent = d.log || '';
+    document.getElementById('enrich-log').scrollTop = 9999;
+
+    if (!d.running) {
+      clearInterval(enrichPollInterval);
+      const btn = document.getElementById('enrich-btn');
+      btn.disabled = false;
+      btn.textContent = '▶ Запустить обогащение';
+      document.getElementById('enrich-status').textContent =
+        d.error ? ('❌ Ошибка: ' + d.error) : '✅ Готово!';
+      loadStats();
+    }
+  } catch(e) {}
+}
+
+async function startSync() {
+  const cityId = document.getElementById('sync-city-id').value;
+  const btn = document.getElementById('sync-btn');
+  const status = document.getElementById('sync-status');
+  const result = document.getElementById('sync-result');
+  btn.disabled = true;
+  btn.textContent = '⏳ Синхронизация...';
+  status.textContent = '';
+  result.classList.add('hidden');
+
+  try {
+    const r = await fetch('/admin/addresses/sync-to-properties', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCsrf()},
+      body: JSON.stringify({city_id: parseInt(cityId)})
+    });
+    const d = await r.json();
+    btn.disabled = false;
+    btn.textContent = '↓ Синхронизировать';
+    if (d.success) {
+      status.textContent = '✅ Готово';
+      result.classList.remove('hidden');
+      result.innerHTML =
+        `Обновлено квартир (район/мкр): <strong>${d.props_district_updated}</strong> &nbsp;|&nbsp; ` +
+        `Заполнено адресов из корпусов: <strong>${d.props_address_updated}</strong>`;
+    } else {
+      status.textContent = '❌ ' + (d.error || 'Ошибка');
+    }
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = '↓ Синхронизировать';
+    status.textContent = '❌ ' + e.message;
+  }
+}
+
+async function runBbox() {
+  const btn = document.getElementById('bbox-btn');
+  const status = document.getElementById('bbox-status');
+  const result = document.getElementById('bbox-result');
+  btn.disabled = true;
+  btn.textContent = '⏳ Назначаю...';
+  status.textContent = '';
+  result.classList.add('hidden');
+  try {
+    const r = await fetch('/admin/addresses/bbox-assign-districts', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCsrf()},
+      body: JSON.stringify({city_id: 1})
+    });
+    const d = await r.json();
+    btn.disabled = false;
+    btn.textContent = '📐 Назначить округа по координатам';
+    if (d.success) {
+      status.textContent = '✅ Готово';
+      result.classList.remove('hidden');
+      result.innerHTML =
+        `Назначено округов: <strong>${d.assigned}</strong> &nbsp;|&nbsp; ` +
+        `Итого ЖК с районом: <strong>${d.total_with_district}</strong>`;
+      loadStats();
+    } else {
+      status.textContent = '❌ ' + (d.error || 'Ошибка');
+    }
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = '📐 Назначить округа по координатам';
+    status.textContent = '❌ ' + e.message;
+  }
+}
+
+async function loadStats() {
+  try {
+    const r = await fetch('/api/address-coverage-stats');
+    const d = await r.json();
+    if (!d.success) return;
+    const rows = d.cities.map(c => `
+      <tr class="border-t border-gray-100 hover:bg-gray-50">
+        <td class="py-2 px-3 font-medium text-gray-800">${c.name}</td>
+        <td class="py-2 px-3 text-center">${c.total_rc}</td>
+        <td class="py-2 px-3 text-center">
+          <span class="${c.with_district == c.total_rc ? 'text-emerald-600 font-semibold' : 'text-gray-700'}">${c.with_district}</span>
+          <span class="text-gray-400 text-xs">/${c.total_rc}</span>
+        </td>
+        <td class="py-2 px-3 text-center">
+          <span class="${c.with_quarter == c.total_rc ? 'text-emerald-600 font-semibold' : 'text-gray-700'}">${c.with_quarter}</span>
+          <span class="text-gray-400 text-xs">/${c.total_rc}</span>
+        </td>
+        <td class="py-2 px-3 text-center">
+          <span class="${c.with_street == c.total_rc ? 'text-emerald-600 font-semibold' : 'text-gray-700'}">${c.with_street}</span>
+          <span class="text-gray-400 text-xs">/${c.total_rc}</span>
+        </td>
+        <td class="py-2 px-3 text-center text-gray-600">${c.props_with_settlement || 0}</td>
+      </tr>
+    `).join('');
+    document.getElementById('stats-table').innerHTML = `
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
+          <tr>
+            <th class="py-2 px-3 text-left">Город</th>
+            <th class="py-2 px-3 text-center">Всего ЖК</th>
+            <th class="py-2 px-3 text-center">Район</th>
+            <th class="py-2 px-3 text-center">Микрорайон</th>
+            <th class="py-2 px-3 text-center">Улица</th>
+            <th class="py-2 px-3 text-center">Квартир с мкр</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  } catch(e) {
+    document.getElementById('stats-table').innerHTML = '<p class="text-red-500 text-sm">' + e.message + '</p>';
+  }
+}
+
+async function loadBreakdown() {
+  const cityId = document.getElementById('breakdown-city-id').value;
+  const el = document.getElementById('breakdown-content');
+  el.innerHTML = '<div class="col-span-2 text-center py-4 text-gray-400 text-sm">Загрузка...</div>';
+  try {
+    const r = await fetch(`/api/address-district-breakdown?city_id=${cityId}`);
+    const d = await r.json();
+    if (!d.success) { el.innerHTML = '<p class="text-red-500 text-sm col-span-2">Ошибка</p>'; return; }
+
+    const distHtml = d.districts.map(x => `
+      <div class="flex justify-between items-center py-1.5 border-b border-gray-50">
+        <span class="text-gray-700 text-sm">${x.name}</span>
+        <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">${x.count} ЖК</span>
+      </div>`).join('') || '<p class="text-gray-400 text-sm">Нет данных</p>';
+
+    const qrtHtml = d.quarters.map(x => `
+      <div class="flex justify-between items-center py-1.5 border-b border-gray-50">
+        <span class="text-gray-700 text-sm">${x.name}</span>
+        <span class="text-xs font-semibold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">${x.count} ЖК</span>
+      </div>`).join('') || '<p class="text-gray-400 text-sm">Нет данных</p>';
+
+    el.innerHTML = `
+      <div class="border border-gray-200 rounded-lg p-4">
+        <h3 class="font-semibold text-gray-700 mb-3 flex items-center gap-1">🏙️ Районы города</h3>
+        ${distHtml}
+      </div>
+      <div class="border border-gray-200 rounded-lg p-4">
+        <h3 class="font-semibold text-gray-700 mb-3 flex items-center gap-1">📌 Микрорайоны</h3>
+        ${qrtHtml}
+      </div>`;
+  } catch(e) {
+    el.innerHTML = '<p class="text-red-500 text-sm col-span-2">' + e.message + '</p>';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadStats();
+  loadBreakdown();
+});
+</script>
+{% endblock %}

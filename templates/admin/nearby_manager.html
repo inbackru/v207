@@ -1,0 +1,410 @@
+{% extends "admin/base.html" %}
+{% block title %}Инфраструктура ЖК — Админ{% endblock %}
+{% block page_title %}Инфраструктура ЖК{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-[#0088CC] to-[#005f99] rounded-xl p-5 text-white">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+            <div>
+                <h1 class="text-xl font-bold">Обогащение инфраструктуры ЖК</h1>
+                <p class="text-blue-100 text-sm mt-0.5">Ближайшие POI (Overpass API) и расстояния до центра города</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <div id="job-status-badge" class="hidden flex items-center gap-2 bg-yellow-400 text-yellow-900 px-3 py-1.5 rounded-lg text-sm font-medium">
+                    <span class="w-2 h-2 rounded-full bg-yellow-700 animate-ping"></span>
+                    Задача выполняется...
+                </div>
+                <a href="{{ url_for('adm.admin_scheduler') }}" class="text-blue-100 hover:text-white text-sm flex items-center gap-1">
+                    <i class="fas fa-clock"></i> Планировщик
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <div class="text-2xl font-bold text-[#0088CC]">{{ stats.total }}</div>
+            <div class="text-sm text-gray-500 mt-0.5">ЖК с координатами</div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <div class="text-2xl font-bold text-green-600">{{ stats.with_data }}</div>
+            <div class="text-sm text-gray-500 mt-0.5">С данными POI</div>
+            <div class="mt-2">
+                <div class="w-full bg-gray-100 rounded-full h-1.5">
+                    <div class="bg-green-500 h-1.5 rounded-full" style="width:{{ stats.completion_rate }}%"></div>
+                </div>
+                <div class="text-xs text-gray-400 mt-1">{{ stats.completion_rate }}%</div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <div class="text-2xl font-bold text-[#0088CC]">{{ stats.with_distance }}</div>
+            <div class="text-sm text-gray-500 mt-0.5">С расстоянием до центра</div>
+            {% if stats.without_distance > 0 %}
+            <div class="text-xs text-orange-500 mt-1">{{ stats.without_distance }} без данных</div>
+            {% endif %}
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <div class="text-2xl font-bold {% if stats.without_data_count > 0 %}text-orange-500{% else %}text-green-600{% endif %}">{{ stats.without_data_count }}</div>
+            <div class="text-sm text-gray-500 mt-0.5">Без POI данных</div>
+            {% if stats.outdated_count > 0 %}
+            <div class="text-xs text-gray-400 mt-1">{{ stats.outdated_count }} устаревших (&gt;6 мес)</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Two column layout: controls + log -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- LEFT: Job Controls -->
+        <div class="space-y-4">
+
+            <!-- POI Update -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                <h3 class="font-semibold text-gray-900 flex items-center gap-2 mb-1">
+                    <i class="fas fa-map-pin text-[#0088CC]"></i> Обогащение POI (инфраструктура)
+                </h3>
+                <p class="text-sm text-gray-500 mb-4">Запрашивает OpenStreetMap Overpass API и сохраняет магазины, школы, транспорт в радиусе 1.5 км от каждого ЖК. Занимает ~2–4 часа для всех 329 ЖК.</p>
+
+                <div class="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-4 text-xs text-blue-700 space-y-1">
+                    <div><i class="fas fa-info-circle mr-1"></i> <strong>Автозапуск:</strong> каждую среду в 03:00 МСК</div>
+                    {% if stats.schedule_info.get('complex_nearby_job') %}
+                    <div><i class="fas fa-calendar mr-1"></i> Следующий запуск: {{ stats.schedule_info['complex_nearby_job'] }}</div>
+                    {% endif %}
+                </div>
+
+                <div id="nearby-status" class="hidden mb-3"></div>
+
+                <!-- City filter -->
+                <div class="mb-3">
+                    <label class="text-xs font-medium text-gray-600 block mb-1">Фильтр по городу</label>
+                    <select id="nearby-city-id" class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0088CC]">
+                        <option value="">Все города</option>
+                        {% for city in cities %}
+                        <option value="{{ city.id }}">{{ city.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="flex gap-2">
+                    <button id="btn-nearby-start" onclick="startNearbyJob()" class="flex-1 bg-[#0088CC] text-white px-4 py-2.5 rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm">
+                        <i class="fas fa-play mr-2"></i>Запустить обогащение
+                    </button>
+                    <button id="btn-nearby-stop" onclick="stopNearbyJob()" class="hidden bg-red-100 text-red-600 px-4 py-2.5 rounded-lg hover:bg-red-200 transition-colors font-medium text-sm">
+                        <i class="fas fa-stop mr-2"></i>Остановить
+                    </button>
+                </div>
+            </div>
+
+            <!-- Distance Update -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                <h3 class="font-semibold text-gray-900 flex items-center gap-2 mb-1">
+                    <i class="fas fa-route text-green-600"></i> Расстояния до центра города
+                </h3>
+                <p class="text-sm text-gray-500 mb-4">Вычисляет расстояние (Haversine) от каждого ЖК до центра соответствующего города. Быстрая операция — занимает несколько секунд.</p>
+
+                <div class="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-4 text-xs text-blue-700 space-y-1">
+                    <div><i class="fas fa-info-circle mr-1"></i> <strong>Автозапуск:</strong> ежедневно в 07:00 МСК</div>
+                    {% if stats.schedule_info.get('complex_distances_job') %}
+                    <div><i class="fas fa-calendar mr-1"></i> Следующий запуск: {{ stats.schedule_info['complex_distances_job'] }}</div>
+                    {% endif %}
+                </div>
+
+                <div id="dist-status" class="hidden mb-3"></div>
+
+                <button id="btn-dist" onclick="runDistances()" class="w-full bg-green-600 text-white px-4 py-2.5 rounded-lg hover:bg-green-700 transition-colors font-medium text-sm">
+                    <i class="fas fa-sync-alt mr-2"></i>Пересчитать расстояния
+                </button>
+            </div>
+
+            <!-- Proxy Settings -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                <h3 class="font-semibold text-gray-900 flex items-center gap-2 mb-3">
+                    <i class="fas fa-shield-alt text-gray-500"></i> Настройки прокси
+                </h3>
+                <p class="text-xs text-gray-400 mb-3">Прокси используется при запросах к Overpass API. Формат: <code class="bg-gray-100 px-1 rounded">http://user:pass@host:port</code></p>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-xs font-medium text-gray-600 block mb-1">Прокси URL (одиночный)</label>
+                        <input type="text" id="proxy-url" placeholder="http://user:pass@proxy.example.com:8080"
+                               class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0088CC]">
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-gray-600 block mb-1">Пул прокси (по одному на строку)</label>
+                        <textarea id="proxy-pool" rows="4" placeholder="http://proxy1:port&#10;http://proxy2:port&#10;http://proxy3:port"
+                                  class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0088CC] font-mono resize-none"></textarea>
+                    </div>
+                    <div class="flex gap-3">
+                        <div class="flex-1">
+                            <label class="text-xs font-medium text-gray-600 block mb-1">Задержка между запросами (сек)</label>
+                            <input type="number" id="proxy-delay" value="1.5" min="0.5" max="10" step="0.5"
+                                   class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0088CC]">
+                        </div>
+                        <div class="flex-1">
+                            <label class="text-xs font-medium text-gray-600 block mb-1">Радиус поиска POI (м)</label>
+                            <input type="number" id="proxy-radius" value="1500" min="500" max="5000" step="100"
+                                   class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0088CC]">
+                        </div>
+                    </div>
+                    <div id="proxy-save-status" class="hidden text-xs text-green-600"><i class="fas fa-check mr-1"></i>Настройки сохранены</div>
+                    <button onclick="saveProxySettings()" class="w-full bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium">
+                        <i class="fas fa-save mr-2"></i>Сохранить настройки
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Live Log + Coverage Table -->
+        <div class="space-y-4">
+
+            <!-- Live progress -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-semibold text-gray-900 flex items-center gap-2">
+                        <i class="fas fa-terminal text-gray-500"></i> Лог выполнения
+                    </h3>
+                    <button onclick="refreshStatus()" class="text-xs text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+
+                <!-- Live progress bar -->
+                <div class="mb-3">
+                    <div class="flex items-center justify-between text-xs text-gray-500 mb-1">
+                        <span>Покрытие POI</span>
+                        <span id="live-coverage">{{ stats.completion_rate }}%</span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2">
+                        <div id="live-progress-bar" class="bg-green-500 h-2 rounded-full transition-all duration-500" style="width:{{ stats.completion_rate }}%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-400 mt-1">
+                        <span id="live-with-data">{{ stats.with_data }} с данными</span>
+                        <span id="live-total">из {{ stats.total }}</span>
+                    </div>
+                </div>
+
+                <!-- Log terminal -->
+                <pre id="job-log" class="bg-gray-900 text-green-400 text-xs rounded-lg p-3 h-64 overflow-y-auto font-mono whitespace-pre-wrap">Нажмите «Запустить» чтобы увидеть вывод...</pre>
+            </div>
+
+            <!-- ЖК без данных -->
+            {% if stats.without_data_count > 0 %}
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+                <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+                    <h3 class="font-semibold text-gray-900 text-sm flex items-center gap-2">
+                        <i class="fas fa-exclamation-triangle text-orange-500"></i>
+                        ЖК без POI данных
+                    </h3>
+                    <span class="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-medium">{{ stats.without_data_count }}</span>
+                </div>
+                <div class="divide-y divide-gray-50 max-h-64 overflow-y-auto">
+                    {% for c in stats.without_data %}
+                    <div class="px-5 py-2.5 flex items-center justify-between">
+                        <a href="/residential_complex/{{ c.id }}" target="_blank" class="text-sm text-[#0088CC] hover:underline truncate mr-3">{{ c.name }}</a>
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <span class="text-xs text-gray-400">{{ c.latitude|round(4) }}, {{ c.longitude|round(4) }}</span>
+                            <button onclick="updateSingleComplex({{ c.id }}, '{{ c.name }}')" class="text-xs bg-blue-50 text-[#0088CC] px-2 py-0.5 rounded hover:bg-blue-100 transition-colors">
+                                Обновить
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% if stats.without_data_count > 10 %}
+                    <div class="px-5 py-2 text-xs text-gray-400">...и ещё {{ stats.without_data_count - 10 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Устаревшие -->
+            {% if stats.outdated_count > 0 %}
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+                <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+                    <h3 class="font-semibold text-gray-900 text-sm flex items-center gap-2">
+                        <i class="fas fa-clock text-gray-400"></i> Устаревшие данные (&gt;6 мес)
+                    </h3>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-medium">{{ stats.outdated_count }}</span>
+                </div>
+                <div class="divide-y divide-gray-50 max-h-48 overflow-y-auto">
+                    {% for c in stats.outdated %}
+                    <div class="px-5 py-2.5 flex items-center justify-between">
+                        <a href="/residential_complex/{{ c.id }}" target="_blank" class="text-sm text-gray-700 hover:text-[#0088CC] truncate mr-3">{{ c.name }}</a>
+                        <span class="text-xs text-gray-400 flex-shrink-0">{{ c.nearby_updated_at.strftime('%d.%m.%Y') if c.nearby_updated_at else 'Никогда' }}</span>
+                    </div>
+                    {% endfor %}
+                    {% if stats.outdated_count > 10 %}
+                    <div class="px-5 py-2 text-xs text-gray-400">...и ещё {{ stats.outdated_count - 10 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+var statusPoll = null;
+
+function showStatus(elId, type, msg) {
+    const el = document.getElementById(elId);
+    el.className = 'mb-3 px-3 py-2 rounded-lg text-sm ' + (
+        type === 'success' ? 'bg-green-50 border border-green-200 text-green-700' :
+        type === 'error'   ? 'bg-red-50 border border-red-200 text-red-700' :
+                             'bg-blue-50 border border-blue-100 text-blue-700'
+    );
+    el.textContent = msg;
+    el.classList.remove('hidden');
+}
+
+function startNearbyJob() {
+    const btn = document.getElementById('btn-nearby-start');
+    const stopBtn = document.getElementById('btn-nearby-stop');
+    const proxyUrl = document.getElementById('proxy-url').value.trim();
+    const cityId = document.getElementById('nearby-city-id').value;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Запускается...';
+    showStatus('nearby-status', 'info', 'Запуск задачи...');
+    const payload = {proxy_url: proxyUrl};
+    if (cityId) payload.city_id = parseInt(cityId);
+    fetch('/admin/nearby/run-full', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content},
+        body: JSON.stringify(payload)
+    }).then(r => r.json()).then(data => {
+        if (data.success) {
+            showStatus('nearby-status', 'info', data.message);
+            btn.innerHTML = '<i class="fas fa-play mr-2"></i>Запустить обогащение';
+            stopBtn.classList.remove('hidden');
+            startPolling();
+        } else {
+            showStatus('nearby-status', 'error', data.message || 'Ошибка запуска');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-play mr-2"></i>Запустить обогащение';
+        }
+    }).catch(e => {
+        showStatus('nearby-status', 'error', 'Ошибка сети: ' + e);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-play mr-2"></i>Запустить обогащение';
+    });
+}
+
+function stopNearbyJob() {
+    fetch('/admin/nearby/stop', {
+        method: 'POST',
+        headers: {'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content}
+    }).then(r => r.json()).then(data => {
+        showStatus('nearby-status', data.success ? 'success' : 'error', data.message);
+        document.getElementById('btn-nearby-stop').classList.add('hidden');
+        document.getElementById('btn-nearby-start').disabled = false;
+        document.getElementById('job-status-badge').classList.add('hidden');
+        if (statusPoll) { clearInterval(statusPoll); statusPoll = null; }
+    });
+}
+
+function runDistances() {
+    const btn = document.getElementById('btn-dist');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Пересчёт...';
+    showStatus('dist-status', 'info', 'Пересчёт расстояний...');
+    fetch('/admin/nearby/run-distances', {
+        method: 'POST',
+        headers: {'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content}
+    }).then(r => r.json()).then(data => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-sync-alt mr-2"></i>Пересчитать расстояния';
+        showStatus('dist-status', data.success ? 'success' : 'error', data.message);
+        if (data.success) refreshStatus();
+    }).catch(e => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-sync-alt mr-2"></i>Пересчитать расстояния';
+        showStatus('dist-status', 'error', 'Ошибка: ' + e);
+    });
+}
+
+function updateSingleComplex(id, name) {
+    if (!confirm('Обновить POI для «' + name + '»?')) return;
+    fetch('/admin/complex/' + id + '/update-nearby', {
+        method: 'POST',
+        headers: {'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content}
+    }).then(r => r.json()).then(data => {
+        const msg = data.success ? ('✅ ' + name + ': ' + data.message) : ('❌ Ошибка: ' + data.error);
+        const n = document.createElement('div');
+        n.className = 'fixed top-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg text-sm text-white ' + (data.success ? 'bg-green-600' : 'bg-red-600');
+        n.textContent = msg;
+        document.body.appendChild(n);
+        setTimeout(() => { n.remove(); if(data.success) location.reload(); }, 4000);
+    });
+}
+
+function refreshStatus() {
+    fetch('/admin/nearby/job-status').then(r => r.json()).then(data => {
+        // Update log
+        const logEl = document.getElementById('job-log');
+        if (data.log && data.log.trim()) logEl.textContent = data.log;
+
+        // Update live progress
+        const pct = data.total > 0 ? Math.round(data.with_nearby / data.total * 100) : 0;
+        document.getElementById('live-progress-bar').style.width = pct + '%';
+        document.getElementById('live-coverage').textContent = pct + '%';
+        document.getElementById('live-with-data').textContent = data.with_nearby + ' с данными';
+        document.getElementById('live-total').textContent = 'из ' + data.total;
+
+        // Show/hide running badge
+        const badge = document.getElementById('job-status-badge');
+        const stopBtn = document.getElementById('btn-nearby-stop');
+        const startBtn = document.getElementById('btn-nearby-start');
+        if (data.running) {
+            badge.classList.remove('hidden');
+            stopBtn.classList.remove('hidden');
+            startBtn.disabled = true;
+        } else {
+            badge.classList.add('hidden');
+            stopBtn.classList.add('hidden');
+            startBtn.disabled = false;
+            if (statusPoll) { clearInterval(statusPoll); statusPoll = null; }
+        }
+
+        // Auto-scroll log
+        logEl.scrollTop = logEl.scrollHeight;
+    });
+}
+
+function startPolling() {
+    if (statusPoll) clearInterval(statusPoll);
+    statusPoll = setInterval(refreshStatus, 3000);
+}
+
+function saveProxySettings() {
+    const data = {
+        proxy_url: document.getElementById('proxy-url').value.trim(),
+        proxy_pool: document.getElementById('proxy-pool').value.split('\n').map(s => s.trim()).filter(Boolean),
+        delay: parseFloat(document.getElementById('proxy-delay').value) || 1.5,
+        radius: parseInt(document.getElementById('proxy-radius').value) || 1500,
+    };
+    fetch('/admin/nearby/save-settings', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content},
+        body: JSON.stringify(data)
+    }).then(r => r.json()).then(d => {
+        const el = document.getElementById('proxy-save-status');
+        el.classList.remove('hidden');
+        setTimeout(() => el.classList.add('hidden'), 3000);
+    });
+}
+
+// Init
+document.addEventListener('DOMContentLoaded', function() {
+    refreshStatus();
+    // Load saved settings
+    fetch('/admin/nearby/job-status').then(r => r.json()).then(data => {
+        if (data.running) startPolling();
+    });
+});
+</script>
+{% endblock %}

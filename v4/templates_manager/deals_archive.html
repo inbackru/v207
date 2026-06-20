@@ -1,0 +1,348 @@
+{% extends "base.html" %}
+
+{% block title %}Архив сделок | InBack{% endblock %}
+
+{% block head %}
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+{% endblock %}
+
+{% block content %}
+<style>
+header { display: none !important; }
+body { padding-top: 0 !important; }
+:root { --brand: #0088CC; --brand-dark: #006699; --green: #059669; }
+
+@media (max-width: 767px) {
+    body > footer, body > .footer, #footer-section { display: none !important; }
+    .archive-top-header { display: none !important; }
+    .archive-page-content { padding: 12px !important; padding-bottom: 80px !important; }
+    .archive-page-content .space-y-6 > * + * { margin-top: 12px !important; }
+    .archive-page-content .grid.grid-cols-2 { gap: 8px !important; }
+    .archive-page-content .grid.grid-cols-2 .p-4 { padding: 10px !important; }
+    .archive-page-content .grid.grid-cols-2 .w-10.h-10 { width: 32px !important; height: 32px !important; }
+    .archive-page-content .grid.grid-cols-2 .text-xl { font-size: 1rem !important; }
+    .archive-page-content .grid.grid-cols-1.md\:grid-cols-3 { grid-template-columns: 1fr !important; gap: 8px !important; }
+    .archive-page-content .grid.grid-cols-1.md\:grid-cols-3 .p-4 { padding: 10px !important; }
+    .archive-page-content .grid.grid-cols-1.md\:grid-cols-3 .text-lg { font-size: 0.875rem !important; }
+    .archive-page-content form.flex { flex-direction: column; gap: 8px !important; align-items: stretch !important; }
+    .archive-page-content form.flex > div { width: 100% !important; }
+    .archive-page-content form select { width: 100% !important; font-size: 14px !important; padding: 10px 14px !important; border-radius: 10px !important; }
+    .archive-page-content form button[type="submit"] { width: 100% !important; padding: 10px 14px !important; border-radius: 10px !important; font-size: 14px !important; }
+    .archive-page-content form a { text-align: center; }
+    .archive-desktop-table { display: none !important; }
+    .archive-mobile-cards { display: block !important; }
+    .archive-manager-table { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .archive-manager-table table { font-size: 11px !important; }
+    .archive-manager-table th, .archive-manager-table td { padding: 6px 8px !important; }
+}
+@media (min-width: 768px) {
+    .archive-mobile-cards { display: none !important; }
+}
+</style>
+
+{% if sidebar_links is defined and sidebar_links %}
+{% include 'components/sidebar.html' %}
+{% endif %}
+
+<div class="{% if sidebar_links is defined and sidebar_links %}md:ml-[70px]{% endif %} transition-all duration-300">
+
+<div class="bg-white border-b border-gray-200 shadow-sm archive-top-header">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between py-3">
+            <div class="flex items-center gap-3">
+                <span class="text-[#0088CC] font-extrabold text-xl tracking-tight">InBack</span>
+                <span class="text-gray-300">|</span>
+                <span class="text-gray-700 font-semibold text-sm">Архив сделок</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="{{ url_for('manager_deals_kanban') }}" class="text-sm text-[#0088CC] hover:text-[#006699] font-medium">
+                    <i class="fas fa-columns mr-1"></i> Канбан
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="hidden max-md:flex items-center gap-3 px-4 py-3 bg-white border-b border-gray-200">
+    <a onclick="if(history.length>1){history.back()}else{location.href='{{ url_for("manager_dashboard") }}'};return false;" href="{{ url_for('manager_dashboard') }}" class="w-8 h-8 flex items-center justify-center rounded-lg bg-[#0088CC]/10 text-[#0088CC]">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    </a>
+    <div class="flex-1 min-w-0">
+        <h1 class="text-sm font-bold text-gray-900">Архив сделок</h1>
+    </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 archive-page-content">
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-folder text-[#0088CC]"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500">Всего</p>
+                    <p class="text-xl font-bold text-gray-900">{{ stats.total }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-trophy text-[#059669]"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500">Успешные</p>
+                    <p class="text-xl font-bold text-[#059669]">{{ stats.successful }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-times-circle text-red-500"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500">Проигранные</p>
+                    <p class="text-xl font-bold text-red-500">{{ stats.rejected }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-percentage text-[#0088CC]"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500">Конверсия</p>
+                    <p class="text-xl font-bold text-gray-900">{{ stats.conversion }}%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <p class="text-xs text-gray-500 mb-1">Сумма успешных</p>
+            <p class="text-lg font-bold text-gray-900">{{ "{:,.0f}".format(stats.total_revenue|default(0)) }} ₽</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <p class="text-xs text-gray-500 mb-1">Кешбэк (успешные)</p>
+            <p class="text-lg font-bold text-[#059669]">{{ "{:,.0f}".format(stats.total_cashback|default(0)) }} ₽</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <p class="text-xs text-gray-500 mb-1">Средний чек</p>
+            <p class="text-lg font-bold text-gray-900">{{ "{:,.0f}".format(stats.avg_deal|default(0)) }} ₽</p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+        <form method="GET" class="flex flex-wrap items-end gap-3">
+            {% if is_rop %}
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Менеджер</label>
+                <select name="manager_id" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC]/30 focus:border-[#0088CC] outline-none">
+                    <option value="">Все менеджеры</option>
+                    {% for m in managers %}
+                    <option value="{{ m.id }}" {% if request.args.get('manager_id')|int == m.id %}selected{% endif %}>{{ m.full_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Статус</label>
+                <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC]/30 focus:border-[#0088CC] outline-none">
+                    <option value="">Все</option>
+                    <option value="completed" {% if request.args.get('status') == 'completed' %}selected{% endif %}>Успешные</option>
+                    <option value="rejected" {% if request.args.get('status') == 'rejected' %}selected{% endif %}>Проигранные</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Период</label>
+                <select name="period" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC]/30 focus:border-[#0088CC] outline-none">
+                    <option value="">Все время</option>
+                    <option value="week" {% if request.args.get('period') == 'week' %}selected{% endif %}>Неделя</option>
+                    <option value="month" {% if request.args.get('period') == 'month' %}selected{% endif %}>Месяц</option>
+                    <option value="quarter" {% if request.args.get('period') == 'quarter' %}selected{% endif %}>Квартал</option>
+                    <option value="year" {% if request.args.get('period') == 'year' %}selected{% endif %}>Год</option>
+                </select>
+            </div>
+            <button type="submit" class="bg-[#0088CC] hover:bg-[#006699] text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
+                <i class="fas fa-filter mr-1"></i> Применить
+            </button>
+            {% if request.args.get('manager_id') or request.args.get('status') or request.args.get('period') %}
+            <a href="{{ request.path }}" class="text-gray-400 hover:text-gray-600 text-sm py-2">
+                <i class="fas fa-times mr-1"></i> Сбросить
+            </a>
+            {% endif %}
+        </form>
+    </div>
+
+    {% if rejection_stats %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+        <h3 class="text-sm font-bold text-gray-700 mb-3">Причины проигрыша</h3>
+        <div class="space-y-2">
+            {% for reason in rejection_stats %}
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-600">{{ reason.reason or 'Не указана' }}</span>
+                <div class="flex items-center gap-2">
+                    <div class="w-24 bg-gray-100 rounded-full h-1.5">
+                        <div class="bg-red-400 rounded-full h-1.5" style="width: {{ (reason.count / stats.rejected * 100) if stats.rejected > 0 else 0 }}%"></div>
+                    </div>
+                    <span class="text-sm font-semibold text-gray-700 w-6 text-right">{{ reason.count }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden archive-desktop-table">
+        <div class="px-4 py-3 border-b border-gray-100">
+            <h3 class="font-bold text-gray-900 text-sm">Закрытые сделки ({{ deals|length }})</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Сделка</th>
+                        {% if is_rop %}
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Менеджер</th>
+                        {% endif %}
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Клиент</th>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Стоимость</th>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Кешбэк</th>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Результат</th>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Причина</th>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Дата</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {% for deal in deals %}
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-4 py-2.5">
+                            <a href="{{ url_for('manager_deal_card', deal_id=deal.id) }}" class="text-[#0088CC] hover:underline font-medium">{{ deal.deal_number }}</a>
+                        </td>
+                        {% if is_rop %}
+                        <td class="px-4 py-2.5 text-gray-700">{{ deal.manager.full_name if deal.manager else '—' }}</td>
+                        {% endif %}
+                        <td class="px-4 py-2.5 text-gray-700">{{ deal.client.full_name if deal.client else '—' }}</td>
+                        <td class="px-4 py-2.5 font-medium text-gray-900">{{ "{:,.0f}".format(deal.property_price) }} ₽</td>
+                        <td class="px-4 py-2.5 text-[#059669] font-medium">{{ "{:,.0f}".format(deal.cashback_amount) }} ₽</td>
+                        <td class="px-4 py-2.5">
+                            {% if deal.status in ['completed', 'successful'] %}
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-green-50 text-[#059669] text-xs font-semibold rounded-full">
+                                <i class="fas fa-trophy text-[9px]"></i> Успешна
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-red-50 text-red-600 text-xs font-semibold rounded-full">
+                                <i class="fas fa-times-circle text-[9px]"></i> Проиграна
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-2.5 text-gray-500 text-xs max-w-[180px]">
+                            {% if deal.rejection_reason %}
+                            <span class="text-red-500">{{ deal.rejection_reason }}</span>
+                            {% elif deal.closing_comment %}
+                            {{ deal.closing_comment[:40] }}{% if deal.closing_comment|length > 40 %}...{% endif %}
+                            {% else %}
+                            —
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-2.5 text-gray-500 text-xs whitespace-nowrap">
+                            {{ deal.closed_at.strftime('%d.%m.%Y') if deal.closed_at else (deal.updated_at.strftime('%d.%m.%Y') if deal.updated_at else '—') }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not deals %}
+                    <tr>
+                        <td colspan="{% if is_rop %}8{% else %}7{% endif %}" class="px-4 py-10 text-center text-gray-400">
+                            <i class="fas fa-folder-open text-3xl mb-2 block"></i>
+                            <p class="font-medium text-sm">Нет закрытых сделок</p>
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="archive-mobile-cards space-y-3" style="display:none;">
+        <div class="flex items-center justify-between">
+            <h3 class="font-bold text-gray-900 text-sm">Закрытые сделки ({{ deals|length }})</h3>
+        </div>
+        {% for deal in deals %}
+        <a href="{{ url_for('manager_deal_card', deal_id=deal.id) }}" class="block bg-white rounded-xl border border-gray-100 shadow-sm p-3">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[#0088CC] font-semibold text-sm">{{ deal.deal_number }}</span>
+                {% if deal.status in ['completed', 'successful'] %}
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-green-50 text-[#059669] text-[10px] font-semibold rounded-full">
+                    <i class="fas fa-trophy text-[8px]"></i> Успешна
+                </span>
+                {% else %}
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-red-50 text-red-600 text-[10px] font-semibold rounded-full">
+                    <i class="fas fa-times-circle text-[8px]"></i> Проиграна
+                </span>
+                {% endif %}
+            </div>
+            <p class="text-xs text-gray-700 font-medium mb-1">{{ deal.client.full_name if deal.client else '—' }}</p>
+            <div class="flex items-center justify-between text-[11px] text-gray-500">
+                <span>{{ "{:,.0f}".format(deal.property_price) }} ₽</span>
+                <span class="text-[#059669] font-medium">+{{ "{:,.0f}".format(deal.cashback_amount) }} ₽</span>
+                <span>{{ deal.closed_at.strftime('%d.%m.%Y') if deal.closed_at else '—' }}</span>
+            </div>
+            {% if deal.rejection_reason %}
+            <p class="text-[10px] text-red-400 mt-1 truncate">{{ deal.rejection_reason }}</p>
+            {% endif %}
+        </a>
+        {% endfor %}
+        {% if not deals %}
+        <div class="bg-white rounded-xl border border-gray-100 p-6 text-center text-gray-400">
+            <i class="fas fa-folder-open text-2xl mb-2 block"></i>
+            <p class="text-sm font-medium">Нет закрытых сделок</p>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if manager_stats %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+        <h3 class="font-bold text-gray-900 text-sm mb-3">Статистика по менеджерам</h3>
+        <div class="overflow-x-auto archive-manager-table">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500">Менеджер</th>
+                        <th class="px-4 py-2.5 text-center text-xs font-semibold text-gray-500">Всего</th>
+                        <th class="px-4 py-2.5 text-center text-xs font-semibold text-gray-500">Успешные</th>
+                        <th class="px-4 py-2.5 text-center text-xs font-semibold text-gray-500">Проигранные</th>
+                        <th class="px-4 py-2.5 text-center text-xs font-semibold text-gray-500">Конверсия</th>
+                        <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500">Выручка</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {% for ms in manager_stats %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-2.5 font-medium text-gray-900">{{ ms.name }}</td>
+                        <td class="px-4 py-2.5 text-center text-gray-700">{{ ms.total }}</td>
+                        <td class="px-4 py-2.5 text-center text-[#059669] font-semibold">{{ ms.successful }}</td>
+                        <td class="px-4 py-2.5 text-center text-red-500 font-semibold">{{ ms.rejected }}</td>
+                        <td class="px-4 py-2.5 text-center">
+                            <span class="px-2 py-0.5 rounded-full text-xs font-bold {% if ms.conversion >= 70 %}bg-green-50 text-green-700{% elif ms.conversion >= 40 %}bg-yellow-50 text-yellow-700{% else %}bg-red-50 text-red-700{% endif %}">
+                                {{ ms.conversion }}%
+                            </span>
+                        </td>
+                        <td class="px-4 py-2.5 text-right font-medium text-gray-900">{{ "{:,.0f}".format(ms.revenue) }} ₽</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+</div>
+
+{% set active_tab = 'deals' %}
+{% include 'components/manager_mobile_nav.html' %}
+{% endblock %}

@@ -1,0 +1,626 @@
+{% extends "base.html" %}
+
+{% block title %}Вход и регистрация | inback{% endblock %}
+
+{% block content %}
+<style>
+    .gradient-bg {
+        background: linear-gradient(135deg, #0088cc 0%, #32a4fb 100%);
+    }
+    
+    .btn-ton {
+        background: linear-gradient(135deg, #0088cc 0%, #32a4fb 100%);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-ton:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 136, 204, 0.3);
+    }
+    
+    .input-ton {
+        border: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+    }
+    
+    .input-ton:focus {
+        border-color: #0088cc;
+        box-shadow: 0 0 0 3px rgba(0, 136, 204, 0.1);
+    }
+    
+    .tab-btn {
+        transition: all 0.3s ease;
+    }
+    
+    .tab-btn.active {
+        background: white;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .tab-content.hidden {
+        display: none;
+    }
+    @keyframes pulseBorderReg {
+        0%,100% { box-shadow: 0 0 0 0 rgba(0,136,204,.4); }
+        50%      { box-shadow: 0 0 0 5px rgba(0,136,204,0); }
+    }
+</style>
+
+<!-- Mobile sticky header -->
+<div class="md:hidden sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm flex items-center h-14 px-4">
+    <button onclick="history.back()" class="flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors -ml-1 mr-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+        </svg>
+    </button>
+    <span id="mobile-auth-title" class="text-base font-semibold text-gray-800">Вход</span>
+</div>
+
+<div class="relative overflow-hidden min-h-screen bg-gray-50">
+    <div class="absolute top-0 left-0 w-full h-1 gradient-bg"></div>
+    <div class="absolute top-20 -left-20 w-40 h-40 rounded-full bg-blue-500 opacity-10"></div>
+    <div class="absolute bottom-20 -right-20 w-60 h-60 rounded-full bg-[#0088CC] opacity-10"></div>
+    
+    <div class="container mx-auto px-4 py-6 md:py-8">
+        <div class="flex flex-col lg:flex-row items-center justify-center min-h-screen">
+            <!-- Left side -->
+            <div class="hidden lg:block lg:w-1/2 lg:pr-12 mb-12 lg:mb-0 relative">
+                <div class="max-w-md mx-auto">
+                    <div class="flex items-center mb-8">
+                        <div class="w-12 h-12 bg-gradient-to-r from-[#0088CC] to-[#006699] rounded-lg flex items-center justify-center text-white font-bold text-lg mr-4">In</div>
+                        <h1 class="text-3xl font-bold bg-gradient-to-r from-[#0088CC] to-[#006699] bg-clip-text text-transparent">InBack</h1>
+                    </div>
+                    
+                    <h2 class="text-4xl font-bold text-gray-800 mb-6 leading-tight">
+                        Получайте кешбэк <span class="text-[#0088CC]">до 5%</span> при покупке новостроек
+                    </h2>
+                    
+                    <p class="text-gray-600 mb-8 text-lg">
+                        Зарегистрируйтесь и получайте возврат денег с каждой покупки недвижимости.
+                    </p>
+                    
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                        <div class="flex items-start">
+                            <div class="bg-gray-100 p-3 rounded-lg mr-4">
+                                <i class="fas fa-coins text-[#0088CC] text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800 mb-2">Как это работает?</h3>
+                                <p class="text-gray-600 text-sm">
+                                    1. Зарегистрируйтесь<br/>
+                                    2. Найдите квартиру<br/>
+                                    3. Получите кешбэк
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right side - Forms with tabs -->
+            <div class="lg:w-1/2 w-full">
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden max-w-md w-full mx-auto">
+                    <!-- Tab buttons -->
+                    <div class="flex bg-gray-100 p-1 m-6 rounded-lg border border-gray-200">
+                        <button type="button" class="tab-btn active flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all" data-tab="login">
+                            <i class="fas fa-sign-in-alt mr-2"></i>Вход
+                        </button>
+                        <button type="button" class="tab-btn flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all" data-tab="register">
+                            <i class="fas fa-user-plus mr-2"></i>Регистрация
+                        </button>
+                    </div>
+                    
+                    <!-- Login Tab -->
+                    <div class="tab-content p-8" id="login-tab">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Вход в личный кабинет</h3>
+                        <p class="text-gray-500 mb-6">Введите номер телефона и пароль</p>
+                        
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                    <div class="mb-4 p-4 rounded-lg {% if category == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-green-50 text-green-700 border border-green-200{% endif %}">
+                                        {{ message }}
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+                        
+                        <form id="login-form" method="POST" action="{{ url_for('auth.login') }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <input type="hidden" name="form_type" value="login"/>
+                            
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-medium mb-2">Номер телефона</label>
+                                <div class="relative">
+                                    <i class="fas fa-phone absolute left-3 top-3 text-gray-400"></i>
+                                    <input class="input-ton w-full pl-10 pr-4 py-3 rounded-lg border focus:outline-none" 
+                                           id="login-phone" name="phone" placeholder="+7 (___) ___-__-__" type="tel" required/>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-medium mb-2">Пароль</label>
+                                <div class="relative">
+                                    <i class="fas fa-lock absolute left-3 top-3 text-gray-400"></i>
+                                    <input class="input-ton w-full pl-10 pr-12 py-3 rounded-lg border focus:outline-none" 
+                                           id="login-password" name="password" placeholder="Введите пароль" type="password" required/>
+                                    <button type="button" class="absolute right-3 top-3 text-gray-400 hover:text-gray-600 focus:outline-none" onclick="togglePassword('login-password', this)">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn-ton w-full py-3 px-4 rounded-lg text-white font-medium mb-4">
+                                Войти
+                            </button>
+                            
+                            <div class="text-right">
+                                <a href="{{ url_for('auth.forgot_password') }}" class="text-sm text-[#0088CC] hover:underline">
+                                    Забыли пароль?
+                                </a>
+                            </div>
+                        </form>
+                        
+                        {% set account_type = 'user' %}
+                        {% include 'auth/_social_buttons.html' %}
+                    </div>
+                    
+                    <!-- Registration Tab -->
+                    <div class="tab-content hidden p-8" id="register-tab">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Регистрация</h3>
+                        <p class="text-gray-500 mb-6">Получайте кешбэк до 5% на покупки</p>
+                        
+                        <!-- Messages container -->
+                        <div id="register-messages" class="mb-4 hidden"></div>
+                        
+                        <!-- Step 1: Phone input -->
+                        <div id="register-step-phone">
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-medium mb-2">Номер телефона</label>
+                                <div class="relative">
+                                    <i class="fas fa-phone absolute left-3 top-3 text-gray-400"></i>
+                                    <input class="input-ton w-full pl-10 pr-4 py-3 rounded-lg border focus:outline-none" 
+                                           id="register-phone" name="phone" placeholder="+7 (___) ___-__-__" type="tel" required/>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-2">Мы отправим вам SMS с кодом подтверждения</p>
+                            </div>
+                            
+                            <button type="button" id="register-send-code-btn" class="btn-ton w-full py-3 px-4 rounded-lg text-white font-medium">
+                                <span id="register-btn-text">Получить код</span>
+                                <i id="register-btn-spinner" class="fas fa-spinner fa-spin ml-2 hidden"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Step 2: SMS Code verification (hidden by default) -->
+                        <div id="register-step-code" class="hidden">
+                            <div class="mb-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                                <p class="text-green-700 text-sm">
+                                    <i class="fas fa-check-circle mr-2"></i>
+                                    SMS с кодом отправлен на номер <span id="register-phone-display" class="font-medium"></span>
+                                </p>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-medium mb-2">Код из SMS</label>
+                                <div class="relative">
+                                    <i class="fas fa-key absolute left-3 top-3 text-gray-400"></i>
+                                    <input class="input-ton w-full pl-10 pr-4 py-3 rounded-lg border focus:outline-none text-center text-xl tracking-widest" 
+                                           id="register-code" name="code" placeholder="______" type="text" maxlength="6" pattern="[0-9]{6}" required/>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-2">Введите 6-значный код</p>
+                            </div>
+                            
+                            <button type="button" id="register-verify-code-btn" class="btn-ton w-full py-3 px-4 rounded-lg text-white font-medium mb-4">
+                                <span id="verify-btn-text">Подтвердить</span>
+                                <i id="verify-btn-spinner" class="fas fa-spinner fa-spin ml-2 hidden"></i>
+                            </button>
+
+                            <!-- Resend row -->
+                            <div class="flex items-center justify-between gap-3 mb-3">
+                                <!-- Circular countdown -->
+                                <div id="reg-countdown-wrap" class="flex items-center gap-2">
+                                    <div class="relative w-9 h-9 flex-shrink-0">
+                                        <svg style="transform:rotate(-90deg)" class="w-9 h-9" viewBox="0 0 76 76">
+                                            <circle cx="38" cy="38" r="36" fill="none" stroke="#e5e7eb" stroke-width="6"/>
+                                            <circle id="reg-countdown-arc" cx="38" cy="38" r="36"
+                                                    fill="none" stroke="#0088CC" stroke-width="6"
+                                                    stroke-linecap="round"
+                                                    style="stroke-dasharray:226;stroke-dashoffset:0;transition:stroke-dashoffset 1s linear"/>
+                                        </svg>
+                                        <span id="reg-countdown-num"
+                                              class="absolute inset-0 flex items-center justify-center text-xs font-bold text-[#0088CC]">60</span>
+                                    </div>
+                                    <span class="text-xs text-gray-500 leading-tight">Повтор через<br><span id="reg-countdown-sec">60</span> сек</span>
+                                </div>
+                                <!-- Resend button — shown after timer ends -->
+                                <button id="reg-resend-btn" type="button" onclick="resendVerificationCode()"
+                                        style="display:none"
+                                        class="flex items-center gap-1.5 px-3 py-2 rounded-lg border-2 border-[#0088CC]
+                                               text-[#0088CC] font-semibold text-xs hover:bg-blue-50 transition-all
+                                               focus:outline-none" style="animation:pulseBorderReg 1.4s ease infinite">
+                                    <i class="fas fa-redo text-xs"></i>
+                                    Отправить ещё раз
+                                </button>
+                            </div>
+
+                            <button type="button" id="register-change-phone-btn" class="w-full py-2 px-4 text-gray-500 hover:text-gray-700 text-sm">
+                                <i class="fas fa-arrow-left mr-1"></i> Изменить номер
+                            </button>
+                        </div>
+                        
+                        <!-- Step 3: Password input for existing user (hidden by default) -->
+                        <div id="register-step-password" class="hidden">
+                            <div class="mb-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                                <p class="text-yellow-800 text-sm">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    Этот номер уже зарегистрирован. Введите пароль для входа.
+                                </p>
+                            </div>
+                            
+                            <form id="existing-user-login-form" method="POST" action="{{ url_for('auth.login') }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <input type="hidden" name="form_type" value="login"/>
+                                <input type="hidden" id="existing-user-phone" name="phone" value=""/>
+                                
+                                <div class="mb-4">
+                                    <label class="block text-gray-700 text-sm font-medium mb-2">Пароль</label>
+                                    <div class="relative">
+                                        <i class="fas fa-lock absolute left-3 top-3 text-gray-400"></i>
+                                        <input class="input-ton w-full pl-10 pr-12 py-3 rounded-lg border focus:outline-none" 
+                                               id="existing-user-password" name="password" placeholder="Введите пароль" type="password" required/>
+                                        <button type="button" class="absolute right-3 top-3 text-gray-400 hover:text-gray-600 focus:outline-none" onclick="togglePassword('existing-user-password', this)">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" class="btn-ton w-full py-3 px-4 rounded-lg text-white font-medium mb-3">
+                                    Войти
+                                </button>
+                            </form>
+                            
+                            <button type="button" id="register-back-to-phone-btn" class="w-full py-2 px-4 text-gray-500 hover:text-gray-700 text-sm">
+                                <i class="fas fa-arrow-left mr-1"></i> Изменить номер
+                            </button>
+                        </div>
+                        
+                        <div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                            <p class="text-xs text-blue-800">
+                                <i class="fas fa-shield-alt mr-2"></i>
+                                Ваши данные защищены шифрованием
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t px-8 py-4 flex items-center justify-center gap-4">
+                        <a href="{{ url_for('partner.partner_login') }}" class="text-sm text-gray-500 hover:text-[#0088cc] font-medium">
+                            <i class="fas fa-handshake mr-1"></i>Партнёрский кабинет
+                        </a>
+                        <span class="text-gray-300">|</span>
+                        <a href="{{ url_for('mgr.manager_login') }}" class="text-sm text-gray-500 hover:text-[#0088cc] font-medium">
+                            <i class="fas fa-user-tie mr-1"></i>Вход для менеджеров
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Toggle password visibility
+function togglePassword(inputId, button) {
+    const input = document.getElementById(inputId);
+    const icon = button.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+
+// Registration state management
+let registrationPhone = '';
+
+function showMessage(containerId, message, isError = false) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = `<div class="p-4 rounded-lg ${isError ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'}">${message}</div>`;
+    container.classList.remove('hidden');
+}
+
+function hideMessage(containerId) {
+    const container = document.getElementById(containerId);
+    container.classList.add('hidden');
+    container.innerHTML = '';
+}
+
+function showStep(stepId) {
+    ['register-step-phone', 'register-step-code', 'register-step-password'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+    });
+    document.getElementById(stepId).classList.remove('hidden');
+}
+
+async function sendVerificationCode() {
+    const phone = document.getElementById('register-phone').value;
+    if (!phone || phone.length < 16) {
+        showMessage('register-messages', 'Введите корректный номер телефона', true);
+        return;
+    }
+    
+    hideMessage('register-messages');
+    
+    const btn = document.getElementById('register-send-code-btn');
+    const btnText = document.getElementById('register-btn-text');
+    const spinner = document.getElementById('register-btn-spinner');
+    
+    btn.disabled = true;
+    btnText.textContent = 'Отправка...';
+    spinner.classList.remove('hidden');
+    
+    try {
+        const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+        const response = await fetch('/register/send-code', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ phone: phone })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            registrationPhone = phone;
+            document.getElementById('register-phone-display').textContent = phone;
+            showStep('register-step-code');
+            document.getElementById('register-code').focus();
+            startRegTimer(data.remaining_seconds ? (60 - data.remaining_seconds) : 60);
+        } else {
+            if (data.message && data.message.includes('уже зарегистрирован')) {
+                registrationPhone = phone;
+                document.getElementById('existing-user-phone').value = phone;
+                showStep('register-step-password');
+                document.getElementById('existing-user-password').focus();
+            } else {
+                showMessage('register-messages', data.message || 'Ошибка отправки SMS', true);
+            }
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showMessage('register-messages', 'Ошибка соединения с сервером', true);
+    } finally {
+        btn.disabled = false;
+        btnText.textContent = 'Получить код';
+        spinner.classList.add('hidden');
+    }
+}
+
+async function verifyCode() {
+    const code = document.getElementById('register-code').value;
+    if (!code || code.length !== 6) {
+        showMessage('register-messages', 'Введите 6-значный код', true);
+        return;
+    }
+    
+    hideMessage('register-messages');
+    
+    const btn = document.getElementById('register-verify-code-btn');
+    const btnText = document.getElementById('verify-btn-text');
+    const spinner = document.getElementById('verify-btn-spinner');
+    
+    btn.disabled = true;
+    btnText.textContent = 'Проверка...';
+    spinner.classList.remove('hidden');
+    
+    try {
+        const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+        const response = await fetch('/register/verify-code', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ 
+                phone: registrationPhone,
+                code: code 
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            if (data.redirect) {
+                window.location.href = data.redirect;
+            } else {
+                window.location.href = '/register/profile';
+            }
+        } else {
+            showMessage('register-messages', data.message || 'Неверный код', true);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showMessage('register-messages', 'Ошибка соединения с сервером', true);
+    } finally {
+        btn.disabled = false;
+        btnText.textContent = 'Подтвердить';
+        spinner.classList.add('hidden');
+    }
+}
+
+function resetToPhoneStep() {
+    hideMessage('register-messages');
+    document.getElementById('register-code').value = '';
+    showStep('register-step-phone');
+    if (regTimerInterval) clearInterval(regTimerInterval);
+}
+
+// ── Countdown timer for SMS resend ──────────────────────────────────────────
+let regTimerSeconds = 60;
+let regTimerInterval = null;
+const _REG_CIRC = 2 * Math.PI * 36; // ≈ 226
+
+function startRegTimer(seconds) {
+    if (regTimerInterval) clearInterval(regTimerInterval);
+    regTimerSeconds = seconds || 60;
+
+    const arc   = document.getElementById('reg-countdown-arc');
+    const num   = document.getElementById('reg-countdown-num');
+    const sec   = document.getElementById('reg-countdown-sec');
+    const wrap  = document.getElementById('reg-countdown-wrap');
+    const btn   = document.getElementById('reg-resend-btn');
+
+    wrap.style.display = 'flex';
+    btn.style.display  = 'none';
+
+    function tick() {
+        const frac = regTimerSeconds / 60;
+        if (arc) arc.style.strokeDashoffset = _REG_CIRC * (1 - frac);
+        if (num) num.textContent = regTimerSeconds;
+        if (sec) sec.textContent = regTimerSeconds;
+
+        if (regTimerSeconds <= 0) {
+            clearInterval(regTimerInterval);
+            wrap.style.display = 'none';
+            btn.style.display  = 'flex';
+            btn.style.alignItems = 'center';
+            btn.style.animation = 'pulseBorderReg 1.4s ease infinite';
+        }
+        regTimerSeconds--;
+    }
+    tick();
+    regTimerInterval = setInterval(tick, 1000);
+}
+
+async function resendVerificationCode() {
+    const btn = document.getElementById('reg-resend-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin text-xs"></i> Отправка...';
+
+    try {
+        const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+        const response = await fetch('/register/send-code', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ phone: registrationPhone })
+        });
+        const data = await response.json();
+
+        if (data.success) {
+            document.getElementById('register-code').value = '';
+            document.getElementById('register-code').focus();
+            startRegTimer(60);
+        } else if (data.rate_limited && data.remaining_seconds) {
+            startRegTimer(data.remaining_seconds);
+        } else {
+            showMessage('register-messages', data.message || 'Ошибка отправки SMS', true);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-redo text-xs"></i> Отправить ещё раз';
+        }
+    } catch (e) {
+        showMessage('register-messages', 'Ошибка соединения с сервером', true);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-redo text-xs"></i> Отправить ещё раз';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    // Format phone number
+    function formatPhone(input) {
+        let value = input.value.replace(/\D/g, '');
+        if (value.startsWith('8')) value = '7' + value.slice(1);
+        if (!value.startsWith('7')) value = '7' + value;
+        
+        const parts = [];
+        if (value.length > 0) parts.push('+7');
+        if (value.length > 1) parts.push(` (${value.slice(1, 4)}`);
+        if (value.length >= 4) parts.push(`) ${value.slice(4, 7)}`);
+        if (value.length >= 7) parts.push(`-${value.slice(7, 9)}`);
+        if (value.length >= 9) parts.push(`-${value.slice(9, 11)}`);
+        
+        input.value = parts.join('');
+    }
+    
+    // Add phone formatting
+    document.getElementById('login-phone').addEventListener('input', function(e) {
+        formatPhone(e.target);
+    });
+    
+    document.getElementById('register-phone').addEventListener('input', function(e) {
+        formatPhone(e.target);
+    });
+    
+    // Update mobile header title on tab switch
+    function updateMobileTitle(tabName) {
+        var titleEl = document.getElementById('mobile-auth-title');
+        if (titleEl) titleEl.textContent = tabName === 'register' ? 'Регистрация' : 'Вход';
+    }
+
+    // Tab switching
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tabName = this.getAttribute('data-tab');
+            
+            // Remove active class from all buttons
+            tabBtns.forEach(b => b.classList.remove('active'));
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            // Hide all tab contents
+            tabContents.forEach(content => content.classList.add('hidden'));
+            // Show selected tab content
+            document.getElementById(tabName + '-tab').classList.remove('hidden');
+
+            updateMobileTitle(tabName);
+        });
+    });
+    
+    var urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('ref')) {
+        tabBtns.forEach(function(b) { b.classList.remove('active'); });
+        tabContents.forEach(function(c) { c.classList.add('hidden'); });
+        var regBtn = document.querySelector('.tab-btn[data-tab="register"]');
+        if (regBtn) regBtn.classList.add('active');
+        document.getElementById('register-tab').classList.remove('hidden');
+        updateMobileTitle('register');
+    }
+
+    // Registration button handlers
+    document.getElementById('register-send-code-btn').addEventListener('click', sendVerificationCode);
+    document.getElementById('register-verify-code-btn').addEventListener('click', verifyCode);
+    document.getElementById('register-change-phone-btn').addEventListener('click', resetToPhoneStep);
+    document.getElementById('register-back-to-phone-btn').addEventListener('click', resetToPhoneStep);
+    
+    // Enter key handling for code input
+    document.getElementById('register-code').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            verifyCode();
+        }
+    });
+    
+    // Enter key handling for phone input
+    document.getElementById('register-phone').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            sendVerificationCode();
+        }
+    });
+});
+</script>
+
+{% endblock %}

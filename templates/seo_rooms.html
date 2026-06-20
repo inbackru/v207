@@ -1,0 +1,310 @@
+{% extends "base.html" %}
+{% set city_slug = current_city.slug if current_city else 'krasnodar' %}
+{% set city_name = current_city.name if current_city else 'Краснодар' %}
+{% set city_name_prep = (current_city.name_prepositional or current_city.name) if current_city else 'Краснодаре' %}
+{% set city_name_gen = (current_city.name_genitive or current_city.name) if current_city else 'Краснодара' %}
+
+{% block title %}{{ room_title }} в новостройках {{ city_name }}{% if min_price %} — от {{ "{:,.0f}".format(min_price/1000000).replace(',', ' ') }} млн ₽{% endif %} | InBack{% endblock %}
+
+{% block description %}{{ room_title }} в новостройках {{ city_name_prep }}. {% if properties_count %}{{ properties_count }} предложений{% endif %}{% if min_price %}, от {{ "{:,.0f}".format(min_price).replace(',', ' ') }} ₽{% endif %}. Кэшбек до 4% при покупке через InBack. Семейная ипотека от 3.5%. Бесплатный подбор.{% endblock %}
+
+{% block keywords %}{{ room_title }} новостройки {{ city_name }}, купить {{ room_title_gen }} {{ city_name }} новостройка, {{ room_title_gen }} {{ city_name }} от застройщика, {{ room_title_gen }} ипотека {{ city_name }}, кэшбек при покупке квартиры {{ city_name }}, {{ room_title_gen }} с кэшбеком новостройка{% endblock %}
+
+{% block canonical_url %}<link rel="canonical" href="https://inback.ru/{{ city_slug }}/{{ room_url_slug }}" />{% endblock %}
+
+{% block extra_head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Главная", "item": "https://inback.ru/"},
+    {"@type": "ListItem", "position": 2, "name": "Новостройки {{ city_name }}", "item": "https://inback.ru/{{ city_slug }}/novostrojki"},
+    {"@type": "ListItem", "position": 3, "name": "{{ room_title }}", "item": "https://inback.ru/{{ city_slug }}/{{ room_url_slug }}"}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Сколько стоят {{ room_title_gen }} в новостройках {{ city_name }}?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Цены на {{ room_title_gen }} в новостройках {{ city_name_prep }}{% if min_price %} начинаются от {{ '{:,.0f}'.format(min_price).replace(',', ' ') }} ₽{% endif %}{% if max_price %} и достигают {{ '{:,.0f}'.format(max_price).replace(',', ' ') }} ₽{% endif %}. При покупке через InBack получаете кэшбек до 4% от стоимости квартиры."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Как купить {{ room_title_acc }} в новостройке {{ city_name }} с кэшбеком?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Зарегистрируйтесь на InBack, выберите подходящую {{ room_title_acc }} в новостройке {{ city_name_prep }} и обратитесь к нашему менеджеру. После оформления сделки мы перечислим кэшбек до 4% на вашу банковскую карту."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Есть ли ипотека на {{ room_title_acc }} в {{ city_name }}?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Да! На {{ room_title_acc }} в новостройках {{ city_name_prep }} доступна семейная ипотека от 3.5% годовых, IT-ипотека от 3.5%, военная ипотека. Наши специалисты помогут выбрать программу и оформить документы бесплатно."
+      }
+    }
+  ]
+}
+</script>
+<style>
+* { font-family: 'Inter', sans-serif; }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<div class="border-b border-slate-100 bg-white">
+  <div class="max-w-7xl mx-auto px-4 py-3">
+    <nav class="flex items-center gap-1 text-sm text-slate-500 flex-wrap">
+      <a href="/" class="hover:text-[#0088CC] transition-colors">Главная</a>
+      <span class="text-slate-300 mx-1">›</span>
+      <a href="/{{ city_slug }}/novostrojki" class="hover:text-[#0088CC] transition-colors">Новостройки {{ city_name }}</a>
+      <span class="text-slate-300 mx-1">›</span>
+      <span class="text-slate-700 font-medium">{{ room_title }}</span>
+    </nav>
+  </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 py-10">
+
+  <!-- HERO -->
+  <div class="mb-10">
+    <h1 class="text-3xl md:text-4xl font-bold text-slate-900 mb-3 leading-tight">
+      {{ room_title }} в новостройках {{ city_name }}
+    </h1>
+    <p class="text-slate-500 text-lg mb-6 max-w-2xl">
+      {% if properties_count %}{{ properties_count }} предложений{% endif %}
+      {% if min_price %}&nbsp;· от {{ "{:,.0f}".format(min_price/1000000).replace(',', ' ') }} млн ₽{% endif %}
+      &nbsp;· Кэшбек до 4% с InBack
+    </p>
+
+    <!-- Stats + room type navigation -->
+    <div class="flex flex-wrap gap-3 mb-6">
+      {% if properties_count %}
+      <div class="bg-white border border-slate-100 rounded-2xl px-5 py-3.5 shadow-sm text-center">
+        <div class="text-2xl font-bold text-[#0088CC]">{{ properties_count }}</div>
+        <div class="text-xs text-slate-500 mt-0.5">предложений</div>
+      </div>
+      {% endif %}
+      {% if complexes_count %}
+      <div class="bg-white border border-slate-100 rounded-2xl px-5 py-3.5 shadow-sm text-center">
+        <div class="text-2xl font-bold text-[#0088CC]">{{ complexes_count }}</div>
+        <div class="text-xs text-slate-500 mt-0.5">ЖК</div>
+      </div>
+      {% endif %}
+      {% if min_price %}
+      <div class="bg-white border border-slate-100 rounded-2xl px-5 py-3.5 shadow-sm text-center">
+        <div class="text-lg font-bold text-slate-900">от {{ "{:,.0f}".format(min_price/1000000).replace(',', ' ') }} млн</div>
+        <div class="text-xs text-slate-500 mt-0.5">стоимость</div>
+      </div>
+      {% endif %}
+      <div class="bg-[#0088CC] rounded-2xl px-5 py-3.5 text-center">
+        <div class="text-2xl font-bold text-white">до 4%</div>
+        <div class="text-xs text-white/80 mt-0.5">кэшбек</div>
+      </div>
+    </div>
+
+    <!-- Room type quick navigation -->
+    <div class="flex flex-wrap gap-2">
+      {% for label, slug_val, is_active in [
+        ('Студии', city_slug ~ '/novostrojki-studiyo', rooms_count == 0),
+        ('1-комнатные', city_slug ~ '/novostrojki-1-komnatnye', rooms_count == 1),
+        ('2-комнатные', city_slug ~ '/novostrojki-2-komnatnye', rooms_count == 2),
+        ('3-комнатные', city_slug ~ '/novostrojki-3-komnatnye', rooms_count == 3),
+        ('4+ комнатные', city_slug ~ '/novostrojki-4-komnatnye', rooms_count == 4),
+      ] %}
+      <a href="/{{ slug_val }}"
+         class="px-4 py-2 rounded-xl text-sm font-medium border transition-colors
+                {% if is_active %}bg-[#0088CC] text-white border-[#0088CC]{% else %}bg-white border-slate-200 text-slate-700 hover:border-[#0088CC] hover:text-[#0088CC]{% endif %}">
+        {{ label }}
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- PROPERTIES GRID -->
+  {% if sample_properties and sample_properties|length > 0 %}
+  <div class="mb-12">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-2xl font-bold text-slate-900">
+        {% if properties_count %}
+        <span class="text-[#0088CC]">{{ properties_count }}</span>
+        {% endif %}
+        {{ room_title_gen }} в новостройках {{ city_name_gen }}
+      </h2>
+      <a href="/{{ city_slug }}/novostrojki?rooms={{ rooms_count }}" class="text-[#0088CC] text-sm font-medium hover:underline flex items-center gap-1">
+        Все предложения <i class="fas fa-arrow-right text-xs"></i>
+      </a>
+    </div>
+
+    <!-- Filters row -->
+    <div class="flex flex-wrap gap-2 mb-6">
+      {% for label, sort_val in [('По цене ↑', 'price_asc'), ('По площади', 'area_desc'), ('Скоро сдача', 'delivery_asc')] %}
+      <a href="/{{ city_slug }}/novostrojki?rooms={{ rooms_count }}&sort={{ sort_val }}"
+         class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-600 hover:border-[#0088CC] hover:text-[#0088CC] transition-colors">
+        {{ label }}
+      </a>
+      {% endfor %}
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+      {% for prop in sample_properties %}
+      <a href="/{{ city_slug }}/object/{{ prop.inner_id }}" class="group block">
+        <div class="aspect-[4/3] relative overflow-hidden rounded-2xl mb-3 bg-slate-100">
+          {% if prop.main_image %}
+          <img src="{{ prop.main_image | crop_watermark }}" alt="{% if not prop.object_rooms %}Студия{% else %}{{ prop.object_rooms | int }}-комн.{% endif %} {{ prop.object_area }} м²" loading="lazy"
+               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          {% else %}
+          <div class="w-full h-full flex items-center justify-center">
+            <i class="fas fa-home text-3xl text-slate-300"></i>
+          </div>
+          {% endif %}
+          {% if prop.cashback_percent %}
+          <div class="absolute top-2 right-2 bg-[#0088CC] text-white text-xs font-medium px-2 py-0.5 rounded-md">{{ prop.cashback_percent }}%</div>
+          {% endif %}
+          {% if prop.end_build_year %}
+          <div class="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-0.5 rounded-md">
+            {% if (prop.end_build_year|int) <= 2025 %}Сдан{% else %}{{ prop.end_build_quarter or '4' }} кв. {{ prop.end_build_year }}{% endif %}
+          </div>
+          {% endif %}
+        </div>
+        <div class="font-bold text-slate-900 text-base mb-0.5">{{ "{:,.0f}".format(prop.price).replace(',', ' ') }} ₽</div>
+        <div class="text-sm text-slate-600">
+          {% if not prop.object_rooms %}Студия{% else %}{{ prop.object_rooms | int }}-комн.{% endif %}
+          · {{ prop.object_area }} м²
+          {% if prop.apartment_floor %}· {{ prop.apartment_floor }}/{{ prop.total_floors_in_complex or prop.total_floors or '?' }} эт.{% endif %}
+        </div>
+        <div class="text-xs text-slate-400 mt-0.5 truncate">{{ prop.complex_name or '' }}</div>
+        {% if prop.price and prop.object_area %}
+        <div class="text-xs text-slate-400">{{ "{:,.0f}".format(prop.price / prop.object_area).replace(',', ' ') }} ₽/м²</div>
+        {% endif %}
+      </a>
+      {% endfor %}
+    </div>
+
+    {% if properties_count and properties_count > sample_properties|length %}
+    <div class="text-center mt-8">
+      <a href="/{{ city_slug }}/novostrojki?rooms={{ rooms_count }}"
+         class="inline-flex items-center gap-2 bg-[#0088CC] text-white px-8 py-3.5 rounded-xl font-semibold hover:bg-[#006699] transition-colors shadow-sm">
+        Смотреть все {{ properties_count }} предложений <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- COMPLEXES WITH THIS ROOM TYPE -->
+  {% if complexes_list and complexes_list|length > 0 %}
+  <div class="mb-12">
+    <h2 class="text-2xl font-bold text-slate-900 mb-6">ЖК с {{ room_title_inst }} в {{ city_name_prep }}</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      {% for c in complexes_list[:6] %}
+      <a href="/{{ city_slug }}/zk/{{ c.slug }}" class="group block bg-white border border-slate-100 rounded-2xl overflow-hidden hover:shadow-xl hover:border-slate-200 transition-all duration-300">
+        <div class="aspect-[16/9] overflow-hidden bg-slate-100 relative">
+          {% set c_images = c.get('images', []) if c.get else [] %}
+          {% if c_images and c_images|length > 0 %}
+          <img src="{{ c_images[0] | crop_watermark }}" alt="ЖК {{ c.name }}" loading="lazy"
+               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          {% elif c.main_image %}
+          <img src="{{ c.main_image | crop_watermark }}" alt="ЖК {{ c.name }}" loading="lazy"
+               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          {% else %}
+          <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-slate-100">
+            <i class="fas fa-building text-4xl text-slate-300"></i>
+          </div>
+          {% endif %}
+          {% if c.cashback_percent %}
+          <div class="absolute top-3 left-3 bg-[#0088CC] text-white text-xs font-semibold px-2.5 py-1 rounded-lg">
+            Кэшбек {{ c.cashback_percent }}%
+          </div>
+          {% endif %}
+        </div>
+        <div class="p-5">
+          <div class="flex items-start justify-between gap-2 mb-2">
+            <h3 class="font-bold text-slate-900 group-hover:text-[#0088CC] transition-colors">{{ c.name }}</h3>
+            {% if c.object_class_display_name %}
+            <span class="flex-shrink-0 bg-slate-100 text-slate-600 text-xs px-2 py-0.5 rounded-full">{{ c.object_class_display_name }}</span>
+            {% endif %}
+          </div>
+          {% if c.min_price or c.real_price_from %}
+          <p class="text-lg font-bold text-[#0088CC] mb-1">от {{ "{:,.0f}".format((c.real_price_from or c.min_price)/1000000).replace(',', ' ') }} млн ₽</p>
+          {% endif %}
+          <p class="text-sm text-slate-400">
+            {% if c.developer_name %}{{ c.developer_name }}{% endif %}
+            {% if c.end_build_year %}· Сдача {{ c.end_build_year }}{% endif %}
+          </p>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- MORTGAGE INFO -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
+    {% for program, rate, color, desc in [
+      ('Семейная ипотека', '3.5%', '#22c55e', 'Для семей с детьми, рождёнными после 2018 г.'),
+      ('IT-ипотека', '3.5%', '#0088CC', 'Для сотрудников аккредитованных IT-компаний'),
+      ('Военная ипотека', '6.75%', '#f59e0b', 'Для военнослужащих по контракту'),
+    ] %}
+    <div class="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-2.5 h-2.5 rounded-full" style="background-color: {{ color }};"></div>
+        <h3 class="font-bold text-slate-900">{{ program }}</h3>
+      </div>
+      <div class="text-3xl font-bold mb-2" style="color: {{ color }};">от {{ rate }}</div>
+      <p class="text-sm text-slate-500 mb-4">{{ desc }}</p>
+      <a href="/{{ city_slug }}/semejnaya-ipoteka" class="text-sm font-medium text-[#0088CC] hover:underline flex items-center gap-1">
+        Подробнее <i class="fas fa-arrow-right text-xs"></i>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- SEO TEXT -->
+  <div class="bg-slate-50 border border-slate-100 rounded-2xl p-6 md:p-8 mb-12">
+    <h2 class="text-xl font-bold text-slate-900 mb-4">{{ room_title }} в новостройках {{ city_name_gen }} — цены и условия</h2>
+    <div class="text-slate-600 text-sm leading-relaxed space-y-3 max-w-4xl">
+      {% if seo_text %}
+      {{ seo_text | safe }}
+      {% else %}
+      <p>{{ room_title }} в новостройках {{ city_name_prep }} — один из наиболее востребованных форматов жилья{% if rooms_count == 0 %} среди молодых специалистов и инвесторов{% elif rooms_count == 1 %} среди молодых пар и одиночек{% elif rooms_count == 2 %} среди молодых семей{% elif rooms_count == 3 %} среди семей с детьми{% endif %}. {% if min_price %}Цены начинаются от {{ "{:,.0f}".format(min_price).replace(',', ' ') }} ₽{% if avg_price %} при средней стоимости {{ "{:,.0f}".format(avg_price).replace(',', ' ') }} ₽{% endif %}.{% endif %}</p>
+      <p>При покупке {{ room_title_gen }} через InBack вы получаете кэшбек до 4% от стоимости — это реальные деньги, которые мы перечисляем на вашу карту после завершения сделки. Для квартиры стоимостью 5 млн ₽ кэшбек составит до 200 000 ₽.</p>
+      <p>Для покупки {{ room_title_gen }} доступны льготные ипотечные программы: семейная ипотека по ставке от 3.5% для семей с детьми, IT-ипотека от 3.5% для сотрудников IT-компаний, военная ипотека для военнослужащих. Наши специалисты бесплатно помогут подобрать программу и оформить все документы.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="bg-slate-900 rounded-2xl p-8 md:p-12 text-center text-white">
+    <div class="text-xs tracking-widest text-slate-400 mb-3 uppercase">InBack — кэшбек при покупке квартиры</div>
+    <h2 class="text-2xl md:text-3xl font-bold mb-3">Купите {{ room_title_acc }} с кэшбеком до 4%</h2>
+    <p class="text-slate-400 mb-8 max-w-lg mx-auto">Выберите квартиру в новостройке {{ city_name_gen }} и получите реальные деньги обратно. Бесплатный подбор, помощь с ипотекой и сопровождение сделки.</p>
+    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+      <a href="/{{ city_slug }}/novostrojki?rooms={{ rooms_count }}"
+         class="bg-[#0088CC] text-white px-8 py-4 rounded-xl font-semibold hover:bg-[#006699] transition-colors">
+        Выбрать {{ room_title_acc }}
+      </a>
+      <a href="/{{ city_slug }}/semejnaya-ipoteka"
+         class="border border-white/20 text-white px-8 py-4 rounded-xl font-semibold hover:bg-white/10 transition-colors">
+        Семейная ипотека 3.5%
+      </a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

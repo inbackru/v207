@@ -1,0 +1,597 @@
+{% extends "base.html" %}
+{% set city_slug = current_city.slug if current_city else (session.city_slug if session.city_slug else 'krasnodar') %}
+
+{% block title %}Условия получения кэшбека за новостройку в {{ (current_city.name_prepositional or current_city.name) if current_city else 'Краснодаре' }} | InBack{% endblock %}
+
+{% block description %}Подробные условия получения кэшбека при покупке квартиры в новостройке: сроки, документы, размер выплат, юридические аспекты. Прозрачная схема работы InBack.{% endblock %}
+
+{% block keywords %}условия кэшбека, как получить кэшбек, документы для кэшбека, сроки выплаты кэшбека, юридические условия, кэшбек новостройка {{ (current_city.name_genitive or current_city.name) if current_city else 'Краснодара' }}, размер кэшбека при покупке квартиры{% endblock %}
+
+{% block og_title %}Условия получения кэшбека за новостройку | InBack{% endblock %}
+{% block og_description %}Подробные условия получения кэшбека: сроки, документы, размер выплат. Прозрачная схема работы сервиса InBack.{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block og_image_tag %}<meta property="og:image" content="{{ url_for('static', filename='images/cashback-terms-og.jpg', _external=True) }}"/>{% endblock %}
+{% block canonical_url %}<link rel="canonical" href="{{ url_for('mortgage.cashback_terms', _external=True) }}" />{% endblock %}
+
+{% block head %}
+
+<!-- FAQ Schema for SEO -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Какой размер кэшбека я могу получить?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Размер кэшбека зависит от застройщика и составляет от 2.5% до 7% от стоимости квартиры. В среднем это 3-5%. Максимальная сумма может достигать 500 000 рублей и более для дорогих объектов."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Когда я получу кэшбек после покупки?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Выплата кэшбека происходит в течение 30-60 дней после регистрации права собственности и предоставления полного пакета документов. Точные сроки зависят от застройщика и могут составлять от 1 до 3 месяцев."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Какие документы нужны для получения кэшбека?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Необходимые документы: договор долевого участия (ДДУ) или договор купли-продажи, выписка из ЕГРН (свидетельство о регистрации права собственности), паспорт покупателя, реквизиты банковского счета для перечисления кэшбека, подписанный договор с InBack."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Нужно ли платить за услуги InBack?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Нет, все услуги InBack абсолютно бесплатны для покупателей. Мы получаем комиссию от застройщиков, часть которой возвращаем вам в виде кэшбека. Никаких скрытых платежей или дополнительных сборов."
+      }
+    }
+  ]
+}
+</script>
+
+<!-- Article Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Условия получения кэшбека за новостройку",
+  "description": "Подробное руководство по условиям получения кэшбека при покупке квартиры в новостройке",
+  "author": {
+    "@type": "Organization",
+    "name": "InBack"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "InBack",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://inback.ru/static/images/logo.png"
+    }
+  },
+  "datePublished": "2024-01-01",
+  "dateModified": "2025-11-06"
+}
+</script>
+
+<!-- HowTo Schema — step-by-step cashback guide -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "Как получить кэшбек при покупке квартиры в новостройке",
+  "description": "Пошаговая инструкция по получению кэшбека до 500 000 ₽ при покупке квартиры в новостройке через InBack",
+  "image": "https://inback.ru/static/images/social-preview.jpg",
+  "totalTime": "P45D",
+  "estimatedCost": {
+    "@type": "MonetaryAmount",
+    "currency": "RUB",
+    "value": "0"
+  },
+  "supply": [
+    {"@type": "HowToSupply", "name": "Паспорт гражданина РФ"},
+    {"@type": "HowToSupply", "name": "СНИЛС"},
+    {"@type": "HowToSupply", "name": "Реквизиты банковского счёта"}
+  ],
+  "tool": [
+    {"@type": "HowToTool", "name": "Личный кабинет InBack"},
+    {"@type": "HowToTool", "name": "Личный менеджер InBack"}
+  ],
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "Зарегистрируйтесь на InBack",
+      "text": "Создайте бесплатный аккаунт на inback.ru. Это займёт 2 минуты. Никакого первоначального взноса или скрытых платежей.",
+      "url": "https://inback.ru/register",
+      "image": "https://inback.ru/static/images/social-preview.jpg"
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "Выберите квартиру и свяжитесь с менеджером",
+      "text": "Выберите понравившийся ЖК из каталога. Нажмите «Записаться на показ» или позвоните менеджеру. Менеджер бесплатно организует экскурсию, поможет с выбором планировки и условиями ипотеки.",
+      "url": "https://inback.ru/krasnodar/zhilye-kompleksy",
+      "image": "https://inback.ru/static/images/social-preview.jpg"
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "Заключите сделку через InBack",
+      "text": "Оформите ДДУ (договор долевого участия). Сделка проводится напрямую с застройщиком по той же цене — InBack не берёт ничего сверх. Наш юрист проверяет документы бесплатно.",
+      "url": "https://inback.ru/krasnodar/usloviya-keshbeka"
+    },
+    {
+      "@type": "HowToStep",
+      "position": 4,
+      "name": "Предоставьте документы на кэшбек",
+      "text": "После регистрации ДДУ в Росреестре загрузите в личный кабинет: копию ДДУ, выписку из ЕГРН и реквизиты счёта. Документы проверяются в течение 3 рабочих дней.",
+      "url": "https://inback.ru/krasnodar/usloviya-keshbeka"
+    },
+    {
+      "@type": "HowToStep",
+      "position": 5,
+      "name": "Получите кэшбек на счёт",
+      "text": "Через 30–60 дней после регистрации сделки кэшбек переводится на ваш банковский счёт. В среднем 3–5% от стоимости квартиры — до 500 000 ₽ реальными деньгами.",
+      "url": "https://inback.ru/krasnodar/usloviya-keshbeka"
+    }
+  ]
+}
+</script>
+
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+    body {
+        font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    .prose-custom {
+        max-width: 75ch;
+    }
+    .prose-custom h2 {
+        font-size: 1.875rem;
+        font-weight: 700;
+        margin-top: 2.5rem;
+        margin-bottom: 1.25rem;
+        color: #111827;
+    }
+    .prose-custom h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        color: #374151;
+    }
+    .prose-custom p {
+        margin-bottom: 1.25rem;
+        line-height: 1.75;
+        color: #4B5563;
+    }
+    .prose-custom ul, .prose-custom ol {
+        margin-bottom: 1.25rem;
+        padding-left: 1.5rem;
+    }
+    .prose-custom li {
+        margin-bottom: 0.5rem;
+        line-height: 1.75;
+        color: #4B5563;
+    }
+    .highlight-box {
+        background: linear-gradient(135deg, #005a9c 0%, #003f73 100%);
+        border-radius: 1rem;
+        padding: 2rem;
+        color: white;
+        margin: 2rem 0;
+    }
+    .highlight-box h2,
+    .highlight-box h3 {
+        color: #ffffff !important;
+    }
+    .highlight-box p,
+    .highlight-box ul,
+    .highlight-box li,
+    .highlight-box strong {
+        color: rgba(255, 255, 255, 0.95) !important;
+    }
+    .info-card {
+        background: #F9FAFB;
+        border-left: 4px solid #0088CC;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        margin: 1.5rem 0;
+    }
+    .step-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        min-width: 2.5rem;
+        flex: 0 0 2.5rem;
+        background: #0088CC;
+        color: white;
+        border-radius: 50%;
+        font-weight: 700;
+        font-size: 1.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="bg-gradient-to-br from-blue-50 to-white py-16">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-6 text-gray-900">
+                Условия получения кэшбека
+            </h1>
+            <p class="text-xl text-gray-600 mb-8">
+                Прозрачные правила возврата денег при покупке квартиры в новостройке. 
+                Все юридические аспекты, сроки и требования в одном месте.
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="#calculator" class="px-8 py-3 bg-[#0088CC] hover:bg-[#006699] text-white rounded-lg font-semibold transition-colors">
+                    Рассчитать кэшбек
+                </a>
+                <a href="#documents" class="px-8 py-3 bg-white border-2 border-gray-300 hover:border-[#0088CC] text-gray-700 rounded-lg font-semibold transition-colors">
+                    Список документов
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Main Content -->
+<section class="py-16">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto prose-custom">
+            
+            <!-- Что такое кэшбек -->
+            <div class="highlight-box">
+                <h2 class="text-3xl font-bold mb-4 text-white">💰 Что такое кэшбек за новостройку?</h2>
+                <p class="text-blue-50 mb-4 text-lg">
+                    Кэшбек — это <strong>возврат части денег</strong>, которые вы заплатили за квартиру. 
+                    Застройщики платят комиссию агентствам недвижимости за приведённых клиентов (обычно 3-7% от стоимости квартиры).
+                </p>
+                <p class="text-blue-50 text-lg">
+                    <strong>InBack</strong> работает напрямую с застройщиками и возвращает вам большую часть этой комиссии. 
+                    Вы получаете до <strong>500 000 рублей</strong> на свой банковский счёт после оформления сделки.
+                </p>
+            </div>
+
+            <!-- Размер кэшбека -->
+            <h2 id="calculator">📊 Размер кэшбека</h2>
+            <p>
+                Размер кэшбека зависит от нескольких факторов и составляет <strong>от 2.5% до 7%</strong> от стоимости квартиры:
+            </p>
+            
+            <div class="grid md:grid-cols-3 gap-4 my-6">
+                <div class="bg-blue-50 p-6 rounded-xl text-center">
+                    <div class="text-3xl font-bold text-[#0088CC] mb-2">2.5-3%</div>
+                    <div class="text-sm text-gray-600">Стандартный кэшбек<br/>для большинства ЖК</div>
+                </div>
+                <div class="bg-blue-50 p-6 rounded-xl text-center">
+                    <div class="text-3xl font-bold text-[#0088CC] mb-2">4-5%</div>
+                    <div class="text-sm text-gray-600">Повышенный кэшбек<br/>при акциях</div>
+                </div>
+                <div class="bg-blue-50 p-6 rounded-xl text-center">
+                    <div class="text-3xl font-bold text-[#0088CC] mb-2">6-7%</div>
+                    <div class="text-sm text-gray-600">Максимальный кэшбек<br/>на старте продаж</div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <h3 class="text-lg font-semibold mb-2 text-gray-900">💡 От чего зависит размер кэшбека:</h3>
+                <ul class="space-y-2">
+                    <li>✓ <strong>Застройщика</strong> — у каждого свои условия сотрудничества</li>
+                    <li>✓ <strong>Стадии строительства</strong> — больше всего на старте продаж</li>
+                    <li>✓ <strong>Типа квартиры</strong> — студии и большие квартиры могут иметь разные ставки</li>
+                    <li>✓ <strong>Акций и специальных предложений</strong> — периодически застройщики увеличивают комиссию</li>
+                </ul>
+            </div>
+
+            <h3>Пример расчёта кэшбека</h3>
+            <div class="bg-gray-50 p-6 rounded-lg">
+                <div class="space-y-3">
+                    <div class="flex justify-between"><span>Стоимость квартиры:</span><strong>5 000 000 ₽</strong></div>
+                    <div class="flex justify-between"><span>Ставка кэшбека:</span><strong>4%</strong></div>
+                    <div class="border-t border-gray-300 my-2"></div>
+                    <div class="flex justify-between text-xl"><span class="font-semibold">Вы получите:</span><strong class="text-[#0088CC]">200 000 ₽</strong></div>
+                </div>
+            </div>
+
+            <!-- Условия получения -->
+            <h2 id="conditions">📝 Обязательные условия получения кэшбека</h2>
+            <p>
+                Чтобы получить кэшбек, необходимо соблюсти следующие условия:
+            </p>
+
+            <div class="space-y-4 my-6">
+                <div class="flex gap-4">
+                    <div class="step-number">1</div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-2">Регистрация до покупки</h3>
+                        <p class="text-gray-600">
+                            Вы должны зарегистрироваться в InBack <strong>до посещения офиса продаж застройщика</strong>. 
+                            Это обязательное условие — застройщик должен знать, что вы наш клиент.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <div class="step-number">2</div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-2">Первичный контакт</h3>
+                        <p class="text-gray-600">
+                            Вы не должны были ранее регистрироваться у застройщика самостоятельно или через других агентов. 
+                            Мы должны быть первыми, кто зарегистрировал вас.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <div class="step-number">3</div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-2">Полная оплата квартиры</h3>
+                        <p class="text-gray-600">
+                            Квартира должна быть <strong>полностью оплачена</strong> (100% стоимости). 
+                            При покупке в ипотеку — банк перечислил полную сумму застройщику.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <div class="step-number">4</div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-2">Регистрация права собственности</h3>
+                        <p class="text-gray-600">
+                            Вы оформили <strong>право собственности</strong> на квартиру и получили выписку из ЕГРН.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <div class="step-number">5</div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-2">Предоставление документов</h3>
+                        <p class="text-gray-600">
+                            Вы предоставили полный пакет документов для оформления выплаты (список ниже).
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сроки получения -->
+            <h2>⏱️ Сроки получения кэшбека</h2>
+            <p>
+                Выплата кэшбека происходит в несколько этапов:
+            </p>
+
+            <div class="bg-blue-50 rounded-xl p-6 my-6">
+                <ol class="space-y-4">
+                    <li class="flex gap-3">
+                        <span class="font-bold text-[#0088CC]">1.</span>
+                        <div>
+                            <strong>Сразу после покупки:</strong> вы предоставляете копии ДДУ и документов об оплате
+                        </div>
+                    </li>
+                    <li class="flex gap-3">
+                        <span class="font-bold text-[#0088CC]">2.</span>
+                        <div>
+                            <strong>После регистрации права собственности:</strong> вы предоставляете выписку из ЕГРН (до 10 дней)
+                        </div>
+                    </li>
+                    <li class="flex gap-3">
+                        <span class="font-bold text-[#0088CC]">3.</span>
+                        <div>
+                            <strong>Проверка документов:</strong> наша юридическая служба проверяет комплектность (5-7 рабочих дней)
+                        </div>
+                    </li>
+                    <li class="flex gap-3">
+                        <span class="font-bold text-[#0088CC]">4.</span>
+                        <div>
+                            <strong>Выплата кэшбека:</strong> перечисление на ваш банковский счёт (30-60 дней)
+                        </div>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="info-card">
+                <strong>⚡ Итого:</strong> в среднем от регистрации собственности до получения денег проходит <strong>1-3 месяца</strong>. 
+                Точные сроки зависят от застройщика и скорости предоставления документов.
+            </div>
+
+            <!-- Документы -->
+            <h2 id="documents">📄 Необходимые документы</h2>
+            <p>
+                Для получения кэшбека вам потребуется предоставить следующие документы:
+            </p>
+
+            <div class="grid md:grid-cols-2 gap-6 my-6">
+                <div class="bg-white border-2 border-gray-200 rounded-xl p-6">
+                    <h3 class="text-lg font-semibold mb-4 text-[#0088CC]">Обязательные документы</h3>
+                    <ul class="space-y-2 text-gray-700">
+                        <li>✓ Паспорт покупателя (разворот с фото)</li>
+                        <li>✓ Договор долевого участия (ДДУ) или договор купли-продажи</li>
+                        <li>✓ Выписка из ЕГРН (свидетельство о собственности)</li>
+                        <li>✓ Платёжные документы (чеки, квитанции об оплате)</li>
+                        <li>✓ Реквизиты банковского счёта</li>
+                        <li>✓ Подписанный договор с InBack</li>
+                    </ul>
+                </div>
+
+                <div class="bg-white border-2 border-gray-200 rounded-xl p-6">
+                    <h3 class="text-lg font-semibold mb-4 text-[#0088CC]">Дополнительные (при необходимости)</h3>
+                    <ul class="space-y-2 text-gray-700">
+                        <li>✓ Кредитный договор (если ипотека)</li>
+                        <li>✓ Справка о погашении ипотеки</li>
+                        <li>✓ Свидетельство о браке (если покупка в совместную собственность)</li>
+                        <li>✓ Нотариальная доверенность (если действует представитель)</li>
+                        <li>✓ Свидетельство о рождении детей (для семейных программ)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Юридические аспекты -->
+            <h2>⚖️ Юридические аспекты</h2>
+            
+            <h3>Договор с InBack</h3>
+            <p>
+                При регистрации вы подписываете договор на оказание услуг по подбору недвижимости. 
+                В договоре прописаны:
+            </p>
+            <ul>
+                <li>Размер кэшбека для выбранного ЖК</li>
+                <li>Сроки и условия выплаты</li>
+                <li>Права и обязанности сторон</li>
+                <li>Порядок разрешения споров</li>
+            </ul>
+
+            <h3>Налогообложение кэшбека</h3>
+            <p>
+                Согласно действующему законодательству РФ, кэшбек может считаться доходом физического лица. 
+                Однако в большинстве случаев он <strong>не облагается налогом</strong>, так как является частью 
+                агентского вознаграждения, а не прямым доходом покупателя.
+            </p>
+
+            <div class="info-card">
+                <strong>💼 Важно:</strong> Мы рекомендуем проконсультироваться с налоговым консультантом 
+                для вашей конкретной ситуации. InBack не является налоговым агентом и не удерживает НДФЛ.
+            </div>
+
+            <h3>Гарантии выплаты</h3>
+            <p>
+                Выплата кэшбека гарантирована договором с застройщиком. InBack работает только с проверенными 
+                застройщиками, имеющими положительную репутацию и стабильное финансовое положение.
+            </p>
+
+            <!-- Частые вопросы -->
+            <h2>❓ Часто задаваемые вопросы</h2>
+            
+            <div class="space-y-4">
+                <details class="bg-gray-50 rounded-lg p-5">
+                    <summary class="font-semibold cursor-pointer text-gray-900">Могу ли я получить кэшбек, если уже посещал офис продаж?</summary>
+                    <p class="mt-3 text-gray-600">
+                        К сожалению, нет. Застройщики регистрируют первичный контакт с клиентом, и если вы 
+                        уже были в офисе продаж, мы не сможем оформить вас как нашего клиента. Регистрируйтесь 
+                        в InBack <strong>до первого визита</strong>.
+                    </p>
+                </details>
+
+                <details class="bg-gray-50 rounded-lg p-5">
+                    <summary class="font-semibold cursor-pointer text-gray-900">Можно ли получить кэшбек при покупке в ипотеку?</summary>
+                    <p class="mt-3 text-gray-600">
+                        Да, абсолютно! Способ оплаты (наличные, ипотека, рассрочка, материнский капитал) не влияет 
+                        на ваше право получить кэшбек. Главное — полная оплата квартиры и регистрация собственности.
+                    </p>
+                </details>
+
+                <details class="bg-gray-50 rounded-lg p-5">
+                    <summary class="font-semibold cursor-pointer text-gray-900">Что если застройщик обанкротится до выплаты?</summary>
+                    <p class="mt-3 text-gray-600">
+                        Мы работаем только с надёжными застройщиками, имеющими положительную кредитную историю. 
+                        Однако в крайне редких случаях банкротства выплата кэшбека может быть задержана или не произведена. 
+                        Это прописано в договоре как форс-мажор.
+                    </p>
+                </details>
+
+                <details class="bg-gray-50 rounded-lg p-5">
+                    <summary class="font-semibold cursor-pointer text-gray-900">Могу ли я отказаться от кэшбека после регистрации?</summary>
+                    <p class="mt-3 text-gray-600">
+                        Да, вы можете в любой момент отказаться от участия в программе кэшбека. 
+                        Это не влияет на условия покупки квартиры у застройщика.
+                    </p>
+                </details>
+
+                <details class="bg-gray-50 rounded-lg p-5">
+                    <summary class="font-semibold cursor-pointer text-gray-900">Нужно ли платить InBack за услуги?</summary>
+                    <p class="mt-3 text-gray-600">
+                        <strong>Нет!</strong> Все услуги InBack абсолютно бесплатны для покупателей. 
+                        Мы получаем комиссию от застройщиков за приведённых клиентов, часть которой возвращаем вам. 
+                        Никаких скрытых платежей, абонентской платы или дополнительных сборов.
+                    </p>
+                </details>
+
+                <details class="bg-gray-50 rounded-lg p-5">
+                    <summary class="font-semibold cursor-pointer text-gray-900">Можно ли получить кэшбек на вторичное жильё?</summary>
+                    <p class="mt-3 text-gray-600">
+                        Нет, программа кэшбека действует <strong>только на новостройки</strong> (первичный рынок недвижимости). 
+                        Вторичное жильё не участвует в программе.
+                    </p>
+                </details>
+            </div>
+
+            <!-- CTA Block -->
+            <div class="highlight-box mt-12">
+                <h2 class="text-3xl font-bold mb-4 text-white">Готовы получить кэшбек?</h2>
+                <p class="text-blue-50 mb-6 text-lg">
+                    Зарегистрируйтесь прямо сейчас и начните экономить на покупке квартиры. 
+                    Наши специалисты проконсультируют вас бесплатно!
+                </p>
+                <div class="flex flex-wrap gap-4">
+                    <a href="{{ url_for('complexes.residential_complexes_city', city_slug=city_slug) }}" class="px-8 py-3 bg-white text-[#0088CC] rounded-lg font-semibold hover:bg-blue-50 transition-colors">
+                        Выбрать квартиру
+                    </a>
+                    <button onclick="openApplicationModal()" class="px-8 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold transition-colors">
+                        Получить консультацию
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section class="bg-gray-50 py-16">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-3xl font-bold mb-6">Остались вопросы?</h2>
+            <p class="text-xl text-gray-600 mb-8">
+                Свяжитесь с нами любым удобным способом — мы ответим на все ваши вопросы!
+            </p>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <div class="text-4xl mb-3">📞</div>
+                    <h3 class="font-semibold mb-2">Телефон</h3>
+                    <a href="tel:+78622666216" class="text-[#0088CC] hover:underline">8 (862) 266-62-16</a>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <div class="text-4xl mb-3">✉️</div>
+                    <h3 class="font-semibold mb-2">Email</h3>
+                    <a href="mailto:info@inback.ru" class="text-[#0088CC] hover:underline">info@inback.ru</a>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <div class="text-4xl mb-3">💬</div>
+                    <h3 class="font-semibold mb-2">Telegram</h3>
+                    <a href="https://t.me/inback_support" class="text-[#0088CC] hover:underline" target="_blank">@inback_support</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+// Smooth scroll to anchors
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    });
+});
+</script>
+
+{% endblock %}

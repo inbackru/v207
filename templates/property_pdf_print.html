@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<title>Карточка объекта — {{ property.complex_name or property.title }}</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+@page {
+    size: A4;
+    margin: 18mm 16mm 20mm 16mm;
+    @bottom-center {
+        content: "InBack.ru — официальный сервис кэшбека при покупке недвижимости";
+        font-size: 7pt;
+        color: #9ca3af;
+        font-family: Arial, sans-serif;
+    }
+    @bottom-right {
+        content: counter(page) " / " counter(pages);
+        font-size: 7pt;
+        color: #9ca3af;
+        font-family: Arial, sans-serif;
+    }
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10pt;
+    color: #1f2937;
+    background: white;
+    line-height: 1.5;
+}
+
+/* ── HEADER ─────────────────────────────────────────────── */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2.5px solid #0088CC;
+    padding-bottom: 10px;
+    margin-bottom: 16px;
+}
+.header-left h1 {
+    font-size: 16pt;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 3px;
+}
+.header-left p {
+    font-size: 8pt;
+    color: #6b7280;
+}
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.header-id {
+    text-align: right;
+}
+.header-id .label {
+    font-size: 7pt;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.header-id .value {
+    font-size: 12pt;
+    font-weight: 700;
+    color: #111827;
+}
+.qr-box img {
+    width: 60px;
+    height: 60px;
+}
+
+/* ── PHOTO GRID ─────────────────────────────────────────── */
+.photo-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 4px;
+    border-radius: 8px;
+    overflow: hidden;
+    height: 180px;
+    margin-bottom: 16px;
+}
+.photo-grid .main-photo {
+    grid-row: 1 / 3;
+    grid-column: 1;
+}
+.photo-grid img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.photo-placeholder {
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    font-size: 8pt;
+    border-radius: 8px;
+    height: 180px;
+    margin-bottom: 16px;
+    border: 2px dashed #e5e7eb;
+}
+
+/* ── TWO-COLUMN LAYOUT ──────────────────────────────────── */
+.two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+/* ── SECTION TITLE ──────────────────────────────────────── */
+.section-title {
+    font-size: 9pt;
+    font-weight: 700;
+    color: #111827;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-left: 3px solid #0088CC;
+    padding-left: 8px;
+    margin-bottom: 8px;
+}
+.section-title.green { border-left-color: #16a34a; }
+
+/* ── INFO TABLE ─────────────────────────────────────────── */
+.info-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+}
+.info-table tr:nth-child(even) td { background: #f9fafb; }
+.info-table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 9pt;
+}
+.info-table td:first-child {
+    color: #6b7280;
+    font-weight: 600;
+    width: 45%;
+    font-size: 8pt;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.info-table td:last-child {
+    font-weight: 700;
+    color: #111827;
+    text-align: right;
+}
+.info-table tr:last-child td { border-bottom: none; }
+.badge-green {
+    background: #dcfce7;
+    color: #15803d;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 7.5pt;
+    font-weight: 700;
+}
+.badge-blue {
+    background: #dbeafe;
+    color: #1d4ed8;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 7.5pt;
+    font-weight: 700;
+}
+
+/* ── PRICE BLOCK ────────────────────────────────────────── */
+.price-block {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 12px;
+}
+.price-main-label {
+    font-size: 7.5pt;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    margin-bottom: 3px;
+}
+.price-main-value {
+    font-size: 20pt;
+    font-weight: 900;
+    color: #111827;
+    line-height: 1;
+    margin-bottom: 8px;
+}
+.cashback-box {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+}
+.cashback-box .cb-label {
+    font-size: 7.5pt;
+    color: #15803d;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+.cashback-box .cb-value {
+    font-size: 14pt;
+    font-weight: 900;
+    color: #16a34a;
+}
+.net-price-box {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 6px;
+    padding: 8px 10px;
+}
+.net-price-label {
+    font-size: 7.5pt;
+    color: #1d4ed8;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+.net-price-value {
+    font-size: 13pt;
+    font-weight: 900;
+    color: #1d4ed8;
+}
+.price-meta {
+    display: flex;
+    gap: 16px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #f3f4f6;
+}
+.price-meta-item .label {
+    font-size: 7pt;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.price-meta-item .value {
+    font-size: 9pt;
+    font-weight: 700;
+    color: #374151;
+}
+
+/* ── DESCRIPTION ────────────────────────────────────────── */
+.description-box {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 8.5pt;
+    color: #374151;
+    line-height: 1.7;
+    margin-bottom: 14px;
+}
+.description-box .dev-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid #e5e7eb;
+}
+.description-box .dev-label {
+    font-size: 7pt;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.description-box .dev-name {
+    font-size: 9pt;
+    font-weight: 700;
+    color: #111827;
+}
+
+/* ── GALLERY ────────────────────────────────────────────── */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    margin-bottom: 8px;
+}
+.gallery-grid img {
+    width: 100%;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 6px;
+    display: block;
+}
+.gallery-more {
+    font-size: 7.5pt;
+    color: #9ca3af;
+    font-style: italic;
+    margin-bottom: 14px;
+}
+
+/* ── FLOOR PLAN ─────────────────────────────────────────── */
+.plan-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 8px;
+    min-height: 120px;
+}
+.plan-box img {
+    max-width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+    border-radius: 4px;
+}
+.plan-empty {
+    color: #d1d5db;
+    font-size: 8pt;
+    text-align: center;
+    padding: 20px;
+}
+
+/* ── DETAILS GRID ───────────────────────────────────────── */
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+}
+.detail-cell {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 7px 10px;
+}
+.detail-cell .d-label {
+    font-size: 7pt;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+.detail-cell .d-value {
+    font-size: 9pt;
+    font-weight: 700;
+    color: #111827;
+}
+
+/* ── CONTACT FOOTER ─────────────────────────────────────── */
+.contact-block {
+    background: #0088CC;
+    border-radius: 10px;
+    padding: 14px 18px;
+    color: white;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 14px;
+    page-break-inside: avoid;
+}
+.contact-block .cb-section .cb-label {
+    font-size: 6.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: rgba(255,255,255,0.55);
+    font-weight: 600;
+    margin-bottom: 3px;
+}
+.contact-block .cb-section .cb-main {
+    font-size: 9pt;
+    font-weight: 700;
+    line-height: 1.4;
+}
+.contact-block .cb-section .cb-sub {
+    font-size: 7pt;
+    color: rgba(255,255,255,0.5);
+    margin-top: 2px;
+}
+
+/* ── DISCLAIMER ─────────────────────────────────────────── */
+.disclaimer {
+    font-size: 7pt;
+    color: #9ca3af;
+    line-height: 1.6;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 10px;
+    margin-top: 4px;
+}
+
+/* ── PAGE BREAK CONTROL ─────────────────────────────────── */
+.no-break { page-break-inside: avoid; }
+.section-wrap { margin-bottom: 14px; }
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══════════════════════════════════════════════════════════════ -->
+<div class="header">
+    <div class="header-left">
+        <h1>Карточка объекта недвижимости</h1>
+        <p>Дата формирования: {{ current_date }} &nbsp;·&nbsp; InBack.ru</p>
+    </div>
+    <div class="header-right">
+        {% if qr_code %}
+        <div class="qr-box">
+            <img src="data:image/png;base64,{{ qr_code }}" alt="QR">
+        </div>
+        {% endif %}
+        <div class="header-id">
+            <div class="label">ID объекта</div>
+            <div class="value">#{{ property.id }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ ГЛАВНОЕ ФОТО ══════════════════════════════════════════════════════════ -->
+{% if images_b64 and images_b64|length > 0 %}
+<div class="photo-grid no-break">
+    <div class="main-photo">
+        <img src="data:image/jpeg;base64,{{ images_b64[0] }}" alt="Главное фото">
+    </div>
+    {% for img_b64 in images_b64[1:4] %}
+    <div>
+        <img src="data:image/jpeg;base64,{{ img_b64 }}" alt="Фото {{ loop.index + 1 }}">
+    </div>
+    {% endfor %}
+    {# Fill empty cells if fewer than 4 photos #}
+    {% for i in range(3 - (images_b64[1:4]|length)) %}
+    <div style="background:#f3f4f6; border-radius:4px;"></div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="photo-placeholder">Фотографии загружаются на сайте InBack.ru</div>
+{% endif %}
+
+<!-- ═══ ОСНОВНАЯ ИНФОРМАЦИЯ + ЦЕНА ═══════════════════════════════════════════ -->
+<div class="two-col no-break section-wrap">
+
+    <!-- Основные характеристики -->
+    <div>
+        <div class="section-title">Основные характеристики</div>
+        <table class="info-table">
+            <tr>
+                <td>Тип объекта</td>
+                <td>{{ property.property_type or 'Квартира' }}</td>
+            </tr>
+            <tr>
+                <td>Жилой комплекс</td>
+                <td style="color:#0088CC;">{{ property.complex_name or property.residential_complex or '—' }}</td>
+            </tr>
+            <tr>
+                <td>Статус</td>
+                <td><span class="badge-green">{{ property.status or 'Свободна' }}</span></td>
+            </tr>
+            <tr>
+                <td>Адрес</td>
+                <td>{{ property.address or '—' }}</td>
+            </tr>
+            <tr>
+                <td>Этаж</td>
+                <td>{{ property.floor or '—' }} из {{ property.total_floors or property.floors_total or '—' }}</td>
+            </tr>
+            <tr>
+                <td>Площадь</td>
+                <td><strong>{{ property.area }} м²</strong></td>
+            </tr>
+            <tr>
+                <td>Комнатность</td>
+                <td>{{ "Студия" if property.rooms == 0 else (property.rooms|string ~ '-комнатная') }}</td>
+            </tr>
+            {% if property.completion_quarter %}
+            <tr>
+                <td>Сдача</td>
+                <td><span class="badge-blue">{{ property.completion_quarter }}</span></td>
+            </tr>
+            {% endif %}
+        </table>
+    </div>
+
+    <!-- Стоимость -->
+    <div>
+        <div class="section-title green">Стоимость и кэшбек</div>
+        <div class="price-block">
+            <div class="price-main-label">Цена застройщика</div>
+            <div class="price-main-value">{{ "{:,}".format(property.price).replace(',', '\u202f') }} ₽</div>
+
+            <div class="cashback-box">
+                <div class="cb-label">Ваш кэшбек (до {{ property.cashback_percent or 5 }}%)</div>
+                <div class="cb-value">+ {{ "{:,}".format(property.cashback_amount or 0).replace(',', '\u202f') }} ₽</div>
+            </div>
+
+            <div class="net-price-box">
+                <div class="net-price-label">Цена с учётом кэшбека</div>
+                <div class="net-price-value">{{ "{:,}".format(property.price - (property.cashback_amount or 0)).replace(',', '\u202f') }} ₽*</div>
+            </div>
+
+            <div class="price-meta">
+                <div class="price-meta-item">
+                    <div class="label">За м²</div>
+                    <div class="value">{{ "{:,}".format((property.price_per_sqm or (property.price / property.area))|int).replace(',', '\u202f') }} ₽</div>
+                </div>
+                <div class="price-meta-item">
+                    <div class="label">Ипотека</div>
+                    <div class="value">от 3.5%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ ОПИСАНИЕ ══════════════════════════════════════════════════════════════ -->
+{% if property.description or property.complex_name %}
+<div class="section-wrap no-break">
+    <div class="section-title">Описание объекта</div>
+    <div class="description-box">
+        {% if property.complex_name %}
+        <strong>{{ property.complex_name }}</strong> — {{ property.complex_description or 'современный жилой комплекс с развитой инфраструктурой.' }}<br><br>
+        {% endif %}
+        {% if property.description %}
+        {{ property.description | striptags | truncate(1200, True, '...') }}
+        {% endif %}
+        {% if property.developer or property.developer_name %}
+        <div class="dev-row">
+            <div>
+                <div class="dev-label">Застройщик</div>
+                <div class="dev-name">{{ property.developer or property.developer_name }}</div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- ═══ ГАЛЕРЕЯ + ПЛАНИРОВКА ═════════════════════════════════════════════════ -->
+<div class="two-col section-wrap">
+    <div>
+        <div class="section-title">Планировка</div>
+        <div class="plan-box">
+            {% if plan_b64 %}
+            <img src="data:image/jpeg;base64,{{ plan_b64 }}" alt="Планировка">
+            {% else %}
+            <div class="plan-empty">Схема планировки<br>доступна на сайте InBack.ru</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div>
+        <div class="section-title">Детали объекта</div>
+        <div class="details-grid">
+            <div class="detail-cell">
+                <div class="d-label">Отделка</div>
+                <div class="d-value">{{ property.finishing or property.renovation or 'Предчистовая' }}</div>
+            </div>
+            <div class="detail-cell">
+                <div class="d-label">Санузел</div>
+                <div class="d-value">{{ property.bathroom_type or 'Совмещённый' }}</div>
+            </div>
+            <div class="detail-cell">
+                <div class="d-label">Балкон / Лоджия</div>
+                <div class="d-value">{% if property.balcony and property.balcony != 'Нет' %}{{ property.balcony }}{% else %}Отсутствует{% endif %}</div>
+            </div>
+            <div class="detail-cell">
+                <div class="d-label">Окна</div>
+                <div class="d-value">{{ property.windows_type or 'Пластиковые' }}</div>
+            </div>
+            <div class="detail-cell">
+                <div class="d-label">Лифты</div>
+                <div class="d-value">{{ property.elevators or '2 пассажирских' }}</div>
+            </div>
+            <div class="detail-cell">
+                <div class="d-label">Паркинг</div>
+                <div class="d-value">{{ property.parking_type or 'Гостевая' }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ ДОПОЛНИТЕЛЬНЫЕ ФОТО ══════════════════════════════════════════════════ -->
+{% if images_b64 and images_b64|length > 4 %}
+<div class="section-wrap no-break">
+    <div class="section-title">Фотографии объекта</div>
+    <div class="gallery-grid">
+        {% for img_b64 in images_b64[4:10] %}
+        <img src="data:image/jpeg;base64,{{ img_b64 }}" alt="Фото {{ loop.index + 4 }}">
+        {% endfor %}
+    </div>
+    {% if images_b64|length > 10 %}
+    <div class="gallery-more">И ещё {{ images_b64|length - 10 }} фотографий на InBack.ru</div>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- ═══ КОНТАКТНЫЙ БЛОК ═══════════════════════════════════════════════════════ -->
+<div class="contact-block no-break">
+    <div class="cb-section">
+        <div class="cb-label">Застройщик</div>
+        <div class="cb-main">{{ property.developer or property.developer_name or 'Уточняйте у менеджера' }}</div>
+        {% if property.developer_inn %}
+        <div class="cb-sub">ИНН {{ property.developer_inn }}</div>
+        {% endif %}
+    </div>
+    <div class="cb-section">
+        <div class="cb-label">Документация</div>
+        <div class="cb-main" style="font-size:8pt;">Проектная декларация на сайте наш.дом.рф</div>
+    </div>
+    <div class="cb-section">
+        <div class="cb-label">Отдел продаж</div>
+        <div class="cb-main" style="font-size:13pt;">8 (862) 266-62-16</div>
+        <div class="cb-sub">Бесплатно по РФ</div>
+    </div>
+    <div class="cb-section">
+        <div class="cb-label">InBack.ru</div>
+        <div class="cb-main">Официальный сервис кэшбека</div>
+        <div class="cb-sub" style="margin-top:4px;">inback.ru</div>
+    </div>
+</div>
+
+<!-- ═══ ОТКАЗ ОТ ОТВЕТСТВЕННОСТИ ════════════════════════════════════════════ -->
+<div class="disclaimer">
+    * Карточка объекта сгенерирована автоматически и действительна на дату формирования.
+    Предложение не является публичной офертой. Актуальные цены и наличие уточняйте у менеджеров InBack.ru.
+    Кэшбек начисляется по условиям партнёрской программы InBack. &nbsp;|&nbsp; © {{ current_date[:4] }} InBack.ru — Все права защищены.
+</div>
+
+</body>
+</html>

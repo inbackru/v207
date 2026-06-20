@@ -1,0 +1,1051 @@
+{% extends "base.html" %}
+
+{% block title %}Налоговый вычет при покупке квартиры в {{ (current_city.name_prepositional or current_city.name) if current_city else 'Краснодаре' }} 2026 - верните до 650,000₽ | InBack{% endblock %}
+{% block description %}Налоговый вычет при покупке квартиры в {{ (current_city.name_prepositional or current_city.name) if current_city else 'Краснодаре' }}: возврат до 260,000₽ за жилье + 390,000₽ за проценты. Помощь в оформлении документов и подаче декларации.{% endblock %}
+{% block keywords %}налоговый вычет, возврат НДФЛ, вычет при покупке квартиры, налоговый вычет 2026, имущественный вычет, вычет проценты ипотека{% endblock %}
+
+{% block og_title %}Налоговый вычет при покупке квартиры в {{ (current_city.name_prepositional or current_city.name) if current_city else 'Краснодаре' }} 2026 - верните до 650,000₽ | InBack{% endblock %}
+{% block og_description %}Налоговый вычет при покупке квартиры в {{ (current_city.name_prepositional or current_city.name) if current_city else 'Краснодаре' }}: возврат до 260,000₽ за жилье + 390,000₽ за проценты. Помощь в оформлении документов.{% endblock %}
+{% block twitter_title %}Налоговый вычет при покупке квартиры в {{ (current_city.name_prepositional or current_city.name) if current_city else 'Краснодаре' }} 2026 - верните до 650,000₽ | InBack{% endblock %}
+{% block twitter_description %}Налоговый вычет при покупке квартиры в {{ (current_city.name_prepositional or current_city.name) if current_city else 'Краснодаре' }}: возврат до 260,000₽ за жилье + 390,000₽ за проценты по ипотеке.{% endblock %}
+{% block twitter_image %}{{ url_for('static', filename='images/tax-deduction-og.jpg', _external=True) }}{% endblock %}
+
+{% block head %}
+<meta name="robots" content="index, follow">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ url_for('city_pages.tax_deduction_city', city_slug=current_city.slug if current_city else 'krasnodar', _external=True) }}">
+<meta property="og:site_name" content="InBack">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="{{ url_for('city_pages.tax_deduction_city', city_slug=current_city.slug if current_city else 'krasnodar', _external=True) }}">
+
+<link rel="canonical" href="{{ url_for('city_pages.tax_deduction_city', city_slug=current_city.slug if current_city else 'krasnodar', _external=True) }}" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "RealEstateAgent",
+      "name": "Inback",
+      "image": "https://inback.ru/logo.jpg",
+      "description": "Официальный сервис возврата кэшбека при покупке недвижимости в {{ (current_city.name_prepositional or current_city.name) if current_city else 'Краснодаре' }} и других городах России",
+      "areaServed": {
+        "@type": "AdministrativeArea",
+        "name": "{{ current_city.name if current_city else 'Краснодар' }} и Краснодарский край"
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "ул. Красная, 32",
+        "addressLocality": "{{ current_city.name if current_city else 'Краснодар' }}",
+        "addressRegion": "Краснодарский край" 
+      },
+      "telephone": "+78001231212",
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday"
+        ],
+        "opens": "09:00",
+        "closes": "19:00"
+      }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Сколько раз можно получить налоговый вычет?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Налоговый вычет на покупку жилья можно получить только один раз в жизни. Однако если вы не использовали всю сумму вычета (260,000₽), остаток можно перенести на покупку другой недвижимости. Вычет по процентам по ипотеке (до 390,000₽) предоставляется только на один объект."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Можно ли получить вычет за несколько лет сразу?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Да, вы можете подать декларацию за последние 3 года. Например, если вы купили квартиру в 2023 году, в 2026 году можете подать декларации за 2023, 2024 и 2025 годы одновременно и получить все вычеты сразу."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Когда можно подавать на вычет после покупки квартиры?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Подать документы на вычет можно только после окончания года, в котором была куплена квартира. Например, если вы купили квартиру в 2025 году, подать на вычет можно с 1 января 2026 года."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Можно ли получить вычет на вторичное жилье?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Да, налоговый вычет предоставляется как на новостройки, так и на вторичное жилье. Главное условие - недвижимость должна находиться в России, и вы должны быть резидентом РФ и платить НДФЛ по ставке 13%."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Что если мой доход меньше суммы вычета?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Если ваш годовой НДФЛ меньше суммы вычета, остаток переносится на следующие годы. Вычет будет предоставляться до тех пор, пока вся сумма не будет возвращена. Срок давности не ограничен."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Можно ли получить вычет, если квартира оформлена на супруга?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Да, если квартира куплена в браке, каждый из супругов имеет право на вычет, даже если квартира оформлена только на одного из них. Каждый супруг может получить до 260,000₽ за покупку и до 390,000₽ за проценты."
+          }
+        }
+      ]
+    }
+    </script>
+
+<style>
+.tax-hero-gradient {
+    background: linear-gradient(180deg, #f0f7ff 0%, #e8f4fd 20%, #e0f2fe 50%, #f0f9ff 75%, #ffffff 100%);
+}
+
+@keyframes float-receipt {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    33% { transform: translateY(-14px) rotate(4deg); }
+    66% { transform: translateY(6px) rotate(-2deg); }
+}
+@keyframes float-receipt-reverse {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    33% { transform: translateY(10px) rotate(-3deg); }
+    66% { transform: translateY(-8px) rotate(2deg); }
+}
+@keyframes spin-gentle {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+@keyframes spin-gentle-reverse {
+    0% { transform: rotate(360deg); }
+    100% { transform: rotate(0deg); }
+}
+@keyframes float-coin {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-10px) scale(1.05); }
+}
+@keyframes shimmer-tax {
+    0% { opacity: 0.3; }
+    50% { opacity: 0.7; }
+    100% { opacity: 0.3; }
+}
+
+.stat-card-hover {
+    transition: all 0.3s ease;
+}
+.stat-card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 136, 204, 0.12);
+}
+
+.benefit-card {
+    transition: all 0.3s ease;
+}
+.benefit-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+}
+
+.faq-item {
+    transition: all 0.3s ease;
+}
+.faq-item:hover {
+    border-color: #0088CC;
+}
+
+.card-hover {
+    transition: all 0.3s ease;
+}
+.card-hover:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.slider::-webkit-slider-thumb {
+    appearance: none;
+    height: 22px;
+    width: 22px;
+    border-radius: 50%;
+    background: #0088CC;
+    cursor: pointer;
+    border: 3px solid #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 136, 204, 0.3);
+}
+.slider::-moz-range-thumb {
+    height: 22px;
+    width: 22px;
+    border-radius: 50%;
+    background: #0088CC;
+    cursor: pointer;
+    border: 3px solid #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 136, 204, 0.3);
+}
+.slider::-webkit-slider-runnable-track {
+    background: linear-gradient(to right, #0088CC 0%, #e5e7eb 0%);
+    border-radius: 9999px;
+}
+
+.rotate-180 {
+    transform: rotate(180deg);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<section class="tax-hero-gradient relative overflow-hidden">
+    <div class="absolute inset-0 overflow-hidden hidden md:block">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full border border-[#0088CC]/8" style="animation: spin-gentle 30s linear infinite;"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full border border-[#0088CC]/5" style="animation: spin-gentle-reverse 40s linear infinite;"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full border border-dashed border-[#0088CC]/4" style="animation: spin-gentle 50s linear infinite;"></div>
+    </div>
+
+    <div class="absolute top-20 left-[8%] hidden md:block" style="animation: float-receipt 6s ease-in-out infinite;">
+        <div class="w-16 h-16 bg-white rounded-2xl shadow-lg flex items-center justify-center">
+            <svg class="w-8 h-8 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/></svg>
+        </div>
+    </div>
+    <div class="absolute top-32 right-[10%] hidden md:block" style="animation: float-receipt-reverse 5s ease-in-out infinite; animation-delay: 0.5s;">
+        <div class="w-14 h-14 bg-white rounded-2xl shadow-lg flex items-center justify-center">
+            <svg class="w-7 h-7 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        </div>
+    </div>
+    <div class="absolute bottom-40 left-[12%] hidden lg:block" style="animation: float-coin 4s ease-in-out infinite; animation-delay: 1s;">
+        <div class="w-12 h-12 bg-white rounded-xl shadow-md flex items-center justify-center">
+            <span class="text-[#0088CC] font-bold text-sm">13%</span>
+        </div>
+    </div>
+    <div class="absolute bottom-32 right-[8%] hidden lg:block" style="animation: float-receipt 7s ease-in-out infinite; animation-delay: 2s;">
+        <div class="w-14 h-14 bg-white rounded-2xl shadow-lg flex items-center justify-center">
+            <svg class="w-7 h-7 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+    </div>
+    <div class="absolute top-48 left-[25%] hidden lg:block" style="animation: float-receipt-reverse 8s ease-in-out infinite; animation-delay: 1.5s;">
+        <div class="w-10 h-10 bg-white rounded-xl shadow-md flex items-center justify-center">
+            <svg class="w-5 h-5 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+        </div>
+    </div>
+
+    <div class="absolute top-16 left-1/4 w-2 h-2 bg-[#0088CC]/20 rounded-full hidden md:block" style="animation: shimmer-tax 3s ease-in-out infinite;"></div>
+    <div class="absolute top-40 right-1/3 w-3 h-3 bg-[#0088CC]/15 rounded-full hidden md:block" style="animation: shimmer-tax 4s ease-in-out infinite; animation-delay: 1s;"></div>
+    <div class="absolute bottom-28 left-1/3 w-2 h-2 bg-[#0088CC]/25 rounded-full hidden md:block" style="animation: shimmer-tax 3.5s ease-in-out infinite; animation-delay: 0.5s;"></div>
+
+    <div class="container mx-auto px-4 py-20 md:py-28 relative z-10">
+        <div class="max-w-3xl mx-auto text-center relative">
+            <span class="page-hero-badge">Налоговый вычет 2026</span>
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-gray-900 leading-tight">
+                Налоговый вычет <span class="text-[#0088CC]">до 650 000 ₽</span><br class="hidden md:block"> при покупке квартиры
+            </h1>
+            <p class="text-xl md:text-2xl mb-10 text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                Верните НДФЛ при покупке квартиры в {{ (current_city.name_prepositional or current_city.name) if current_city else 'Краснодаре' }}. Помощь в оформлении документов и подаче декларации
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="openQuizModal()" class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-[#0088CC] to-[#006699] text-white rounded-xl hover:shadow-xl transition-all duration-300 transform hover:scale-[1.03] shadow-lg font-semibold text-lg">
+                    Подобрать квартиру
+                </button>
+                <button onclick="openCalculatorModal()" class="inline-flex items-center justify-center px-8 py-4 bg-white text-gray-800 rounded-xl hover:bg-gray-50 transition-all font-semibold text-lg shadow-md border border-gray-100">
+                    <svg class="w-5 h-5 mr-2 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                    Рассчитать вычет
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto px-4 pb-16 md:pb-20 relative z-10">
+        <div class="bg-white rounded-2xl p-5 text-center stat-card-hover border border-gray-100 shadow-sm">
+            <div class="text-3xl font-bold text-[#0088CC] mb-1">260 000₽</div>
+            <div class="text-sm text-gray-600">За покупку жилья</div>
+        </div>
+        <div class="bg-white rounded-2xl p-5 text-center stat-card-hover border border-gray-100 shadow-sm">
+            <div class="text-3xl font-bold text-[#0088CC] mb-1">390 000₽</div>
+            <div class="text-sm text-gray-600">За проценты ипотеки</div>
+        </div>
+        <div class="bg-white rounded-2xl p-5 text-center stat-card-hover border border-gray-100 shadow-sm">
+            <div class="text-3xl font-bold text-[#0088CC] mb-1">13%</div>
+            <div class="text-sm text-gray-600">Возврат НДФЛ</div>
+        </div>
+        <div class="bg-white rounded-2xl p-5 text-center stat-card-hover border border-gray-100 shadow-sm">
+            <div class="text-3xl font-bold text-[#0088CC] mb-1">от 3 мес</div>
+            <div class="text-sm text-gray-600">Срок возврата</div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-14">
+                <span class="page-hero-badge">Виды вычетов</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Виды налоговых вычетов при покупке жилья
+                </h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    Что можно вернуть при покупке квартиры
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100 benefit-card">
+                    <div class="w-14 h-14 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mb-5">
+                        <svg class="w-7 h-7 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">Покупка жилья</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Максимум 260,000₽ (13% от 2 млн ₽)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">За квартиру, дом, комнату</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Один раз в жизни</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100 benefit-card">
+                    <div class="w-14 h-14 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mb-5">
+                        <svg class="w-7 h-7 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">Проценты по ипотеке</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Максимум 390,000₽ (13% от 3 млн ₽)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Только на уплаченные проценты</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">На один объект жилья</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100 benefit-card">
+                    <div class="w-14 h-14 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mb-5">
+                        <svg class="w-7 h-7 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">Строительство и ремонт</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Входит в основной вычет</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Материалы и работы</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Только для новостроек без отделки</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-14">
+                <span class="page-hero-badge">Требования</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Требования и документы
+                </h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    Что нужно для получения налогового вычета
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mr-4">
+                            <svg class="w-6 h-6 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Условия получения</h3>
+                    </div>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Российское гражданство</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Официальное трудоустройство (уплата НДФЛ 13%)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Покупка жилой недвижимости в России</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Можно получить только 1 раз за жизнь</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Не более уплаченного НДФЛ за год</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mr-4">
+                            <svg class="w-6 h-6 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Необходимые документы</h3>
+                    </div>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Паспорт</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Справка 2-НДФЛ</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Договор купли-продажи</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Выписка из ЕГРН</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-gray-700">Платежные документы (чеки, квитанции)</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 bg-white" id="calculator-section">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-12">
+                <span class="page-hero-badge">Калькулятор</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Калькулятор налогового вычета
+                </h2>
+                <p class="text-xl text-gray-600">
+                    Рассчитайте сумму возврата при покупке квартиры
+                </p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+                <div class="grid lg:grid-cols-2 gap-8">
+                    <div class="space-y-6">
+                        <div>
+                            <div class="flex justify-between items-center mb-3">
+                                <label class="text-gray-700 font-medium">Стоимость недвижимости</label>
+                                <div class="text-xl font-bold text-[#0088CC]" id="taxPropertyPrice">5 000 000 ₽</div>
+                            </div>
+                            <input type="range" 
+                                   min="1000000" 
+                                   max="15000000" 
+                                   step="100000" 
+                                   value="5000000" 
+                                   class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                                   id="taxPropertyPriceRange">
+                            <div class="flex justify-between text-sm text-gray-500 mt-1">
+                                <span>1 млн ₽</span>
+                                <span>15 млн ₽</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center mb-3">
+                                <label class="text-gray-700 font-medium">Уплаченные проценты по ипотеке</label>
+                                <div class="text-xl font-bold text-[#0088CC]" id="taxMortgageInterest">500 000 ₽</div>
+                            </div>
+                            <input type="range" 
+                                   min="0" 
+                                   max="5000000" 
+                                   step="50000" 
+                                   value="500000" 
+                                   class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                                   id="taxMortgageInterestRange">
+                            <div class="flex justify-between text-sm text-gray-500 mt-1">
+                                <span>0 ₽</span>
+                                <span>5 млн ₽</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center mb-3">
+                                <label class="text-gray-700 font-medium">Годовой доход (НДФЛ)</label>
+                                <div class="text-xl font-bold text-[#0088CC]" id="taxAnnualIncome">1 000 000 ₽</div>
+                            </div>
+                            <input type="range" 
+                                   min="100000" 
+                                   max="5000000" 
+                                   step="50000" 
+                                   value="1000000" 
+                                   class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                                   id="taxAnnualIncomeRange">
+                            <div class="flex justify-between text-sm text-gray-500 mt-1">
+                                <span>100 тыс ₽</span>
+                                <span>5 млн ₽</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-[#0088CC] to-[#006699] rounded-2xl p-6 text-white">
+                        <div class="text-center mb-6">
+                            <h3 class="text-2xl font-bold mb-2">Расчет вычета</h3>
+                            <div class="text-4xl font-bold" id="taxTotalReturn">325 000 ₽</div>
+                            <p class="text-white/80">можете вернуть</p>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center py-2 border-b border-white/20">
+                                <span class="text-white/80">За покупку:</span>
+                                <span class="font-semibold" id="taxPropertyReturn">260 000 ₽</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-white/20">
+                                <span class="text-white/80">За проценты:</span>
+                                <span class="font-semibold" id="taxInterestReturn">65 000 ₽</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-white/20">
+                                <span class="text-white/80">НДФЛ за год:</span>
+                                <span class="font-semibold" id="taxYearlyNDFL">130 000 ₽</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2">
+                                <span class="text-white/80">Срок возврата:</span>
+                                <span class="font-semibold" id="taxReturnYears">3 года</span>
+                            </div>
+                        </div>
+
+                        <button onclick="openApplicationModal()" class="w-full bg-white text-[#0088CC] py-3 rounded-xl font-semibold mt-6 hover:bg-gray-50 transition-colors">
+                            Подобрать квартиру
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-14">
+                <span class="page-hero-badge">Наши услуги</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Почему оформление вычета стоит доверить InBack?
+                </h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    Самостоятельное оформление вычета часто оказывается сложнее, чем кажется. Мы поможем сэкономить время и деньги.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                <div class="bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all border border-gray-100 benefit-card">
+                    <div class="w-14 h-14 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mb-4 benefit-icon">
+                        <svg class="w-7 h-7 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">Подготовка декларации 3-НДФЛ</h3>
+                    <p class="text-gray-600">Заполним декларацию корректно, чтобы налоговая одобрила вычет с первого раза без доработок</p>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all border border-gray-100 benefit-card">
+                    <div class="w-14 h-14 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mb-4 benefit-icon">
+                        <svg class="w-7 h-7 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">Сбор документов</h3>
+                    <p class="text-gray-600">Расскажем, какие документы нужны, где их получить и проверим комплект перед подачей</p>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all border border-gray-100 benefit-card">
+                    <div class="w-14 h-14 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mb-4 benefit-icon">
+                        <svg class="w-7 h-7 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">Максимальный вычет</h3>
+                    <p class="text-gray-600">Рассчитаем точную сумму и подскажем, как получить максимальный возврат, включая вычеты супругов</p>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all border border-gray-100 benefit-card">
+                    <div class="w-14 h-14 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mb-4 benefit-icon">
+                        <svg class="w-7 h-7 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">Консультация онлайн</h3>
+                    <p class="text-gray-600">Ответим на все вопросы по налогообложению и поможем разобраться в нюансах получения вычета</p>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all border border-gray-100 benefit-card">
+                    <div class="w-14 h-14 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mb-4 benefit-icon">
+                        <svg class="w-7 h-7 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">Гарантия результата</h3>
+                    <p class="text-gray-600">Сопровождаем до получения денег на счет. Если возникнут вопросы от налоговой — решим их за вас</p>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all border border-gray-100 benefit-card">
+                    <div class="w-14 h-14 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mb-4 benefit-icon">
+                        <svg class="w-7 h-7 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">Онлайн из любой точки</h3>
+                    <p class="text-gray-600">Работаем дистанционно — не нужно приезжать в офис. Все документы принимаем онлайн</p>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-[#0088CC] to-[#006699] rounded-2xl p-8 text-white">
+                <div class="grid md:grid-cols-4 gap-6 text-center">
+                    <div>
+                        <div class="text-3xl font-bold mb-1">5 000+</div>
+                        <div class="text-white/80 text-sm">клиентов получили вычет</div>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-bold mb-1">98%</div>
+                        <div class="text-white/80 text-sm">одобрение с первого раза</div>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-bold mb-1">3 мес</div>
+                        <div class="text-white/80 text-sm">средний срок возврата</div>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-bold mb-1">4.9</div>
+                        <div class="text-white/80 text-sm">средняя оценка клиентов</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-14">
+                <span class="page-hero-badge">Виды вычетов</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Таблица налоговых вычетов 2026
+                </h2>
+                <p class="text-xl text-gray-600">
+                    Максимальные суммы возврата по различным видам расходов
+                </p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Вид расхода</th>
+                            <th class="px-6 py-4 text-right text-sm font-semibold text-gray-900">Максимальная сумма вычета</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 text-gray-700">Покупка жилья</td>
+                            <td class="px-6 py-4 text-right font-semibold text-[#0088CC]">до 260,000₽</td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 text-gray-700">Проценты по ипотеке</td>
+                            <td class="px-6 py-4 text-right font-semibold text-[#0088CC]">до 390,000₽</td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 text-gray-700">Обучение (свое)</td>
+                            <td class="px-6 py-4 text-right font-semibold text-gray-600">до 15,600₽ в год</td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 text-gray-700">Обучение детей</td>
+                            <td class="px-6 py-4 text-right font-semibold text-gray-600">до 6,500₽ в год</td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 text-gray-700">Лечение</td>
+                            <td class="px-6 py-4 text-right font-semibold text-gray-600">до 15,600₽ в год</td>
+                        </tr>
+                        <tr class="hover:bg-gray-50 bg-blue-50">
+                            <td class="px-6 py-4 text-gray-900 font-bold">ИТОГО максимум (жилье + проценты)</td>
+                            <td class="px-6 py-4 text-right font-bold text-[#0088CC] text-xl">650,000₽</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-14">
+            <span class="page-hero-badge">Преимущества</span>
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Преимущества налогового вычета
+            </h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+            <div class="bg-gray-50 rounded-2xl p-6 card-hover border border-gray-100">
+                <div class="w-12 h-12 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">650 000 ₽</h3>
+                <p class="text-gray-600">Максимальная сумма возврата в 2026 году</p>
+            </div>
+            <div class="bg-gray-50 rounded-2xl p-6 card-hover border border-gray-100">
+                <div class="w-12 h-12 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">3 месяца</h3>
+                <p class="text-gray-600">Средний срок получения вычета</p>
+            </div>
+            <div class="bg-gray-50 rounded-2xl p-6 card-hover border border-gray-100">
+                <div class="w-12 h-12 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Простое оформление</h3>
+                <p class="text-gray-600">Через Госуслуги или налоговую</p>
+            </div>
+            <div class="bg-gray-50 rounded-2xl p-6 card-hover border border-gray-100">
+                <div class="w-12 h-12 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Законный возврат</h3>
+                <p class="text-gray-600">Гарантированный государством</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-14">
+                <span class="page-hero-badge">Как получить вычет</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Как получить налоговый вычет с InBack?</h2>
+                <p class="text-xl text-gray-600">4 простых шага — мы берем на себя всю сложную работу</p>
+            </div>
+
+            <div class="grid md:grid-cols-4 gap-6 mb-12">
+                <div class="relative">
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center h-full">
+                        <div class="w-12 h-12 bg-gradient-to-r from-[#0088CC] to-[#006699] text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">1</div>
+                        <h3 class="font-bold text-lg mb-2">Оставьте заявку</h3>
+                        <p class="text-gray-600 text-sm">Заполните форму на сайте или позвоните нам — мы бесплатно проконсультируем</p>
+                    </div>
+                    <div class="hidden md:block absolute top-1/2 -right-3 transform -translate-y-1/2 z-10">
+                        <svg class="w-5 h-5 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center h-full">
+                        <div class="w-12 h-12 bg-gradient-to-r from-[#0088CC] to-[#006699] text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">2</div>
+                        <h3 class="font-bold text-lg mb-2">Соберите документы</h3>
+                        <p class="text-gray-600 text-sm">Мы дадим полный список и проверим каждый документ перед подачей</p>
+                    </div>
+                    <div class="hidden md:block absolute top-1/2 -right-3 transform -translate-y-1/2 z-10">
+                        <svg class="w-5 h-5 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center h-full">
+                        <div class="w-12 h-12 bg-gradient-to-r from-[#0088CC] to-[#006699] text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">3</div>
+                        <h3 class="font-bold text-lg mb-2">Подайте декларацию</h3>
+                        <p class="text-gray-600 text-sm">Мы подготовим 3-НДФЛ, а вы подадите её онлайн через Госуслуги или ЛК ФНС</p>
+                    </div>
+                    <div class="hidden md:block absolute top-1/2 -right-3 transform -translate-y-1/2 z-10">
+                        <svg class="w-5 h-5 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </div>
+                </div>
+                <div>
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center h-full">
+                        <div class="w-12 h-12 bg-gradient-to-r from-[#0088CC] to-[#006699] text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">4</div>
+                        <h3 class="font-bold text-lg mb-2">Получите деньги</h3>
+                        <p class="text-gray-600 text-sm">Ожидайте поступления средств на ваш счет — стандартный срок до 4 месяцев</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-8">
+                <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+                    <h3 class="text-xl font-bold mb-6 flex items-center">
+                        <div class="w-10 h-10 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mr-3">
+                            <svg class="w-5 h-5 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/></svg>
+                        </div>
+                        Два способа получения вычета
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between py-3 border-b border-gray-200">
+                            <span class="text-gray-600">Через налоговую:</span>
+                            <span class="font-semibold text-[#0088CC]">раз в год</span>
+                        </div>
+                        <div class="flex justify-between py-3 border-b border-gray-200">
+                            <span class="text-gray-600">Через работодателя:</span>
+                            <span class="font-semibold">ежемесячно</span>
+                        </div>
+                        <div class="flex justify-between py-3 border-b border-gray-200">
+                            <span class="text-gray-600">Срок проверки:</span>
+                            <span class="font-semibold">до 3 месяцев</span>
+                        </div>
+                        <div class="flex justify-between py-3 border-b border-gray-200">
+                            <span class="text-gray-600">Перенос остатка:</span>
+                            <span class="font-semibold">на следующие годы</span>
+                        </div>
+                        <div class="flex justify-between py-3">
+                            <span class="text-gray-600">Срок давности:</span>
+                            <span class="font-semibold">за 3 предыдущих года</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+                    <h3 class="text-xl font-bold mb-6 flex items-center">
+                        <div class="w-10 h-10 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mr-3">
+                            <svg class="w-5 h-5 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                        </div>
+                        Полезные советы
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <p class="text-gray-600">Супруги могут получить вычет отдельно — суммарно до 1 300 000 ₽</p>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <p class="text-gray-600">Можно подать за 3 предыдущих года одновременно</p>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <p class="text-gray-600">Вычет за проценты по ипотеке можно получать ежегодно</p>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <p class="text-gray-600">Упрощенный порядок — вычет без декларации через ЛК ФНС</p>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <p class="text-gray-600">Расходы на ремонт новостройки без отделки входят в вычет</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-10">
+                <button onclick="openApplicationModal()" class="bg-gradient-to-r from-[#0088CC] to-[#006699] hover:shadow-lg text-white font-bold py-4 px-10 rounded-xl transition-all duration-300 transform hover:scale-[1.02] text-lg">
+                    Получить бесплатную консультацию
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-14">
+                <span class="page-hero-badge">Ответы на вопросы</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Часто задаваемые вопросы
+                </h2>
+            </div>
+
+            <div class="space-y-4">
+                <div class="bg-gray-50 rounded-2xl border border-gray-100 faq-item">
+                    <button class="w-full text-left px-6 py-5 focus:outline-none flex justify-between items-center" onclick="toggleFaq(1)">
+                        <span class="font-semibold text-gray-900">Сколько раз можно получить налоговый вычет?</span>
+                        <svg class="w-5 h-5 text-[#0088CC] transition-transform flex-shrink-0 ml-4" id="faq-icon-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div class="mt-1 text-gray-600 hidden px-6 pb-5" id="faq-content-1">
+                        <p>Налоговый вычет на покупку жилья можно получить только один раз в жизни. Однако если вы не использовали всю сумму вычета (260,000₽), остаток можно перенести на покупку другой недвижимости. Вычет по процентам по ипотеке (до 390,000₽) предоставляется только на один объект.</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-2xl border border-gray-100 faq-item">
+                    <button class="w-full text-left px-6 py-5 focus:outline-none flex justify-between items-center" onclick="toggleFaq(2)">
+                        <span class="font-semibold text-gray-900">Можно ли получить вычет за несколько лет сразу?</span>
+                        <svg class="w-5 h-5 text-[#0088CC] transition-transform flex-shrink-0 ml-4" id="faq-icon-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div class="mt-1 text-gray-600 hidden px-6 pb-5" id="faq-content-2">
+                        <p>Да, вы можете подать декларацию за последние 3 года. Например, если вы купили квартиру в 2022 году, в 2026 году можете подать декларации за 2022, 2023 и 2024 годы одновременно и получить все вычеты сразу.</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-2xl border border-gray-100 faq-item">
+                    <button class="w-full text-left px-6 py-5 focus:outline-none flex justify-between items-center" onclick="toggleFaq(3)">
+                        <span class="font-semibold text-gray-900">Когда можно подавать на вычет после покупки квартиры?</span>
+                        <svg class="w-5 h-5 text-[#0088CC] transition-transform flex-shrink-0 ml-4" id="faq-icon-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div class="mt-1 text-gray-600 hidden px-6 pb-5" id="faq-content-3">
+                        <p>Подать документы на вычет можно только после окончания года, в котором была куплена квартира. Например, если вы купили квартиру в 2024 году, подать на вычет можно с 1 января 2026 года.</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-2xl border border-gray-100 faq-item">
+                    <button class="w-full text-left px-6 py-5 focus:outline-none flex justify-between items-center" onclick="toggleFaq(4)">
+                        <span class="font-semibold text-gray-900">Можно ли получить вычет на вторичное жилье?</span>
+                        <svg class="w-5 h-5 text-[#0088CC] transition-transform flex-shrink-0 ml-4" id="faq-icon-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div class="mt-1 text-gray-600 hidden px-6 pb-5" id="faq-content-4">
+                        <p>Да, налоговый вычет предоставляется как на новостройки, так и на вторичное жилье. Главное условие - недвижимость должна находиться в России, и вы должны быть резидентом РФ и платить НДФЛ по ставке 13%.</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-2xl border border-gray-100 faq-item">
+                    <button class="w-full text-left px-6 py-5 focus:outline-none flex justify-between items-center" onclick="toggleFaq(5)">
+                        <span class="font-semibold text-gray-900">Что если мой доход меньше суммы вычета?</span>
+                        <svg class="w-5 h-5 text-[#0088CC] transition-transform flex-shrink-0 ml-4" id="faq-icon-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div class="mt-1 text-gray-600 hidden px-6 pb-5" id="faq-content-5">
+                        <p>Если ваш годовой НДФЛ меньше суммы вычета, остаток переносится на следующие годы. Вычет будет предоставляться до тех пор, пока вся сумма не будет возвращена. Срок давности не ограничен.</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-2xl border border-gray-100 faq-item">
+                    <button class="w-full text-left px-6 py-5 focus:outline-none flex justify-between items-center" onclick="toggleFaq(6)">
+                        <span class="font-semibold text-gray-900">Можно ли получить вычет, если квартира оформлена на супруга?</span>
+                        <svg class="w-5 h-5 text-[#0088CC] transition-transform flex-shrink-0 ml-4" id="faq-icon-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div class="mt-1 text-gray-600 hidden px-6 pb-5" id="faq-content-6">
+                        <p>Да, если квартира куплена в браке, каждый из супругов имеет право на вычет, даже если квартира оформлена только на одного из них. Каждый супруг может получить до 260,000₽ за покупку и до 390,000₽ за проценты.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-16 bg-gradient-to-r from-[#0088CC] to-[#006699] text-white">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-6">Купите квартиру и верните до 650 000 ₽</h2>
+            <p class="text-xl mb-8 text-white/90">
+                Поможем подобрать квартиру с учетом налогового вычета и оформить все документы для возврата НДФЛ
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="openApplicationModal()" class="bg-white text-[#0088CC] px-8 py-4 rounded-xl font-semibold text-lg transition-all transform hover:scale-[1.02] hover:shadow-xl">
+                    Подобрать квартиру
+                </button>
+                <a href="{{ url_for('props.properties') }}" class="border-2 border-white text-white hover:bg-white hover:text-[#0088CC] px-8 py-4 rounded-xl font-semibold text-lg transition-all transform hover:scale-[1.02]">
+                    Каталог новостроек
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+function formatPrice(num) {
+    return new Intl.NumberFormat('ru-RU').format(num) + ' ₽';
+}
+
+function calculateTaxDeduction() {
+    const propertyPrice = parseInt(document.getElementById('taxPropertyPriceRange').value);
+    const mortgageInterest = parseInt(document.getElementById('taxMortgageInterestRange').value);
+    const annualIncome = parseInt(document.getElementById('taxAnnualIncomeRange').value);
+    
+    document.getElementById('taxPropertyPrice').textContent = formatPrice(propertyPrice);
+    document.getElementById('taxMortgageInterest').textContent = formatPrice(mortgageInterest);
+    document.getElementById('taxAnnualIncome').textContent = formatPrice(annualIncome);
+    
+    const maxPropertyDeduction = 2000000;
+    const maxInterestDeduction = 3000000;
+    
+    const propertyReturn = Math.min(propertyPrice, maxPropertyDeduction) * 0.13;
+    const interestReturn = Math.min(mortgageInterest, maxInterestDeduction) * 0.13;
+    
+    const totalReturn = propertyReturn + interestReturn;
+    const yearlyNDFL = annualIncome * 0.13;
+    
+    const returnYears = yearlyNDFL > 0 ? Math.ceil(totalReturn / yearlyNDFL) : 0;
+    
+    document.getElementById('taxPropertyReturn').textContent = formatPrice(Math.round(propertyReturn));
+    document.getElementById('taxInterestReturn').textContent = formatPrice(Math.round(interestReturn));
+    document.getElementById('taxTotalReturn').textContent = formatPrice(Math.round(totalReturn));
+    document.getElementById('taxYearlyNDFL').textContent = formatPrice(Math.round(yearlyNDFL));
+    document.getElementById('taxReturnYears').textContent = returnYears + ' ' + (returnYears === 1 ? 'год' : returnYears < 5 ? 'года' : 'лет');
+}
+
+document.getElementById('taxPropertyPriceRange').addEventListener('input', calculateTaxDeduction);
+document.getElementById('taxMortgageInterestRange').addEventListener('input', calculateTaxDeduction);
+document.getElementById('taxAnnualIncomeRange').addEventListener('input', calculateTaxDeduction);
+
+function toggleFaq(num) {
+    const content = document.getElementById(`faq-content-${num}`);
+    const icon = document.getElementById(`faq-icon-${num}`);
+    
+    content.classList.toggle('hidden');
+    icon.classList.toggle('rotate-180');
+}
+
+function openCalculatorModal() {
+    const calculatorSection = document.getElementById('calculator-section');
+    calculatorSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+calculateTaxDeduction();
+</script>
+
+{% endblock %}

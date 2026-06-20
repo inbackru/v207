@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="ru" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ presentation.title }} — InBack</title>
+    
+    <meta name="description" content="Подборка недвижимости для {{ presentation.client_name or 'клиента' }} от InBack">
+    <meta property="og:title" content="{{ presentation.title }} — Презентация недвижимости">
+    <meta property="og:description" content="Эксклюзивная подборка недвижимости с кэшбеком">
+    
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #0088CC, #005588);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s ease;
+        }
+        
+        .card:hover {
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            transform: translateY(-2px);
+        }
+        
+        .photo-slider {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16/10;
+            overflow: hidden;
+            border-radius: 12px 12px 0 0;
+            background: #f3f4f6;
+        }
+        
+        .slide {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        
+        .slide.active { opacity: 1; }
+        
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .slider-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.9);
+            color: #374151;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        
+        .slider-nav:hover { background: white; }
+        .slider-nav.prev { left: 12px; }
+        .slider-nav.next { right: 12px; }
+        
+        .slider-dots {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+            z-index: 10;
+        }
+        
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .dot.active {
+            background: white;
+            width: 18px;
+            border-radius: 3px;
+        }
+        
+        .btn-primary {
+            background: #0088CC;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 500;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary:hover {
+            background: #0077B5;
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+        
+        .stat-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .toast {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 500;
+            z-index: 10001;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+        
+        .toast.show { transform: translateX(0); }
+        .toast.info { background: #0088CC; }
+        .toast.success { background: #10B981; }
+        .toast.error { background: #EF4444; }
+        .toast.warning { background: #F59E0B; }
+
+        .complex-card {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+
+        .mobile-sticky-bar {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            padding: 10px 16px;
+            padding-bottom: max(10px, env(safe-area-inset-bottom));
+            z-index: 50;
+            box-shadow: 0 -4px 16px rgba(0,0,0,0.08);
+        }
+
+        @media (max-width: 640px) {
+            .mobile-sticky-bar { display: flex; gap: 10px; align-items: center; }
+            body { padding-bottom: 72px; }
+            .property-card-actions {
+                flex-direction: column;
+                gap: 8px !important;
+            }
+            .property-card-actions button {
+                width: 100%;
+                justify-content: center;
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 antialiased">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-100 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <a href="/" class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-[#0088CC] rounded-xl flex items-center justify-center text-white font-bold text-lg">In</div>
+                    <span class="text-xl font-semibold text-[#0088CC]">InBack</span>
+                </a>
+                
+                <div class="flex items-center gap-3">
+                    <button onclick="sharePresentation()" class="btn-secondary flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                        </svg>
+                        <span class="hidden sm:inline">Поделиться</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 py-8">
+        <!-- Hero Section -->
+        <section class="text-center mb-12">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-3">{{ presentation.title }}</h1>
+            <p class="text-lg text-gray-500 mb-8">Персональная подборка для {{ presentation.client_name or 'вас' }}</p>
+            
+            <!-- Stats -->
+            {% set total_area = namespace(value=0) %}
+            {% set min_price = namespace(value=0) %}
+            {% set complex_names = namespace(value=[]) %}
+            {% for prop in presentation.properties %}
+                {% set total_area.value = total_area.value + (prop.area or 0) %}
+                {% if min_price.value == 0 or (prop.price and prop.price < min_price.value) %}
+                    {% set min_price.value = prop.price or 0 %}
+                {% endif %}
+                {% if prop.complex_name and prop.complex_name not in complex_names.value %}
+                    {% set complex_names.value = complex_names.value + [prop.complex_name] %}
+                {% endif %}
+            {% endfor %}
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
+                <div class="stat-card">
+                    <div class="text-2xl font-bold text-gray-900">{{ presentation.properties|length }}</div>
+                    <div class="text-sm text-gray-500">Объектов</div>
+                </div>
+                <div class="stat-card">
+                    <div class="text-2xl font-bold text-gray-900">{{ complex_names.value|length }}</div>
+                    <div class="text-sm text-gray-500">ЖК</div>
+                </div>
+                <div class="stat-card">
+                    <div class="text-2xl font-bold text-gray-900">{{ "%.1f"|format(total_area.value) }}</div>
+                    <div class="text-sm text-gray-500">м² общая</div>
+                </div>
+                <div class="stat-card">
+                    <div class="text-2xl font-bold text-gray-900">от {{ "%.1f"|format(min_price.value / 1000000) }}М</div>
+                    <div class="text-sm text-gray-500">стоимость</div>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap justify-center gap-4 mt-8">
+                <button id="downloadAllBtn" onclick="downloadAllPresentationPDF('{{ presentation.title }}')" class="btn-primary flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <span id="downloadBtnText">Скачать все в PDF</span>
+                </button>
+            </div>
+            
+            <!-- Progress Container (hidden by default) -->
+            <div id="progressContainer" class="hidden mt-6 max-w-md mx-auto">
+                <div class="bg-white rounded-xl p-6 border border-gray-200">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div id="progressIcon" class="w-10 h-10 bg-[#0088CC] rounded-full flex items-center justify-center">
+                            <i class="fas fa-cog fa-spin text-white"></i>
+                        </div>
+                        <div class="text-left">
+                            <div id="progressMessage" class="font-medium text-gray-900">Подготовка...</div>
+                            <div id="progressDetails" class="text-sm text-gray-500"></div>
+                        </div>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2">
+                        <div id="progressBar" class="bg-[#0088CC] h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <div id="progressPercent" class="text-sm text-gray-500 mt-2">0%</div>
+                    <div id="progressStatus" class="text-sm text-gray-400"></div>
+                </div>
+            </div>
+        </section>
+
+        {% if presentation.complexes %}
+        <!-- Complexes Section -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Жилые комплексы</h2>
+            
+            <div class="grid gap-6">
+                {% for complex_name, complex in presentation.complexes.items() %}
+                <div class="complex-card">
+                    <div class="md:flex">
+                        <!-- Complex Image -->
+                        <div class="md:w-1/3">
+                            {% if complex.photos and complex.photos|length > 0 %}
+                            <img src="{{ complex.photos[0] }}" alt="{{ complex_name }}" class="w-full h-48 md:h-full object-cover">
+                            {% else %}
+                            <div class="w-full h-48 md:h-full bg-gray-100 flex items-center justify-center">
+                                <span class="text-gray-400">Нет фото</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Complex Info -->
+                        <div class="p-6 md:w-2/3">
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">{{ complex_name }}</h3>
+                            
+                            <div class="grid grid-cols-2 gap-4 text-sm mb-4">
+                                {% if complex.developer %}
+                                <div>
+                                    <span class="text-gray-500">Застройщик:</span>
+                                    <span class="text-gray-900 font-medium ml-1">{{ complex.developer }}</span>
+                                </div>
+                                {% endif %}
+                                
+                                {% if complex.address %}
+                                <div>
+                                    <span class="text-gray-500">Адрес:</span>
+                                    <span class="text-gray-900 ml-1">{{ complex.address }}</span>
+                                </div>
+                                {% endif %}
+                                
+                                {% if complex.end_year %}
+                                <div>
+                                    <span class="text-gray-500">Сдача:</span>
+                                    <span class="text-gray-900 ml-1">{{ complex.end_quarter or '' }} кв. {{ complex.end_year }}</span>
+                                </div>
+                                {% endif %}
+                                
+                                {% if complex.cashback_rate %}
+                                <div>
+                                    <span class="text-gray-500">Кэшбек:</span>
+                                    <span class="text-green-600 font-medium ml-1">до {{ complex.cashback_rate }}%</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="openComplexPage('{{ complex.complex_id or 0 }}')" class="btn-secondary text-sm flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                    </svg>
+                                    Подробнее о ЖК
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Properties Section -->
+        <section>
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Подобранные квартиры</h2>
+            
+            <div class="grid gap-6">
+                {% for property in presentation.properties %}
+                {% set loop_index = loop.index0 %}
+                <article class="card overflow-hidden">
+                    <div class="md:flex">
+                        <!-- Property Image -->
+                        <div class="md:w-2/5">
+                            {% if property.images and property.images|length > 0 %}
+                            <div class="photo-slider" data-property="{{ loop_index }}">
+                                <div class="slides-wrapper">
+                                    {% for image in property.images %}
+                                    <div class="slide{% if loop.index0 == 0 %} active{% endif %}">
+                                        <img src="{{ image }}" alt="Фото {{ loop.index }}" loading="lazy">
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                
+                                {% if property.images|length > 1 %}
+                                <button class="slider-nav prev" onclick="changeSlide({{ loop_index }}, -1)">‹</button>
+                                <button class="slider-nav next" onclick="changeSlide({{ loop_index }}, 1)">›</button>
+                                
+                                <div class="slider-dots">
+                                    {% for image in property.images %}
+                                    <div class="dot{% if loop.index0 == 0 %} active{% endif %}" onclick="currentSlide({{ loop_index }}, {{ loop.index0 }})"></div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                
+                                <div class="absolute bottom-3 left-3 bg-black/60 text-white px-2 py-1 rounded text-xs">
+                                    {{ property.images|length }} фото
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="aspect-video bg-gray-100 flex items-center justify-center">
+                                <span class="text-gray-400">Нет фото</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Property Details -->
+                        <div class="p-6 md:w-3/5">
+                            <!-- Title & Price -->
+                            <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-900">
+                                        {% if property.rooms == 0 %}Студия{% else %}{{ property.rooms }}-комнатная{% endif %}, {{ property.area }} м²
+                                    </h3>
+                                    <p class="text-gray-500">{{ property.floor }}/{{ property.total_floors }} этаж · {{ property.complex_name or 'ЖК' }}</p>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-2xl font-bold text-gray-900">{{ "{:,.0f}".format(property.price|int).replace(',', ' ') }} ₽</div>
+                                    <div class="text-sm text-green-600 font-medium">
+                                        Кэшбек: {{ "{:,.0f}".format(property.cashback_amount or 0).replace(',', ' ') }} ₽
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Key Info -->
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4 text-sm">
+                                <div class="bg-gray-50 rounded-lg p-3">
+                                    <div class="text-gray-500">Площадь</div>
+                                    <div class="font-semibold">{{ property.area }} м²</div>
+                                </div>
+                                <div class="bg-gray-50 rounded-lg p-3">
+                                    <div class="text-gray-500">Этаж</div>
+                                    <div class="font-semibold">{{ property.floor }}/{{ property.total_floors }}</div>
+                                </div>
+                                <div class="bg-gray-50 rounded-lg p-3">
+                                    <div class="text-gray-500">Цена за м²</div>
+                                    <div class="font-semibold">{{ "{:,.0f}".format((property.price|int / property.area|float)|int).replace(',', ' ') }} ₽</div>
+                                </div>
+                                <div class="bg-green-50 rounded-lg p-3">
+                                    <div class="text-green-600">Кэшбек</div>
+                                    <div class="font-semibold text-green-700">{{ property.cashback_percent or 5 }}%</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Additional Details -->
+                            <div class="text-sm text-gray-600 mb-4 space-y-1">
+                                {% if property.address %}
+                                <div>{{ property.address }}</div>
+                                {% endif %}
+                                <div>Отделка: {{ property.renovation_display_name or 'Без отделки' }} · Класс: {{ property.housing_class or 'Комфорт' }}</div>
+                            </div>
+                            
+                            <!-- Manager Note -->
+                            {% if property.manager_note %}
+                            <div class="bg-blue-50 border-l-4 border-[#0088CC] p-4 rounded-r-lg mb-4">
+                                <div class="text-sm font-medium text-[#0088CC] mb-1">Комментарий менеджера</div>
+                                <p class="text-sm text-gray-700">{{ property.manager_note }}</p>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Actions -->
+                            <div class="property-card-actions flex flex-wrap gap-3">
+                                <button onclick="openReservationModal({{ loop_index }}, '{{ property.property_id }}', '{{ property.complex_name }}')" class="btn-primary flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    Забронировать
+                                </button>
+                                <button onclick="showPropertyDetails('{{ property.property_id }}')" class="btn-secondary flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    Подробнее
+                                </button>
+                                <button onclick="downloadPropertyPDF({{ loop_index }})" class="btn-secondary flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    PDF
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="mt-16 text-center">
+            <div class="bg-gray-900 rounded-2xl p-8 md:p-12">
+                <h2 class="text-2xl md:text-3xl font-bold text-white mb-4">Готовы обсудить?</h2>
+                <p class="text-gray-400 mb-8 max-w-lg mx-auto">
+                    Свяжитесь с нами для записи на просмотр или оформления сделки с кэшбеком
+                </p>
+                
+                <div class="flex flex-wrap justify-center gap-4">
+                    <a href="tel:+7" class="btn-secondary bg-white hover:bg-gray-100">
+                        Позвонить
+                    </a>
+                    <a href="https://wa.me/" target="_blank" class="btn-primary bg-green-600 hover:bg-green-700">
+                        WhatsApp
+                    </a>
+                    <a href="https://t.me/" target="_blank" class="btn-primary">
+                        Telegram
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-100 py-8 mt-16">
+        <div class="max-w-5xl mx-auto px-4 text-center">
+            <p class="text-gray-400 text-sm">
+                © 2025 InBack · Презентация создана {{ presentation.created_at.strftime('%d.%m.%Y') if presentation.created_at else 'сегодня' }}
+            </p>
+        </div>
+    </footer>
+
+    <!-- Mobile Sticky Bottom Bar -->
+    <div class="mobile-sticky-bar">
+        <button onclick="downloadAllPresentationPDF('{{ presentation.title }}')" 
+                style="flex:1; background:#0088CC; color:white; padding:12px 0; border-radius:10px; border:none; font-weight:600; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+            <i class="fas fa-file-pdf"></i> Скачать PDF
+        </button>
+        <button onclick="sharePresentation()" 
+                style="flex:1; background:#f3f4f6; color:#374151; padding:12px 0; border-radius:10px; border:1px solid #e5e7eb; font-weight:600; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+            <i class="fas fa-share-alt"></i> Поделиться
+        </button>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
+
+    <script>
+        // Presentation data
+        const presentationId = {{ presentation.id }};
+        const uniqueId = '{{ presentation.unique_url }}';
+        
+        const properties = [
+            {% for property in presentation.properties %}
+            {
+                id: {{ (property.property_id or property.id or '')|tojson }},
+                complex_id: {{ property.complex_id or property.residential_complex_id or 0 }},
+                complex_name: {{ (property.complex_name or '')|tojson }},
+                rooms: {{ property.rooms or 0 }},
+                area: {{ property.area or 0 }},
+                price: {{ property.price or 0 }}
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        // Toast helper
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check' : type === 'error' ? 'fa-times' : type === 'warning' ? 'fa-exclamation' : 'fa-spinner fa-spin'}"></i>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            
+            setTimeout(() => toast.classList.add('show'), 10);
+            
+            if (type !== 'info') {
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+            
+            return toast;
+        }
+
+        // Clipboard helper with fallbacks
+        async function copyToClipboard(text) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    return true;
+                } catch (err) { }
+            }
+            
+            try {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.cssText = 'position:fixed;left:-9999px;top:-9999px;opacity:0';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                const success = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                if (success) return true;
+            } catch (err) { }
+            
+            return false;
+        }
+
+        // Share presentation
+        function sharePresentation() {
+            const url = window.location.href;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Презентация недвижимости InBack',
+                    text: 'Подобранные квартиры с кэшбеком',
+                    url: url
+                }).catch(() => fallbackShare(url));
+            } else {
+                fallbackShare(url);
+            }
+        }
+        
+        function fallbackShare(url) {
+            copyToClipboard(url).then(success => {
+                if (success) {
+                    showToast('Ссылка скопирована', 'success');
+                } else {
+                    prompt('Скопируйте ссылку:', url);
+                }
+            });
+        }
+
+        // Photo slider
+        let currentSlides = {};
+        
+        function changeSlide(propertyIndex, direction) {
+            const slider = document.querySelector(`.photo-slider[data-property="${propertyIndex}"]`);
+            if (!slider) return;
+            
+            const slides = slider.querySelectorAll('.slide');
+            const dots = slider.querySelectorAll('.dot');
+            if (!slides.length || slides.length <= 1) return;
+            
+            if (!currentSlides[propertyIndex]) currentSlides[propertyIndex] = 0;
+            
+            slides[currentSlides[propertyIndex]].classList.remove('active');
+            if (dots[currentSlides[propertyIndex]]) dots[currentSlides[propertyIndex]].classList.remove('active');
+            
+            currentSlides[propertyIndex] += direction;
+            if (currentSlides[propertyIndex] >= slides.length) currentSlides[propertyIndex] = 0;
+            if (currentSlides[propertyIndex] < 0) currentSlides[propertyIndex] = slides.length - 1;
+            
+            slides[currentSlides[propertyIndex]].classList.add('active');
+            if (dots[currentSlides[propertyIndex]]) dots[currentSlides[propertyIndex]].classList.add('active');
+        }
+        
+        function currentSlide(propertyIndex, slideIndex) {
+            const slider = document.querySelector(`.photo-slider[data-property="${propertyIndex}"]`);
+            if (!slider) return;
+            
+            const slides = slider.querySelectorAll('.slide');
+            const dots = slider.querySelectorAll('.dot');
+            
+            slides.forEach(s => s.classList.remove('active'));
+            dots.forEach(d => d.classList.remove('active'));
+            
+            if (slides[slideIndex]) slides[slideIndex].classList.add('active');
+            if (dots[slideIndex]) dots[slideIndex].classList.add('active');
+            currentSlides[propertyIndex] = slideIndex;
+        }
+
+        // Touch swipe for photo sliders
+        document.querySelectorAll('.photo-slider').forEach(slider => {
+            let startX = 0;
+            let startY = 0;
+            let isDragging = false;
+            const propertyIndex = parseInt(slider.dataset.property);
+
+            slider.addEventListener('touchstart', function(e) {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                isDragging = true;
+            }, {passive: true});
+
+            slider.addEventListener('touchmove', function(e) {
+                if (!isDragging) return;
+                const diffX = e.touches[0].clientX - startX;
+                const diffY = e.touches[0].clientY - startY;
+                if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 10) {
+                    e.preventDefault();
+                }
+            }, {passive: false});
+
+            slider.addEventListener('touchend', function(e) {
+                if (!isDragging) return;
+                isDragging = false;
+                const endX = e.changedTouches[0].clientX;
+                const diffX = endX - startX;
+                if (Math.abs(diffX) > 40) {
+                    changeSlide(propertyIndex, diffX > 0 ? -1 : 1);
+                }
+            }, {passive: true});
+        });
+
+        // Download property PDF
+        function downloadPropertyPDF(propertyIndex) {
+            const property = properties[propertyIndex];
+            if (!property || !property.id) {
+                showToast('Объект не найден', 'error');
+                return;
+            }
+            
+            const toast = showToast('Генерация PDF...', 'info');
+            // Use public endpoint for property PDF
+            window.location.href = `/object/${property.id}/pdf`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 2000);
+        }
+
+        // Open complex page
+        function openComplexPage(complexId) {
+            if (!complexId || complexId === '0' || complexId === 0) {
+                showToast('ЖК не найден', 'warning');
+                return;
+            }
+            
+            window.open(`/residential-complex/${complexId}`, '_blank');
+        }
+
+        // Download all PDF
+        function downloadAllPresentationPDF(title) {
+            const downloadBtn = document.getElementById('downloadAllBtn');
+            const downloadBtnText = document.getElementById('downloadBtnText');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const progressPercent = document.getElementById('progressPercent');
+            const progressMessage = document.getElementById('progressMessage');
+            const progressDetails = document.getElementById('progressDetails');
+            const progressIcon = document.getElementById('progressIcon');
+            
+            if (downloadBtn) downloadBtn.style.display = 'none';
+            progressContainer.classList.remove('hidden');
+            
+            progressBar.style.width = '0%';
+            progressPercent.textContent = '0%';
+            progressMessage.textContent = 'Подготовка файлов...';
+            progressDetails.textContent = '';
+            
+            function showError(msg) {
+                progressMessage.textContent = 'Ошибка';
+                progressDetails.textContent = msg;
+                progressIcon.innerHTML = '<i class="fas fa-times text-white"></i>';
+                progressIcon.classList.remove('bg-[#0088CC]');
+                progressIcon.classList.add('bg-red-500');
+                
+                setTimeout(() => {
+                    progressContainer.classList.add('hidden');
+                    if (downloadBtn) downloadBtn.style.display = 'block';
+                    progressIcon.classList.remove('bg-red-500');
+                    progressIcon.classList.add('bg-[#0088CC]');
+                }, 4000);
+            }
+            
+            function resetButton() {
+                progressContainer.classList.add('hidden');
+                if (downloadBtn) downloadBtn.style.display = 'block';
+            }
+            
+            fetch(`/presentation/view/${uniqueId}/start-generation`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                    return;
+                }
+            })
+            .catch(err => showError('Не удалось начать генерацию'));
+            
+            let pollAttempts = 0;
+            const maxAttempts = 80;
+            
+            const pollInterval = setInterval(async () => {
+                pollAttempts++;
+                
+                try {
+                    const response = await fetch(`/presentation/view/${uniqueId}/progress`);
+                    const data = await response.json();
+                    
+                    progressBar.style.width = data.progress + '%';
+                    progressPercent.textContent = data.progress + '%';
+                    progressMessage.textContent = data.message || 'Обработка...';
+                    progressDetails.textContent = data.details || '';
+                    
+                    if (data.status === 'completed') {
+                        clearInterval(pollInterval);
+                        progressIcon.innerHTML = '<i class="fas fa-check text-white"></i>';
+                        
+                        setTimeout(() => {
+                            window.location.href = `/presentation/view/${uniqueId}/download-result`;
+                            setTimeout(resetButton, 2000);
+                        }, 500);
+                    }
+                    
+                    if (pollAttempts >= maxAttempts) {
+                        clearInterval(pollInterval);
+                        showError('Превышено время ожидания');
+                    }
+                } catch (err) {
+                    clearInterval(pollInterval);
+                    showError('Ошибка соединения');
+                }
+            }, 1500);
+        }
+
+        // Reservation modal
+        function openReservationModal(propertyIndex, propertyId, complexName) {
+            const property = properties[propertyIndex] || {};
+            
+            const modal = document.createElement('div');
+            modal.id = 'reservationModal';
+            modal.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl p-6 max-w-md w-full">
+                    <h2 class="text-xl font-bold text-gray-900 mb-1">Забронировать</h2>
+                    <p class="text-gray-500 text-sm mb-6">${property.rooms ? property.rooms + '-комн' : 'Студия'}, ${property.area} м² · ${complexName || ''}</p>
+                    
+                    <form id="reservationForm" class="space-y-4">
+                        <input type="hidden" name="property_id" value="${propertyId}">
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Имя *</label>
+                            <input type="text" name="client_name" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0088CC] focus:border-[#0088CC] outline-none">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Телефон *</label>
+                            <input type="tel" name="client_phone" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0088CC] focus:border-[#0088CC] outline-none" placeholder="+7">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Комментарий</label>
+                            <textarea name="comment" rows="2" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0088CC] focus:border-[#0088CC] outline-none resize-none"></textarea>
+                        </div>
+                        
+                        <div class="flex gap-3 pt-2">
+                            <button type="button" onclick="closeReservationModal()" class="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200">
+                                Отмена
+                            </button>
+                            <button type="submit" class="flex-1 py-3 bg-[#0088CC] text-white rounded-xl font-medium hover:bg-[#0077B5]">
+                                Отправить
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            modal.querySelector('input[name="client_name"]').focus();
+            
+            modal.addEventListener('click', e => { if (e.target === modal) closeReservationModal(); });
+            
+            document.getElementById('reservationForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const form = e.target;
+                const btn = form.querySelector('button[type="submit"]');
+                btn.textContent = 'Отправка...';
+                btn.disabled = true;
+                
+                try {
+                    const formData = new FormData(form);
+                    const response = await fetch('/api/booking', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            property_id: formData.get('property_id'),
+                            client_name: formData.get('client_name'),
+                            client_phone: formData.get('client_phone'),
+                            comment: formData.get('comment'),
+                            presentation_id: presentationId
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        modal.innerHTML = `
+                            <div class="bg-white rounded-2xl p-8 max-w-md w-full text-center">
+                                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i class="fas fa-check text-2xl text-green-600"></i>
+                                </div>
+                                <h2 class="text-xl font-bold text-gray-900 mb-2">Заявка отправлена!</h2>
+                                <p class="text-gray-500 mb-6">Менеджер свяжется с вами в ближайшее время</p>
+                                <button onclick="closeReservationModal()" class="w-full py-3 bg-[#0088CC] text-white rounded-xl font-medium">Закрыть</button>
+                            </div>
+                        `;
+                    } else {
+                        throw new Error();
+                    }
+                } catch (err) {
+                    btn.textContent = 'Отправить';
+                    btn.disabled = false;
+                    showToast('Ошибка отправки', 'error');
+                }
+            });
+        }
+        
+        function closeReservationModal() {
+            const modal = document.getElementById('reservationModal');
+            if (modal) modal.remove();
+        }
+
+        // Show property details
+        function showPropertyDetails(propertyId) {
+            window.open(`/object/${propertyId}`, '_blank');
+        }
+
+        // Log load time
+        console.log('Modern Presentation Load Time:', performance.now().toFixed(0) + 'ms');
+    </script>
+</body>
+</html>

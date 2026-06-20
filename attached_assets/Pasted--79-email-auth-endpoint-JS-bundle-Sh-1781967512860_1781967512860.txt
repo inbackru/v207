@@ -1,0 +1,142 @@
+Логин — номер телефона (+79...), не email. Меняю формат и ищу auth endpoint через JS bundle:
+
+
+Show less
+
+Ran python3
+
+Ran python3
+
+Planning auth endpoint interaction
+Found it! The auth endpoint at https://auth.trendagent.ru/ returns 200 GET with a JSON response: {"errors":"Введен неверный телефон или пароль..."} - this is the login endpoint! I need to POST to https://auth.trendagent.ru/ with the correct body format.
+
+Let me try posting to the root URL with different body formats.
+
+GET / на auth.trendagent.ru вернул JSON с "неверный телефон" — это и есть login endpoint! Пробую POST:
+
+
+Show less
+
+Ran python3
+
+Evaluating authentication endpoint behavior (6 seconds)
+The auth server returns "Cannot POST /" but GET to "/" returns a JSON error about wrong phone/password. This means the GET itself is somehow triggering validation. Let me think about this differently.
+
+GET to https://auth.trendagent.ru/ returned {"errors":"Введен неверный телефон или пароль..."} - this is strange. Maybe the auth URL uses query parameters rather than POST body?
+
+Let me try:
+
+GET with query params: https://auth.trendagent.ru/?phone=...&password=...
+Or maybe the real auth is happening via a different path
+Also, let me look at the auth.trendagent.ru server more carefully - checking what routes are available by looking at the OPTIONS responses.
+I should dig into the main app's JavaScript bundle to find where the actual login endpoint is being called. Looking at the importmap, I need to trace through the entry point and search for auth-related strings. The common-deps.js and before-routing-event.js files might have the auth service configuration I'm looking for.
+
+GET на / возвращает JSON об ошибке пароля — значит / это и есть endpoint, но принимает только GET с параметрами. Пробую иначе + ищу в JS bundle:
+
+
+3 actions
+🎉 Токен получен! Endpoint: /login?phone=...&password=... (GET). Немедленно получаю данные по зданиям:
+
+
+Show less
+
+Ran python3
+
+Searching for building data endpoint (10 seconds)
+Отлично! Авторизация работает! Я получил токен длиной 465 символов. Теперь нужно найти endpoint для зданий. Блок endpoint /blocks/{id}/ работает и возвращает данные о ЖК "Гарантия PRIME". Но /blocks/{id}/buildings/ возвращает 404.
+
+Попробую другие пути для получения данных о зданиях. Из логов пользователя видел:
+
+buildings/?auth_token=... - 200, 1.9 кБ
+Заметил, что ЖК "Гарантия PRIME" в Trendagent совпадает с нашим "Гарантия на Обрывной" по GUID, так что это один и тот же объект. Теперь нужно проверить разные варианты путей для доступа к зданиям этого комплекса.
+Из логов вижу, что есть несколько возможных форматов запросов к buildings endpoint — с параметрами block_id или blocks, и разные базовые URL. Попробую перебрать эти варианты, чтобы найти рабочий.
+
+Блок данные получены! Ищу правильный endpoint для зданий — из логов видел buildings?blocks=...:
+
+
+Show less
+
+Ran python3
+
+Ran python3
+
+Planning building data extraction (20 seconds)
+Let me look at the block response more carefully. I can see that the block data has corp field - this is probably the buildings/corps data! Let me get the full corp field and also look at other fields for building data.
+
+Also, looking at the response keys: ['id', 'crm_id', 'name', 'alias', 'guid', 'description', 'location', 'address', 'latitude', 'longitude', 'pano_url', 'edit_mode', 'updated_at', 'status', 'subways', 'region', 'minPrice', 'apartmentsMinPrices', 'gallery', 'seo', 'point_distance', 'city', 'roomsType', 'corp', 'deadlines', 'builder', 'finishing', 'building_type', 'facade_type', 'contract_type', 'apartCount', 'is_mortgage_apart', 'is_mortgage_secondary', 'payment_types']
+The corp, deadlines, and roomsType fields look promising for building details, and apartmentsMinPrices might contain pricing breakdowns. I should also check that filters endpoint and the buildings/ endpoint that showed up in the logs to see what data they're returning. Wait, maybe the buildings/ endpoint is actually on a different Trendagent subdomain entirely. Looking back at the network logs, most XHR requests were initiated by sentry.js, which is interesting. Let me reconsider the relative paths in the logs—if the browser was at https://krasnodar.trendagent.ru/api/v1/blocks/619f7c88d625d0b5aa7d3c61/ and made a relative XHR request to buildings/, the full URL would resolve to https://krasnodar.trendagent.ru/api/v1/blocks/619f7c88d625d0b5aa7d3c61/buildings/. But when I tested that exact path, I got back the HTML shell instead of JSON data, which suggests something else is going on.
+
+Actually, I just realized—the API_URL in env.js points to https://api.trendagent.ru/v4_29, so the buildings endpoint should be at https://api.trendagent.ru/v4_29/blocks/619f7c88d625d0b5aa7d3c61/buildings/?auth_token=.... That returns a 404 though. The block ID 619f7c88d625d0b5aa7d3c61 is definitely correct—it maps to "Гарантия PRIME" with GUID "garantiya-na-obryvnoy"—but maybe the buildings endpoint uses a different identifier or path structure than I'm assuming.
+
+Looking at the network logs, I see a filters endpoint being called with block_id=619f7c88d625d0b5aa7d3c61&name=build…level_types, which suggests the block ID is valid for other endpoints. Let me pull the full block response and check what's in the corp, deadlines, and apartmentsMinPrices fields—those might already contain the buildings data I'm looking for.
+
+В ответе блока есть corp — это и есть здания! Смотрю полный corp-объект и ищу endpoint для квартир:
+
+
+Show less
+
+Ran python3
+
+Ran python3
+
+Analyzing building deadline groupings (33 seconds)
+From the Trendagent API response, I found valuable data:
+
+corp field (buildings grouped by deadline):
+
+"2#4 кв. 2024": ["4", "6", "5", "2"] - Литеры 4, 6, 5, 2 (сдача Q4 2024)
+"1#3 кв. 2023": ["3", "1"] - Литеры 3, 1 (сдача Q3 2023)
+"1#4 кв. 2023": ["22/1"] - Обрывная 22/1 (сдача Q4 2023)
+deadlines field maps each building to its MongoDB identifier, so I can track Литер 1, Литер 3, Обрывная 22/1, Литер 5, and Литер 6 by their unique IDs in the database.
+Now that I've confirmed all 7 buildings exist in Trendagent, I need to fetch the apartments data using these building IDs. The network logs suggest there's an apartments endpoint that accepts building identifiers as parameters, so I'll query that to retrieve apartment information for each building. Looking at the network logs more carefully, I see the block detail endpoint returned 304, and there's a buildings/ endpoint that came back with 200 and about 1.9KB of data. I need to figure out what the base path is for that buildings endpoint, and I'm also noticing the builder-reward-settings endpoint that takes block and city parameters. The XHR calls are actually going to api.trendagent.ru/v4_29/, and looking at the initiator column more carefully, the sentry.js:2 reference means Sentry intercepted these requests rather than them necessarily being relative paths. In Chrome DevTools, the Name column shows just the last part of the URL path, so buildings/?auth_token=... could resolve to https://krasnodar.trendagent.ru/buildings/?auth_token=... if the user is on the root domain.
+
+But more likely, these XHR requests use the full URL to api.trendagent.ru and DevTools is just displaying the final path segment, so what shows as buildings/ could actually be /v4_29/blocks/619f7c88d625d0b5aa7d3c61/buildings/. Since that endpoint returns 404, I should try a few different approaches: using the building IDs from deadlines to fetch apartments, adding premiseType=apartment to the block endpoint, trying apartment-api.trendagent.ru with the auth token, or fetching using the block's crm_id (2265) which is the integer ID in their system. I've identified 7 different building IDs so far that I can work with. I'm noticing from the network logs that there's a specific endpoint pattern for fetching apartments using premiseType=apartment, and I see references to year-based paths like 2025/ that might be filtering by year. Let me try querying these building IDs with those endpoints to see if I can retrieve the apartment data.
+
+В deadlines нашёл MongoDB IDs для ВСЕХ корпусов, включая Литер 2 и 4! Теперь ищу квартиры по этим ID:
+
+
+Show less
+
+Ran python3
+
+Ran python3
+
+Planning API endpoint utilization (6 seconds)
+Let me analyze what I found:
+
+[200] /api/v1/blocks/619f7c88d625d0b5aa7d3c61/buildings/ - THIS IS THE ONE! The path is on krasnodar.trendagent.ru/api/v1/blocks/{id}/buildings/!
+
+[200] /blocks/619f7c88d625d0b5aa7d3c61/unified/ - also returns data
+
+/v4_29/buildings/{building_id}/ returns 500 (internal error) - so these building IDs might work differently
+
+Let me now:
+I need to hit both endpoints - the krasnodar subdomain's API v1 path for the buildings list, and the main api.trendagent.ru v4_29 endpoint for the unified block data. These are two separate APIs that the SPA is calling to get the full picture.
+
+Нашёл два рабочих endpoint! krasnodar.trendagent.ru/api/v1/blocks/{id}/buildings/ и /unified/. Получаю данные:
+
+
+Show less
+
+Ran python3
+
+Ran python3
+
+Planning building geometry integration (8 seconds)
+EXCELLENT! The unified/ endpoint returned 25531 bytes with full building data including geometry (polygons)! This is exactly what we need!
+
+The buildings field contains:
+
+_id: MongoDB ID
+name: Building name (number like "3", "1", "2", etc.)
+geometry: GeoJSON Polygon with actual building footprint coordinates!
+deadline, deadline_over_check, etc.
+This is gold! The geometry field has the actual polygon coordinates of each building. Let me get all buildings data and update our database.
+
+Also, the krasnodar.trendagent.ru/api/v1/blocks/{id}/buildings/ returned 3500 bytes but with HTML (SPA shell) - this is because it redirects to the HTML. The buildings data is in the unified/ endpoint.
+Now I need to extract all the buildings from the unified response, pull out their names, IDs, and geometry polygons, then use those to update our boundary geometry. I should also check if there's apartments data available in the response.
+
+🎉 unified/ содержит полигоны зданий! 
+
+
+Отличные данные! Trendagent дал полигоны зданий с реальными координатами — это гораздо точнее OSM-центроидов. Обновляю boundary_geometry и координаты квартир:

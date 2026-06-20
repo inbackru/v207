@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 40" width="160" height="40">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0088CC"/>
+      <stop offset="100%" style="stop-color:#006699"/>
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0088CC"/>
+      <stop offset="100%" style="stop-color:#006699"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="4" width="32" height="32" rx="8" ry="8" fill="url(#bgGrad)"/>
+  <text x="18" y="26" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="15" fill="white">In</text>
+  <text x="98" y="28" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="22" fill="url(#textGrad)">InBack</text>
+</svg>

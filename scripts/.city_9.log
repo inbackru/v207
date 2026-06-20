@@ -1,0 +1,192 @@
+ℹ️  Прокси не настроен — прямой доступ
+🏙️  Город: Курск | cache JKs: 23
+
+🔍 ЖК для обработки: 23
+════════════════════════════════════════════════════════════
+
+[1/23] 3-й Весенний проезд (id=675, cian=40914) | ETA 0м0с
+  🔄 Новая сессия (ротация IP прокси)
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=—  desc=0c  (2 полей)
+
+[2/23] Белорусский квартал (id=665, cian=47768) | ETA 1м44с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=—  desc=0c  (2 полей)
+
+[3/23] Дружба (id=669, cian=40985) | ETA 1м54с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=—  desc=0c  (2 полей)
+
+[4/23] Инстеп.Плевицкая (id=662, cian=40890) | ETA 1м57с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=—  desc=0c  (2 полей)
+
+[5/23] Инстеп.Сити (id=647, cian=3568034) | ETA 1м57с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=СЗ Инстеп  desc=0c  (7 полей)
+
+[6/23] Инстеп.Хуторская (id=649, cian=4873332) | ETA 1м56с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=Хуторская улица, 33
+      округ=—  мкр=—  dev=СЗ Инстеп  desc=0c  (8 полей)
+
+[7/23] Квартал на Чехова «OLIVIA» (ОЛИВИЯ) (id=648, cian=3832430) | ETA 1м54с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=улица Чехова, 5
+      округ=—  мкр=—  dev=Имена  desc=0c  (6 полей)
+
+[8/23] Новая Высота (id=644, cian=4492028) | ETA 1м51с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=улица Павлуновского
+      округ=—  мкр=—  dev=КПД-1  desc=0c  (7 полей)
+
+[9/23] Парковый квартал Чувства (id=641, cian=5226413) | ETA 1м48с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=МАРМАКС  desc=0c  (6 полей)
+
+[10/23] Полет (id=643, cian=5090428) | ETA 1м45с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=Полет  desc=0c  (6 полей)
+
+[11/23] Рябинки Парк (id=670, cian=40874) | ETA 1м42с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=—  desc=0c  (2 полей)
+
+[12/23] Сергиевский (id=646, cian=1921306) | ETA 1м39с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=улица Володарского, 50к1
+      округ=—  мкр=—  dev=—  desc=0c  (6 полей)
+
+[13/23] Серебряные холмы (id=642, cian=40734) | ETA 1м35с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=Ультра Недвижимость  desc=0c  (7 полей)
+
+[14/23] Солянка парк (id=645, cian=127082) | ETA 1м32с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=улица Энгельса, 158к1
+      округ=—  мкр=—  dev=Ультра Недвижимость  desc=0c  (7 полей)
+
+[15/23] микрорайон Северный (id=667, cian=40998) | ETA 0м29с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=—  desc=0c  (2 полей)
+
+[16/23] по ул. Береговая, 5 (id=674, cian=40752) | ETA 0м25с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=—  desc=0c  (2 полей)
+
+[17/23] по ул. Запольная 60 (id=664, cian=40739) | ETA 0м22с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=—  desc=0c  (2 полей)
+
+[18/23] по ул. Карла Маркса (id=663, cian=40895) | ETA 0м18с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=—  desc=0c  (2 полей)
+
+[19/23] по ул. Кати Зеленко (id=672, cian=40910) | ETA 0м15с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=—  desc=0c  (2 полей)
+
+[20/23] по ул. Льва Толстого (id=666, cian=40994) | ETA 0м11с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=—  desc=0c  (2 полей)
+
+[21/23] по ул. Республиканская, 62 (id=671, cian=3907446) | ETA 0м7с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=—  desc=0c  (2 полей)
+
+[22/23] по ул. Хуторская (id=673, cian=40961) | ETA 0м4с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=—  desc=0c  (2 полей)
+
+[23/23] по ул.Соловьиная (id=650, cian=5718593) | ETA 0м0с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=Соловьиная улица, 53
+      округ=—  мкр=—  dev=Ультра Недвижимость  desc=0c  (7 полей)
+
+════════════════════════════════════════════════════════════
+Итого: ✅23  ❌0  ⏭️0  из 23 ЖК  за 1.5 мин
+
+✅ Процесс завершён (код 0)
+
+🔄 АВТО: запускаем разбор адресов (parse_cian_addresses.py)...
+Processing 23 complexes (city_id=9), mode=COALESCE (fill nulls only)...
+
+
+✅ Updated: 23, Errors: 0
+
+── Fill-rate ──────────────────────────────────────────
+  has_region                    : 259
+  has_city                      : 433
+  has_district                  : 334
+  has_quarter                   : 190
+  has_street                    : 431
+  has_house                     : 229
+  total                         : 495
+✅ Разбор адресов завершён (код 0)
+
+🔄 АВТО: синхронизируем адреса квартир (propagate_rc_address.py)...
+WARNING: TELEGRAM_BOT_TOKEN not set - Telegram notifications will be disabled
+TELEGRAM_BOT_TOKEN not found
+ℹ️  Sentry disabled (SENTRY_DSN not set)
+2026-06-19 21:50:37,391 - INFO - Security configuration initialized:
+2026-06-19 21:50:37,391 - INFO -   ✅ Rate Limiting: Active
+2026-06-19 21:50:37,392 - INFO -   ✅ CSRF Protection: Active
+2026-06-19 21:50:37,392 - INFO -   ✅ Security Headers: Active
+2026-06-19 21:50:37,392 - INFO -   ✅ XSS Protection: Active
+2026-06-19 21:50:37,392 - INFO -   ✅ Clickjacking Protection: Active
+2026-06-19 21:50:37,392 - INFO -   ✅ SQL Injection Protection: Active (SQLAlchemy ORM)
+✅ Advanced security features initialized successfully
+Database tables created successfully!
+2026-06-19 21:50:38,797 - DEBUG - /etc/localtime found
+2026-06-19 21:50:38,798 - DEBUG - No explicit setting existed. Use localtime
+2026-06-19 21:50:38,798 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 21:50:38,798 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 21:50:38,798 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 21:50:38,799 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 21:50:38,799 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 21:50:38,799 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 21:50:38,799 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 21:50:38,799 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 21:50:38,799 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 21:50:38,804 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 21:50:38,804 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 21:50:38,804 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 21:50:38,804 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 21:50:38,804 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 21:50:38,804 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 21:50:38,805 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 21:50:38,805 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 21:50:38,805 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 21:50:38,805 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 21:50:38,805 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 21:50:38,805 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 21:50:38,805 - INFO - ⏸️  APScheduler skipped - Set ENABLE_SCHEDULER=true to run background jobs
+Propagating RC address → properties (force=False, city=9) ...
+  parsed_area updated:       0
+  parsed_settlement updated: 0
+  parsed_street updated:     0
+  parsed_city updated:       0
+
+Final coverage:
+  Окrug  (parsed_area):       6109/65380 (9%)
+  Мкр    (parsed_settlement): 20442/65380 (31%)
+  Улица  (parsed_street):     58113/65380 (88%)
+Done.
+✅ Синхронизация адресов завершена (код 0)

@@ -1,0 +1,709 @@
+{% extends 'base.html' %}
+
+{% block title %}Кошелёк — 10 000 ₽ бонус за регистрацию | InBack{% endblock %}
+
+{% block content %}
+
+{% if current_user.is_authenticated %}
+<!-- ═══════════════════════════════ AUTHENTICATED USER ═══════════════════════════════ -->
+<div class="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div class="max-w-5xl mx-auto px-4 py-12">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-1">Мой кошелёк</h1>
+            <p class="text-gray-500 text-sm">Ваши кэшбек-начисления и история выплат</p>
+        </div>
+
+        <!-- Balance Block -->
+        <div class="rounded-2xl mb-8 overflow-hidden"
+             style="background:linear-gradient(135deg,#0088CC 0%,#006699 100%)">
+            <div class="px-8 py-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                <div>
+                    <div class="text-white/70 text-sm font-medium mb-1">Доступный баланс</div>
+                    <div class="text-5xl font-bold text-white mb-2">
+                        {{ "{:,.0f}".format(current_user.balance|float if current_user.balance is not none else 0)|replace(',', ' ') }} ₽
+                    </div>
+                    <p class="text-white/60 text-sm">За всё время: {{ "{:,.0f}".format(current_user.total_earned|float if current_user.total_earned is not none else 0)|replace(',', ' ') }} ₽</p>
+                </div>
+                <a href="{{ url_for('dashboard') }}#balance"
+                   class="flex-shrink-0 bg-white text-[#0088CC] px-7 py-3.5 rounded-xl font-bold text-sm hover:bg-blue-50 transition-all shadow-lg">
+                    Вывести средства
+                </a>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid sm:grid-cols-3 gap-5 mb-8">
+            <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                <div class="text-gray-500 text-xs font-medium uppercase tracking-wide mb-2">Всего заработано</div>
+                <div class="text-3xl font-bold text-[#0088CC]">{{ "{:,.0f}".format(current_user.total_earned|float if current_user.total_earned is not none else 0)|replace(',', ' ') }} ₽</div>
+            </div>
+            <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                <div class="text-gray-500 text-xs font-medium uppercase tracking-wide mb-2">Квартир с кэшбеком</div>
+                <div class="text-3xl font-bold text-[#0088CC]">{{ user_property_count|default(0) }}</div>
+            </div>
+            <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                <div class="text-gray-500 text-xs font-medium uppercase tracking-wide mb-2">Бонус за регистрацию</div>
+                <div class="text-3xl font-bold text-green-600">10 000 ₽</div>
+            </div>
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-4">
+            <a href="{{ url_for('dashboard') }}#balance"
+               class="bg-[#0088CC] hover:bg-[#006699] text-white rounded-xl p-4 font-semibold text-center transition-all">
+                Управление средствами
+            </a>
+            <a href="/{{ current_city.slug or 'krasnodar' }}/properties"
+               class="bg-white border-2 border-[#0088CC] text-[#0088CC] hover:bg-blue-50 rounded-xl p-4 font-semibold text-center transition-all">
+                Выбрать квартиру с кэшбеком
+            </a>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<!-- ═══════════════════════════════ GUEST LANDING ═══════════════════════════════ -->
+
+<style>
+    @keyframes walletFloat {
+        0%,100% { transform: translateY(0px) rotate(-1deg); }
+        50% { transform: translateY(-8px) rotate(1deg); }
+    }
+    @keyframes walletPulse {
+        0%,100% { box-shadow: 0 0 0 0 rgba(0,136,204,0.25); }
+        50% { box-shadow: 0 0 0 14px rgba(0,136,204,0); }
+    }
+    @keyframes walletCoin {
+        0%,100% { transform: translateY(0) scale(1); opacity:0.9; }
+        50%   { transform: translateY(-6px) scale(1.08); opacity:1; }
+    }
+    @keyframes lockShake {
+        0%,100% { transform: rotate(0deg); }
+        20% { transform: rotate(-4deg); }
+        40% { transform: rotate(4deg); }
+        60% { transform: rotate(-2deg); }
+        80% { transform: rotate(2deg); }
+    }
+    .wallet-card-float { animation: walletFloat 4s ease-in-out infinite; }
+    .wallet-pulse { animation: walletPulse 2.4s ease-in-out infinite; }
+    .coin-bounce { animation: walletCoin 2s ease-in-out infinite; }
+    .lock-icon { animation: lockShake 3s ease-in-out infinite; }
+    .wallet-balance-gradient {
+        background: linear-gradient(135deg, #0088CC 0%, #005fa3 60%, #004080 100%);
+    }
+    .step-line::after {
+        content: '';
+        position: absolute;
+        left: 19px; top: 44px;
+        width: 2px; height: calc(100% - 8px);
+        background: linear-gradient(to bottom, #0088CC, #e5e7eb);
+    }
+    .faq-item summary { list-style: none; }
+    .faq-item summary::-webkit-details-marker { display: none; }
+    .faq-item[open] .faq-arrow { transform: rotate(180deg); }
+    .faq-arrow { transition: transform 0.3s ease; }
+    .bonus-glow { box-shadow: 0 0 40px rgba(0,136,204,0.2), 0 8px 32px rgba(0,0,0,0.12); }
+</style>
+
+<!-- ── HERO ─────────────────────────────────────────────────── -->
+<section class="relative overflow-hidden"
+         style="background:linear-gradient(160deg,#f0f7ff 0%,#e8f4fd 40%,#f5fbff 100%)">
+    <!-- Decorative circles -->
+    <div class="absolute top-0 right-0 w-96 h-96 rounded-full opacity-10"
+         style="background:radial-gradient(circle,#0088CC,transparent);transform:translate(30%,-30%)"></div>
+    <div class="absolute bottom-0 left-0 w-64 h-64 rounded-full opacity-8"
+         style="background:radial-gradient(circle,#0088CC,transparent);transform:translate(-30%,30%)"></div>
+
+    <div class="relative max-w-6xl mx-auto px-4 py-14 md:py-20">
+        <div class="grid md:grid-cols-2 gap-10 items-center">
+
+            <!-- Left: text -->
+            <div>
+                <div class="inline-flex items-center gap-2 bg-white/80 border border-[#0088CC]/20 rounded-full px-4 py-1.5 mb-5 shadow-sm">
+                    <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                    <span class="text-xs font-semibold text-gray-700 uppercase tracking-wider">Бонус доступен прямо сейчас</span>
+                </div>
+                <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight mb-4">
+                    Получите<br>
+                    <span style="color:#0088CC">10 000 ₽</span><br>
+                    за регистрацию
+                </h1>
+                <p class="text-gray-600 text-lg mb-2 leading-relaxed">
+                    Бонус зачисляется на ваш кошелёк сразу после создания аккаунта.
+                </p>
+                <div class="flex items-start gap-2 mb-7 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+                    <svg class="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                    <span class="text-sm text-amber-800 font-medium">Вывод бонуса открывается после завершения первой сделки через InBack</span>
+                </div>
+                <button onclick="scrollToReg()"
+                        class="wallet-pulse inline-flex items-center gap-2 px-8 py-4 rounded-xl text-white font-bold text-lg shadow-xl transition-all hover:opacity-90"
+                        style="background:linear-gradient(135deg,#0088CC,#006699)">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                    </svg>
+                    Забрать 10 000 ₽
+                </button>
+                <p class="text-xs text-gray-400 mt-3">Регистрация за 2 минуты · Без документов</p>
+            </div>
+
+            <!-- Right: virtual wallet card -->
+            <div class="flex justify-center">
+                <div class="wallet-card-float relative" style="perspective:1000px">
+                    <!-- Main card -->
+                    <div class="wallet-balance-gradient rounded-3xl p-7 text-white bonus-glow"
+                         style="width:320px; transform:rotateY(-6deg) rotateX(3deg)">
+                        <!-- Card top -->
+                        <div class="flex items-center justify-between mb-8">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                                    </svg>
+                                </div>
+                                <span class="font-bold text-sm tracking-wide">InBack</span>
+                            </div>
+                            <span class="text-white/50 text-xs uppercase tracking-widest">Кошелёк</span>
+                        </div>
+
+                        <!-- Pending balance label -->
+                        <div class="flex items-center gap-1.5 mb-1">
+                            <svg class="lock-icon w-3.5 h-3.5 text-yellow-300" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span class="text-white/60 text-xs uppercase tracking-wider font-medium">Бонус ожидает</span>
+                        </div>
+
+                        <!-- Balance -->
+                        <div class="coin-bounce text-5xl font-extrabold tracking-tight mb-1">10 000 ₽</div>
+                        <p class="text-white/50 text-xs mb-8">Разблокируется после первой сделки</p>
+
+                        <!-- Card bottom: chip + hint -->
+                        <div class="flex items-center justify-between">
+                            <div class="flex gap-1">
+                                <div class="w-8 h-6 bg-yellow-400/80 rounded" style="border-radius:4px"></div>
+                                <div class="w-8 h-6 bg-yellow-400/40 rounded -ml-3" style="border-radius:4px"></div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-white/40 text-[10px] uppercase tracking-wide">До 500 000 ₽</div>
+                                <div class="text-white/70 text-xs font-medium">с каждой сделки</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Floating badge: registered -->
+                    <div class="absolute -top-4 -right-4 bg-green-400 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
+                        + 10 000 ₽
+                    </div>
+                    <!-- Floating chip bottom -->
+                    <div class="absolute -bottom-3 left-8 bg-white text-gray-700 text-xs font-semibold px-4 py-2 rounded-xl shadow-lg border border-gray-100 flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        5 200+ клиентов получили кэшбек
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Wave bottom -->
+    <div class="absolute bottom-0 left-0 right-0 overflow-hidden leading-none" style="height:48px">
+        <svg viewBox="0 0 1440 48" fill="white" preserveAspectRatio="none" style="width:100%;height:100%">
+            <path d="M0,48 L0,24 C360,48 720,0 1080,24 L1440,8 L1440,48 Z"/>
+        </svg>
+    </div>
+</section>
+
+<!-- ── КАК РАБОТАЕТ БОНУС ────────────────────────────────────── -->
+<section class="py-16 bg-white">
+    <div class="max-w-5xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-3">Как получить и потратить бонус</h2>
+            <p class="text-gray-500 max-w-xl mx-auto">Три простых шага — и деньги у вас на карте</p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8 relative">
+            <!-- Desktop connector line -->
+            <div class="hidden md:block absolute top-8 left-[16.6%] right-[16.6%] h-0.5 bg-gradient-to-r from-[#0088CC] via-[#0088CC] to-gray-200"></div>
+
+            <!-- Step 1 -->
+            <div class="relative bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-5 mx-auto text-2xl relative z-10"
+                     style="background:linear-gradient(135deg,#0088CC,#006699)">
+                    <span class="text-white font-bold">1</span>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2 text-center">Зарегистрируйтесь</h3>
+                <p class="text-gray-500 text-sm text-center leading-relaxed">Быстрая регистрация через телефон. Бонус 10 000 ₽ зачисляется немедленно — без условий</p>
+                <div class="mt-4 bg-[#0088CC]/5 rounded-xl px-4 py-2.5 text-center">
+                    <span class="text-[#0088CC] font-bold text-sm">= 10 000 ₽ на кошельке</span>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="relative bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-5 mx-auto text-2xl relative z-10"
+                     style="background:linear-gradient(135deg,#1a9fdd,#0088CC)">
+                    <span class="text-white font-bold">2</span>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2 text-center">Купите квартиру</h3>
+                <p class="text-gray-500 text-sm text-center leading-relaxed">Выберите новостройку в нашем каталоге. Менеджер бесплатно поможет с выбором и сопроводит сделку</p>
+                <div class="mt-4 bg-green-50 rounded-xl px-4 py-2.5 text-center">
+                    <span class="text-green-700 font-bold text-sm">+ до 500 000 ₽ кэшбека</span>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="relative bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-5 mx-auto text-2xl relative z-10"
+                     style="background:linear-gradient(135deg,#00b09b,#00a388)">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2 text-center">Выведите деньги</h3>
+                <p class="text-gray-500 text-sm text-center leading-relaxed">После успешной сделки весь накопленный кэшбек + бонус 10 000 ₽ переводим на вашу карту</p>
+                <div class="mt-4 bg-green-50 rounded-xl px-4 py-2.5 text-center">
+                    <span class="text-green-700 font-bold text-sm">💳 На любую карту РФ</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── ЗАЧЕМ РЕГИСТРИРОВАТЬСЯ СЕЙЧАС ────────────────────────── -->
+<section class="py-16" style="background:linear-gradient(180deg,#f8fbff 0%,#ffffff 100%)">
+    <div class="max-w-5xl mx-auto px-4">
+        <div class="grid md:grid-cols-2 gap-10 items-center">
+
+            <!-- Calculator -->
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-md p-7">
+                <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                    Считайте вашу выгоду
+                </h3>
+
+                <div class="space-y-5">
+                    <div>
+                        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">Стоимость квартиры</label>
+                        <div class="relative">
+                            <input type="range" id="priceSlider" min="3000000" max="20000000" step="500000" value="7000000"
+                                   oninput="updateCalc()"
+                                   class="w-full h-2 rounded-full appearance-none cursor-pointer"
+                                   style="background:linear-gradient(to right,#0088CC 35%,#e5e7eb 35%)">
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-400 mt-1">
+                            <span>3 млн</span><span>20 млн</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-xl p-4 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Стоимость квартиры</span>
+                            <span class="font-bold text-gray-900" id="calcPrice">7 000 000 ₽</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Кэшбек с покупки (~5%)</span>
+                            <span class="font-bold text-[#0088CC]" id="calcCashback">350 000 ₽</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Бонус за регистрацию</span>
+                            <span class="font-bold text-green-600">+ 10 000 ₽</span>
+                        </div>
+                        <div class="border-t border-gray-200 pt-3 flex justify-between items-center">
+                            <span class="text-sm font-semibold text-gray-800">Итого получите</span>
+                            <span class="text-xl font-extrabold text-green-600" id="calcTotal">360 000 ₽</span>
+                        </div>
+                    </div>
+
+                    <button onclick="scrollToReg()"
+                            class="w-full py-3.5 rounded-xl text-white font-bold transition-all hover:opacity-90 text-sm"
+                            style="background:linear-gradient(135deg,#0088CC,#006699)">
+                        Зарегистрироваться и получить 10 000 ₽
+                    </button>
+                </div>
+            </div>
+
+            <!-- Why now -->
+            <div>
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">Зачем регистрироваться сейчас?</h2>
+                <div class="space-y-5">
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-[#0088CC]/10 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-5 h-5 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-900 mb-0.5">Бонус зачислится сразу</h4>
+                            <p class="text-gray-500 text-sm">10 000 ₽ появляются на кошельке в момент регистрации. Ждать не нужно.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-[#0088CC]/10 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-5 h-5 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-900 mb-0.5">Доступ к закрытым ценам</h4>
+                            <p class="text-gray-500 text-sm">Авторизованные пользователи видят специальные предложения от застройщиков, недоступные публично.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-[#0088CC]/10 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-5 h-5 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-900 mb-0.5">Персональный менеджер</h4>
+                            <p class="text-gray-500 text-sm">После регистрации вам назначается менеджер, который бесплатно сопровождает от выбора до ключей.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-900 mb-0.5">Кэшбек накапливается</h4>
+                            <p class="text-gray-500 text-sm">Чем раньше зарегистрируетесь — тем раньше начинаете накапливать. Пригласите друзей и получите дополнительно 20 000 ₽.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ── ФОРМА РЕГИСТРАЦИИ ─────────────────────────────────────── -->
+<section id="wallet-reg-section" class="py-16" style="background:linear-gradient(135deg,#0a1628 0%,#0d2040 50%,#091530 100%)">
+    <div class="max-w-lg mx-auto px-4 text-center">
+
+        <!-- Icon -->
+        <div class="w-16 h-16 rounded-2xl mx-auto mb-6 flex items-center justify-center"
+             style="background:linear-gradient(135deg,#0088CC,#006699)">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+            </svg>
+        </div>
+
+        <h2 class="text-3xl font-extrabold text-white mb-2">Забрать 10 000 ₽</h2>
+        <p class="text-white/60 mb-8 text-sm">Регистрация займёт 2 минуты. Введите телефон — пришлём код подтверждения.</p>
+
+        <!-- Form card -->
+        <div class="bg-white rounded-2xl p-7 shadow-2xl text-left">
+
+            <!-- Step 1: Phone -->
+            <div id="regStep1">
+                <div class="flex items-center gap-3 mb-5 p-3.5 bg-green-50 rounded-xl border border-green-200">
+                    <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    <span class="text-green-800 text-sm font-semibold">После регистрации вам будет зачислено <strong>10 000 ₽</strong></span>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Имя</label>
+                        <input type="text" id="wRegName" placeholder="Как вас зовут?"
+                               class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#0088CC] focus:ring-2 focus:ring-[#0088CC]/20 transition-all">
+                        <p class="hidden text-xs text-red-500 mt-1" id="wNameErr">Введите имя</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Номер телефона</label>
+                        <input type="tel" id="wRegPhone" placeholder="+7 (___) ___-__-__"
+                               class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#0088CC] focus:ring-2 focus:ring-[#0088CC]/20 transition-all"
+                               oninput="walletFormatPhone(this)" onkeypress="return /[0-9+\-() ]/.test(event.key)" maxlength="18">
+                        <p class="hidden text-xs text-red-500 mt-1" id="wPhoneErr">Введите корректный номер</p>
+                    </div>
+                    <button onclick="walletSendCode()" id="wSendBtn"
+                            class="w-full py-3.5 rounded-xl text-white font-bold text-sm transition-all hover:opacity-90"
+                            style="background:linear-gradient(135deg,#0088CC,#006699)">
+                        Получить код и 10 000 ₽
+                    </button>
+                    <p class="text-center text-xs text-gray-400">
+                        Нажимая, вы соглашаетесь с <a href="/privacy-policy" class="text-[#0088CC] hover:underline">политикой конфиденциальности</a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Step 2: OTP -->
+            <div id="regStep2" class="hidden">
+                <div class="text-center mb-6">
+                    <div class="text-4xl mb-2">📱</div>
+                    <p class="text-gray-800 font-semibold">Код отправлен на</p>
+                    <p class="text-[#0088CC] font-bold" id="wPhoneDisplay"></p>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5 text-center">Код из SMS</label>
+                        <input type="text" id="wOtpInput" placeholder="000000" maxlength="6"
+                               class="w-full border border-gray-200 rounded-xl px-4 py-4 text-center text-3xl tracking-widest font-mono focus:outline-none focus:border-[#0088CC] focus:ring-2 focus:ring-[#0088CC]/20"
+                               oninput="if(this.value.length===6) walletVerifyCode()">
+                        <p class="hidden text-xs text-red-500 mt-1 text-center" id="wCodeErr">Неверный код</p>
+                    </div>
+                    <button onclick="walletVerifyCode()" id="wVerifyBtn"
+                            class="w-full py-3.5 rounded-xl text-white font-bold text-sm transition-all hover:opacity-90"
+                            style="background:linear-gradient(135deg,#0088CC,#006699)">
+                        Подтвердить
+                    </button>
+                    <div class="text-center">
+                        <button onclick="walletResend()" id="wResendBtn" class="text-xs text-gray-400 hidden">
+                            Отправить повторно (<span id="wTimer">60</span>с)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Success -->
+            <div id="regStep3" class="hidden text-center py-4">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">10 000 ₽ зачислены!</h3>
+                <p class="text-gray-500 text-sm mb-6">Деньги уже на вашем кошельке. Выберите квартиру, чтобы разблокировать вывод.</p>
+                <a href="/{{ current_city.slug or 'krasnodar' }}/properties"
+                   class="inline-block px-6 py-3 rounded-xl text-white font-bold text-sm"
+                   style="background:linear-gradient(135deg,#0088CC,#006699)">
+                    Выбрать квартиру →
+                </a>
+            </div>
+        </div>
+
+        <!-- Already registered -->
+        <p class="mt-5 text-white/40 text-sm">
+            Уже есть аккаунт?
+            <a href="{{ url_for('auth.login') }}" class="text-[#0088CC] hover:underline font-medium">Войдите</a>
+        </p>
+    </div>
+</section>
+
+<!-- ── FAQ ──────────────────────────────────────────────────── -->
+<section class="py-16 bg-white">
+    <div class="max-w-3xl mx-auto px-4">
+        <h2 class="text-3xl font-bold text-gray-900 mb-10 text-center">Частые вопросы</h2>
+        <div class="space-y-3">
+
+            {% set faqs = [
+              ('Почему бонус нельзя вывести сразу?',
+               'Бонус 10 000 ₽ — это наш подарок за то, что вы доверяете нам поиск квартиры. Мы удерживаем его до завершения первой сделки, чтобы исключить злоупотребления. Как только сделка закрыта — деньги ваши.'),
+              ('Когда именно зачисляются 10 000 ₽?',
+               'Бонус появляется на балансе в кошельке в момент регистрации. Вы сразу увидите 10 000 ₽ на счету, но кнопка вывода будет заблокирована до завершения сделки.'),
+              ('Сколько времени занимает сделка?',
+               'Средний срок от выбора квартиры до подписания акта — 3–6 месяцев при ипотеке, от 1 месяца при полной оплате. Наш менеджер сопровождает вас на каждом шаге.'),
+              ('Какой максимальный кэшбек с покупки?',
+               'До 500 000 ₽ — зависит от застройщика и стоимости квартиры. Конкретную сумму рассчитываем индивидуально. Плюс 10 000 ₽ бонуса сверху.'),
+              ('Есть ли комиссия при выводе?',
+               'Нет. Переводим 100% кэшбека + бонуса на любую карту РФ. Без скрытых списаний.'),
+              ('Что если я передумаю покупать?',
+               'Ничего страшного. Ваш аккаунт и бонус никуда не денутся. Когда будете готовы — всё на месте.'),
+            ] %}
+
+            {% for q, a in faqs %}
+            <details class="faq-item bg-white border border-gray-100 rounded-2xl overflow-hidden hover:border-[#0088CC]/30 transition-colors">
+                <summary class="flex items-center justify-between px-6 py-4 cursor-pointer font-semibold text-gray-900 text-sm">
+                    {{ q }}
+                    <svg class="faq-arrow w-5 h-5 text-gray-400 flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </summary>
+                <div class="px-6 pb-5 text-gray-500 text-sm leading-relaxed border-t border-gray-50 pt-3">{{ a }}</div>
+            </details>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- ── BOTTOM CTA ───────────────────────────────────────────── -->
+<section class="py-14" style="background:linear-gradient(135deg,#f0f7ff,#e8f4fd)">
+    <div class="max-w-2xl mx-auto px-4 text-center">
+        <p class="text-sm text-[#0088CC] font-semibold uppercase tracking-widest mb-3">Последний шаг</p>
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">Ваши 10 000 ₽ ждут</h2>
+        <p class="text-gray-500 mb-8">Регистрация за 2 минуты. Без лишних документов.</p>
+        <button onclick="scrollToReg()"
+                class="inline-flex items-center gap-2 px-8 py-4 rounded-xl text-white font-bold shadow-lg hover:opacity-90 transition-all"
+                style="background:linear-gradient(135deg,#0088CC,#006699)">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+            </svg>
+            Получить бонус 10 000 ₽
+        </button>
+    </div>
+</section>
+
+<script>
+/* ── Scroll to registration ── */
+function scrollToReg() {
+    var el = document.getElementById('wallet-reg-section');
+    if (el) el.scrollIntoView({behavior:'smooth', block:'center'});
+    setTimeout(function() {
+        var inp = document.getElementById('wRegName');
+        if (inp) inp.focus();
+    }, 600);
+}
+
+/* ── Cashback calculator ── */
+function updateCalc() {
+    var slider = document.getElementById('priceSlider');
+    var val = parseInt(slider.value);
+    var cashback = Math.round(val * 0.05);
+    var total = cashback + 10000;
+    var pct = ((val - 3000000) / (20000000 - 3000000)) * 100;
+
+    slider.style.background = 'linear-gradient(to right,#0088CC ' + pct + '%,#e5e7eb ' + pct + '%)';
+    document.getElementById('calcPrice').textContent = (val/1000000).toFixed(1).replace('.0','') + ' 000 000 ₽';
+    document.getElementById('calcCashback').textContent = cashback.toLocaleString('ru') + ' ₽';
+    document.getElementById('calcTotal').textContent = total.toLocaleString('ru') + ' ₽';
+}
+updateCalc();
+
+/* ── Phone formatter ── */
+function walletFormatPhone(inp) {
+    var raw = inp.value.replace(/\D/g,'');
+    if (raw.startsWith('8')) raw = '7' + raw.slice(1);
+    if (!raw) { inp.value = ''; return; }
+    var fmt = '+7';
+    if (raw.length > 1) fmt += ' (' + raw.slice(1,4);
+    if (raw.length >= 4) fmt += ') ' + raw.slice(4,7);
+    if (raw.length >= 7) fmt += '-' + raw.slice(7,9);
+    if (raw.length >= 9) fmt += '-' + raw.slice(9,11);
+    inp.value = fmt;
+}
+
+/* ── OTP registration flow ── */
+var _wPhone = '';
+
+function walletSendCode() {
+    var name  = (document.getElementById('wRegName').value || '').trim();
+    var phone = (document.getElementById('wRegPhone').value || '').replace(/\D/g,'');
+    var ok = true;
+
+    if (!name) {
+        document.getElementById('wNameErr').classList.remove('hidden');
+        ok = false;
+    } else { document.getElementById('wNameErr').classList.add('hidden'); }
+
+    if (phone.length < 10) {
+        document.getElementById('wPhoneErr').classList.remove('hidden');
+        ok = false;
+    } else { document.getElementById('wPhoneErr').classList.add('hidden'); }
+
+    if (!ok) return;
+
+    var btn = document.getElementById('wSendBtn');
+    btn.disabled = true;
+    btn.textContent = 'Отправляем...';
+
+    var csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    var phoneFormatted = '+7' + phone.slice(-10);
+    _wPhone = phoneFormatted;
+
+    fetch('/api/auth/send-code', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','X-CSRFToken': csrf},
+        body: JSON.stringify({phone: phoneFormatted, name: name})
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+        if (data.success || data.status === 'ok' || data.message) {
+            document.getElementById('regStep1').classList.add('hidden');
+            document.getElementById('regStep2').classList.remove('hidden');
+            document.getElementById('wPhoneDisplay').textContent = phoneFormatted;
+            startWalletTimer();
+        } else {
+            btn.disabled = false;
+            btn.textContent = 'Получить код и 10 000 ₽';
+            document.getElementById('wPhoneErr').textContent = data.error || 'Ошибка отправки';
+            document.getElementById('wPhoneErr').classList.remove('hidden');
+        }
+    })
+    .catch(function() {
+        btn.disabled = false;
+        btn.textContent = 'Получить код и 10 000 ₽';
+    });
+}
+
+function walletVerifyCode() {
+    var code = (document.getElementById('wOtpInput').value || '').trim();
+    if (code.length < 4) return;
+
+    var btn = document.getElementById('wVerifyBtn');
+    btn.disabled = true;
+    btn.textContent = 'Проверяем...';
+
+    var csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    var name = (document.getElementById('wRegName').value || '').trim();
+
+    fetch('/api/auth/verify-code', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','X-CSRFToken': csrf},
+        body: JSON.stringify({phone: _wPhone, code: code, name: name})
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+        if (data.success || data.status === 'ok') {
+            document.getElementById('regStep2').classList.add('hidden');
+            document.getElementById('regStep3').classList.remove('hidden');
+        } else {
+            btn.disabled = false;
+            btn.textContent = 'Подтвердить';
+            document.getElementById('wCodeErr').textContent = data.error || 'Неверный код';
+            document.getElementById('wCodeErr').classList.remove('hidden');
+            document.getElementById('wOtpInput').classList.add('border-red-400');
+        }
+    })
+    .catch(function() {
+        btn.disabled = false;
+        btn.textContent = 'Подтвердить';
+    });
+}
+
+var _walletTimerInterval = null;
+function startWalletTimer() {
+    var sec = 60;
+    var resendBtn = document.getElementById('wResendBtn');
+    var timerEl  = document.getElementById('wTimer');
+    if (resendBtn) resendBtn.classList.remove('hidden');
+
+    if (_walletTimerInterval) clearInterval(_walletTimerInterval);
+    _walletTimerInterval = setInterval(function() {
+        sec--;
+        if (timerEl) timerEl.textContent = sec;
+        if (sec <= 0) {
+            clearInterval(_walletTimerInterval);
+            if (resendBtn) resendBtn.innerHTML = '<span class="text-[#0088CC] cursor-pointer" onclick="walletResend()">Отправить повторно</span>';
+        }
+    }, 1000);
+}
+
+function walletResend() {
+    document.getElementById('regStep2').classList.add('hidden');
+    document.getElementById('regStep1').classList.remove('hidden');
+    document.getElementById('wOtpInput').value = '';
+    var btn = document.getElementById('wSendBtn');
+    btn.disabled = false;
+    btn.textContent = 'Получить код и 10 000 ₽';
+}
+
+/* Suppress quiz on this page */
+(function() {
+    function hideQuiz() {
+        var q = document.getElementById('quiz-modal-container');
+        if (q) { q.className='hidden'; q.style.cssText='display:none!important'; }
+    }
+    hideQuiz();
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hideQuiz);
+})();
+</script>
+
+{% endif %}
+{% endblock %}

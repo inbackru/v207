@@ -1,0 +1,554 @@
+{% extends "base.html" %}
+
+{% set _city_gen = (current_city.name_genitive or current_city.name) if current_city else 'Краснодара' %}
+{% set _city_prep = (current_city.name_prepositional or current_city.name) if current_city else 'Краснодаре' %}
+{% set _city_name = current_city.name if current_city else 'Краснодар' %}
+{% set _city_slug = current_city.slug if current_city else 'krasnodar' %}
+
+{% block title %}Районы {{ _city_gen }} 2026 — новостройки по районам, цены и карта | InBack{% endblock %}
+{% block description %}Новостройки по районам {{ _city_gen }} 2026: средняя цена кв. метра, количество ЖК, инфраструктура. Сравнивайте {{ districts|length if districts else '' }} районов и выбирайте квартиру с кэшбеком до 500 000 ₽ через InBack.{% endblock %}
+{% block keywords %}районы {{ _city_gen }}, новостройки по районам {{ _city_name }}, цены по районам {{ _city_name }}, {{ _city_name }} районы сравнение, стоимость кв метра районы {{ _city_name }}, где купить квартиру {{ _city_gen }}, лучшие районы {{ _city_gen }} для жизни, ЖК по районам {{ _city_name }}, купить квартиру в районе {{ _city_gen }}, новостройки 2026 {{ _city_name }} по районам{% endblock %}
+{% block og_title %}Районы {{ _city_gen }} — новостройки и цены по районам | InBack{% endblock %}
+{% block og_description %}Сравнение районов {{ _city_gen }} по ценам на новостройки. Средняя стоимость кв. метра, количество ЖК, инфраструктура. Кэшбек до 500 000 ₽.{% endblock %}
+{% block canonical_url %}<link rel="canonical" href="https://inback.ru/{{ _city_slug }}/rajony" />{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Главная", "item": "https://inback.ru/"},
+        {"@type": "ListItem", "position": 2, "name": "Новостройки {{ _city_gen }}", "item": "https://inback.ru/{{ _city_slug }}/novostrojki"},
+        {"@type": "ListItem", "position": 3, "name": "Районы {{ _city_gen }}", "item": "https://inback.ru/{{ _city_slug }}/rajony"}
+      ]
+    },
+    {
+      "@type": "CollectionPage",
+      "@id": "https://inback.ru/{{ _city_slug }}/rajony#collection",
+      "name": "Районы {{ _city_gen }} — новостройки по районам",
+      "description": "Сравнение {{ districts|length if districts else '' }} районов {{ _city_gen }} по ценам на новостройки и инфраструктуре",
+      "url": "https://inback.ru/{{ _city_slug }}/rajony",
+      "inLanguage": "ru-RU",
+      "publisher": {
+        "@type": "RealEstateAgent",
+        "@id": "https://inback.ru/#organization",
+        "name": "InBack — кэшбек за новостройки",
+        "url": "https://inback.ru"
+      }
+    }
+  ]
+}
+</script>
+{% endblock %}
+
+{% block meta %}
+<meta name="description" content="Сравнение районов {{ _city_gen }} по ценам на новостройки. Средняя стоимость кв. метра, количество предложений, инфраструктура каждого района.">
+<meta name="keywords" content="районы {{ _city_gen }}, цены по районам, новостройки по районам {{ _city_name }}, стоимость кв метра, сравнение районов">
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<section class="bg-gradient-to-br from-[#0088CC] to-[#005fa3] py-10 md:py-14">
+  <div class="container mx-auto px-4">
+    <nav class="text-sm text-blue-200 mb-4">
+      <a href="{{ url_for('index') }}" class="hover:text-white">Главная</a>
+      <span class="mx-2">›</span>
+      {% if current_city %}
+      <a href="/{{ current_city.slug }}/novostrojki" class="hover:text-white">Новостройки {{ current_city.name_genitive or current_city.name }}</a>
+      <span class="mx-2">›</span>
+      {% endif %}
+      <span class="text-white">Районы</span>
+    </nav>
+    <h1 class="text-3xl md:text-4xl font-bold text-white mb-3">
+      Районы {{ (current_city.name_genitive or current_city.name) if current_city else 'Краснодара' }}
+    </h1>
+    <p class="text-blue-100 text-lg mb-6">
+      Сравните цены, инфраструктуру и доступность новостроек в каждом районе
+    </p>
+
+    <!-- Summary Stats -->
+    {% set active_districts = districts | selectattr('props_count', 'gt', 0) | list %}
+    {% if active_districts %}
+    {% set total_props = active_districts | map(attribute='props_count') | sum %}
+    {% set avg_sqm_vals = active_districts | selectattr('avg_price_sqm') | map(attribute='avg_price_sqm') | list %}
+    <div class="grid grid-cols-3 sm:grid-cols-4 gap-4 max-w-2xl">
+      <div class="bg-white bg-opacity-15 rounded-xl p-4 text-center">
+        <div class="text-2xl font-bold text-white">{{ okrugs | length }}</div>
+        <div class="text-blue-100 text-sm">округов</div>
+      </div>
+      <div class="bg-white bg-opacity-15 rounded-xl p-4 text-center">
+        <div class="text-2xl font-bold text-white">{{ microrayons | length }}</div>
+        <div class="text-blue-100 text-sm">микрорайонов</div>
+      </div>
+      <div class="bg-white bg-opacity-15 rounded-xl p-4 text-center">
+        <div class="text-2xl font-bold text-white">{{ "{:,}".format(total_props).replace(',', ' ') }}</div>
+        <div class="text-blue-100 text-sm">предложений</div>
+      </div>
+      <div class="bg-white bg-opacity-15 rounded-xl p-4 text-center">
+        {% if avg_sqm_vals %}
+        <div class="text-2xl font-bold text-white">{{ "{:,}".format((avg_sqm_vals | sum // avg_sqm_vals | length)).replace(',', ' ') }} ₽</div>
+        {% else %}
+        <div class="text-2xl font-bold text-white">—</div>
+        {% endif %}
+        <div class="text-blue-100 text-sm">ср. цена м²</div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- Controls Bar -->
+<div class="bg-white border-b border-gray-200 sticky top-0 z-20 shadow-sm">
+  <div class="container mx-auto px-4 py-3 flex flex-wrap gap-3 items-center justify-between">
+    <!-- Type Tabs (CIAN-style) -->
+    <div class="flex gap-1 flex-wrap">
+      <button class="type-tab active px-4 py-2 rounded-lg bg-[#0088CC] text-white text-sm font-medium transition-all" data-type="all">
+        Все районы
+        <span class="ml-1 text-xs opacity-80">({{ districts | length }})</span>
+      </button>
+      {% if okrugs %}
+      <button class="type-tab px-4 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm font-medium hover:bg-blue-50 transition-all" data-type="okrug">
+        Округа
+        <span class="ml-1 text-xs opacity-70">({{ okrugs | length }})</span>
+      </button>
+      {% endif %}
+      {% if microrayons %}
+      <button class="type-tab px-4 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm font-medium hover:bg-green-50 transition-all" data-type="microrayon">
+        Микрорайоны
+        <span class="ml-1 text-xs opacity-70">({{ microrayons | length }})</span>
+      </button>
+      {% endif %}
+      {% if settlements %}
+      <button class="type-tab px-4 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm font-medium hover:bg-amber-50 transition-all" data-type="settlement">
+        Посёлки
+        <span class="ml-1 text-xs opacity-70">({{ settlements | length }})</span>
+      </button>
+      {% endif %}
+    </div>
+
+    <div class="flex items-center gap-3">
+      <!-- Search -->
+      <div class="relative min-w-[180px]">
+        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+        <input id="districtSearch" type="text" placeholder="Поиск района…"
+               class="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200">
+      </div>
+
+      <!-- View Toggle -->
+      <div class="flex gap-1 border border-gray-200 rounded-lg p-1">
+        <button id="viewGrid" class="px-3 py-1.5 rounded bg-blue-600 text-white text-sm" title="Карточки">
+          <i class="fas fa-th-large"></i>
+        </button>
+        <button id="viewMap" class="px-3 py-1.5 rounded text-gray-500 hover:bg-gray-100 text-sm" title="Карта">
+          <i class="fas fa-map"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<main class="bg-gray-50 py-8" id="mainContent">
+  <div class="container mx-auto px-4">
+
+    <!-- GRID VIEW (CIAN-style grouped) -->
+    <div id="gridView">
+
+      <!-- ── Окружа секция ─────────────────────────────────────────── -->
+      {% if okrugs %}
+      <div class="type-section mb-10" data-section-type="okrug">
+        <div class="flex items-center gap-3 mb-5">
+          <div class="w-1 h-7 bg-blue-600 rounded-full"></div>
+          <h2 class="text-xl font-bold text-gray-800">Административные округа</h2>
+          <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">{{ okrugs | length }}</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          {% for d in okrugs %}
+          <a href="{% if current_city %}/{{ current_city.slug }}{% endif %}/rayon/{{ d.slug }}"
+             class="district-card bg-white rounded-xl shadow hover:shadow-lg transition-all duration-200 hover:-translate-y-1 overflow-hidden block{% if d.props_count == 0 %} opacity-60{% endif %}"
+             data-name="{{ d.name | lower }} {{ d.slug }}"
+             data-type="{{ d.district_type }}"
+             data-count="{{ d.props_count }}"
+             data-sqm="{{ d.avg_price_sqm or 0 }}">
+
+            <!-- Map thumbnail -->
+            <div class="h-36 relative overflow-hidden bg-blue-50">
+              {% if d.latitude and d.longitude %}
+              <img src="https://static-maps.yandex.ru/1.x/?ll={{ d.longitude }},{{ d.latitude }}&size=400,150&z=12&l=map"
+                   class="w-full h-full object-cover" loading="lazy" alt="{{ d.name }}" onerror="this.style.display='none'">
+              {% endif %}
+              <span class="absolute top-2 left-2 {{ d.type_badge_cls }} text-xs font-semibold px-2 py-0.5 rounded-full">{{ d.type_label }}</span>
+              {% if d.avg_price_sqm %}
+              <div class="absolute top-2 right-2 bg-white bg-opacity-95 text-gray-800 text-xs font-semibold px-2 py-1 rounded-full shadow">
+                {{ "{:,}".format(d.avg_price_sqm).replace(',', ' ') }} ₽/м²
+              </div>
+              {% endif %}
+              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent px-3 py-2">
+                <h3 class="text-white font-bold text-sm">{{ d.name }}</h3>
+              </div>
+            </div>
+
+            <div class="p-4">
+              {% if d.avg_price_sqm %}
+              <div class="mb-3">
+                <div class="flex justify-between text-xs text-gray-500 mb-1">
+                  <span>Цена м²</span>
+                  <span class="font-semibold text-gray-700">{{ "{:,}".format(d.avg_price_sqm).replace(',', ' ') }} ₽</span>
+                </div>
+                <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                  {% set bar_color = 'bg-green-500' if d.price_bar_pct < 40 else ('bg-yellow-500' if d.price_bar_pct < 70 else 'bg-red-500') %}
+                  <div class="{{ bar_color }} h-full rounded-full" style="width: {{ [d.price_bar_pct, 8] | max }}%"></div>
+                </div>
+              </div>
+              {% endif %}
+              <div class="flex items-center justify-between text-sm">
+                <div>
+                  <span class="font-bold text-blue-700 text-base">{{ "{:,}".format(d.props_count).replace(',', ' ') }}</span>
+                  <span class="text-gray-400 text-xs ml-1">предложений</span>
+                </div>
+                {% if d.min_price %}
+                <span class="text-gray-500 text-xs">от {{ "{:,}".format(d.min_price // 1000000).replace(',', ' ') }} млн</span>
+                {% endif %}
+              </div>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- ── Микрорайоны секция ─────────────────────────────────────── -->
+      {% if microrayons %}
+      <div class="type-section mb-10" data-section-type="microrayon">
+        <div class="flex items-center gap-3 mb-5">
+          <div class="w-1 h-7 bg-green-500 rounded-full"></div>
+          <h2 class="text-xl font-bold text-gray-800">Микрорайоны</h2>
+          <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">{{ microrayons | length }}</span>
+          <span class="text-xs text-gray-400 hidden sm:inline">— точная геолокация по полигону</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          {% for d in microrayons %}
+          <a href="{% if current_city %}/{{ current_city.slug }}{% endif %}/rayon/{{ d.slug }}"
+             class="district-card bg-white rounded-xl shadow hover:shadow-lg transition-all duration-200 hover:-translate-y-1 overflow-hidden block{% if d.props_count == 0 %} opacity-60{% endif %}"
+             data-name="{{ d.name | lower }} {{ d.slug }}"
+             data-type="{{ d.district_type }}"
+             data-count="{{ d.props_count }}"
+             data-sqm="{{ d.avg_price_sqm or 0 }}">
+
+            <div class="h-36 relative overflow-hidden bg-green-50">
+              {% if d.latitude and d.longitude %}
+              <img src="https://static-maps.yandex.ru/1.x/?ll={{ d.longitude }},{{ d.latitude }}&size=400,150&z=14&l=map"
+                   class="w-full h-full object-cover" loading="lazy" alt="{{ d.name }}" onerror="this.style.display='none'">
+              {% endif %}
+              <span class="absolute top-2 left-2 {{ d.type_badge_cls }} text-xs font-semibold px-2 py-0.5 rounded-full">{{ d.type_label }}</span>
+              {% if d.avg_price_sqm %}
+              <div class="absolute top-2 right-2 bg-white bg-opacity-95 text-gray-800 text-xs font-semibold px-2 py-1 rounded-full shadow">
+                {{ "{:,}".format(d.avg_price_sqm).replace(',', ' ') }} ₽/м²
+              </div>
+              {% endif %}
+              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent px-3 py-2">
+                <h3 class="text-white font-bold text-sm">{{ d.name }}</h3>
+              </div>
+            </div>
+
+            <div class="p-4">
+              {% if d.avg_price_sqm %}
+              <div class="mb-3">
+                <div class="flex justify-between text-xs text-gray-500 mb-1">
+                  <span>Цена м²</span>
+                  <span class="font-semibold text-gray-700">{{ "{:,}".format(d.avg_price_sqm).replace(',', ' ') }} ₽</span>
+                </div>
+                <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                  {% set bar_color = 'bg-green-500' if d.price_bar_pct < 40 else ('bg-yellow-500' if d.price_bar_pct < 70 else 'bg-red-500') %}
+                  <div class="{{ bar_color }} h-full rounded-full" style="width: {{ [d.price_bar_pct, 8] | max }}%"></div>
+                </div>
+              </div>
+              {% endif %}
+              <div class="flex items-center justify-between text-sm mb-2">
+                <div>
+                  <span class="font-bold text-green-700 text-base">{{ "{:,}".format(d.props_count).replace(',', ' ') }}</span>
+                  <span class="text-gray-400 text-xs ml-1">предложений</span>
+                </div>
+                {% if d.min_price %}
+                <span class="text-gray-500 text-xs">от {{ "{:,}".format(d.min_price // 1000000).replace(',', ' ') }} млн</span>
+                {% endif %}
+              </div>
+              <!-- Infra tags -->
+              {% set infra = d.infrastructure_data or {} %}
+              <div class="flex flex-wrap gap-1 text-xs">
+                {% if infra.education_count %}<span class="bg-green-50 text-green-600 px-2 py-0.5 rounded-full">🏫 {{ infra.education_count }}</span>{% endif %}
+                {% if infra.medical_count %}<span class="bg-red-50 text-red-600 px-2 py-0.5 rounded-full">🏥 {{ infra.medical_count }}</span>{% endif %}
+                {% if infra.transport_count %}<span class="bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">🚌 {{ infra.transport_count }}</span>{% endif %}
+              </div>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- ── Посёлки секция ─────────────────────────────────────────── -->
+      {% if settlements %}
+      <div class="type-section mb-10" data-section-type="settlement">
+        <div class="flex items-center gap-3 mb-5">
+          <div class="w-1 h-7 bg-amber-500 rounded-full"></div>
+          <h2 class="text-xl font-bold text-gray-800">Посёлки и поселения</h2>
+          <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">{{ settlements | length }}</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          {% for d in settlements %}
+          <a href="{% if current_city %}/{{ current_city.slug }}{% endif %}/rayon/{{ d.slug }}"
+             class="district-card bg-white rounded-xl shadow hover:shadow-lg transition-all duration-200 hover:-translate-y-1 overflow-hidden block{% if d.props_count == 0 %} opacity-60{% endif %}"
+             data-name="{{ d.name | lower }} {{ d.slug }}"
+             data-type="{{ d.district_type }}"
+             data-count="{{ d.props_count }}"
+             data-sqm="{{ d.avg_price_sqm or 0 }}">
+
+            <div class="h-36 relative overflow-hidden bg-amber-50">
+              {% if d.latitude and d.longitude %}
+              <img src="https://static-maps.yandex.ru/1.x/?ll={{ d.longitude }},{{ d.latitude }}&size=400,150&z=13&l=map"
+                   class="w-full h-full object-cover" loading="lazy" alt="{{ d.name }}" onerror="this.style.display='none'">
+              {% endif %}
+              <span class="absolute top-2 left-2 {{ d.type_badge_cls }} text-xs font-semibold px-2 py-0.5 rounded-full">{{ d.type_label }}</span>
+              {% if d.avg_price_sqm %}
+              <div class="absolute top-2 right-2 bg-white bg-opacity-95 text-gray-800 text-xs font-semibold px-2 py-1 rounded-full shadow">
+                {{ "{:,}".format(d.avg_price_sqm).replace(',', ' ') }} ₽/м²
+              </div>
+              {% endif %}
+              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent px-3 py-2">
+                <h3 class="text-white font-bold text-sm">{{ d.name }}</h3>
+              </div>
+            </div>
+
+            <div class="p-4">
+              <div class="flex items-center justify-between text-sm">
+                <div>
+                  <span class="font-bold text-amber-700 text-base">{{ "{:,}".format(d.props_count).replace(',', ' ') }}</span>
+                  <span class="text-gray-400 text-xs ml-1">предложений</span>
+                </div>
+                {% if d.min_price %}
+                <span class="text-gray-500 text-xs">от {{ "{:,}".format(d.min_price // 1000000).replace(',', ' ') }} млн</span>
+                {% endif %}
+              </div>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- No results -->
+      <div id="noResults" class="text-center py-16 hidden">
+        <i class="fas fa-search text-5xl text-gray-300 mb-4"></i>
+        <h3 class="text-xl font-semibold text-gray-500 mb-2">Районы не найдены</h3>
+        <button onclick="document.getElementById('districtSearch').value=''; filterDistricts()" class="mt-2 text-blue-600 hover:underline text-sm">Сбросить поиск</button>
+      </div>
+    </div>
+
+    <!-- MAP VIEW (hidden by default) -->
+    <div id="mapView" class="hidden">
+      <div class="bg-white rounded-xl shadow overflow-hidden">
+        <div class="flex items-center gap-3 px-4 py-3 border-b border-gray-100 text-sm text-gray-600 flex-wrap">
+          <span class="font-medium text-gray-700">Цена м² :</span>
+          <div class="flex items-center gap-1"><span class="inline-block w-4 h-4 rounded" style="background:#22c55e"></span><span>Ниже среднего</span></div>
+          <div class="flex items-center gap-1"><span class="inline-block w-4 h-4 rounded" style="background:#eab308"></span><span>Средняя</span></div>
+          <div class="flex items-center gap-1"><span class="inline-block w-4 h-4 rounded" style="background:#f97316"></span><span>Выше среднего</span></div>
+          <div class="flex items-center gap-1"><span class="inline-block w-4 h-4 rounded" style="background:#ef4444"></span><span>Высокая</span></div>
+          <div class="flex items-center gap-1"><span class="inline-block w-4 h-4 rounded" style="background:#d1d5db"></span><span>Нет данных</span></div>
+        </div>
+        <div id="districtsMap" style="height:560px;width:100%;"></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- CTA -->
+<section class="bg-white border-t border-gray-100 py-12">
+  <div class="container mx-auto px-4 text-center max-w-2xl">
+    <h2 class="text-2xl font-bold text-gray-800 mb-3">Не знаете, какой район выбрать?</h2>
+    <p class="text-gray-500 mb-6">Наши эксперты помогут подобрать квартиру с кэшбеком до 500 000 ₽</p>
+    <div class="flex flex-col sm:flex-row justify-center gap-3">
+      <button onclick="openApplicationModal ? openApplicationModal() : openModal('applicationModal')"
+              class="bg-[#0088CC] text-white px-7 py-3 rounded-full font-semibold hover:bg-[#006699] transition-colors">
+        Получить консультацию
+      </button>
+      <a href="{{ url_for('props.properties') }}"
+         class="border-2 border-[#0088CC] text-[#0088CC] px-7 py-3 rounded-full font-semibold hover:bg-[#0088CC] hover:text-white transition-colors">
+        Все квартиры
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+(function() {
+  var cards    = Array.from(document.querySelectorAll('.district-card'));
+  var sections = Array.from(document.querySelectorAll('.type-section'));
+  var noRes    = document.getElementById('noResults');
+  var search   = document.getElementById('districtSearch');
+  var typeTabs = document.querySelectorAll('.type-tab');
+  var currentType  = 'all';
+  var currentQuery = '';
+
+  function applyFilters() {
+    var q = currentQuery;
+    var t = currentType;
+    var visible = 0;
+
+    // Filter sections by type tab
+    sections.forEach(function(sec) {
+      var stype = sec.dataset.sectionType;
+      var showSec = (t === 'all' || t === stype);
+      if (!showSec) { sec.style.display = 'none'; return; }
+      sec.style.display = '';
+
+      // Filter cards inside section by search
+      var secCards = sec.querySelectorAll('.district-card');
+      var secVisible = 0;
+      secCards.forEach(function(c) {
+        var match = !q || c.dataset.name.includes(q);
+        c.style.display = match ? '' : 'none';
+        if (match) { visible++; secVisible++; }
+      });
+      // Hide entire section if no cards match
+      if (q && secVisible === 0) sec.style.display = 'none';
+    });
+
+    noRes.classList.toggle('hidden', visible > 0 || !q);
+  }
+
+  // Type tab filter
+  typeTabs.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      currentType = btn.dataset.type;
+      typeTabs.forEach(function(b) {
+        var isActive = b === btn;
+        b.classList.toggle('bg-[#0088CC]', isActive);
+        b.classList.toggle('text-white',   isActive);
+        b.classList.toggle('active',       isActive);
+        b.classList.toggle('bg-gray-100',  !isActive);
+        b.classList.toggle('text-gray-700', !isActive);
+      });
+      applyFilters();
+    });
+  });
+
+  // Search filter
+  search.addEventListener('input', function() {
+    currentQuery = search.value.toLowerCase().trim();
+    applyFilters();
+  });
+
+  window.filterDistricts = applyFilters;
+
+  // View toggle
+  var gridBtn  = document.getElementById('viewGrid');
+  var mapBtn   = document.getElementById('viewMap');
+  var gridView = document.getElementById('gridView');
+  var mapView  = document.getElementById('mapView');
+
+  function setView(view) {
+    gridView.classList.toggle('hidden', view !== 'grid');
+    mapView.classList.toggle('hidden',  view !== 'map');
+    gridBtn.classList.toggle('bg-blue-600', view === 'grid');
+    gridBtn.classList.toggle('text-white',  view === 'grid');
+    gridBtn.classList.toggle('text-gray-500', view !== 'grid');
+    mapBtn.classList.toggle('bg-blue-600',  view === 'map');
+    mapBtn.classList.toggle('text-white',   view === 'map');
+    mapBtn.classList.toggle('text-gray-500', view !== 'map');
+    if (view === 'map') initDistrictsMap();
+  }
+
+  gridBtn.addEventListener('click', function() { setView('grid'); });
+  mapBtn.addEventListener('click',  function() { setView('map');  });
+})();
+</script>
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+<script>
+(function() {
+  var _mapInitialised = false;
+
+  window.initDistrictsMap = function() {
+    if (_mapInitialised) {
+      if (window._districtsLeafletMap) {
+        setTimeout(function() { window._districtsLeafletMap.invalidateSize(); }, 100);
+      }
+      return;
+    }
+    _mapInitialised = true;
+
+    var cityId = {{ current_city.id if current_city else 1 }};
+    var map = L.map('districtsMap', {
+      center: [
+        {{ current_city.latitude if current_city and current_city.latitude else 45.04 }},
+        {{ current_city.longitude if current_city and current_city.longitude else 38.98 }}
+      ],
+      zoom: 11,
+      scrollWheelZoom: true
+    });
+    window._districtsLeafletMap = map;
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 19
+    }).addTo(map);
+
+    function priceColour(t) {
+      if (t === null || t === undefined) return '#d1d5db';
+      var stops = [[0,[34,197,94]],[0.33,[234,179,8]],[0.66,[249,115,22]],[1.0,[239,68,68]]];
+      var lo = stops[0], hi = stops[stops.length-1];
+      for (var i=0;i<stops.length-1;i++) {
+        if (t>=stops[i][0]&&t<=stops[i+1][0]){lo=stops[i];hi=stops[i+1];break;}
+      }
+      var f=(lo[0]===hi[0])?0:(t-lo[0])/(hi[0]-lo[0]);
+      return 'rgb('+Math.round(lo[1][0]+f*(hi[1][0]-lo[1][0]))+','+Math.round(lo[1][1]+f*(hi[1][1]-lo[1][1]))+','+Math.round(lo[1][2]+f*(hi[1][2]-lo[1][2]))+')';
+    }
+    function fmt(n){if(!n)return'—';return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'\u00a0')+' ₽';}
+
+    fetch('/api/districts/heatmap?city_id='+cityId)
+      .then(function(r){return r.json();})
+      .then(function(geojson){
+        if(!geojson.features||!geojson.features.length) return;
+        var allBounds=[];
+        L.geoJSON(geojson,{
+          style:function(feature){
+            var p=feature.properties;
+            return{fillColor:priceColour(p.price_norm),fillOpacity:0.55,color:'#ffffff',weight:2,opacity:1};
+          },
+          onEachFeature:function(feature,layer){
+            var p=feature.properties;
+            var popupHtml='<div style="min-width:180px;font-family:sans-serif">'+
+              '<div style="font-weight:700;font-size:15px;margin-bottom:6px">'+p.name+'</div>'+
+              (p.avg_price_sqm?'<div style="margin-bottom:3px">Ср. цена м²: <b>'+fmt(p.avg_price_sqm)+'</b></div>':'')+
+              (p.min_price?'<div style="margin-bottom:3px">От: <b>'+fmt(p.min_price)+'</b></div>':'')+
+              '<div style="margin-bottom:8px">Предложений: <b>'+(p.props_count||0)+'</b></div>'+
+              '<a href="'+p.url+'" style="display:inline-block;padding:5px 12px;background:#0088CC;color:#fff;border-radius:6px;text-decoration:none;font-size:13px">Смотреть →</a>'+
+              '</div>';
+            layer.bindPopup(popupHtml,{maxWidth:240});
+            if(layer.getBounds){
+              var c=layer.getBounds().getCenter();
+              allBounds.push(layer.getBounds());
+              var labelText=p.name+(p.avg_price_sqm?'<br><small>'+fmt(p.avg_price_sqm)+'/м²</small>':'');
+              L.marker(c,{icon:L.divIcon({className:'',html:'<div style="background:rgba(255,255,255,0.88);border:1px solid #ccc;border-radius:5px;padding:2px 6px;font-size:11px;font-weight:600;white-space:nowrap;text-align:center;line-height:1.4;box-shadow:0 1px 3px rgba(0,0,0,.15)">'+labelText+'</div>',iconAnchor:[0,0]}),interactive:false}).addTo(map);
+            }
+            layer.on('mouseover',function(){layer.setStyle({fillOpacity:0.8,weight:3});});
+            layer.on('mouseout', function(){layer.setStyle({fillOpacity:0.55,weight:2});});
+          }
+        }).addTo(map);
+        if(allBounds.length){var combined=allBounds[0];for(var i=1;i<allBounds.length;i++)combined.extend(allBounds[i]);map.fitBounds(combined,{padding:[20,20]});}
+        setTimeout(function(){map.invalidateSize();},150);
+      })
+      .catch(function(e){console.error('Heatmap load failed',e);});
+  };
+})();
+</script>
+{% endblock %}

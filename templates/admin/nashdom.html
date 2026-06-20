@@ -1,0 +1,348 @@
+{% extends "base.html" %}
+
+{% block title %}Наш.дом.рф — управление матчингом ЖК | Admin{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+
+  <!-- Header -->
+  <div class="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <a href="/admin/enrichment" class="text-gray-400 hover:text-gray-600">
+          <i class="fas fa-arrow-left"></i>
+        </a>
+        <div>
+          <h1 class="text-xl font-bold text-gray-900">Наш.дом.рф — матчинг ЖК</h1>
+          <p class="text-xs text-gray-500">Просмотр, подтверждение и ручная привязка ЖК к порталу наш.дом.рф</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <span class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium">
+          {{ stats.matched }} / {{ stats.total }} привязаны
+        </span>
+        <span class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium">
+          {{ stats.with_photos }} с фото
+        </span>
+        {% if stats.confirmed > 0 %}
+        <span class="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-full font-medium">
+          {{ stats.confirmed }} подтверждены
+        </span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 py-6">
+
+    <!-- Filters Bar -->
+    <form method="get" action="/admin/nashdom" class="bg-white rounded-2xl border border-gray-200 p-4 mb-6 flex flex-wrap gap-3 items-end shadow-sm">
+      <!-- City -->
+      <div>
+        <label class="block text-xs text-gray-500 mb-1 font-medium">Город</label>
+        <select name="city_id" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0088CC]">
+          {% for city in cities %}
+          <option value="{{ city.id }}" {% if city.id == current_city_id %}selected{% endif %}>{{ city.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <!-- Search -->
+      <div class="flex-1 min-w-48">
+        <label class="block text-xs text-gray-500 mb-1 font-medium">Поиск ЖК</label>
+        <input name="q" value="{{ search_q }}" type="text" placeholder="Введите название..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0088CC]">
+      </div>
+      <!-- Mode -->
+      <div>
+        <label class="block text-xs text-gray-500 mb-1 font-medium">Фильтр</label>
+        <select name="mode" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0088CC]">
+          <option value="all" {% if filter_mode == 'all' %}selected{% endif %}>Все</option>
+          <option value="matched" {% if filter_mode == 'matched' %}selected{% endif %}>Привязаны к наш.дом</option>
+          <option value="unmatched" {% if filter_mode == 'unmatched' %}selected{% endif %}>Не привязаны</option>
+          <option value="photos" {% if filter_mode == 'photos' %}selected{% endif %}>Есть фото наш.дом</option>
+        </select>
+      </div>
+      <button type="submit" class="bg-[#0088CC] text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-[#006699] transition-colors">
+        <i class="fas fa-search mr-1"></i> Найти
+      </button>
+    </form>
+
+    <!-- Info tip -->
+    <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6 text-sm text-blue-800 flex items-start gap-3">
+      <i class="fas fa-circle-info mt-0.5 flex-shrink-0"></i>
+      <div>
+        <strong>Как работает матчинг:</strong> наш.дом.рф автоматически сопоставляет ЖК по названию и застройщику.
+        Здесь вы можете <strong>подтвердить</strong> правильную привязку, <strong>отклонить</strong> ошибочную или
+        <strong>вручную задать ID</strong> с портала наш.дом.рф. Кнопка «Перенести фото» заменяет фото ЦИАН на чистые
+        фото с наш.дом.рф (без водяных знаков).
+      </div>
+    </div>
+
+    <!-- Complexes Grid -->
+    {% if complexes %}
+    <div class="space-y-4">
+      {% for c in complexes %}
+      <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden" id="rc-{{ c.id }}">
+        <div class="flex flex-col md:flex-row gap-0">
+
+          <!-- Photos Column -->
+          <div class="md:w-64 flex-shrink-0 bg-gray-50 border-b md:border-b-0 md:border-r border-gray-100">
+            {% if c.nd_photos %}
+            <div class="relative">
+              <img src="{{ c.nd_photos[0] }}" alt="{{ c.name }}" class="w-full h-44 object-cover">
+              <span class="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">
+                <i class="fas fa-house-check mr-1"></i>наш.дом
+              </span>
+              {% if c.nd_photos|length > 1 %}
+              <span class="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-0.5 rounded-full">
+                {{ c.nd_photos|length }} фото
+              </span>
+              {% endif %}
+            </div>
+            <!-- Thumbnail strip -->
+            {% if c.nd_photos|length > 1 %}
+            <div class="flex gap-1 p-2 overflow-x-auto">
+              {% for ph in c.nd_photos[:6] %}
+              <img src="{{ ph }}" alt="" class="w-12 h-12 object-cover rounded flex-shrink-0 border border-gray-200">
+              {% endfor %}
+            </div>
+            {% endif %}
+            {% elif c.main_image and c.main_image != '/static/images/no-photo.svg' %}
+            <div class="relative">
+              <img src="{{ c.main_image }}" alt="{{ c.name }}" class="w-full h-44 object-cover">
+              <span class="absolute top-2 left-2 bg-gray-500 text-white text-xs px-2 py-0.5 rounded-full">ЦИАН</span>
+            </div>
+            {% else %}
+            <div class="w-full h-44 flex items-center justify-center text-gray-300">
+              <i class="fas fa-image text-4xl"></i>
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Info Column -->
+          <div class="flex-1 p-5">
+            <div class="flex items-start justify-between gap-3 mb-3">
+              <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h2 class="text-lg font-bold text-gray-900">{{ c.name }}</h2>
+                  {% if c.confirmed %}
+                  <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">
+                    <i class="fas fa-check-circle mr-1"></i>Подтверждён
+                  </span>
+                  {% endif %}
+                  {% if c.nashdom_id %}
+                  <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                    <i class="fas fa-link mr-1"></i>Привязан
+                  </span>
+                  {% else %}
+                  <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Не привязан</span>
+                  {% endif %}
+                </div>
+                <p class="text-sm text-gray-500 mt-0.5">{{ c.developer }}</p>
+              </div>
+              <div class="text-right flex-shrink-0">
+                <div class="text-sm font-medium text-gray-700">{{ c.apts_count | default(0) }} квартир</div>
+                {% if c.sold_count > 0 %}
+                <div class="text-xs text-gray-400">{{ c.sold_count }} продано</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Nashdom ID -->
+            {% if c.nashdom_id %}
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-xs text-gray-500">ID наш.дом.рф:</span>
+              <code class="text-xs bg-gray-100 px-2 py-0.5 rounded font-mono">{{ c.nashdom_id }}</code>
+              <a href="https://наш.дом.рф/object/{{ c.nashdom_id }}" target="_blank" class="text-xs text-[#0088CC] hover:underline">
+                <i class="fas fa-external-link-alt"></i> Открыть
+              </a>
+            </div>
+            {% endif %}
+
+            <!-- Buildings Table -->
+            {% if c.buildings %}
+            <div class="mb-4">
+              <p class="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wide">Корпуса</p>
+              <div class="overflow-x-auto">
+                <table class="text-xs w-full">
+                  <thead>
+                    <tr class="text-gray-400 border-b border-gray-100">
+                      <th class="text-left pb-1 pr-4 font-medium">Корпус</th>
+                      <th class="text-left pb-1 pr-4 font-medium">Срок сдачи</th>
+                      <th class="text-left pb-1 pr-4 font-medium">Этажей</th>
+                      <th class="text-left pb-1 pr-4 font-medium">Квартир</th>
+                      <th class="text-left pb-1 font-medium">Статус</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for b in c.buildings %}
+                    <tr class="border-b border-gray-50 hover:bg-gray-50">
+                      <td class="py-1 pr-4 font-medium text-gray-800">{{ b.name or '—' }}</td>
+                      <td class="py-1 pr-4">
+                        {% if b.year and b.quarter %}
+                          <span class="{{ 'text-green-600' if b.year < 2026 else ('text-orange-500' if b.year == 2026 else 'text-blue-600') }} font-medium">
+                            {{ b.quarter }} кв. {{ b.year }}
+                          </span>
+                        {% elif b.year %}
+                          <span class="{{ 'text-green-600' if b.year < 2026 else 'text-blue-600' }} font-medium">{{ b.year }}</span>
+                        {% else %}
+                          <span class="text-gray-400">—</span>
+                        {% endif %}
+                      </td>
+                      <td class="py-1 pr-4 text-gray-600">{{ b.floors or '—' }}</td>
+                      <td class="py-1 pr-4 text-gray-600">{{ b.total_apts or '—' }}</td>
+                      <td class="py-1">
+                        {% if b.released %}
+                          <span class="bg-green-100 text-green-700 px-1.5 py-0.5 rounded text-xs">Сдан</span>
+                        {% else %}
+                          <span class="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded text-xs">Строится</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            {% else %}
+            <p class="text-xs text-gray-400 mb-4 italic">Корпуса не загружены с наш.дом.рф</p>
+            {% endif %}
+
+            <!-- Actions -->
+            <div class="flex flex-wrap gap-2 pt-3 border-t border-gray-100">
+              {% if c.nashdom_id %}
+                {% if not c.confirmed %}
+                <button onclick="ndAction({{ c.id }}, 'confirm')"
+                  class="inline-flex items-center gap-1.5 px-4 py-2 bg-green-500 text-white text-xs font-semibold rounded-lg hover:bg-green-600 transition-colors">
+                  <i class="fas fa-check"></i> Подтвердить матч
+                </button>
+                {% else %}
+                <button onclick="ndAction({{ c.id }}, 'confirm')"
+                  class="inline-flex items-center gap-1.5 px-4 py-2 bg-purple-100 text-purple-700 text-xs font-semibold rounded-lg hover:bg-purple-200 transition-colors">
+                  <i class="fas fa-check-circle"></i> Подтверждён
+                </button>
+                {% endif %}
+                <button onclick="ndAction({{ c.id }}, 'reject')"
+                  class="inline-flex items-center gap-1.5 px-4 py-2 bg-red-50 text-red-600 text-xs font-semibold rounded-lg hover:bg-red-100 transition-colors border border-red-200">
+                  <i class="fas fa-times"></i> Отвязать
+                </button>
+              {% endif %}
+              {% if c.nd_photos %}
+              <button onclick="ndPushPhotos({{ c.id }}, this)"
+                class="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-50 text-[#0088CC] text-xs font-semibold rounded-lg hover:bg-blue-100 transition-colors border border-blue-200">
+                <i class="fas fa-images"></i> Перенести фото в галерею ({{ c.nd_photos|length }} шт)
+              </button>
+              {% endif %}
+              <!-- Manual ID input -->
+              <div class="flex items-center gap-2 ml-auto">
+                <input type="text" id="nd-id-{{ c.id }}" placeholder="ID наш.дом.рф вручную"
+                  class="border border-gray-300 rounded-lg px-3 py-1.5 text-xs w-52 focus:outline-none focus:ring-2 focus:ring-[#0088CC]">
+                <button onclick="ndSetId({{ c.id }})"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-700 text-white text-xs font-semibold rounded-lg hover:bg-gray-800 transition-colors">
+                  <i class="fas fa-link"></i> Привязать
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-20">
+      <i class="fas fa-house-circle-xmark text-5xl text-gray-300 mb-4"></i>
+      <p class="text-gray-500">ЖК не найдены по заданным фильтрам</p>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="nd-toast" class="fixed bottom-6 right-6 z-50 hidden">
+  <div class="bg-gray-900 text-white px-5 py-3 rounded-xl shadow-xl text-sm font-medium flex items-center gap-2">
+    <i id="nd-toast-icon" class="fas fa-check-circle text-green-400"></i>
+    <span id="nd-toast-msg"></span>
+  </div>
+</div>
+
+<script>
+function ndToast(msg, ok) {
+  var t = document.getElementById('nd-toast');
+  document.getElementById('nd-toast-msg').textContent = msg;
+  document.getElementById('nd-toast-icon').className = ok === false
+    ? 'fas fa-times-circle text-red-400'
+    : 'fas fa-check-circle text-green-400';
+  t.classList.remove('hidden');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(function() { t.classList.add('hidden'); }, 3500);
+}
+
+function ndAction(complexId, action) {
+  fetch('/admin/nashdom/confirm', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token() if csrf_token is defined else "" }}'},
+    body: JSON.stringify({complex_id: complexId, action: action})
+  }).then(function(r) { return r.json(); }).then(function(d) {
+    if (d.ok) {
+      var card = document.getElementById('rc-' + complexId);
+      if (action === 'confirm') {
+        ndToast('Матч подтверждён ✓', true);
+        var badges = card.querySelectorAll('.flex.items-center.gap-2.flex-wrap span');
+        // Add confirmed badge if not present
+        var hasBadge = Array.from(badges).some(function(b){ return b.textContent.includes('Подтверждён'); });
+        if (!hasBadge) {
+          var badge = document.createElement('span');
+          badge.className = 'text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium';
+          badge.innerHTML = '<i class="fas fa-check-circle mr-1"></i>Подтверждён';
+          badges[0] && badges[0].parentNode && badges[0].parentNode.appendChild(badge);
+        }
+      } else if (action === 'reject') {
+        ndToast('Привязка удалена', true);
+        setTimeout(function() { card.style.opacity='0.4'; }, 200);
+      }
+    } else {
+      ndToast('Ошибка: ' + (d.error || 'неизвестная'), false);
+    }
+  }).catch(function() { ndToast('Ошибка сети', false); });
+}
+
+function ndSetId(complexId) {
+  var input = document.getElementById('nd-id-' + complexId);
+  var ndId = (input && input.value.trim()) || '';
+  if (!ndId) { ndToast('Введите ID наш.дом.рф', false); return; }
+  fetch('/admin/nashdom/confirm', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token() if csrf_token is defined else "" }}'},
+    body: JSON.stringify({complex_id: complexId, action: 'set_id', nashdom_id: ndId})
+  }).then(function(r){ return r.json(); }).then(function(d){
+    if (d.ok) { ndToast('ID наш.дом.рф сохранён', true); if (input) input.value = ''; }
+    else ndToast('Ошибка: ' + (d.error||''), false);
+  }).catch(function(){ ndToast('Ошибка сети', false); });
+}
+
+function ndPushPhotos(complexId, btn) {
+  if (!confirm('Заменить текущую галерею ЖК на фотографии с наш.дом.рф?')) return;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Переносим...';
+  fetch('/admin/nashdom/push-photos', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token() if csrf_token is defined else "" }}'},
+    body: JSON.stringify({complex_id: complexId})
+  }).then(function(r){ return r.json(); }).then(function(d){
+    if (d.ok) {
+      ndToast('Фото перенесены: ' + d.photos_count + ' шт. Главное: ' + d.main_image, true);
+      btn.innerHTML = '<i class="fas fa-check"></i> Фото перенесены';
+      btn.className = btn.className.replace('bg-blue-50', 'bg-green-50').replace('text-[#0088CC]', 'text-green-700').replace('border-blue-200', 'border-green-200');
+    } else {
+      ndToast('Ошибка: ' + (d.error||''), false);
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-images"></i> Перенести фото в галерею';
+    }
+  }).catch(function(){
+    ndToast('Ошибка сети', false);
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-images"></i> Перенести фото в галерею';
+  });
+}
+</script>
+{% endblock %}

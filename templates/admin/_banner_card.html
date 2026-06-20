@@ -1,0 +1,51 @@
+<div class="bg-white rounded-xl border border-gray-100 p-4 flex items-center gap-4">
+    {% if banner.image_url %}
+    <img src="{{ banner.image_url }}" alt="" class="w-16 h-12 object-cover rounded-lg flex-shrink-0">
+    {% else %}
+    <div class="w-16 h-12 rounded-lg flex items-center justify-center flex-shrink-0" style="background: {{ banner.bg_color }}">
+        {% if banner.large_text %}
+        <span class="text-white font-bold text-xs">{{ banner.large_text }}</span>
+        {% else %}
+        <i class="fas fa-image text-gray-400"></i>
+        {% endif %}
+    </div>
+    {% endif %}
+    <div class="flex-1 min-w-0">
+        <div class="font-semibold text-gray-800 truncate">{{ banner.title }}</div>
+        {% if banner.subtitle %}
+        <div class="text-sm text-gray-500 truncate">{{ banner.subtitle }}</div>
+        {% endif %}
+        <div class="flex items-center gap-3 mt-1 text-xs text-gray-400">
+            <span>Порядок: {{ banner.sort_order }}</span>
+            {% if banner.deadline_text %}<span class="bg-gray-100 px-1.5 py-0.5 rounded">{{ banner.deadline_text }}</span>{% endif %}
+            {% if banner.link_url %}<span>{{ banner.link_url[:30] }}</span>{% endif %}
+            <span style="background: {{ banner.bg_color }}; width: 16px; height: 16px; border-radius: 4px; display: inline-block; vertical-align: middle;"></span>
+        </div>
+    </div>
+    <div class="flex items-center gap-2 flex-shrink-0">
+        <button onclick="toggleBanner({{ banner.id }})" id="toggle-{{ banner.id }}" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors {% if banner.is_active %}bg-green-100 text-green-700{% else %}bg-gray-100 text-gray-500{% endif %}">
+            {{ 'Активен' if banner.is_active else 'Неактивен' }}
+        </button>
+        <button onclick="openEditModal(this)" class="p-2 text-gray-400 hover:text-blue-600 transition-colors"
+                data-id="{{ banner.id }}"
+                data-title="{{ banner.title or '' }}"
+                data-subtitle="{{ banner.subtitle or '' }}"
+                data-image-url="{{ banner.image_url or '' }}"
+                data-link-url="{{ banner.link_url or '' }}"
+                data-link-text="{{ banner.link_text or '' }}"
+                data-bg-color="{{ banner.bg_color or '#1a1a2e' }}"
+                data-sort-order="{{ banner.sort_order or 0 }}"
+                data-placement="{{ banner.placement or 'header' }}"
+                data-deadline-text="{{ banner.deadline_text or '' }}"
+                data-large-text="{{ banner.large_text or '' }}"
+                data-overlay-opacity="{{ banner.overlay_opacity or 0 }}">
+            <i class="fas fa-edit"></i>
+        </button>
+        <form method="POST" action="/admin/banners/{{ banner.id }}/delete" onsubmit="return confirm('Удалить баннер?')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="p-2 text-gray-400 hover:text-red-600 transition-colors">
+                <i class="fas fa-trash"></i>
+            </button>
+        </form>
+    </div>
+</div>

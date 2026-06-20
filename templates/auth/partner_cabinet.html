@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+
+{% block title %}Партнёрская программа | InBack{% endblock %}
+
+{% block content %}
+<style>
+:root {
+    --brand-blue: #0088CC;
+    --brand-blue-dark: #006699;
+}
+.partner-hero {
+    background: linear-gradient(135deg, var(--brand-blue) 0%, var(--brand-blue-dark) 100%);
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+}
+.stat-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -10px rgba(0, 136, 204, 0.2);
+}
+.step-number {
+    background: white;
+    color: var(--brand-blue);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.25rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.calculator-card {
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+}
+.faq-item {
+    border-bottom: 1px solid #edf2f7;
+}
+.faq-question {
+    width: 100%;
+    text-align: left;
+    padding: 1.25rem 0;
+    font-weight: 600;
+    color: #2d3748;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    color: #718096;
+    font-size: 0.95rem;
+}
+.faq-item.active .faq-answer {
+    max-height: 500px;
+    padding-bottom: 1.25rem;
+}
+.faq-item.active .faq-icon {
+    transform: rotate(180deg);
+}
+.faq-icon {
+    transition: transform 0.3s ease;
+}
+</style>
+
+<div class="min-h-screen bg-[#F8FAFC]">
+    <!-- Hero Section -->
+    <section class="partner-hero relative overflow-hidden text-white pt-20 pb-24 md:pt-32 md:pb-40">
+        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 w-80 h-80 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 relative z-10">
+            <div class="max-w-3xl">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-6 animate-fade-in">
+                    <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                    <span class="text-sm font-medium tracking-wide uppercase">Реферальная программа</span>
+                </div>
+                <h1 class="text-4xl md:text-6xl font-extrabold mb-6 leading-[1.1]">
+                    Приглашайте друзей <br> и получайте бонусы
+                </h1>
+                <div class="flex flex-col sm:flex-row gap-8 mb-10">
+                    <div class="flex flex-col">
+                        <span class="text-white/70 text-sm mb-1">Вам</span>
+                        <span class="text-3xl md:text-4xl font-bold text-amber-300">20 000 ₽</span>
+                        <span class="text-white/70 text-sm">на баланс за друга</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-white/70 text-sm mb-1">Другу</span>
+                        <span class="text-3xl md:text-4xl font-bold text-sky-200">Cashback</span>
+                        <span class="text-white/70 text-sm">максимальный возврат</span>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-4">
+                    <a href="#referral-section" class="bg-white text-[#0088CC] px-8 py-4 rounded-2xl font-bold text-lg hover:bg-opacity-90 transition-all shadow-xl shadow-blue-900/20">
+                        Начать зарабатывать
+                    </a>
+                    <a href="#how-it-works" class="bg-white/10 backdrop-blur-md text-white border border-white/30 px-8 py-4 rounded-2xl font-bold text-lg hover:bg-white/20 transition-all">
+                        Как это работает
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats & Referral Link -->
+    <section id="referral-section" class="max-w-7xl mx-auto px-4 -mt-16 md:-mt-20 relative z-20 pb-20">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Stats Column -->
+            <div class="lg:col-span-8 space-y-6">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="stat-card bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                        <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-4">
+                            <svg class="w-6 h-6 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                            </svg>
+                        </div>
+                        <p class="text-gray-500 text-sm font-medium mb-1">Приглашено друзей</p>
+                        <p class="text-3xl font-bold text-gray-900">{{ total_referrals }}</p>
+                    </div>
+                    <div class="stat-card bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                        <div class="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center mb-4">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <p class="text-gray-500 text-sm font-medium mb-1">Заработано всего</p>
+                        <p class="text-3xl font-bold text-green-600">{{ '{:,.0f}'.format(total_earned).replace(',', ' ') }} ₽</p>
+                    </div>
+                    <div class="stat-card bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                        <div class="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center mb-4">
+                            <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                            </svg>
+                        </div>
+                        <p class="text-gray-500 text-sm font-medium mb-1">Текущий баланс</p>
+                        <p class="text-3xl font-bold text-amber-600">{{ '{:,.0f}'.format(available_balance).replace(',', ' ') }} ₽</p>
+                    </div>
+                </div>
+
+                <!-- Link Card -->
+                <div class="bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6">Ваша персональная ссылка</h3>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex-1 bg-gray-50 rounded-2xl px-6 py-4 font-mono text-gray-600 border border-gray-100 break-all flex items-center" id="referral-link-display">
+                            {{ referral_link }}
+                        </div>
+                        <button onclick="copyPartnerLink()" class="bg-[#0088CC] hover:bg-[#006699] text-white px-8 py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-3 group">
+                            <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
+                            </svg>
+                            <span id="copy-btn-text">Копировать</span>
+                        </button>
+                    </div>
+                    <div class="flex flex-wrap gap-4 mt-8 pt-8 border-t border-gray-50">
+                        <span class="text-sm text-gray-400 font-medium uppercase tracking-wider w-full mb-2">Поделиться в соцсетях:</span>
+                        <a href="https://wa.me/?text=Привет!%20Зарегистрируйся%20по%20моей%20ссылке%20и%20получи%20кешбэк%20на%20покупку%20квартиры!%20{{ referral_link | urlencode }}" target="_blank" class="flex items-center gap-2 bg-[#25D366] text-white px-6 py-3 rounded-xl hover:opacity-90 transition-all font-bold">
+                            <i class="fab fa-whatsapp text-lg"></i> WhatsApp
+                        </a>
+                        <a href="https://t.me/share/url?url={{ referral_link | urlencode }}&text=Привет!%20Зарегистрируйся%20по%20моей%20ссылке%20и%20получи%20кешбэк%20на%20покупку%20квартиры!" target="_blank" class="flex items-center gap-2 bg-[#0088CC] text-white px-6 py-3 rounded-xl hover:opacity-90 transition-all font-bold">
+                            <i class="fab fa-telegram-plane text-lg"></i> Telegram
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Info -->
+            <div class="lg:col-span-4 space-y-6">
+                <div class="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-8 rounded-[32px] shadow-xl">
+                    <h4 class="text-xl font-bold mb-6">Топ за 2026 год</h4>
+                    <div class="space-y-6">
+                        <div class="p-5 bg-white/5 rounded-2xl border border-white/10">
+                            <p class="text-white/50 text-sm mb-1 uppercase tracking-widest font-bold">Макс. доход</p>
+                            <p class="text-3xl font-bold text-amber-400">420 000 ₽</p>
+                            <p class="text-white/50 text-xs mt-2">заработал наш топ-партнер</p>
+                        </div>
+                        <div class="p-5 bg-white/5 rounded-2xl border border-white/10">
+                            <p class="text-white/50 text-sm mb-1 uppercase tracking-widest font-bold">Всего выплачено</p>
+                            <p class="text-3xl font-bold text-sky-400">8.4 млн ₽</p>
+                            <p class="text-white/50 text-xs mt-2">участникам программы</p>
+                        </div>
+                    </div>
+                    <div class="mt-8 pt-8 border-t border-white/10">
+                        <p class="text-sm text-white/70 italic leading-relaxed">
+                            "Реферальная программа InBack — это не только бонусы, но и возможность помочь друзьям купить квартиру выгодно."
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it works -->
+    <section id="how-it-works" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 text-center mb-16">
+            <h2 class="text-3xl md:text-5xl font-extrabold text-gray-900 mb-4">Приглашать друзей легче лёгкого</h2>
+            <p class="text-gray-500 text-lg">Всего три простых шага до вашего первого вознаграждения</p>
+        </div>
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                <div class="relative group">
+                    <div class="w-20 h-20 bg-blue-50 rounded-[2rem] flex items-center justify-center mb-8 group-hover:bg-[#0088CC] group-hover:text-white transition-all duration-500">
+                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                        </svg>
+                    </div>
+                    <h4 class="text-xl font-bold text-gray-900 mb-4">Отправьте ссылку</h4>
+                    <p class="text-gray-500 leading-relaxed">Поделитесь вашей уникальной ссылкой в мессенджерах или соцсетях</p>
+                    <div class="hidden md:block absolute top-10 -right-6 text-gray-200">
+                        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                    </div>
+                </div>
+                <div class="relative group">
+                    <div class="w-20 h-20 bg-blue-50 rounded-[2rem] flex items-center justify-center mb-8 group-hover:bg-[#0088CC] group-hover:text-white transition-all duration-500">
+                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                    </div>
+                    <h4 class="text-xl font-bold text-gray-900 mb-4">Друг регистрируется</h4>
+                    <p class="text-gray-500 leading-relaxed">Ваш друг создает аккаунт, используя вашу персональную ссылку</p>
+                    <div class="hidden md:block absolute top-10 -right-6 text-gray-200">
+                        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                    </div>
+                </div>
+                <div class="group">
+                    <div class="w-20 h-20 bg-green-50 rounded-[2rem] flex items-center justify-center mb-8 group-hover:bg-green-600 group-hover:text-white transition-all duration-500">
+                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <h4 class="text-xl font-bold text-gray-900 mb-4">Вы получаете 20 000 ₽</h4>
+                    <p class="text-gray-500 leading-relaxed">Бонус моментально зачисляется на ваш баланс. Все довольны!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="py-24 bg-[#F8FAFC]">
+        <div class="max-w-4xl mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-12 text-center">Часто задаваемые вопросы</h2>
+            <div class="space-y-2">
+                <div class="faq-item bg-white px-8 rounded-2xl shadow-sm border border-gray-100">
+                    <button class="faq-question">
+                        <span>Как работает реферальная программа?</span>
+                        <svg class="faq-icon w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        Всё просто: вы делитесь ссылкой, друг регистрируется, вы получаете бонус. Друг при этом получает доступ к эксклюзивным условиям кешбэка при покупке квартиры через нашу платформу.
+                    </div>
+                </div>
+                <div class="faq-item bg-white px-8 rounded-2xl shadow-sm border border-gray-100">
+                    <button class="faq-question">
+                        <span>Сколько друзей можно пригласить?</span>
+                        <svg class="faq-icon w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        Ограничений нет! Вы можете приглашать любое количество друзей. Ваша ссылка действует бессрочно.
+                    </div>
+                </div>
+                <div class="faq-item bg-white px-8 rounded-2xl shadow-sm border border-gray-100">
+                    <button class="faq-question">
+                        <span>Как я могу использовать бонусы?</span>
+                        <svg class="faq-icon w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        Бонусы зачисляются на ваш баланс в личном кабинете. Вы можете использовать их для оплаты услуг платформы или вывести их (при достижении определенных условий).
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Referral List -->
+    {% if referrals %}
+    <section class="py-24 bg-white">
+        <div class="max-w-5xl mx-auto px-4">
+            <div class="flex items-center justify-between mb-8">
+                <h3 class="text-2xl font-bold text-gray-900">Ваши приглашения</h3>
+                <span class="bg-blue-50 text-[#0088CC] px-4 py-1.5 rounded-full text-sm font-bold">Всего: {{ total_referrals }}</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for ref in referrals %}
+                <div class="flex items-center justify-between p-6 bg-gray-50 rounded-[2rem] border border-gray-100 hover:border-[#0088CC]/20 transition-all">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-gray-100">
+                            <span class="text-lg font-bold text-[#0088CC]">{{ ref.referred_name[0].upper() }}</span>
+                        </div>
+                        <div>
+                            <p class="font-bold text-gray-900">{{ ref.referred_name }}</p>
+                            <p class="text-xs text-gray-400">{{ ref.created_at }}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-extrabold text-green-600 text-lg">+{{ '{:,.0f}'.format(ref.bonus_amount).replace(',', ' ') }} ₽</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+</div>
+
+<script>
+function copyPartnerLink() {
+    var link = document.getElementById('referral-link-display').textContent.trim();
+    navigator.clipboard.writeText(link).then(function() {
+        var btn = document.getElementById('copy-btn-text');
+        btn.textContent = 'Скопировано!';
+        setTimeout(function() {
+            btn.textContent = 'Копировать';
+        }, 2000);
+    });
+}
+
+// FAQ Accordion
+document.querySelectorAll('.faq-question').forEach(button => {
+    button.addEventListener('click', () => {
+        const faqItem = button.parentElement;
+        const isOpen = faqItem.classList.contains('active');
+        
+        // Close all other items
+        document.querySelectorAll('.faq-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        
+        if (!isOpen) {
+            faqItem.classList.add('active');
+        }
+    });
+});
+</script>
+{% endblock %}

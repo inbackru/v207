@@ -1,0 +1,351 @@
+{% extends "admin/base.html" %}
+
+{% block page_title %}Профиль{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="mb-4 p-4 rounded-lg {% if category == 'error' %}bg-red-50 text-red-700 border border-red-200{% elif category == 'success' %}bg-green-50 text-green-700 border border-green-200{% else %}bg-blue-50 text-blue-700 border border-blue-200{% endif %}">
+                    <div class="flex items-center">
+                        <i class="fas {% if category == 'error' %}fa-exclamation-circle{% elif category == 'success' %}fa-check-circle{% else %}fa-info-circle{% endif %} mr-2"></i>
+                        {{ message }}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
+                <div class="relative inline-block mb-4">
+                    {% if admin.profile_image %}
+                    <img src="{{ admin.profile_image }}" alt="Аватар" class="w-24 h-24 rounded-full object-cover mx-auto border-4 border-[#0088CC]/20" onerror="this.style.display='none'">
+                    {% else %}
+                    <div class="w-24 h-24 rounded-full bg-gradient-to-br from-[#0088CC] to-[#005f99] flex items-center justify-center text-white font-bold text-3xl mx-auto">{{ (admin.full_name or 'А')[0] }}</div>
+                    {% endif %}
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900">{{ admin.full_name }}</h3>
+                <p class="text-sm text-[#0088CC] font-medium mt-1">{{ admin.role }}</p>
+                <p class="text-xs text-gray-500 mt-1">ID: {{ admin.admin_id }}</p>
+
+                <div class="mt-6 space-y-3 text-left">
+                    <div class="flex items-center text-sm text-gray-600">
+                        <i class="fas fa-envelope w-5 text-gray-400 mr-3"></i>
+                        <span class="truncate">{{ admin.email }}</span>
+                    </div>
+                    {% if admin.phone %}
+                    <div class="flex items-center text-sm text-gray-600">
+                        <i class="fas fa-phone w-5 text-gray-400 mr-3"></i>
+                        <span>{{ admin.phone }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="flex items-center text-sm text-gray-600">
+                        <i class="fas fa-calendar w-5 text-gray-400 mr-3"></i>
+                        <span>Создан: {{ admin.created_at.strftime('%d.%m.%Y') if admin.created_at else '—' }}</span>
+                    </div>
+                    {% if admin.last_login %}
+                    <div class="flex items-center text-sm text-gray-600">
+                        <i class="fas fa-clock w-5 text-gray-400 mr-3"></i>
+                        <span>Последний вход: {{ admin.last_login.strftime('%d.%m.%Y %H:%M') }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-gray-100">
+                    {% if admin.is_super_admin %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#0088CC]/10 text-[#0088CC]">
+                            <i class="fas fa-shield-alt mr-1"></i> Супер Админ
+                        </span>
+                    {% endif %}
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium {% if admin.is_active %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
+                        <i class="fas fa-circle text-[6px] mr-1.5"></i>
+                        {{ 'Активен' if admin.is_active else 'Неактивен' }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+                    <i class="fas fa-user-edit text-[#0088CC] mr-2"></i>
+                    Личные данные
+                </h3>
+                <form method="POST" action="{{ url_for('adm.admin_profile') }}">
+                    <input type="hidden" name="action" value="update_profile">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Полное имя</label>
+                            <input type="text" name="full_name" value="{{ admin.full_name }}"
+                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0088CC]/30 focus:border-[#0088CC] transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <div class="flex gap-2">
+                                <input type="email" value="{{ admin.email }}" readonly
+                                       class="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50 text-gray-700">
+                                <button type="button" onclick="openEmailChangeModal()"
+                                        class="px-4 py-2.5 bg-[#0088CC] text-white rounded-lg text-sm font-medium hover:bg-[#006fa3] transition-colors whitespace-nowrap">
+                                    Изменить
+                                </button>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">Потребуется подтверждение по ссылке</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Телефон</label>
+                            <div class="flex gap-2">
+                                <input type="tel" id="phone_display" value="{{ admin.phone or '' }}" readonly
+                                       placeholder="+7 (___) ___-__-__"
+                                       class="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50 text-gray-700">
+                                <button type="button" onclick="openPhoneChangeModal()"
+                                        class="px-4 py-2.5 bg-[#0088CC] text-white rounded-lg text-sm font-medium hover:bg-[#006fa3] transition-colors whitespace-nowrap">
+                                    Изменить
+                                </button>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">Потребуется подтверждение по SMS</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Роль</label>
+                            <input type="text" value="{{ admin.role }}" disabled
+                                   class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-500 cursor-not-allowed">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">URL фото профиля</label>
+                            <input type="url" name="profile_image" value="{{ admin.profile_image }}"
+                                   placeholder="https://example.com/photo.jpg"
+                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0088CC]/30 focus:border-[#0088CC] transition-colors">
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end">
+                        <button type="submit" class="px-6 py-2.5 bg-[#0088CC] text-white rounded-lg text-sm font-medium hover:bg-[#006fa3] transition-colors shadow-sm">
+                            <i class="fas fa-save mr-2"></i>Сохранить изменения
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+                    <i class="fas fa-lock text-[#0088CC] mr-2"></i>
+                    Смена пароля
+                </h3>
+                <form method="POST" action="{{ url_for('adm.admin_profile') }}">
+                    <input type="hidden" name="action" value="change_password">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Текущий пароль</label>
+                            <div class="relative">
+                                <input type="password" name="current_password" id="current_password" required
+                                       class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0088CC]/30 focus:border-[#0088CC] transition-colors pr-10">
+                                <button type="button" onclick="togglePasswordVisibility('current_password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Новый пароль</label>
+                            <div class="relative">
+                                <input type="password" name="new_password" id="new_password" required minlength="6"
+                                       class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0088CC]/30 focus:border-[#0088CC] transition-colors pr-10">
+                                <button type="button" onclick="togglePasswordVisibility('new_password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">Минимум 6 символов</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Подтвердите новый пароль</label>
+                            <div class="relative">
+                                <input type="password" name="confirm_password" id="confirm_password" required minlength="6"
+                                       class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0088CC]/30 focus:border-[#0088CC] transition-colors pr-10">
+                                <button type="button" onclick="togglePasswordVisibility('confirm_password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end">
+                        <button type="submit" class="px-6 py-2.5 bg-[#059669] text-white rounded-lg text-sm font-medium hover:bg-[#047857] transition-colors shadow-sm">
+                            <i class="fas fa-key mr-2"></i>Изменить пароль
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Email Change Modal -->
+<div id="emailChangeModal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-50" onclick="if(event.target===this)closeEmailChangeModal()">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Смена email</h3>
+            <button onclick="closeEmailChangeModal()" class="text-gray-400 hover:text-gray-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div id="email-change-error" class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700"></div>
+        <div id="email-change-step1">
+            <p class="text-sm text-gray-600 mb-4">Введите новый email. На него будет отправлена ссылка для подтверждения.</p>
+            <input type="email" id="new_email_input" placeholder="Новый email" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0088CC]/30 focus:border-[#0088CC] mb-4">
+            <button id="email-change-send-btn" onclick="requestEmailChange()" class="w-full py-2.5 bg-[#0088CC] text-white rounded-lg text-sm font-medium hover:bg-[#006fa3] transition-colors">Отправить ссылку</button>
+        </div>
+        <div id="email-change-step2" class="hidden">
+            <div class="text-center py-4">
+                <svg class="w-16 h-16 mx-auto text-[#0088CC] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                <p class="text-gray-700 font-medium mb-2">Ссылка отправлена!</p>
+                <p class="text-sm text-gray-500">Проверьте почту и перейдите по ссылке для подтверждения.</p>
+                <p class="text-xs text-gray-400 mt-2">Ссылка действительна 24 часа</p>
+            </div>
+            <button onclick="closeEmailChangeModal()" class="w-full py-2.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 mt-4">Закрыть</button>
+        </div>
+    </div>
+</div>
+
+<!-- Phone Change Modal -->
+<div id="phoneChangeModal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-50" onclick="if(event.target===this)closePhoneChangeModal()">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Смена номера телефона</h3>
+            <button onclick="closePhoneChangeModal()" class="text-gray-400 hover:text-gray-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div id="phone-change-error" class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700"></div>
+        <div id="phone-change-step1">
+            <p class="text-sm text-gray-600 mb-4">Введите новый номер телефона. На него будет отправлен SMS-код.</p>
+            <input type="tel" id="new_phone_input" placeholder="+7 (___) ___-__-__" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0088CC]/30 focus:border-[#0088CC] mb-4">
+            <button id="phone-change-send-btn" onclick="requestPhoneChange()" class="w-full py-2.5 bg-[#0088CC] text-white rounded-lg text-sm font-medium hover:bg-[#006fa3] transition-colors">Получить код</button>
+        </div>
+        <div id="phone-change-step2" class="hidden">
+            <p class="text-sm text-gray-600 mb-2">Код отправлен на <span id="phone-masked" class="font-medium"></span></p>
+            <input type="text" id="phone-verify-code" maxlength="6" placeholder="______" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-center text-xl tracking-[0.5em] mb-4">
+            <button id="phone-verify-btn" onclick="verifyPhoneChange()" class="w-full py-2.5 bg-[#0088CC] text-white rounded-lg text-sm font-medium hover:bg-[#006fa3] transition-colors mb-2">Подтвердить</button>
+            <button onclick="resendPhoneCode()" class="w-full py-2 text-sm text-[#0088CC] hover:underline">Отправить код повторно</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePasswordVisibility(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+    }
+}
+
+document.getElementById('new_phone_input')?.addEventListener('input', function(e) {
+    let x = e.target.value.replace(/\D/g, '').match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
+    e.target.value = !x[2] ? x[1] : '+' + x[1] + ' (' + x[2] + ') ' + x[3] + (x[4] ? '-' + x[4] : '') + (x[5] ? '-' + x[5] : '');
+});
+
+function openEmailChangeModal() {
+    document.getElementById('emailChangeModal').classList.remove('hidden');
+    document.getElementById('emailChangeModal').classList.add('flex');
+    document.getElementById('new_email_input').value = '';
+    document.getElementById('email-change-step1').classList.remove('hidden');
+    document.getElementById('email-change-step2').classList.add('hidden');
+    document.getElementById('email-change-error').classList.add('hidden');
+}
+function closeEmailChangeModal() {
+    document.getElementById('emailChangeModal').classList.add('hidden');
+    document.getElementById('emailChangeModal').classList.remove('flex');
+}
+function openPhoneChangeModal() {
+    document.getElementById('phoneChangeModal').classList.remove('hidden');
+    document.getElementById('phoneChangeModal').classList.add('flex');
+    document.getElementById('new_phone_input').value = '';
+    document.getElementById('phone-verify-code').value = '';
+    document.getElementById('phone-change-step1').classList.remove('hidden');
+    document.getElementById('phone-change-step2').classList.add('hidden');
+    document.getElementById('phone-change-error').classList.add('hidden');
+}
+function closePhoneChangeModal() {
+    document.getElementById('phoneChangeModal').classList.add('hidden');
+    document.getElementById('phoneChangeModal').classList.remove('flex');
+}
+
+async function requestEmailChange() {
+    var newEmail = document.getElementById('new_email_input').value.trim();
+    var errorEl = document.getElementById('email-change-error');
+    errorEl.classList.add('hidden');
+    if (!newEmail) { errorEl.textContent = 'Введите новый email'; errorEl.classList.remove('hidden'); return; }
+    var btn = document.getElementById('email-change-send-btn');
+    btn.disabled = true; btn.textContent = 'Отправка...';
+    try {
+        var response = await fetch('/api/profile/request-email-change', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token() }}' },
+            body: JSON.stringify({ new_email: newEmail })
+        });
+        var data = await response.json();
+        if (data.success) {
+            document.getElementById('email-change-step1').classList.add('hidden');
+            document.getElementById('email-change-step2').classList.remove('hidden');
+        } else { errorEl.textContent = data.message; errorEl.classList.remove('hidden'); }
+    } catch (e) { errorEl.textContent = 'Ошибка сети'; errorEl.classList.remove('hidden'); }
+    finally { btn.disabled = false; btn.textContent = 'Отправить ссылку'; }
+}
+
+async function requestPhoneChange() {
+    var newPhone = document.getElementById('new_phone_input').value.trim();
+    var errorEl = document.getElementById('phone-change-error');
+    errorEl.classList.add('hidden');
+    if (!newPhone) { errorEl.textContent = 'Введите номер'; errorEl.classList.remove('hidden'); return; }
+    var btn = document.getElementById('phone-change-send-btn');
+    btn.disabled = true; btn.textContent = 'Отправка...';
+    try {
+        var response = await fetch('/api/profile/request-phone-change', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token() }}' },
+            body: JSON.stringify({ new_phone: newPhone })
+        });
+        var data = await response.json();
+        if (data.success) {
+            document.getElementById('phone-change-step1').classList.add('hidden');
+            document.getElementById('phone-change-step2').classList.remove('hidden');
+            document.getElementById('phone-masked').textContent = data.phone || '';
+        } else { errorEl.textContent = data.message; errorEl.classList.remove('hidden'); }
+    } catch (e) { errorEl.textContent = 'Ошибка сети'; errorEl.classList.remove('hidden'); }
+    finally { btn.disabled = false; btn.textContent = 'Получить код'; }
+}
+
+async function verifyPhoneChange() {
+    var code = document.getElementById('phone-verify-code').value.trim();
+    var errorEl = document.getElementById('phone-change-error');
+    errorEl.classList.add('hidden');
+    if (!code || code.length !== 6) { errorEl.textContent = 'Введите 6-значный код'; errorEl.classList.remove('hidden'); return; }
+    var btn = document.getElementById('phone-verify-btn');
+    btn.disabled = true; btn.textContent = 'Проверка...';
+    try {
+        var response = await fetch('/api/profile/verify-phone-change', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token() }}' },
+            body: JSON.stringify({ code: code })
+        });
+        var data = await response.json();
+        if (data.success) {
+            document.getElementById('phone_display').value = data.new_phone;
+            closePhoneChangeModal();
+            alert('Номер телефона успешно изменён!');
+        } else { errorEl.textContent = data.message; errorEl.classList.remove('hidden'); }
+    } catch (e) { errorEl.textContent = 'Ошибка сети'; errorEl.classList.remove('hidden'); }
+    finally { btn.disabled = false; btn.textContent = 'Подтвердить'; }
+}
+
+function resendPhoneCode() {
+    document.getElementById('phone-change-step2').classList.add('hidden');
+    document.getElementById('phone-change-step1').classList.remove('hidden');
+}
+</script>
+{% endblock %}

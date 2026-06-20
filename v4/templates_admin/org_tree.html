@@ -1,0 +1,518 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Организационная структура — Админ панель | InBack{% endblock %}
+{% block page_title %}Организационная структура{% endblock %}
+
+{% block head %}
+<style>
+    .dept-card { transition: all 0.2s; border-left: 4px solid #0088CC; }
+    .dept-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .dept-child { margin-left: 2rem; position: relative; }
+    .dept-child::before { content: ''; position: absolute; left: -1.25rem; top: 0; bottom: 0; width: 2px; background: #e5e7eb; }
+    .dept-child::after { content: ''; position: absolute; left: -1.25rem; top: 1.5rem; width: 1rem; height: 2px; background: #e5e7eb; }
+    .role-badge { font-size: 11px; padding: 2px 10px; border-radius: 9999px; font-weight: 600; }
+    .role-director { background: #fef3c7; color: #92400e; }
+    .role-rop { background: #dbeafe; color: #1e40af; }
+    .role-manager { background: #f3f4f6; color: #374151; }
+    .perm-on { color: #059669; }
+    .perm-off { color: #d1d5db; }
+    .tree-connector { border-left: 2px dashed #cbd5e1; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between flex-wrap gap-3">
+        <div>
+            <p class="text-gray-500 text-sm mt-1">Управляйте отделами, ролями и правами доступа сотрудников</p>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="document.getElementById('addDeptModal').classList.remove('hidden')" class="bg-[#0088CC] text-white px-4 py-2 rounded-lg hover:bg-[#006da3] transition text-sm font-medium">
+                <i class="fas fa-plus mr-2"></i>Добавить отдел
+            </button>
+            <button onclick="document.getElementById('addRoleModal').classList.remove('hidden')" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition text-sm font-medium">
+                <i class="fas fa-user-tag mr-2"></i>Роли
+            </button>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 space-y-4">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                <h3 class="font-bold text-gray-900 text-base mb-4"><i class="fas fa-sitemap mr-2 text-[#0088CC]"></i>Структура компании</h3>
+
+                {% if not departments %}
+                <div class="text-center py-8 text-gray-400">
+                    <i class="fas fa-building text-4xl mb-3"></i>
+                    <p>Нет отделов. Создайте первый отдел для начала работы.</p>
+                </div>
+                {% else %}
+                <div class="space-y-3">
+                    {% for dept in departments if not dept.parent_id %}
+                    <div class="dept-card bg-white rounded-lg border border-gray-200 p-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-[#0088CC] bg-opacity-10 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-building text-[#0088CC]"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">{{ dept.name }}</h4>
+                                    <p class="text-xs text-gray-500">
+                                        {% if dept.head_manager %}
+                                        <i class="fas fa-user-tie mr-1"></i>{{ dept.head_manager.full_name }}
+                                        {% endif %}
+                                        <span class="ml-2"><i class="fas fa-users mr-1"></i>{{ dept.member_count }} чел.</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="editDept({{ dept.id }}, '{{ dept.name }}', '{{ dept.description or '' }}', {{ dept.parent_id or 'null' }}, {{ dept.head_manager_id or 'null' }})" class="text-gray-400 hover:text-[#0088CC] p-1.5" title="Редактировать">
+                                    <i class="fas fa-pen text-xs"></i>
+                                </button>
+                                <button onclick="deleteDept({{ dept.id }}, '{{ dept.name }}')" class="text-gray-400 hover:text-red-500 p-1.5" title="Удалить">
+                                    <i class="fas fa-trash text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        {% set children = departments | selectattr('parent_id', 'equalto', dept.id) | list %}
+                        {% if children %}
+                        <div class="mt-3 space-y-2">
+                            {% for child in children %}
+                            <div class="dept-child">
+                                <div class="bg-gray-50 rounded-lg border border-gray-100 p-3">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <i class="fas fa-folder text-[#0088CC] text-sm"></i>
+                                            <span class="font-medium text-gray-800 text-sm">{{ child.name }}</span>
+                                            {% if child.head_manager %}
+                                            <span class="text-xs text-gray-500">— {{ child.head_manager.full_name }}</span>
+                                            {% endif %}
+                                            <span class="text-xs text-gray-400"><i class="fas fa-users mr-1"></i>{{ child.member_count }}</span>
+                                        </div>
+                                        <div class="flex items-center gap-1">
+                                            <button onclick="editDept({{ child.id }}, '{{ child.name }}', '{{ child.description or '' }}', {{ child.parent_id or 'null' }}, {{ child.head_manager_id or 'null' }})" class="text-gray-400 hover:text-[#0088CC] p-1" title="Редактировать">
+                                                <i class="fas fa-pen text-[10px]"></i>
+                                            </button>
+                                            <button onclick="deleteDept({{ child.id }}, '{{ child.name }}')" class="text-gray-400 hover:text-red-500 p-1" title="Удалить">
+                                                <i class="fas fa-trash text-[10px]"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {% set members = managers | selectattr('department_id', 'equalto', child.id) | list %}
+                                    {% if members %}
+                                    <div class="mt-2 flex flex-wrap gap-1.5">
+                                        {% for m in members %}
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-white border border-gray-200 rounded-full text-xs">
+                                            <img src="{{ m.profile_image }}" class="w-4 h-4 rounded-full" alt="">
+                                            {{ m.full_name }}
+                                            {% if m.org_role %}
+                                            <span class="role-badge {% if m.org_role.key == 'director' %}role-director{% elif m.org_role.key == 'rop' %}role-rop{% else %}role-manager{% endif %}">{{ m.org_role.name }}</span>
+                                            {% endif %}
+                                        </span>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        {% set root_members = managers | selectattr('department_id', 'equalto', dept.id) | list %}
+                        {% if root_members %}
+                        <div class="mt-3 flex flex-wrap gap-1.5">
+                            {% for m in root_members %}
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-50 border border-gray-200 rounded-full text-xs">
+                                <img src="{{ m.profile_image }}" class="w-4 h-4 rounded-full" alt="">
+                                {{ m.full_name }}
+                                {% if m.org_role %}
+                                <span class="role-badge {% if m.org_role.key == 'director' %}role-director{% elif m.org_role.key == 'rop' %}role-rop{% else %}role-manager{% endif %}">{{ m.org_role.name }}</span>
+                                {% endif %}
+                            </span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                <h3 class="font-bold text-gray-900 text-base mb-4"><i class="fas fa-users mr-2 text-[#0088CC]"></i>Сотрудники</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500">Сотрудник</th>
+                                <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500">Отдел</th>
+                                <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500">Роль</th>
+                                <th class="px-4 py-2.5 text-center text-xs font-semibold text-gray-500">Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for m in managers %}
+                            <tr class="hover:bg-gray-50" id="manager-row-{{ m.id }}">
+                                <td class="px-4 py-2.5">
+                                    <div class="flex items-center gap-2">
+                                        <img src="{{ m.profile_image }}" class="w-7 h-7 rounded-full" alt="">
+                                        <div>
+                                            <div class="font-medium text-gray-900 text-sm">{{ m.full_name }}</div>
+                                            <div class="text-xs text-gray-400">{{ m.email }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-2.5 text-gray-700 text-sm">
+                                    {{ m.department.name if m.department else '—' }}
+                                </td>
+                                <td class="px-4 py-2.5">
+                                    {% if m.org_role %}
+                                    <span class="role-badge {% if m.org_role.key == 'director' %}role-director{% elif m.org_role.key == 'rop' %}role-rop{% else %}role-manager{% endif %}">{{ m.org_role.name }}</span>
+                                    {% else %}
+                                    <span class="text-gray-400 text-xs">Не назначена</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-2.5 text-center">
+                                    <button onclick="assignManager({{ m.id }}, '{{ m.full_name }}', {{ m.department_id or 'null' }}, {{ m.org_role_id or 'null' }})" class="text-[#0088CC] hover:text-[#006da3] text-xs font-medium">
+                                        <i class="fas fa-edit mr-1"></i>Назначить
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                <h3 class="font-bold text-gray-900 text-base mb-4"><i class="fas fa-shield-alt mr-2 text-[#0088CC]"></i>Роли и права</h3>
+                <div class="space-y-3">
+                    {% for role in roles %}
+                    <div class="border border-gray-100 rounded-lg p-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="role-badge {% if role.key == 'director' %}role-director{% elif role.key == 'rop' %}role-rop{% else %}role-manager{% endif %}">{{ role.name }}</span>
+                            <button onclick="editRole({{ role.id }})" class="text-gray-400 hover:text-[#0088CC] text-xs"><i class="fas fa-pen"></i></button>
+                            <span class="text-xs text-gray-400">{{ role.members.count() }} чел.</span>
+                        </div>
+                        <div class="grid grid-cols-1 gap-1 text-xs">
+                            <div class="flex items-center gap-1.5">
+                                <i class="fas fa-{% if role.can_view_all_deals or role.can_view_department_deals %}check perm-on{% else %}times perm-off{% endif %}"></i>
+                                <span class="text-gray-600">Сделки: {% if role.can_view_all_deals %}все{% elif role.can_view_department_deals %}отдела{% else %}свои{% endif %}</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <i class="fas fa-{% if role.can_view_all_archive or role.can_view_department_archive %}check perm-on{% else %}times perm-off{% endif %}"></i>
+                                <span class="text-gray-600">Архив: {% if role.can_view_all_archive %}все{% elif role.can_view_department_archive %}отдела{% else %}свои{% endif %}</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <i class="fas fa-{% if role.can_change_deal_responsible %}check perm-on{% else %}times perm-off{% endif %}"></i>
+                                <span class="text-gray-600">Смена ответственного</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <i class="fas fa-{% if role.can_view_statistics %}check perm-on{% else %}times perm-off{% endif %}"></i>
+                                <span class="text-gray-600">Статистика</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <i class="fas fa-{% if role.can_receive_leads %}check perm-on{% else %}times perm-off{% endif %}"></i>
+                                <span class="text-gray-600">Приём заявок с сайта</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <button onclick="document.getElementById('addRoleModal').classList.remove('hidden')" class="w-full mt-3 text-center text-xs text-[#0088CC] hover:underline">
+                    <i class="fas fa-plus mr-1"></i>Добавить роль
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="addDeptModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-gray-900" id="deptModalTitle">Добавить отдел</h3>
+            <button onclick="closeDeptModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+        </div>
+        <form id="deptForm" method="POST" action="/admin/api/departments">
+            <input type="hidden" name="dept_id" id="deptId">
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Название</label>
+                    <input type="text" name="name" id="deptName" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-[#0088CC] focus:border-[#0088CC]" placeholder="Отдел продаж">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Описание</label>
+                    <input type="text" name="description" id="deptDesc" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" placeholder="Описание отдела">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Родительский отдел</label>
+                    <select name="parent_id" id="deptParent" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                        <option value="">— Верхний уровень —</option>
+                        {% for dept in departments %}
+                        <option value="{{ dept.id }}">{{ dept.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Руководитель</label>
+                    <select name="head_manager_id" id="deptHead" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                        <option value="">— Не назначен —</option>
+                        {% for m in managers %}
+                        <option value="{{ m.id }}">{{ m.full_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="flex gap-2 mt-5">
+                <button type="button" onclick="closeDeptModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50">Отмена</button>
+                <button type="submit" class="flex-1 px-4 py-2 bg-[#0088CC] text-white rounded-lg text-sm font-medium hover:bg-[#006da3]">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="assignModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-gray-900">Назначить сотрудника</h3>
+            <button onclick="closeAssignModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+        </div>
+        <p class="text-sm text-gray-600 mb-4" id="assignManagerName"></p>
+        <form id="assignForm" method="POST" action="/admin/api/managers/assign">
+            <input type="hidden" name="manager_id" id="assignManagerId">
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Отдел</label>
+                    <select name="department_id" id="assignDept" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                        <option value="">— Не назначен —</option>
+                        {% for dept in departments %}
+                        <option value="{{ dept.id }}">{{ dept.full_path }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Роль</label>
+                    <select name="org_role_id" id="assignRole" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                        <option value="">— Не назначена —</option>
+                        {% for role in roles %}
+                        <option value="{{ role.id }}">{{ role.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="flex gap-2 mt-5">
+                <button type="button" onclick="closeAssignModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50">Отмена</button>
+                <button type="submit" class="flex-1 px-4 py-2 bg-[#0088CC] text-white rounded-lg text-sm font-medium hover:bg-[#006da3]">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="addRoleModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+    <div class="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 p-6 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-gray-900" id="roleModalTitle">Добавить роль</h3>
+            <button onclick="closeRoleModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+        </div>
+        <form id="roleForm" method="POST" action="/admin/api/roles">
+            <input type="hidden" name="role_id" id="roleId">
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Название</label>
+                    <input type="text" name="name" id="roleName" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" placeholder="Старший менеджер">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Ключ</label>
+                    <input type="text" name="key" id="roleKey" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" placeholder="senior_manager">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Уровень (0-100)</label>
+                    <input type="number" name="level" id="roleLevel" value="10" min="0" max="100" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                </div>
+                <div class="border-t pt-3">
+                    <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Права доступа</p>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-2 text-sm text-gray-700">
+                            <input type="checkbox" name="can_view_all_deals" id="roleViewAllDeals" class="rounded border-gray-300 text-[#0088CC]">
+                            Просмотр всех сделок
+                        </label>
+                        <label class="flex items-center gap-2 text-sm text-gray-700">
+                            <input type="checkbox" name="can_view_department_deals" id="roleViewDeptDeals" class="rounded border-gray-300 text-[#0088CC]">
+                            Просмотр сделок отдела
+                        </label>
+                        <label class="flex items-center gap-2 text-sm text-gray-700">
+                            <input type="checkbox" name="can_view_own_deals" id="roleViewOwnDeals" checked class="rounded border-gray-300 text-[#0088CC]">
+                            Просмотр своих сделок
+                        </label>
+                        <label class="flex items-center gap-2 text-sm text-gray-700">
+                            <input type="checkbox" name="can_change_deal_responsible" id="roleChangeDealResp" class="rounded border-gray-300 text-[#0088CC]">
+                            Смена ответственного в сделке
+                        </label>
+                        <label class="flex items-center gap-2 text-sm text-gray-700">
+                            <input type="checkbox" name="can_view_all_archive" id="roleViewAllArchive" class="rounded border-gray-300 text-[#0088CC]">
+                            Просмотр всего архива
+                        </label>
+                        <label class="flex items-center gap-2 text-sm text-gray-700">
+                            <input type="checkbox" name="can_view_department_archive" id="roleViewDeptArchive" class="rounded border-gray-300 text-[#0088CC]">
+                            Просмотр архива отдела
+                        </label>
+                        <label class="flex items-center gap-2 text-sm text-gray-700">
+                            <input type="checkbox" name="can_view_own_archive" id="roleViewOwnArchive" checked class="rounded border-gray-300 text-[#0088CC]">
+                            Просмотр своего архива
+                        </label>
+                        <label class="flex items-center gap-2 text-sm text-gray-700">
+                            <input type="checkbox" name="can_manage_department" id="roleManageDept" class="rounded border-gray-300 text-[#0088CC]">
+                            Управление отделом
+                        </label>
+                        <label class="flex items-center gap-2 text-sm text-gray-700">
+                            <input type="checkbox" name="can_view_statistics" id="roleViewStats" class="rounded border-gray-300 text-[#0088CC]">
+                            Просмотр статистики
+                        </label>
+                        <label class="flex items-center gap-2 text-sm text-gray-700">
+                            <input type="checkbox" name="can_manage_managers" id="roleManageManagers" class="rounded border-gray-300 text-[#0088CC]">
+                            Управление менеджерами
+                        </label>
+                        <label class="flex items-center gap-2 text-sm text-gray-700">
+                            <input type="checkbox" name="can_receive_leads" id="roleReceiveLeads" class="rounded border-gray-300 text-[#0088CC]">
+                            Приём заявок с сайта
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-2 mt-5">
+                <button type="button" onclick="closeRoleModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50">Отмена</button>
+                <button type="submit" class="flex-1 px-4 py-2 bg-[#0088CC] text-white rounded-lg text-sm font-medium hover:bg-[#006da3]">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function closeDeptModal() {
+    document.getElementById('addDeptModal').classList.add('hidden');
+    document.getElementById('deptForm').reset();
+    document.getElementById('deptId').value = '';
+    document.getElementById('deptModalTitle').textContent = 'Добавить отдел';
+}
+
+function editDept(id, name, desc, parentId, headId) {
+    document.getElementById('deptModalTitle').textContent = 'Редактировать отдел';
+    document.getElementById('deptId').value = id;
+    document.getElementById('deptName').value = name;
+    document.getElementById('deptDesc').value = desc;
+    document.getElementById('deptParent').value = parentId || '';
+    document.getElementById('deptHead').value = headId || '';
+    document.getElementById('addDeptModal').classList.remove('hidden');
+}
+
+function deleteDept(id, name) {
+    if (confirm('Удалить отдел "' + name + '"? Сотрудники будут откреплены от отдела.')) {
+        fetch('/admin/api/departments/' + id, { method: 'DELETE' })
+            .then(r => r.json())
+            .then(d => { if (d.success) location.reload(); else alert(d.error); });
+    }
+}
+
+function closeAssignModal() {
+    document.getElementById('assignModal').classList.add('hidden');
+}
+
+function assignManager(id, name, deptId, roleId) {
+    document.getElementById('assignManagerId').value = id;
+    document.getElementById('assignManagerName').textContent = name;
+    document.getElementById('assignDept').value = deptId || '';
+    document.getElementById('assignRole').value = roleId || '';
+    document.getElementById('assignModal').classList.remove('hidden');
+}
+
+function editRole(id) {
+    fetch('/admin/api/roles/' + id)
+        .then(r => { if (!r.ok) throw new Error('Ошибка загрузки роли'); return r.json(); })
+        .then(role => {
+            document.getElementById('roleModalTitle').textContent = 'Редактировать роль';
+            document.getElementById('roleId').value = role.id;
+            document.getElementById('roleName').value = role.name;
+            document.getElementById('roleKey').value = role.key;
+            document.getElementById('roleLevel').value = role.level || 10;
+            document.getElementById('roleViewAllDeals').checked = role.can_view_all_deals;
+            document.getElementById('roleViewDeptDeals').checked = role.can_view_department_deals;
+            document.getElementById('roleViewOwnDeals').checked = role.can_view_own_deals;
+            document.getElementById('roleChangeDealResp').checked = role.can_change_deal_responsible;
+            document.getElementById('roleViewAllArchive').checked = role.can_view_all_archive;
+            document.getElementById('roleViewDeptArchive').checked = role.can_view_department_archive;
+            document.getElementById('roleViewOwnArchive').checked = role.can_view_own_archive;
+            document.getElementById('roleManageDept').checked = role.can_manage_department;
+            document.getElementById('roleViewStats').checked = role.can_view_statistics;
+            document.getElementById('roleManageManagers').checked = role.can_manage_managers;
+            document.getElementById('roleReceiveLeads').checked = role.can_receive_leads;
+            document.getElementById('addRoleModal').classList.remove('hidden');
+        })
+        .catch(err => alert(err.message || 'Не удалось загрузить роль'));
+}
+
+function closeRoleModal() {
+    document.getElementById('addRoleModal').classList.add('hidden');
+    document.getElementById('roleForm').reset();
+    document.getElementById('roleId').value = '';
+    document.getElementById('roleModalTitle').textContent = 'Добавить роль';
+}
+
+document.getElementById('deptForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const fd = new FormData(this);
+    const deptId = fd.get('dept_id');
+    const url = deptId ? '/admin/api/departments/' + deptId : '/admin/api/departments';
+    fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.fromEntries(fd))
+    }).then(r => r.json()).then(d => { if (d.success) location.reload(); else alert(d.error); });
+});
+
+document.getElementById('assignForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const fd = new FormData(this);
+    fetch('/admin/api/managers/assign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.fromEntries(fd))
+    }).then(r => r.json()).then(d => { if (d.success) location.reload(); else alert(d.error); });
+});
+
+document.getElementById('roleForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const fd = new FormData(this);
+    const data = {};
+    for (const [key, value] of fd.entries()) {
+        data[key] = value;
+    }
+    const elMap = {
+        'can_view_all_deals': 'roleViewAllDeals',
+        'can_view_department_deals': 'roleViewDeptDeals',
+        'can_view_own_deals': 'roleViewOwnDeals',
+        'can_change_deal_responsible': 'roleChangeDealResp',
+        'can_view_all_archive': 'roleViewAllArchive',
+        'can_view_department_archive': 'roleViewDeptArchive',
+        'can_view_own_archive': 'roleViewOwnArchive',
+        'can_manage_department': 'roleManageDept',
+        'can_view_statistics': 'roleViewStats',
+        'can_manage_managers': 'roleManageManagers',
+        'can_receive_leads': 'roleReceiveLeads'
+    };
+    Object.keys(elMap).forEach(cb => {
+        data[cb] = document.getElementById(elMap[cb]).checked;
+    });
+    const roleId = fd.get('role_id');
+    const url = roleId ? '/admin/api/roles/' + roleId : '/admin/api/roles';
+    fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    }).then(r => r.json()).then(d => { if (d.success) location.reload(); else alert(d.error); });
+});
+</script>
+{% endblock %}

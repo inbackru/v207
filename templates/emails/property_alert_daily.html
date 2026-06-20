@@ -1,0 +1,124 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Дневная сводка новых объектов - InBack{% endblock %}
+
+{% block content %}
+<h1>📅 Дневная сводка</h1>
+
+<p>Здравствуйте{% if user and user.full_name %}, {{ user.full_name.split()[0] }}{% endif %}!</p>
+
+<p>За последние 24 часа появилось <strong>{{ properties_count }}</strong> 
+{% if properties_count == 1 %}новый объект{% elif properties_count < 5 %}новых объекта{% else %}новых объектов{% endif %}, 
+соответствующих вашему поиску <strong>"{{ search.name }}"</strong>.</p>
+
+<!-- Properties List -->
+{% for property in properties %}
+<div style="border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; margin: 16px 0; background: white;">
+    <div style="display: flex; flex-direction: row; flex-wrap: wrap;">
+        {% if property.main_image %}
+        <div style="flex: 0 0 auto; width: 200px; min-height: 180px; background: #f3f4f6;">
+            <img src="{{ property.main_image }}" alt="{{ property.title }}" 
+                 style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+        {% endif %}
+        
+        <div style="flex: 1; min-width: 250px; padding: 20px;">
+            <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600; color: #1d1d1f;">
+                {{ property.title }}
+            </h3>
+            
+            <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;">
+                {% if property.rooms is not none %}
+                <span style="background: #f0f9ff; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-size: 13px;">
+                    {% if property.rooms == 0 %}Студия{% else %}{{ property.rooms }}-комн.{% endif %}
+                </span>
+                {% endif %}
+                
+                {% if property.area %}
+                <span style="background: #f0fdf4; color: #15803d; padding: 4px 10px; border-radius: 6px; font-size: 13px;">
+                    {{ property.area|round(1) }} м²
+                </span>
+                {% endif %}
+                
+                {% if property.floor and property.total_floors %}
+                <span style="background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 6px; font-size: 13px;">
+                    {{ property.floor }}/{{ property.total_floors }} эт
+                </span>
+                {% endif %}
+            </div>
+            
+            {% if property.price %}
+            <div style="margin: 8px 0;">
+                <div style="font-size: 24px; font-weight: 700; color: #0088CC;">
+                    {{ '{:,.0f}'.format(property.price).replace(',', ' ') }} ₽
+                </div>
+                {% if property.price_per_sqm %}
+                <div style="font-size: 12px; color: #6b7280;">
+                    {{ '{:,.0f}'.format(property.price_per_sqm).replace(',', ' ') }} ₽/м²
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            {% if property.residential_complex %}
+            <p style="margin: 8px 0; color: #6b7280; font-size: 14px;">
+                ЖК {{ property.residential_complex.name }}
+            </p>
+            {% endif %}
+            
+            <a href="{{ base_url }}/property/{{ property.id }}" 
+               style="display: inline-block; margin-top: 12px; background: #0088CC; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 600;">
+                Подробнее
+            </a>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- View All Button -->
+<div style="text-align: center; margin: 32px 0;">
+    <a href="{{ base_url }}/properties" class="btn-primary">
+        Посмотреть все объекты
+    </a>
+</div>
+
+<!-- Search Info -->
+<div class="highlight-box">
+    <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1d1d1f;">
+        Параметры поиска "{{ search.name }}"
+    </h3>
+    <p style="margin: 0; font-size: 14px; color: #6b7280;">
+        {% if search.property_type %}Тип: {{ search.property_type }}{% endif %}
+        {% if search.price_min or search.price_max %}
+        <br>Цена: {% if search.price_min %}от {{ '{:,.0f}'.format(search.price_min).replace(',', ' ') }} ₽{% endif %}
+        {% if search.price_max %}до {{ '{:,.0f}'.format(search.price_max).replace(',', ' ') }} ₽{% endif %}
+        {% endif %}
+        {% if search.size_min or search.size_max %}
+        <br>Площадь: {% if search.size_min %}от {{ search.size_min }} м²{% endif %}
+        {% if search.size_max %}до {{ search.size_max }} м²{% endif %}
+        {% endif %}
+        {% if search.location %}<br>Район: {{ search.location }}{% endif %}
+    </p>
+</div>
+
+<!-- Tips -->
+<div style="background: #fef3c7; border: 1px solid #fbbf24; border-radius: 8px; padding: 16px; margin: 24px 0;">
+    <p style="margin: 0; font-size: 14px; color: #92400e;">
+        💡 <strong>Совет:</strong> Добавьте объекты в избранное, чтобы не потерять их, 
+        или создайте персональную подборку для сравнения.
+    </p>
+</div>
+
+<!-- Unsubscribe -->
+<div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #e5e7eb; text-align: center;">
+    <p style="font-size: 13px; color: #9ca3af; margin: 0;">
+        Дневная сводка для поиска "{{ search.name }}".<br>
+        <a href="{{ unsubscribe_url }}" style="color: #6b7280; text-decoration: underline;">
+            Отписаться от уведомлений
+        </a> | 
+        <a href="{{ base_url }}/user/dashboard?tab=saved-searches" style="color: #6b7280; text-decoration: underline;">
+            Управлять настройками
+        </a>
+    </p>
+</div>
+{% endblock %}

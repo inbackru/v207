@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+
+{% block title %}Застройщики {{ current_city.name_genitive or current_city.name if current_city else 'Краснодара' }} — новостройки с кэшбеком | InBack{% endblock %}
+{% block description %}Проверенные застройщики {{ city_gen }} на InBack: {{ total_developers }} компаний, {{ total_complexes }}+ ЖК. Купите квартиру в новостройке и получите кэшбек до 5%. Официальные партнёры, полная юридическая проверка.{% endblock %}
+{% block keywords %}застройщики {{ city_name }}, надёжные застройщики {{ city_name }}, рейтинг застройщиков {{ city_name }}, новостройки от застройщика, кэшбек застройщики, жилые комплексы {{ city_name }}, купить квартиру в новостройке {{ city_name }}, застройщики аккредитованные банками, ипотека от застройщика, партнёры inback{% endblock %}
+
+{% block og_title %}Застройщики {{ current_city.name_genitive or current_city.name if current_city else 'Краснодара' }} с кэшбеком | InBack{% endblock %}
+{% block og_description %}{{ total_developers }} проверенных застройщиков {{ city_gen }} — {{ total_complexes }}+ ЖК с кэшбеком до 5% при покупке квартиры в новостройке.{% endblock %}
+{% block twitter_title %}Застройщики {{ current_city.name_genitive or current_city.name if current_city else 'Краснодара' }} с кэшбеком | InBack{% endblock %}
+{% block twitter_description %}{{ total_developers }} проверенных застройщиков, {{ total_complexes }}+ ЖК, кэшбек до 5%.{% endblock %}
+{% block twitter_image %}{{ url_for('static', filename='images/developers-og.jpg', _external=True) }}{% endblock %}
+
+{% block head %}
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ url_for('devs.developers_city', city_slug=current_city.slug if current_city else 'krasnodar', _external=True) }}">
+<meta property="og:site_name" content="InBack">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="{{ url_for('devs.developers_city', city_slug=current_city.slug if current_city else 'krasnodar', _external=True) }}">
+<link rel="canonical" href="{{ url_for('devs.developers_city', city_slug=current_city.slug if current_city else 'krasnodar', _external=True) }}" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "Застройщики {{ city_gen }} — {{ total_developers }} компаний | InBack",
+  "description": "Проверенные застройщики {{ city_gen }} с кэшбеком при покупке квартиры в новостройке",
+  "url": "{{ url_for('devs.developers_city', city_slug=current_city.slug if current_city else 'krasnodar', _external=True) }}",
+  "numberOfItems": {{ total_developers }},
+  "itemListElement": [
+    {% for developer in developers[:10] %}
+    {
+      "@type": "ListItem",
+      "position": {{ loop.index }},
+      "item": {
+        "@type": "Organization",
+        "name": "{{ developer.name }}",
+        "url": "{{ url_for('devs.developer_page', developer_slug=developer.slug, _external=True) }}"{% if developer.logo_url %},
+        "logo": "{{ developer.logo_url }}"{% endif %}
+      }
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Главная", "item": "{{ url_for('index', _external=True) }}"},
+    {"@type": "ListItem", "position": 2, "name": "{{ city_name }}", "item": "{{ url_for('city_pages.city_home', city_slug=current_city.slug if current_city else 'krasnodar', _external=True) }}"},
+    {"@type": "ListItem", "position": 3, "name": "Застройщики", "item": "{{ url_for('devs.developers_city', city_slug=current_city.slug if current_city else 'krasnodar', _external=True) }}"}
+  ]
+}
+</script>
+
+<script>
+tailwind.config = {
+    theme: {
+        extend: {
+            colors: {
+                ton: { blue: '#0088cc', dark: '#222426', light: '#f5f5f5', accent: '#00a3e0' }
+            },
+            fontFamily: { sans: ['Manrope', 'sans-serif'] }
+        }
+    }
+}
+</script>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="container mx-auto px-4 py-3 text-sm">
+<nav aria-label="Breadcrumb">
+<ol class="inline-flex items-center space-x-1 md:space-x-3">
+<li class="inline-flex items-center">
+<a class="text-[#0088CC] hover:underline inline-flex items-center" href="{{ url_for('index') }}">
+<svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
+Главная
+</a>
+</li>
+{% if current_city %}
+<li>
+<div class="flex items-center">
+<svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
+<a href="{{ url_for('city_pages.city_home', city_slug=current_city.slug) }}" class="text-[#0088CC] hover:underline ml-1 md:ml-2">{{ current_city.name }}</a>
+</div>
+</li>
+{% endif %}
+<li aria-current="page">
+<div class="flex items-center">
+<svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
+<span class="text-gray-500 ml-1 md:ml-2">Застройщики</span>
+</div>
+</li>
+</ol>
+</nav>
+</div>
+{% endblock %}
+
+{% block content %}
+<section class="hero-gradient py-14 md:py-20">
+<div class="container mx-auto px-4">
+<div class="max-w-3xl mx-auto text-center">
+<div class="inline-flex items-center gap-2 bg-blue-50 text-[#0088CC] rounded-full px-4 py-1.5 text-sm font-medium mb-5">
+  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+  Проверенные партнёры
+</div>
+<h1 class="text-4xl md:text-5xl font-bold mb-4">
+  Застройщики {{ (current_city.name_genitive or current_city.name) if current_city else "Краснодара" }}
+</h1>
+<p class="text-lg text-gray-600 mb-8">Работаем только с официальными застройщиками. Получите кэшбек до&nbsp;5% при покупке квартиры — без скрытых условий</p>
+<div class="flex flex-col sm:flex-row justify-center gap-3">
+<a class="px-6 py-3 bg-[#0088CC] text-white rounded-xl hover:bg-[#006699] transition-colors font-semibold shadow-sm" href="#developers">Все застройщики</a>
+<a class="px-6 py-3 bg-white text-[#0088CC] border border-[#0088CC] rounded-xl hover:bg-blue-50 transition-colors font-semibold" href="#calculator">Рассчитать кэшбек</a>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Stats -->
+<section class="bg-white border-b border-gray-100 py-10">
+<div class="container mx-auto px-4">
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto">
+<div class="text-center">
+<div class="text-3xl font-bold text-[#0088CC]">{{ total_developers }}</div>
+<div class="text-sm text-gray-500 mt-1">Застройщиков</div>
+</div>
+<div class="text-center">
+<div class="text-3xl font-bold text-[#0088CC]">{{ total_complexes }}+</div>
+<div class="text-sm text-gray-500 mt-1">Жилых комплексов</div>
+</div>
+<div class="text-center">
+<div class="text-3xl font-bold text-[#0088CC]">до 5%</div>
+<div class="text-sm text-gray-500 mt-1">Кэшбек покупателю</div>
+</div>
+<div class="text-center">
+<div class="text-3xl font-bold text-[#0088CC]">500 000 ₽</div>
+<div class="text-sm text-gray-500 mt-1">Максимальная сумма</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Developers Grid -->
+<section id="developers" class="py-14 bg-gray-50">
+<div class="container mx-auto px-4">
+
+<!-- Header + Search -->
+<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+<div>
+  <h2 class="text-2xl font-bold text-gray-900">Список застройщиков</h2>
+  <p class="text-sm text-gray-500 mt-1">{{ developers|length }} компаний {{ current_city.name_prepositional_with_v if current_city else "в Краснодаре" }}</p>
+</div>
+<div class="relative w-full md:w-72">
+  <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+  <input id="devSearch" type="text" placeholder="Поиск застройщика..." autocomplete="off"
+    class="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#0088CC]/30 focus:border-[#0088CC] bg-white">
+</div>
+</div>
+
+<div id="devsGrid" class="developers-grid grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+{% for developer in developers %}
+<a href="/developer/{{ developer.slug }}"
+   class="dev-card-link block"
+   data-name="{{ developer.name|lower }}">
+<div class="developer-card bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 p-6 h-full flex flex-col">
+
+  <!-- Logo + Name -->
+  <div class="flex items-center gap-4 mb-5">
+    <div class="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden bg-gray-50 border border-gray-100">
+      {% if developer.logo_url %}
+      <img src="{{ developer.logo_url }}" alt="{{ developer.name }}" class="w-full h-full object-contain p-1"
+           onerror="this.parentElement.innerHTML='<span class=\'text-[#0088CC] font-bold text-base\'>{{ developer.name[:2] }}</span>'">
+      {% else %}
+      <span class="text-[#0088CC] font-bold text-base">{{ developer.name[:2] }}</span>
+      {% endif %}
+    </div>
+    <div class="min-w-0">
+      <h3 class="font-bold text-gray-900 leading-tight truncate">{{ developer.name }}</h3>
+      {% if developer.founded_year %}
+      <p class="text-xs text-gray-400 mt-0.5">С {{ developer.founded_year }} года</p>
+      {% else %}
+      <p class="text-xs text-gray-400 mt-0.5">Застройщик</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Stats row -->
+  <div class="flex gap-4 mt-auto pt-4 border-t border-gray-50">
+    <div class="flex-1 text-center">
+      <div class="text-lg font-bold text-gray-900">{{ developer.complexes_count }}</div>
+      <div class="text-xs text-gray-400">
+        {% if developer.complexes_count == 1 %}ЖК{% elif developer.complexes_count in [2,3,4] %}ЖК{% else %}ЖК{% endif %}
+      </div>
+    </div>
+    {% if developer.stats and developer.stats.min_price and developer.stats.min_price > 0 %}
+    <div class="flex-1 text-center border-l border-gray-100">
+      <div class="text-lg font-bold text-gray-900">{{ (developer.stats.min_price / 1000000)|round(1) }}&nbsp;млн</div>
+      <div class="text-xs text-gray-400">от ₽</div>
+    </div>
+    {% endif %}
+    {% if developer.completed_projects and developer.completed_projects > 0 %}
+    <div class="flex-1 text-center border-l border-gray-100">
+      <div class="text-lg font-bold text-gray-900">{{ developer.completed_projects }}</div>
+      <div class="text-xs text-gray-400">сдано</div>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+</a>
+{% else %}
+<div class="col-span-3 text-center py-16 text-gray-400">
+  <svg class="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+  Застройщики не найдены
+</div>
+{% endfor %}
+</div>
+
+<!-- No results message for search -->
+<p id="noResults" class="hidden text-center py-12 text-gray-400 text-sm">Ничего не найдено — попробуйте другой запрос</p>
+
+</div>
+</section>
+
+<style>
+.developers-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+@media (min-width: 1024px) {
+    .developers-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 1023px) and (min-width: 641px) {
+    .developers-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+    .developers-grid { grid-template-columns: 1fr; }
+}
+</style>
+
+<script>
+(function() {
+    const input = document.getElementById('devSearch');
+    const cards = document.querySelectorAll('.dev-card-link');
+    const noResults = document.getElementById('noResults');
+    input.addEventListener('input', function() {
+        const q = this.value.trim().toLowerCase();
+        let visible = 0;
+        cards.forEach(function(card) {
+            const name = card.dataset.name || '';
+            const match = !q || name.includes(q);
+            card.style.display = match ? '' : 'none';
+            if (match) visible++;
+        });
+        noResults.classList.toggle('hidden', visible > 0);
+    });
+})();
+</script>
+
+{% endblock %}

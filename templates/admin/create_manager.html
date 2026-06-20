@@ -1,0 +1,322 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{{ 'Редактировать' if manager else 'Создать' }} менеджера - Админ панель | InBack{% endblock %}
+{% block page_title %}{{ 'Редактировать менеджера' if manager else 'Новый менеджер' }}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+    <!-- Page Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">{{ 'Редактировать менеджера' if manager else 'Новый менеджер' }}</h1>
+            <p class="text-gray-600 mt-1">{{ 'Изменить данные менеджера' if manager else 'Добавить нового менеджера в систему' }}</p>
+        </div>
+        <div class="flex space-x-3">
+            <a href="{{ url_for('adm.admin_managers') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg">
+                <i class="fas fa-arrow-left mr-2"></i>К менеджерам
+            </a>
+        </div>
+    </div>
+
+    <!-- Manager Form -->
+    <div class="bg-white rounded-lg shadow">
+        <form method="POST" enctype="multipart/form-data" class="p-6 space-y-6">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <!-- Personal Information -->
+            <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Личная информация</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="full_name" class="block text-sm font-medium text-gray-700 mb-2">ФИО *</label>
+                        <input type="text" 
+                               name="full_name" 
+                               id="full_name" 
+                               required
+                               value="{{ (manager.first_name + ' ' + manager.last_name) if manager else '' }}"
+                               placeholder="Иванов Иван Иванович"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-[#0088CC] focus:border-[#0088CC]">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                        <input type="email" 
+                               name="email" 
+                               id="email" 
+                               required
+                               value="{{ manager.email if manager else '' }}"
+                               placeholder="manager@inback.ru"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-[#0088CC] focus:border-[#0088CC]">
+                    </div>
+                    <div>
+                        <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Телефон</label>
+                        <input type="text" 
+                               name="phone" 
+                               id="phone" 
+                               value="{{ manager.phone if manager else '' }}"
+                               placeholder="+7 (999) 123-45-67"
+                               inputmode="tel"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-[#0088CC] focus:border-[#0088CC]">
+                  <div>
+                      <label for="telegram_id" class="block text-sm font-medium text-gray-700 mb-2">Telegram ID</label>
+                      <input type="text" id="telegram_id" name="telegram_id"
+                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0088CC] focus:border-transparent"
+                             placeholder="Например: 123456789">
+                  </div>
+                    </div>
+                    <div>
+                        <label for="position" class="block text-sm font-medium text-gray-700 mb-2">Должность</label>
+                        <input type="text" 
+                               name="position" 
+                               id="position" 
+                               value="{{ manager.position if manager else 'Менеджер по продажам' }}"
+                               placeholder="Менеджер по продажам"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-[#0088CC] focus:border-[#0088CC]">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Work Information -->
+            <div class="border-t pt-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Рабочая информация</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="org_role_id" class="block text-sm font-medium text-gray-700 mb-2">Роль</label>
+                        <select name="org_role_id" id="org_role_id" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-[#0088CC] focus:border-[#0088CC]">
+                            <option value="">— Выберите роль —</option>
+                            {% if roles %}{% for role in roles %}
+                            <option value="{{ role.id }}" {% if manager and manager.org_role_id == role.id %}selected{% endif %}>{{ role.name }}</option>
+                            {% endfor %}{% else %}
+                            <option value="" disabled>Роли не созданы</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                    <div>
+                        <label for="department_id" class="block text-sm font-medium text-gray-700 mb-2">Отдел</label>
+                        <select name="department_id" id="department_id" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-[#0088CC] focus:border-[#0088CC]">
+                            <option value="">— Выберите отдел —</option>
+                            {% if departments %}{% for dept in departments %}
+                            <option value="{{ dept.id }}" {% if manager and manager.department_id == dept.id %}selected{% endif %}>{{ dept.name }}</option>
+                            {% endfor %}{% else %}
+                            <option value="" disabled>Отделы не созданы</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                    <div>
+                        <label for="manager_id" class="block text-sm font-medium text-gray-700 mb-2">ID менеджера</label>
+                        <input type="text" 
+                               name="manager_id" 
+                               id="manager_id" 
+                               value="{{ manager.manager_id if manager else '' }}"
+                               placeholder="MNG12345678"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-[#0088CC] focus:border-[#0088CC]">
+                        <p class="text-xs text-gray-500 mt-1">Оставьте пустым для автоматической генерации</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Фото профиля</label>
+                        
+                        <!-- File upload option -->
+                        <div class="mb-3">
+                            <label for="profile_image_file" class="block text-xs text-gray-600 mb-1">
+                                <i class="fas fa-upload mr-1"></i>Загрузить файл
+                            </label>
+                            <input type="file" 
+                                   name="profile_image_file" 
+                                   id="profile_image_file" 
+                                   accept="image/jpeg,image/png,image/jpg,image/webp"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-[#0088CC] focus:border-[#0088CC]">
+                            <p class="text-xs text-gray-500 mt-1">JPG, PNG или WebP (макс. 5MB)</p>
+                        </div>
+                        
+                        <!-- Or URL option -->
+                        <div>
+                            <label for="profile_image_url" class="block text-xs text-gray-600 mb-1">
+                                <i class="fas fa-link mr-1"></i>Или укажите URL
+                            </label>
+                            <input type="text" 
+                                   name="profile_image_url" 
+                                   id="profile_image_url" 
+                                   value="{{ manager.profile_image if manager else '' }}"
+                                   placeholder="https://example.com/photo.jpg или /static/uploads/..."
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-[#0088CC] focus:border-[#0088CC]">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="is_active" class="block text-sm font-medium text-gray-700 mb-2">Статус аккаунта</label>
+                        <select name="is_active" id="is_active" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-[#0088CC] focus:border-[#0088CC]">
+                            <option value="True" {% if not manager or manager.is_active %}selected{% endif %}>Активен</option>
+                            <option value="False" {% if manager and not manager.is_active %}selected{% endif %}>Заблокирован</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Password Section -->
+            <div class="border-t pt-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">{{ 'Изменить пароль' if manager else 'Пароль для входа' }}</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ 'Новый пароль' if manager else 'Пароль' }} {% if not manager %}*{% endif %}
+                        </label>
+                        <input type="password" 
+                               name="password" 
+                               id="password" 
+                               {% if not manager %}required{% endif %}
+                               placeholder="Введите пароль"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-[#0088CC] focus:border-[#0088CC]">
+                        {% if manager %}
+                        <p class="text-xs text-gray-500 mt-1">Оставьте пустым, если не хотите менять пароль</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label for="password_confirm" class="block text-sm font-medium text-gray-700 mb-2">
+                            Подтвердите пароль {% if not manager %}*{% endif %}
+                        </label>
+                        <input type="password" 
+                               name="password_confirm" 
+                               id="password_confirm" 
+                               {% if not manager %}required{% endif %}
+                               placeholder="Подтвердите пароль"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-[#0088CC] focus:border-[#0088CC]">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Access & Permissions -->
+            <div class="border-t pt-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Права доступа</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-3">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="permissions" value="view_clients" 
+                                   {% if not manager or (manager.permissions and 'view_clients' in manager.permissions) %}checked{% endif %}
+                                   class="rounded border-gray-300 text-[#0088CC] focus:ring-[#0088CC]">
+                            <span class="ml-2 text-sm text-gray-700">Просмотр клиентов</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="permissions" value="edit_clients" 
+                                   {% if not manager or (manager.permissions and 'edit_clients' in manager.permissions) %}checked{% endif %}
+                                   class="rounded border-gray-300 text-[#0088CC] focus:ring-[#0088CC]">
+                            <span class="ml-2 text-sm text-gray-700">Редактирование клиентов</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="permissions" value="view_applications" 
+                                   {% if not manager or (manager.permissions and 'view_applications' in manager.permissions) %}checked{% endif %}
+                                   class="rounded border-gray-300 text-[#0088CC] focus:ring-[#0088CC]">
+                            <span class="ml-2 text-sm text-gray-700">Просмотр заявок</span>
+                        </label>
+                    </div>
+                    <div class="space-y-3">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="permissions" value="process_applications" 
+                                   {% if not manager or (manager.permissions and 'process_applications' in manager.permissions) %}checked{% endif %}
+                                   class="rounded border-gray-300 text-[#0088CC] focus:ring-[#0088CC]">
+                            <span class="ml-2 text-sm text-gray-700">Обработка заявок</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="permissions" value="send_notifications" 
+                                   {% if not manager or (manager.permissions and 'send_notifications' in manager.permissions) %}checked{% endif %}
+                                   class="rounded border-gray-300 text-[#0088CC] focus:ring-[#0088CC]">
+                            <span class="ml-2 text-sm text-gray-700">Отправка уведомлений</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="permissions" value="view_analytics" 
+                                   {% if not manager or (manager.permissions and 'view_analytics' in manager.permissions) %}checked{% endif %}
+                                   class="rounded border-gray-300 text-[#0088CC] focus:ring-[#0088CC]">
+                            <span class="ml-2 text-sm text-gray-700">Просмотр аналитики</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="border-t pt-6">
+                <div class="flex justify-between">
+                    <button type="submit" class="bg-[#0088CC] hover:bg-[#0077b3] text-white px-6 py-3 rounded-lg font-medium">
+                        <i class="fas fa-save mr-2"></i>{{ 'Обновить менеджера' if manager else 'Создать менеджера' }}
+                    </button>
+                    
+                    {% if manager %}
+                    <div class="flex space-x-3">
+                        <button type="button" 
+                                onclick="if(confirm('Удалить менеджера? Это действие необратимо!')) { window.location.href = '{{ url_for('adm.admin_delete_manager', manager_id=manager.id) }}'; }"
+                                class="bg-red-500 hover:bg-red-600 text-white px-4 py-3 rounded-lg">
+                            <i class="fas fa-trash mr-2"></i>Удалить
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Auto-generate manager ID if not provided
+document.addEventListener('DOMContentLoaded', function() {
+    const managerIdField = document.getElementById('manager_id');
+    if (!managerIdField.value) {
+        const randomId = 'MNG' + Math.random().toString().substr(2, 8);
+        managerIdField.value = randomId;
+    }
+});
+
+// Password confirmation validation
+document.getElementById('password_confirm').addEventListener('input', function() {
+    const password = document.getElementById('password').value;
+    const confirmPassword = this.value;
+    
+    if (password !== confirmPassword) {
+        this.setCustomValidity('Пароли не совпадают');
+    } else {
+        this.setCustomValidity('');
+    }
+});
+
+document.getElementById('password').addEventListener('input', function() {
+    const confirmField = document.getElementById('password_confirm');
+    if (confirmField.value) {
+        confirmField.dispatchEvent(new Event('input'));
+    }
+});
+
+// ──── Маска телефона +7 (XXX) XXX-XX-XX ────
+function phoneDigits(raw) {
+    let d = raw.replace(/\D/g, '');
+    if (d.length > 0 && (d[0] === '7' || d[0] === '8')) d = d.slice(1);
+    return d.slice(0, 10);
+}
+function formatPhoneRU(digits) {
+    if (!digits) return '';
+    let r = '+7 (';
+    r += digits.slice(0, Math.min(3, digits.length));
+    if (digits.length > 3) r += ') ' + digits.slice(3, Math.min(6, digits.length));
+    if (digits.length > 6) r += '-' + digits.slice(6, Math.min(8, digits.length));
+    if (digits.length > 8) r += '-' + digits.slice(8, 10);
+    return r;
+}
+(function() {
+    const inp = document.getElementById('phone');
+    if (!inp) return;
+    if (inp.value) inp.value = formatPhoneRU(phoneDigits(inp.value));
+    inp.addEventListener('keydown', function(e) {
+        if (e.key === 'Backspace') {
+            e.preventDefault();
+            const d = phoneDigits(this.value);
+            this.value = formatPhoneRU(d.slice(0, -1));
+            this.setSelectionRange(this.value.length, this.value.length);
+        }
+    });
+    inp.addEventListener('input', function() {
+        const d = phoneDigits(this.value);
+        this.value = formatPhoneRU(d);
+        this.setSelectionRange(this.value.length, this.value.length);
+    });
+    inp.addEventListener('paste', function(e) {
+        e.preventDefault();
+        const pasted = (e.clipboardData || window.clipboardData).getData('text');
+        this.value = formatPhoneRU(phoneDigits(pasted));
+        this.setSelectionRange(this.value.length, this.value.length);
+    });
+})();
+</script>
+{% endblock %}

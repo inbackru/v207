@@ -1,0 +1,702 @@
+{% extends "base.html" %}
+{% block title %}Мои сделки{% if current_city %} — {{ current_city.name }}{% endif %} | InBack{% endblock %}
+{% block content %}
+{% if not current_user.is_authenticated %}
+<script>window.location.href = '/login?next=' + encodeURIComponent(window.location.pathname);</script>
+{% else %}
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-2 text-xs text-gray-400 mb-6">
+      <a href="/" class="hover:text-[#0088CC] transition-colors">Главная</a>
+      <span>/</span>
+      <span class="text-gray-700 font-medium">Мои сделки</span>
+    </nav>
+
+    <!-- Hero -->
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">Мои заявки</h1>
+        <p class="text-sm text-gray-500">Сделки, этапы и кэшбек</p>
+      </div>
+      <a href="/{{ city_slug }}/properties" class="hidden sm:inline-flex items-center gap-2 bg-[#0088CC] hover:bg-[#006699] text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors shadow-sm">
+        <i class="fas fa-plus text-xs"></i>
+        Найти объект
+      </a>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+      <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-5 text-white">
+        <div class="text-3xl font-bold mb-1" id="deals-total-count">—</div>
+        <div class="text-xs opacity-80">Всего сделок</div>
+      </div>
+      <div class="bg-gradient-to-br from-blue-400 to-blue-500 rounded-2xl p-5 text-white">
+        <div class="text-3xl font-bold mb-1" id="deals-active-count">—</div>
+        <div class="text-xs opacity-80">В процессе</div>
+      </div>
+      <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-5 text-white">
+        <div class="text-3xl font-bold mb-1" id="deals-completed-count">—</div>
+        <div class="text-xs opacity-80">Завершено</div>
+      </div>
+      <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-5 text-white">
+        <div class="text-2xl font-bold mb-1" id="deals-cashback-total">—</div>
+        <div class="text-xs opacity-80">Кэшбек</div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-5">
+      <div class="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+        <button class="deals-filter-btn active flex-shrink-0 px-4 py-2 rounded-xl text-sm font-medium border-2 border-[#0088CC] bg-[#0088CC]/5 text-[#0088CC] transition-all whitespace-nowrap" data-status="all">
+          Все <span class="ml-1.5 bg-[#0088CC] text-white text-xs px-1.5 py-0.5 rounded-full" id="deals-all-count">0</span>
+        </button>
+        <button class="deals-filter-btn flex-shrink-0 px-4 py-2 rounded-xl text-sm font-medium border-2 border-gray-200 text-gray-600 hover:border-blue-300 transition-all whitespace-nowrap" data-status="new,in_progress,calculation">
+          <span class="w-2 h-2 bg-blue-500 rounded-full inline-block mr-1"></span>Новые
+        </button>
+        <button class="deals-filter-btn flex-shrink-0 px-4 py-2 rounded-xl text-sm font-medium border-2 border-gray-200 text-gray-600 hover:border-yellow-300 transition-all whitespace-nowrap" data-status="meeting_scheduled,meeting_done,postponed,verbal_reserve,reserved,object_reserved">
+          <span class="w-2 h-2 bg-yellow-500 rounded-full inline-block mr-1"></span>В процессе
+        </button>
+        <button class="deals-filter-btn flex-shrink-0 px-4 py-2 rounded-xl text-sm font-medium border-2 border-gray-200 text-gray-600 hover:border-indigo-300 transition-all whitespace-nowrap" data-status="documents,mortgage,ddu_preparation,ddu_signing,registration,receivables">
+          <span class="w-2 h-2 bg-indigo-500 rounded-full inline-block mr-1"></span>Оформление
+        </button>
+        <button class="deals-filter-btn flex-shrink-0 px-4 py-2 rounded-xl text-sm font-medium border-2 border-gray-200 text-gray-600 hover:border-green-300 transition-all whitespace-nowrap" data-status="completed,successful">
+          <span class="w-2 h-2 bg-green-500 rounded-full inline-block mr-1"></span>Завершены
+        </button>
+        <button class="deals-filter-btn flex-shrink-0 px-4 py-2 rounded-xl text-sm font-medium border-2 border-gray-200 text-gray-600 hover:border-red-300 transition-all whitespace-nowrap" data-status="rejected">
+          <span class="w-2 h-2 bg-red-500 rounded-full inline-block mr-1"></span>Отклонены
+        </button>
+      </div>
+    </div>
+
+    <!-- Deals list -->
+    <div class="space-y-4" id="deals-list"></div>
+
+    <!-- Loading -->
+    <div id="deals-loading" class="bg-white rounded-2xl shadow-sm p-12 text-center">
+      <div class="relative inline-block mb-4">
+        <div class="absolute inset-0 bg-[#0088CC] opacity-20 rounded-full animate-ping"></div>
+        <div class="relative w-14 h-14 bg-gradient-to-br from-[#0088CC] to-[#006699] rounded-full flex items-center justify-center shadow">
+          <svg class="animate-spin h-7 w-7 text-white" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+        </div>
+      </div>
+      <p class="text-gray-600 font-medium">Загружаем ваши заявки...</p>
+    </div>
+
+    <!-- Empty -->
+    <div id="deals-empty" class="hidden bg-white rounded-2xl shadow-sm p-12 text-center">
+      <div class="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-5">
+        <i class="fas fa-file-contract text-blue-400 text-3xl"></i>
+      </div>
+      <h3 class="text-xl font-bold text-gray-900 mb-2">Заявок пока нет</h3>
+      <p class="text-gray-500 text-sm mb-6">Оформите заявку на покупку недвижимости с кэшбеком</p>
+      <a href="/{{ city_slug }}/properties" class="inline-flex items-center gap-2 bg-[#0088CC] text-white px-6 py-3 rounded-xl font-medium hover:bg-[#006699] transition-colors">
+        <i class="fas fa-search text-sm"></i> Найти недвижимость
+      </a>
+    </div>
+
+    <!-- Deal card template (hidden) -->
+    <div id="deal-card-template" class="hidden">
+      <div class="deal-card group bg-white rounded-2xl shadow-sm hover:shadow-xl border border-gray-100 hover:border-[#0088CC]/30 transition-all duration-300 overflow-hidden cursor-pointer">
+        <div class="deal-complex-img-wrap relative h-32 bg-gradient-to-br from-blue-100 to-blue-200 overflow-hidden">
+          <img class="deal-complex-img w-full h-full object-cover" src="" alt="" onerror="this.style.display='none'">
+          <div class="deal-complex-img-fallback absolute inset-0 flex items-center justify-center">
+            <i class="fas fa-building text-blue-300 text-3xl"></i>
+          </div>
+          <div class="absolute top-3 right-3">
+            <div class="deal-status-badge backdrop-blur-sm text-xs font-semibold px-3 py-1 rounded-full"></div>
+          </div>
+        </div>
+        <div class="p-5">
+          <div class="flex items-start justify-between mb-3">
+            <div>
+              <h4 class="font-bold text-gray-900 deal-number group-hover:text-[#0088CC] transition-colors"></h4>
+              <p class="text-xs text-gray-400 mt-0.5 deal-created-at"></p>
+            </div>
+          </div>
+          <div class="deal-progress-bar mb-4"></div>
+          <div class="bg-gray-50 rounded-xl p-4">
+            <a class="deal-complex-name-link hover:underline" href="#">
+              <h5 class="font-bold text-gray-900 text-sm mb-1 deal-complex-name"></h5>
+            </a>
+            <p class="text-sm text-gray-600 mb-3 deal-property-description"></p>
+            <div class="flex flex-wrap gap-2 mb-3">
+              <span class="bg-white rounded-lg px-2.5 py-1 text-xs font-medium text-gray-700 shadow-sm deal-property-area"></span>
+              <span class="bg-white rounded-lg px-2.5 py-1 text-xs font-medium text-gray-700 shadow-sm deal-property-rooms"></span>
+              <span class="bg-white rounded-lg px-2.5 py-1 text-xs font-medium text-gray-700 shadow-sm deal-property-floor"></span>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div class="bg-white rounded-lg p-2.5 shadow-sm flex items-center justify-between">
+                <span class="text-xs text-gray-500">Стоимость</span>
+                <span class="text-sm font-bold text-gray-900 deal-price"></span>
+              </div>
+              <div class="bg-green-50 rounded-lg p-2.5 border border-green-100 flex items-center justify-between">
+                <span class="text-xs text-green-700 font-medium">Кэшбек</span>
+                <span class="text-sm font-bold text-green-600 deal-cashback"></span>
+              </div>
+            </div>
+          </div>
+          <div class="deal-client-notes-section hidden mt-3">
+            <div class="bg-blue-50 border-l-4 border-[#0088CC] rounded-r-lg p-3">
+              <p class="text-xs font-medium text-gray-900 mb-0.5">Заметки:</p>
+              <p class="text-sm text-gray-700 deal-client-notes"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  var currentDeals = [];
+  var currentFilter = 'all';
+
+  const STATUS_LABELS = {
+    'new':'Новая','in_progress':'В работе','calculation':'Расчёт',
+    'meeting_scheduled':'Встреча','meeting_done':'Встреча','postponed':'Отложена',
+    'verbal_reserve':'Устная бронь','reserved':'Бронь','object_reserved':'Забронирован',
+    'documents':'Документы','mortgage':'Ипотека','ddu_preparation':'Подг. ДДУ',
+    'ddu_signing':'Подпись ДДУ','registration':'Регистрация','receivables':'Дебиторка',
+    'completed':'Завершена','successful':'Завершена','rejected':'Отклонена'
+  };
+  const STATUS_COLORS = {
+    'new':'#3b82f6','in_progress':'#0088CC','calculation':'#6366f1',
+    'meeting_scheduled':'#8b5cf6','meeting_done':'#a855f7','postponed':'#f59e0b',
+    'verbal_reserve':'#f97316','reserved':'#ef4444','object_reserved':'#f59e0b',
+    'documents':'#ec4899','mortgage':'#14b8a6','ddu_preparation':'#06b6d4',
+    'ddu_signing':'#0284c7','registration':'#4f46e5','receivables':'#dc2626',
+    'completed':'#059669','successful':'#059669','rejected':'#6b7280'
+  };
+  const ACTIVE_ST = ['new','in_progress','calculation','meeting_scheduled','meeting_done',
+    'postponed','verbal_reserve','reserved','object_reserved','documents','mortgage',
+    'ddu_preparation','ddu_signing','registration','receivables'];
+  const DONE_ST = ['completed','successful'];
+  const PROGRESS_STEPS = [
+    {label:'Новая',statuses:['new']},
+    {label:'В работе',statuses:['in_progress','calculation','meeting_scheduled','meeting_done','postponed']},
+    {label:'Бронь',statuses:['verbal_reserve','reserved','object_reserved']},
+    {label:'Оформление',statuses:['documents','mortgage','ddu_preparation','ddu_signing','registration','receivables']},
+    {label:'Завершена',statuses:['completed','successful']},
+  ];
+
+  function fmt(n) { return Math.floor(n||0).toLocaleString('ru-RU') + ' ₽'; }
+  function fmtDate(s) {
+    if (!s) return '';
+    try { return new Date(s).toLocaleDateString('ru-RU'); } catch(e){ return s; }
+  }
+
+  function load() {
+    fetch('/api/deals', {headers:{'X-CSRFToken': (document.querySelector('meta[name="csrf-token"]')||{}).content||''}})
+      .then(r=>r.json())
+      .then(data=>{
+        document.getElementById('deals-loading').classList.add('hidden');
+        if (data.success && data.deals && data.deals.length > 0) {
+          currentDeals = data.deals;
+          updateStats(currentDeals);
+          renderDeals(currentDeals);
+        } else {
+          currentDeals = [];
+          updateStats([]);
+          document.getElementById('deals-empty').classList.remove('hidden');
+        }
+      })
+      .catch(()=>{
+        document.getElementById('deals-loading').classList.add('hidden');
+        document.getElementById('deals-empty').classList.remove('hidden');
+      });
+  }
+
+  function updateStats(deals) {
+    var active = deals.filter(d=>ACTIVE_ST.includes(d.status)).length;
+    var done = deals.filter(d=>DONE_ST.includes(d.status)).length;
+    var cb = deals.reduce((s,d)=>s+(d.cashback_amount||0),0);
+    document.getElementById('deals-total-count').textContent = deals.length;
+    document.getElementById('deals-active-count').textContent = active;
+    document.getElementById('deals-completed-count').textContent = done;
+    document.getElementById('deals-cashback-total').textContent = fmt(cb);
+    var allCount = document.getElementById('deals-all-count');
+    if (allCount) allCount.textContent = deals.length;
+  }
+
+  function renderDeals(deals) {
+    var list = document.getElementById('deals-list');
+    var tmpl = document.getElementById('deal-card-template');
+    list.innerHTML = '';
+    if (deals.length === 0) {
+      document.getElementById('deals-empty').classList.remove('hidden');
+      return;
+    }
+    document.getElementById('deals-empty').classList.add('hidden');
+    deals.forEach(function(deal) {
+      var c = tmpl.cloneNode(true);
+      c.id = 'deal-' + deal.id;
+      c.classList.remove('hidden');
+
+      c.querySelector('.deal-number').textContent = 'Сделка ' + (deal.deal_number||'');
+      c.querySelector('.deal-created-at').textContent = fmtDate(deal.created_at);
+
+      var badge = c.querySelector('.deal-status-badge');
+      var label = deal.status_display || STATUS_LABELS[deal.status] || deal.status;
+      var color = deal.status_color || STATUS_COLORS[deal.status] || '#6b7280';
+      badge.textContent = label;
+      badge.style.backgroundColor = color + '22';
+      badge.style.color = color;
+      badge.style.border = '1px solid ' + color + '44';
+
+      // image
+      var img = c.querySelector('.deal-complex-img');
+      if (deal.complex_image) { img.src = deal.complex_image; img.alt = deal.complex_name||''; }
+      else { img.style.display='none'; }
+
+      var lnk = c.querySelector('.deal-complex-name-link');
+      if (lnk && deal.complex_url) { lnk.href = deal.complex_url; lnk.target='_blank'; }
+
+      c.querySelector('.deal-complex-name').textContent = deal.complex_name || 'ЖК не указан';
+      c.querySelector('.deal-property-description').textContent = deal.property_description || '';
+      c.querySelector('.deal-property-area').textContent = deal.property_area ? deal.property_area+' м²' : '';
+      c.querySelector('.deal-property-rooms').textContent = deal.property_rooms ? deal.property_rooms+' комн.' : '';
+      c.querySelector('.deal-property-floor').textContent = deal.property_floor ? deal.property_floor+' этаж' : '';
+      c.querySelector('.deal-price').textContent = fmt(deal.property_price);
+      c.querySelector('.deal-cashback').textContent = fmt(deal.cashback_amount);
+
+      if (deal.client_notes) {
+        c.querySelector('.deal-client-notes-section').classList.remove('hidden');
+        c.querySelector('.deal-client-notes').textContent = deal.client_notes;
+      }
+
+      // Progress bar
+      var pb = c.querySelector('.deal-progress-bar');
+      if (pb) {
+        var isRej = deal.status==='rejected';
+        if (isRej) {
+          pb.innerHTML = '<span class="inline-flex items-center px-2.5 py-1 bg-gray-100 text-gray-500 rounded-full text-xs">Отклонена</span>';
+        } else {
+          var activeIdx = -1;
+          PROGRESS_STEPS.forEach(function(s,i){ if(s.statuses.includes(deal.status)) activeIdx=i; });
+          var html = '<div class="flex items-center w-full gap-0">';
+          PROGRESS_STEPS.forEach(function(step,i){
+            var done2 = i<activeIdx, isAct = i===activeIdx;
+            var dot = done2?'#059669':isAct?'#0088CC':'#d1d5db';
+            var tc = done2?'text-green-600':isAct?'text-[#0088CC]':'text-gray-400';
+            html += '<div class="flex flex-col items-center flex-1 min-w-0">';
+            html += '<div class="flex items-center w-full">';
+            if (i>0) html += '<div class="flex-1 h-0.5 '+(done2?'bg-green-400':'bg-gray-200')+'"></div>';
+            html += '<div class="w-3 h-3 rounded-full flex-shrink-0" style="background:'+dot+';'+(isAct?'box-shadow:0 0 0 3px '+dot+'33':'')+'"></div>';
+            if (i<PROGRESS_STEPS.length-1) html += '<div class="flex-1 h-0.5 '+(done2?'bg-green-400':'bg-gray-200')+'"></div>';
+            html += '</div>';
+            html += '<span class="mt-1 text-[10px] leading-tight text-center '+tc+' '+(isAct?'font-semibold':'font-normal')+' w-full truncate px-0.5">'+step.label+'</span>';
+            html += '</div>';
+          });
+          html += '</div>';
+          pb.innerHTML = html;
+        }
+      }
+
+      c.querySelector('.deal-card').addEventListener('click', function(){ openDealDetail(deal.id); });
+      list.appendChild(c);
+    });
+  }
+
+  // Filter buttons
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest('.deals-filter-btn');
+    if (!btn) return;
+    document.querySelectorAll('.deals-filter-btn').forEach(b=>{
+      b.classList.remove('active','border-[#0088CC]','bg-[#0088CC]/5','text-[#0088CC]');
+      b.classList.add('border-gray-200','text-gray-600');
+    });
+    btn.classList.add('active','border-[#0088CC]','bg-[#0088CC]/5','text-[#0088CC]');
+    btn.classList.remove('border-gray-200','text-gray-600');
+    var status = btn.dataset.status;
+    var filtered = status==='all' ? currentDeals : currentDeals.filter(d=>status.split(',').includes(d.status));
+    renderDeals(filtered);
+  });
+
+  load();
+})();
+
+var currentDealDetailId = null;
+var DEAL_STATUS_LABELS = {
+  'new':'Новая','in_progress':'В работе','calculation':'Расчёт',
+  'meeting_scheduled':'Встреча','meeting_done':'Встреча','postponed':'Отложена',
+  'verbal_reserve':'Устная бронь','reserved':'Бронь','object_reserved':'Забронирован',
+  'documents':'Документы','mortgage':'Ипотека','ddu_preparation':'Подг. ДДУ',
+  'ddu_signing':'Подпись ДДУ','registration':'Регистрация','receivables':'Дебиторка',
+  'completed':'Завершена','successful':'Завершена','rejected':'Отклонена'
+};
+
+function getDealCSRF() {
+  var meta = document.querySelector('meta[name="csrf-token"]');
+  if (meta) return meta.getAttribute('content');
+  var input = document.querySelector('input[name="csrf_token"]');
+  if (input) return input.value;
+  return '';
+}
+
+function formatPrice(price) {
+  if (!price) return '0 ₽';
+  return new Intl.NumberFormat('ru-RU', {style:'currency',currency:'RUB',minimumFractionDigits:0,maximumFractionDigits:0}).format(price);
+}
+
+function formatDate(dateString) {
+  var date = new Date(dateString);
+  return date.toLocaleDateString('ru-RU', {day:'2-digit',month:'2-digit',year:'numeric'});
+}
+
+function ddSwitchTab(tabId, btn) {
+  ['main','docs','reward'].forEach(function(t) {
+    var el = document.getElementById('dd-tab-' + t);
+    if (el) el.classList.add('hidden');
+  });
+  var active = document.getElementById('dd-tab-' + tabId);
+  if (active) active.classList.remove('hidden');
+  document.querySelectorAll('.dd-tab-btn').forEach(function(b) {
+    b.classList.remove('text-[#0088CC]','border-b-2','border-[#0088CC]','font-semibold');
+    b.classList.add('text-gray-500','font-medium');
+  });
+  if (btn) {
+    btn.classList.add('text-[#0088CC]','border-b-2','border-[#0088CC]','font-semibold');
+    btn.classList.remove('text-gray-500','font-medium');
+  }
+}
+
+function ddMsgManager() {
+  if (!currentDealDetailId) return;
+  window.open('/dashboard#deals', '_blank');
+}
+
+function openDealDetail(dealId) {
+  currentDealDetailId = dealId;
+  var modal = document.getElementById('dealDetailModal');
+  modal.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+
+  fetch('/api/deals/' + dealId, {headers:{'X-CSRFToken':getDealCSRF()}})
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if (!data.success) { closeDealDetail(); return; }
+    var d = data.deal;
+
+    document.getElementById('dd-title').textContent = 'Сделка ' + d.deal_number;
+    document.getElementById('dd-date').textContent = formatDate(d.created_at);
+    var badge = document.getElementById('dd-status-badge');
+    var label = d.status_display || DEAL_STATUS_LABELS[d.status] || d.status;
+    if (badge) badge.textContent = label;
+
+    var ciEl = document.getElementById('dd-client-info');
+    if (ciEl && (d.client_name || d.client_phone)) {
+      var _el1 = document.getElementById('dd-client-name-strip');
+      var _el2 = document.getElementById('dd-client-phone-strip');
+      var _el3 = document.getElementById('dd-deal-num-strip');
+      if (_el1) _el1.textContent = d.client_name || '';
+      if (_el2) _el2.textContent = d.client_phone || '';
+      if (_el3) _el3.textContent = d.deal_number || '';
+      ciEl.classList.remove('hidden');
+    }
+
+    var propTable = document.getElementById('dd-prop-table');
+    if (propTable) {
+      var ptRows = [];
+      if (d.complex_name) ptRows.push(['ЖК', d.complex_name]);
+      if (d.property_description) ptRows.push(['Описание', d.property_description]);
+      if (d.property_area) ptRows.push(['Площадь', d.property_area + ' м²']);
+      if (d.property_rooms) ptRows.push(['Комнаты', d.property_rooms + '-комн.']);
+      if (d.property_floor) ptRows.push(['Этаж', d.property_floor]);
+      if (d.property_price) ptRows.push(['Стоимость', formatPrice(d.property_price)]);
+      if (d.cashback_amount) ptRows.push(['Кэшбек', formatPrice(d.cashback_amount) + ' (' + (d.cashback_percentage||0).toFixed(1) + '%)']);
+      propTable.innerHTML = ptRows.map(function(r){
+        return '<div class="flex items-baseline justify-between py-1.5 border-b border-gray-50 last:border-0">' +
+          '<span class="text-xs text-gray-500 flex-shrink-0 min-w-[80px]">'+r[0]+'</span>' +
+          '<span class="text-xs font-medium text-gray-900 text-right">'+r[1]+'</span></div>';
+      }).join('');
+    }
+
+    var mgrSection = document.getElementById('dd-manager-section');
+    if (d.manager_name) {
+      var mn = document.getElementById('dd-manager-name'); if (mn) mn.textContent = d.manager_name;
+      var mp = document.getElementById('dd-manager-phone'); if (mp) mp.textContent = d.manager_phone || '';
+      if (mgrSection) mgrSection.classList.remove('hidden');
+      var avatarEl = document.getElementById('dd-manager-avatar');
+      if (avatarEl) {
+        if (d.manager_profile_image) {
+          avatarEl.className = 'w-10 h-10 rounded-full flex-shrink-0 overflow-hidden';
+          avatarEl.innerHTML = '<img src="'+d.manager_profile_image+'" alt="" class="w-full h-full object-cover">';
+        } else {
+          avatarEl.className = 'w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-[#0088CC]';
+          avatarEl.innerHTML = '<span class="text-sm font-bold text-white">'+(d.manager_name?d.manager_name.charAt(0).toUpperCase():'М')+'</span>';
+        }
+      }
+      var msgBtn = document.getElementById('dd-msg-manager-btn'); if (msgBtn) msgBtn.classList.remove('hidden');
+    } else {
+      if (mgrSection) mgrSection.classList.add('hidden');
+    }
+
+    var DEAL_5STAGES = [
+      {label:'Фиксация',statuses:['new','in_progress'],desc:'Заявка зафиксирована в системе. Менеджер свяжется с вами в ближайшее время.'},
+      {label:'Запись на встречу',statuses:['calculation','meeting_scheduled'],desc:'Проводим расчёт и записываемся на встречу с застройщиком.'},
+      {label:'Бронирование',statuses:['reserved'],desc:'Срок и условия бронирования указаны в регламенте застройщика.'},
+      {label:'Сделка',statuses:['documents','mortgage','ddu_signing','registration'],desc:'Оформление документов, ипотека и подписание договора долевого участия.'},
+      {label:'Вознаграждение',statuses:['completed'],desc:'Работа с заявкой завершена. Предоставьте менеджеру подтверждение регистрации договора.'}
+    ];
+    var curStageIdx = 0;
+    for (var si = 0; si < DEAL_5STAGES.length; si++) {
+      if (DEAL_5STAGES[si].statuses.indexOf(d.status) !== -1) { curStageIdx = si; break; }
+    }
+    var bar5 = document.getElementById('dd-5stage-bar');
+    var lbl5 = document.getElementById('dd-5stage-labels');
+    if (bar5) {
+      bar5.innerHTML = '';
+      DEAL_5STAGES.forEach(function(stage, i) {
+        var isComp = i < curStageIdx, isCur = i === curStageIdx;
+        var wrap = document.createElement('div');
+        wrap.style.cssText = 'flex:1;display:flex;align-items:center;position:relative;';
+        var inner = isComp
+          ? '<svg style="width:16px;height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>'
+          : '<span style="font-size:12px;font-weight:700;">'+(i+1)+'</span>';
+        var circStyle = 'width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;z-index:1;' +
+          ((isComp||isCur)?'background:#0088CC;color:white;'+(isCur?'box-shadow:0 0 0 4px rgba(0,136,204,0.2);':''):'background:#f3f4f6;color:#9ca3af;');
+        var lineHtml = (i < DEAL_5STAGES.length-1)
+          ? '<div style="position:absolute;left:32px;right:0;top:15px;height:2px;background:'+(i<curStageIdx?'#0088CC':'#e5e7eb')+';"></div>'
+          : '';
+        wrap.innerHTML = lineHtml + '<div style="'+circStyle+'">'+inner+'</div>';
+        bar5.appendChild(wrap);
+      });
+    }
+    if (lbl5) {
+      lbl5.innerHTML = '';
+      DEAL_5STAGES.forEach(function(stage, i) {
+        var isComp = i < curStageIdx, isCur = i === curStageIdx;
+        var lbl = document.createElement('div');
+        lbl.style.cssText = 'flex:1;text-align:center;';
+        lbl.innerHTML = '<span style="font-size:9px;line-height:1.2;display:block;margin-top:4px;'+(isCur?'font-weight:700;color:#0088CC;':isComp?'color:#6b7280;':'color:#9ca3af;')+'">'+stage.label+'</span>';
+        lbl5.appendChild(lbl);
+      });
+    }
+    var descEl = document.getElementById('dd-stage-desc');
+    if (descEl && DEAL_5STAGES[curStageIdx]) {
+      descEl.textContent = DEAL_5STAGES[curStageIdx].desc;
+      descEl.classList.remove('hidden');
+    }
+
+    var rAmt = document.getElementById('dd-reward-amount');
+    var rPct = document.getElementById('dd-reward-pct');
+    var rPrc = document.getElementById('dd-reward-price');
+    var rFml = document.getElementById('dd-reward-formula');
+    var rBox = document.getElementById('dd-reward-info-box');
+    var rPnd = document.getElementById('dd-reward-pending');
+    if (rAmt) rAmt.textContent = formatPrice(d.cashback_amount);
+    if (rPct) rPct.textContent = (d.cashback_percentage||0).toFixed(1)+'%';
+    if (rPrc) rPrc.textContent = formatPrice(d.property_price);
+    if (rFml) rFml.textContent = formatPrice(d.property_price)+' × '+(d.cashback_percentage||0).toFixed(1)+'% = '+formatPrice(d.cashback_amount);
+    if (d.status==='completed') {
+      if (rBox) rBox.classList.remove('hidden'); if (rPnd) rPnd.classList.add('hidden');
+    } else {
+      if (rBox) rBox.classList.add('hidden'); if (rPnd) rPnd.classList.remove('hidden');
+    }
+
+    if (d.notes) {
+      var mnTxt = document.getElementById('dd-manager-notes'); if (mnTxt) mnTxt.textContent = d.notes;
+      var mnSec = document.getElementById('dd-manager-notes-section'); if (mnSec) mnSec.classList.remove('hidden');
+    } else {
+      var mnSec2 = document.getElementById('dd-manager-notes-section'); if (mnSec2) mnSec2.classList.add('hidden');
+    }
+    var cnEl = document.getElementById('dd-client-notes'); if (cnEl) cnEl.textContent = d.client_notes || '—';
+
+    ddSwitchTab('main', document.querySelector('.dd-tab-btn[data-ddtab="main"]'));
+    loadDealDocuments(dealId);
+  })
+  .catch(function(err){ console.error('Error loading deal:', err); closeDealDetail(); });
+}
+
+function closeDealDetail() {
+  document.getElementById('dealDetailModal').classList.add('hidden');
+  document.body.style.overflow = '';
+  currentDealDetailId = null;
+}
+
+function loadDealDocuments(dealId) {
+  fetch('/api/deals/'+dealId+'/documents', {headers:{'X-CSRFToken':getDealCSRF()}})
+  .then(function(r){return r.json();})
+  .then(function(data){
+    var list = document.getElementById('dd-documents-list');
+    var empty = document.getElementById('dd-docs-empty');
+    if (!data.success || !data.documents || data.documents.length===0) {
+      list.innerHTML = ''; list.appendChild(empty); empty.classList.remove('hidden'); return;
+    }
+    empty.classList.add('hidden'); list.innerHTML = '';
+    data.documents.forEach(function(doc){
+      var div = document.createElement('div');
+      div.className = 'flex items-center gap-3 p-3 bg-gray-50 rounded-xl group hover:bg-gray-100 transition-colors';
+      div.innerHTML = '<div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 bg-gray-100"><svg class="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/></svg></div>' +
+        '<div class="flex-1 min-w-0"><p class="text-sm font-medium text-gray-900 truncate">'+doc.original_filename+'</p><p class="text-xs text-gray-500">'+(doc.created_at||'')+'</p></div>' +
+        '<div class="flex items-center gap-1"><a href="/api/documents/'+doc.id+'/download" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white text-gray-400 hover:text-[#0088CC] transition-colors" title="Скачать"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></a>' +
+        '<button onclick="deleteDealDoc('+doc.id+')" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></div>';
+      list.appendChild(div);
+    });
+  });
+}
+
+function uploadDealDocs(input) {
+  if (!input.files || input.files.length===0 || !currentDealDetailId) return;
+  var formData = new FormData();
+  for (var i=0; i<input.files.length; i++) { formData.append('files', input.files[i]); }
+  document.getElementById('dd-upload-progress').classList.remove('hidden');
+  fetch('/api/deals/'+currentDealDetailId+'/documents', {method:'POST',headers:{'X-CSRFToken':getDealCSRF()},body:formData})
+  .then(function(r){return r.json();})
+  .then(function(data){
+    document.getElementById('dd-upload-progress').classList.add('hidden');
+    input.value = '';
+    if (data.success) loadDealDocuments(currentDealDetailId);
+  })
+  .catch(function(){ document.getElementById('dd-upload-progress').classList.add('hidden'); input.value=''; });
+}
+
+function deleteDealDoc(docId) {
+  if (!currentDealDetailId || !confirm('Удалить документ?')) return;
+  fetch('/api/deals/'+currentDealDetailId+'/documents/'+docId, {method:'DELETE',headers:{'X-CSRFToken':getDealCSRF()}})
+  .then(function(r){return r.json();})
+  .then(function(data){ if (data.success) loadDealDocuments(currentDealDetailId); });
+}
+</script>
+
+<!-- Deal Detail Modal -->
+<div id="dealDetailModal" class="fixed inset-0 z-[9999] hidden">
+  <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeDealDetail()"></div>
+  <div class="relative w-full h-full md:flex md:items-center md:justify-center md:p-6">
+    <div class="relative bg-white w-full h-full md:h-auto md:max-h-[90vh] md:max-w-2xl md:rounded-2xl md:shadow-2xl overflow-y-auto" id="dealDetailContent">
+      <div class="sticky top-0 z-10 bg-gradient-to-r from-[#0088CC] to-[#0070AA] px-4 py-4 flex items-center justify-between md:rounded-t-2xl">
+        <div class="flex items-center gap-3">
+          <button onclick="closeDealDetail()" class="w-8 h-8 flex items-center justify-center rounded-lg bg-white/20 hover:bg-white/30 text-white transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+          </button>
+          <div>
+            <h2 class="text-sm font-bold text-white" id="dd-title">Сделка</h2>
+            <p class="text-xs text-white/70" id="dd-date"></p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <div id="dd-status-badge" class="px-3 py-1 rounded-full text-xs font-semibold bg-white/20 text-white border border-white/30"></div>
+          <button onclick="closeDealDetail()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/20 text-white transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+        </div>
+      </div>
+      <div class="flex bg-white border-b border-gray-100 sticky top-[62px] z-[5]">
+        <button class="dd-tab-btn flex-1 py-3 text-xs font-semibold text-[#0088CC] border-b-2 border-[#0088CC] transition-all" onclick="ddSwitchTab('main',this)" data-ddtab="main">Сделка</button>
+        <button class="dd-tab-btn flex-1 py-3 text-xs font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700 transition-all" onclick="ddSwitchTab('docs',this)" data-ddtab="docs">Документы</button>
+        <button class="dd-tab-btn flex-1 py-3 text-xs font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700 transition-all" onclick="ddSwitchTab('reward',this)" data-ddtab="reward">Вознаграждение</button>
+      </div>
+      <div id="dd-tab-main" class="p-4 space-y-4">
+        <div id="dd-client-info" class="rounded-2xl bg-gray-50 p-4 hidden">
+          <div class="flex items-start justify-between mb-3">
+            <div>
+              <p class="text-base font-bold text-gray-900" id="dd-client-name-strip"></p>
+              <p class="text-xs text-gray-500 mt-0.5">Тел: <span id="dd-client-phone-strip" class="font-medium"></span></p>
+              <p class="text-xs text-gray-500">Заявка № <span id="dd-deal-num-strip" class="font-medium"></span></p>
+            </div>
+          </div>
+          <button id="dd-msg-manager-btn" onclick="ddMsgManager()" class="hidden text-xs font-semibold px-4 py-1.5 rounded-xl border border-gray-300 text-gray-700 hover:border-[#0088CC] hover:text-[#0088CC] transition-all bg-white shadow-sm">Написать менеджеру</button>
+        </div>
+        <div class="rounded-2xl border border-gray-100 p-4 bg-white shadow-sm">
+          <div class="flex items-center w-full mb-3" id="dd-5stage-bar"></div>
+          <div class="flex w-full" id="dd-5stage-labels"></div>
+          <div id="dd-stage-desc" class="mt-3 text-xs text-gray-600 bg-[#0088CC]/5 rounded-xl p-3 border border-[#0088CC]/10 hidden"></div>
+        </div>
+        <div class="rounded-2xl border border-gray-100 p-4 bg-white shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Объект бронирования</p>
+            <div id="dd-date-chips" class="flex gap-1.5 flex-wrap justify-end"></div>
+          </div>
+          <div id="dd-prop-table" class="space-y-1"></div>
+        </div>
+        <div class="rounded-2xl border border-gray-100 p-4 bg-white shadow-sm hidden" id="dd-manager-section">
+          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Ваш менеджер</p>
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden bg-[#0088CC]" id="dd-manager-avatar">
+              <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-gray-900" id="dd-manager-name"></p>
+              <p class="text-xs text-gray-500" id="dd-manager-phone"></p>
+            </div>
+          </div>
+        </div>
+        <div class="rounded-2xl border border-amber-100 p-4 bg-amber-50/50 hidden" id="dd-manager-notes-section">
+          <p class="text-xs font-semibold text-amber-600 uppercase tracking-wider mb-2">Комментарий менеджера</p>
+          <p class="text-sm text-gray-700" id="dd-manager-notes">—</p>
+        </div>
+        <div class="rounded-2xl border border-gray-100 p-4 bg-white shadow-sm pb-8">
+          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Ваши заметки</p>
+          <p class="text-sm text-gray-700" id="dd-client-notes">—</p>
+        </div>
+      </div>
+      <div id="dd-tab-docs" class="p-4 space-y-3 hidden">
+        <div class="flex items-center justify-between mb-1">
+          <p class="text-sm font-semibold text-gray-700">Документы по сделке</p>
+          <label class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#0088CC] text-white rounded-xl text-xs font-medium cursor-pointer hover:bg-[#006699] transition-colors shadow-sm">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Загрузить
+            <input type="file" multiple class="hidden" onchange="uploadDealDocs(this)" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.heic,.xls,.xlsx">
+          </label>
+        </div>
+        <div id="dd-upload-progress" class="hidden">
+          <div class="flex items-center gap-2 text-xs text-[#0088CC]">
+            <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+            Загрузка...
+          </div>
+        </div>
+        <div id="dd-documents-list" class="space-y-2 pb-8">
+          <p class="text-sm text-gray-400 text-center py-10" id="dd-docs-empty">Нет загруженных документов</p>
+        </div>
+      </div>
+      <div id="dd-tab-reward" class="p-4 space-y-4 hidden pb-8">
+        <div id="dd-reward-info-box" class="hidden rounded-xl p-3 border border-blue-100 bg-blue-50">
+          <div class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-[#0088CC] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <div>
+              <p class="text-xs font-semibold text-[#0088CC]">Работа с заявкой завершена</p>
+              <p class="text-[11px] text-blue-700 mt-0.5">Предоставьте менеджеру подтверждение регистрации договора или документ об оплате клиентом</p>
+            </div>
+          </div>
+        </div>
+        <div class="rounded-2xl border border-gray-100 p-4 bg-white shadow-sm">
+          <p class="text-sm font-bold text-gray-900 mb-3">Вознаграждение</p>
+          <div class="flex items-center justify-between py-2 border-b border-gray-50">
+            <span class="text-sm text-gray-600">Размер вознаграждения</span>
+            <span class="text-sm font-bold text-gray-900" id="dd-reward-amount">—</span>
+          </div>
+        </div>
+        <div class="rounded-2xl border border-gray-100 p-4 bg-white shadow-sm">
+          <p class="text-sm font-bold text-gray-900 mb-4">Расчёт вознаграждения</p>
+          <div class="space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-gray-500">Стоимость объекта</span>
+              <span class="text-sm font-medium text-gray-900" id="dd-reward-price">—</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-gray-500">Процент кэшбека</span>
+              <span class="text-sm font-medium text-gray-900" id="dd-reward-pct">—</span>
+            </div>
+            <div class="flex items-center justify-between pt-2.5 border-t border-gray-100">
+              <span class="text-sm font-semibold text-gray-700">Расчёт</span>
+              <span class="text-sm font-bold text-gray-900" id="dd-reward-formula">—</span>
+            </div>
+          </div>
+        </div>
+        <div id="dd-reward-pending" class="hidden bg-gray-50 rounded-2xl p-4 border border-gray-100">
+          <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <p class="text-xs text-gray-600">Вознаграждение будет рассчитано и выплачено после завершения сделки и регистрации договора</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

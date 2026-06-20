@@ -1,0 +1,241 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Архив сделок - Админ панель | InBack{% endblock %}
+{% block page_title %}Архив сделок{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Архив сделок</h1>
+            <p class="text-gray-600 mt-1">Завершённые и проигранные сделки</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-folder text-[#0088CC] text-lg"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Всего закрыто</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ stats.total }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 bg-green-50 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-trophy text-[#059669] text-lg"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Успешные</p>
+                    <p class="text-2xl font-bold text-[#059669]">{{ stats.successful }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 bg-red-50 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-times-circle text-red-500 text-lg"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Проигранные</p>
+                    <p class="text-2xl font-bold text-red-500">{{ stats.rejected }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-percentage text-[#0088CC] text-lg"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Конверсия</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ stats.conversion }}%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <p class="text-sm text-gray-500 mb-1">Сумма успешных сделок</p>
+            <p class="text-xl font-bold text-gray-900">{{ "{:,.0f}".format(stats.total_revenue|default(0)) }} ₽</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <p class="text-sm text-gray-500 mb-1">Сумма кешбэка (успешные)</p>
+            <p class="text-xl font-bold text-[#059669]">{{ "{:,.0f}".format(stats.total_cashback|default(0)) }} ₽</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <p class="text-sm text-gray-500 mb-1">Средний чек</p>
+            <p class="text-xl font-bold text-gray-900">{{ "{:,.0f}".format(stats.avg_deal|default(0)) }} ₽</p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+        <form method="GET" class="flex flex-wrap items-end gap-4">
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Менеджер</label>
+                <select name="manager_id" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC]/30 focus:border-[#0088CC] outline-none">
+                    <option value="">Все менеджеры</option>
+                    {% for m in managers %}
+                    <option value="{{ m.id }}" {% if request.args.get('manager_id')|int == m.id %}selected{% endif %}>{{ m.full_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Статус</label>
+                <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC]/30 focus:border-[#0088CC] outline-none">
+                    <option value="">Все</option>
+                    <option value="completed" {% if request.args.get('status') == 'completed' %}selected{% endif %}>Успешные</option>
+                    <option value="rejected" {% if request.args.get('status') == 'rejected' %}selected{% endif %}>Проигранные</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Период</label>
+                <select name="period" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC]/30 focus:border-[#0088CC] outline-none">
+                    <option value="">Все время</option>
+                    <option value="week" {% if request.args.get('period') == 'week' %}selected{% endif %}>Неделя</option>
+                    <option value="month" {% if request.args.get('period') == 'month' %}selected{% endif %}>Месяц</option>
+                    <option value="quarter" {% if request.args.get('period') == 'quarter' %}selected{% endif %}>Квартал</option>
+                    <option value="year" {% if request.args.get('period') == 'year' %}selected{% endif %}>Год</option>
+                </select>
+            </div>
+            <button type="submit" class="bg-[#0088CC] hover:bg-[#006699] text-white px-5 py-2 rounded-lg text-sm font-semibold transition-colors">
+                <i class="fas fa-filter mr-1"></i> Применить
+            </button>
+            {% if request.args.get('manager_id') or request.args.get('status') or request.args.get('period') %}
+            <a href="{{ request.path }}" class="text-gray-400 hover:text-gray-600 text-sm py-2">
+                <i class="fas fa-times mr-1"></i> Сбросить
+            </a>
+            {% endif %}
+        </form>
+    </div>
+
+    {% if rejection_stats %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+        <h3 class="text-sm font-bold text-gray-700 mb-3">Причины проигрыша</h3>
+        <div class="space-y-2">
+            {% for reason in rejection_stats %}
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-600">{{ reason.reason or 'Не указана' }}</span>
+                <div class="flex items-center gap-2">
+                    <div class="w-32 bg-gray-100 rounded-full h-2">
+                        <div class="bg-red-400 rounded-full h-2" style="width: {{ (reason.count / stats.rejected * 100) if stats.rejected > 0 else 0 }}%"></div>
+                    </div>
+                    <span class="text-sm font-semibold text-gray-700 w-8 text-right">{{ reason.count }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-5 py-4 border-b border-gray-100">
+            <h3 class="font-bold text-gray-900">Закрытые сделки ({{ deals|length }})</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Сделка</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Менеджер</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Клиент</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Стоимость</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Кешбэк</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Результат</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Причина</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Дата</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {% for deal in deals %}
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-4 py-3">
+                            <a href="{{ url_for('manager_deal_card', deal_id=deal.id) }}" class="text-[#0088CC] hover:underline font-medium">{{ deal.deal_number }}</a>
+                            {% if deal.property_description %}
+                            <p class="text-xs text-gray-400 mt-0.5 truncate max-w-[150px]">{{ deal.property_description }}</p>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-gray-700">{{ deal.manager.full_name if deal.manager else '—' }}</td>
+                        <td class="px-4 py-3 text-gray-700">{{ deal.client.full_name if deal.client else '—' }}</td>
+                        <td class="px-4 py-3 font-medium text-gray-900">{{ "{:,.0f}".format(deal.property_price) }} ₽</td>
+                        <td class="px-4 py-3 text-[#059669] font-medium">{{ "{:,.0f}".format(deal.cashback_amount) }} ₽</td>
+                        <td class="px-4 py-3">
+                            {% if deal.status in ['completed', 'successful'] %}
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-green-50 text-[#059669] text-xs font-semibold rounded-full">
+                                <i class="fas fa-trophy text-[10px]"></i> Успешна
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-red-50 text-red-600 text-xs font-semibold rounded-full">
+                                <i class="fas fa-times-circle text-[10px]"></i> Проиграна
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-gray-500 text-xs max-w-[200px]">
+                            {% if deal.rejection_reason %}
+                            <span class="text-red-500">{{ deal.rejection_reason }}</span>
+                            {% elif deal.closing_comment %}
+                            {{ deal.closing_comment[:50] }}{% if deal.closing_comment|length > 50 %}...{% endif %}
+                            {% else %}
+                            —
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">
+                            {{ deal.closed_at.strftime('%d.%m.%Y') if deal.closed_at else (deal.updated_at.strftime('%d.%m.%Y') if deal.updated_at else '—') }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not deals %}
+                    <tr>
+                        <td colspan="8" class="px-4 py-12 text-center text-gray-400">
+                            <i class="fas fa-folder-open text-4xl mb-3 block"></i>
+                            <p class="font-medium">Нет закрытых сделок</p>
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if manager_stats %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+        <h3 class="font-bold text-gray-900 mb-4">Статистика по менеджерам</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500">Менеджер</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500">Всего</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500">Успешные</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500">Проигранные</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500">Конверсия</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500">Выручка</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {% for ms in manager_stats %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 font-medium text-gray-900">{{ ms.name }}</td>
+                        <td class="px-4 py-3 text-center text-gray-700">{{ ms.total }}</td>
+                        <td class="px-4 py-3 text-center text-[#059669] font-semibold">{{ ms.successful }}</td>
+                        <td class="px-4 py-3 text-center text-red-500 font-semibold">{{ ms.rejected }}</td>
+                        <td class="px-4 py-3 text-center">
+                            <span class="px-2 py-0.5 rounded-full text-xs font-bold {% if ms.conversion >= 70 %}bg-green-50 text-green-700{% elif ms.conversion >= 40 %}bg-yellow-50 text-yellow-700{% else %}bg-red-50 text-red-700{% endif %}">
+                                {{ ms.conversion }}%
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-right font-medium text-gray-900">{{ "{:,.0f}".format(ms.revenue) }} ₽</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

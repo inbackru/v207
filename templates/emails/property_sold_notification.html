@@ -1,0 +1,125 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Объект из вашего списка продан - InBack{% endblock %}
+
+{% block content %}
+<h1>🔴 Объект из вашего списка продан</h1>
+
+<p>Здравствуйте{% if user and user.full_name %}, {{ user.full_name.split()[0] }}{% endif %}!</p>
+
+<p>К сожалению, объект, который был у вас в списке, уже продан и недоступен для покупки.</p>
+
+<!-- Property Card with SOLD Badge -->
+<div style="border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; margin: 24px 0; background: white; position: relative;">
+    <!-- SOLD Badge -->
+    <div style="position: absolute; top: 16px; right: 16px; background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); color: white; padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.3); z-index: 10;">
+        ПРОДАН
+    </div>
+    
+    {% if property.main_image %}
+    <div style="width: 100%; height: 240px; overflow: hidden; background: #f3f4f6; position: relative;">
+        <img src="{{ property.main_image }}" alt="{{ property.title }}" 
+             style="width: 100%; height: 100%; object-fit: cover; opacity: 0.6;">
+    </div>
+    {% endif %}
+    
+    <div style="padding: 24px;">
+        <h2 style="margin: 0 0 12px 0; font-size: 22px; font-weight: 600; color: #1d1d1f;">
+            {{ property.title or 'Квартира' }}
+        </h2>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;">
+            {% if property.rooms is not none %}
+            <span style="background: #f0f9ff; color: #0369a1; padding: 6px 12px; border-radius: 6px; font-size: 14px; font-weight: 500;">
+                {% if property.rooms == 0 %}Студия{% else %}{{ property.rooms }}-комн.{% endif %}
+            </span>
+            {% endif %}
+            
+            {% if property.area %}
+            <span style="background: #f0fdf4; color: #15803d; padding: 6px 12px; border-radius: 6px; font-size: 14px; font-weight: 500;">
+                {{ property.area|round(1) }} м²
+            </span>
+            {% endif %}
+            
+            {% if property.floor and property.total_floors %}
+            <span style="background: #fef3c7; color: #92400e; padding: 6px 12px; border-radius: 6px; font-size: 14px; font-weight: 500;">
+                {{ property.floor }}/{{ property.total_floors }} этаж
+            </span>
+            {% endif %}
+        </div>
+        
+        {% if property.price %}
+        <div style="margin: 16px 0;">
+            <div style="font-size: 32px; font-weight: 700; color: #6b7280; line-height: 1.2; text-decoration: line-through;">
+                {{ '{:,.0f}'.format(property.price).replace(',', ' ') }} ₽
+            </div>
+            {% if property.price_per_sqm %}
+            <div style="font-size: 14px; color: #9ca3af; margin-top: 4px;">
+                {{ '{:,.0f}'.format(property.price_per_sqm).replace(',', ' ') }} ₽/м²
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        {% if property.residential_complex %}
+        <p style="margin: 12px 0; color: #424245; font-size: 15px;">
+            <strong>ЖК:</strong> {{ property.residential_complex.name }}
+        </p>
+        {% endif %}
+        
+        {% if property.developer %}
+        <p style="margin: 12px 0; color: #424245; font-size: 15px;">
+            <strong>Застройщик:</strong> {{ property.developer.name }}
+        </p>
+        {% endif %}
+        
+        {% if property.parsed_district or property.district %}
+        <p style="margin: 12px 0; color: #424245; font-size: 15px;">
+            <strong>Район:</strong> {{ property.parsed_district or property.district.name }}
+        </p>
+        {% endif %}
+        
+        {% if property.address %}
+        <p style="margin: 12px 0; color: #424245; font-size: 15px;">
+            <strong>Адрес:</strong> {{ property.address }}
+        </p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Call to Action -->
+<div class="highlight-box" style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px solid #bae6fd;">
+    <h3 style="margin: 0 0 12px 0; font-size: 18px; font-weight: 600; color: #1d1d1f;">
+        🔍 Не упустите другие возможности!
+    </h3>
+    <p style="margin: 0 0 16px 0; font-size: 15px; color: #424245;">
+        У нас есть множество похожих объектов, которые могут вам подойти. Посмотрите актуальные предложения и найдите свою идеальную квартиру!
+    </p>
+    <a href="{{ similar_url }}" class="btn-primary" style="display: inline-block; text-align: center; background: linear-gradient(135deg, #0088CC 0%, #006699 100%); color: white; text-decoration: none; padding: 16px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
+        Смотреть похожие объекты
+    </a>
+</div>
+
+<!-- Info Box -->
+<div style="background: #fef3c7; border: 1px solid #fde68a; border-radius: 8px; padding: 20px; margin: 24px 0;">
+    <p style="margin: 0; font-size: 14px; color: #92400e; line-height: 1.6;">
+        <strong>💡 Совет:</strong> Рынок недвижимости очень динамичен. Новые объекты появляются каждый день. 
+        {% if user.email_notifications %}
+        Вы можете настроить уведомления о новых объектах, чтобы не упустить выгодные предложения.
+        {% else %}
+        Включите email-уведомления в настройках профиля, чтобы получать информацию о новых объектах первыми!
+        {% endif %}
+    </p>
+</div>
+
+<!-- Contact Support -->
+<div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #e5e7eb; text-align: center;">
+    <p style="font-size: 14px; color: #6b7280; margin: 0 0 12px 0;">
+        Нужна помощь в поиске недвижимости?
+    </p>
+    <p style="font-size: 14px; color: #424245; margin: 0;">
+        Свяжитесь с нашими менеджерами: <a href="tel:+78612000000" style="color: #0088CC; text-decoration: none; font-weight: 600;">+7 (861) 200-00-00</a>
+        или <a href="mailto:support@inback.ru" style="color: #0088CC; text-decoration: none; font-weight: 600;">support@inback.ru</a>
+    </p>
+</div>
+{% endblock %}

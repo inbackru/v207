@@ -1,0 +1,146 @@
+ℹ️  Прокси не настроен — прямой доступ
+🏙️  Город: Майкоп | cache JKs: 0
+
+🔍 ЖК для обработки: 14
+════════════════════════════════════════════════════════════
+
+[1/14] Горные высоты (id=618, cian=5721889) | ETA 0м0с
+  🔄 Новая сессия (ротация IP прокси)
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=—  desc=0c  (3 полей)
+
+[2/14] Долина (id=613, cian=5256735) | ETA 0м23с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=—  desc=0c  (3 полей)
+
+[3/14] Звезды (id=615, cian=4705333) | ETA 0м30с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=—  desc=0c  (3 полей)
+
+[4/14] Кооперативный (id=629, cian=8234) | ETA 0м30с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=—  desc=0c  (2 полей)
+
+[5/14] На высоте (id=614, cian=4792566) | ETA 0м28с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=—  desc=0c  (3 полей)
+
+[6/14] Насып (id=632, cian=44222) | ETA 0м26с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=—  desc=0c  (2 полей)
+
+[7/14] Предгорье Лаго-Наки (id=612, cian=4538828) | ETA 0м23с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=—  desc=0c  (3 полей)
+
+[8/14] Сердце столицы (id=619, cian=3397694) | ETA 0м20с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=—  desc=0c  (3 полей)
+
+[9/14] Фишт (id=633, cian=1259020) | ETA 0м17с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=—  desc=0c  (2 полей)
+
+[10/14] Черемушки (id=631, cian=3830051) | ETA 0м14с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=—  desc=0c  (2 полей)
+
+[11/14] Эпос (id=617, cian=5733892) | ETA 0м10с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=—  desc=0c  (3 полей)
+
+[12/14] Яблоневый эко район (id=616, cian=4113091) | ETA 0м7с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=—  desc=0c  (3 полей)
+
+[13/14] по ул. Ленина, 29 (id=634, cian=158674) | ETA 0м3с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=—  desc=0c  (2 полей)
+
+[14/14] по ул. Остапенко (id=630, cian=44223) | ETA 0м0с
+  ℹ️  city_id не обновляю (страница не содержит данных ЖК — вероятно, soft-block)
+  ✅ фото=0  lat=—  addr=—
+      округ=—  мкр=—  dev=—  desc=0c  (2 полей)
+
+════════════════════════════════════════════════════════════
+Итого: ✅14  ❌0  ⏭️0  из 14 ЖК  за 0.9 мин
+
+✅ Процесс завершён (код 0)
+
+🔄 АВТО: запускаем разбор адресов (parse_cian_addresses.py)...
+Processing 14 complexes (city_id=8), mode=COALESCE (fill nulls only)...
+
+
+✅ Updated: 14, Errors: 0
+
+── Fill-rate ──────────────────────────────────────────
+  has_region                    : 124
+  has_city                      : 407
+  has_district                  : 86
+  has_quarter                   : 95
+  has_street                    : 426
+  has_house                     : 181
+  total                         : 495
+✅ Разбор адресов завершён (код 0)
+
+🔄 АВТО: синхронизируем адреса квартир (propagate_rc_address.py)...
+WARNING: TELEGRAM_BOT_TOKEN not set - Telegram notifications will be disabled
+TELEGRAM_BOT_TOKEN not found
+ℹ️  Sentry disabled (SENTRY_DSN not set)
+2026-06-19 11:46:35,191 - INFO - Security configuration initialized:
+2026-06-19 11:46:35,191 - INFO -   ✅ Rate Limiting: Active
+2026-06-19 11:46:35,191 - INFO -   ✅ CSRF Protection: Active
+2026-06-19 11:46:35,191 - INFO -   ✅ Security Headers: Active
+2026-06-19 11:46:35,191 - INFO -   ✅ XSS Protection: Active
+2026-06-19 11:46:35,191 - INFO -   ✅ Clickjacking Protection: Active
+2026-06-19 11:46:35,191 - INFO -   ✅ SQL Injection Protection: Active (SQLAlchemy ORM)
+✅ Advanced security features initialized successfully
+Database tables created successfully!
+2026-06-19 11:46:37,244 - DEBUG - /etc/localtime found
+2026-06-19 11:46:37,244 - DEBUG - No explicit setting existed. Use localtime
+2026-06-19 11:46:37,245 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 11:46:37,245 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 11:46:37,245 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 11:46:37,246 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 11:46:37,246 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 11:46:37,246 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 11:46:37,246 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 11:46:37,246 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 11:46:37,246 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 11:46:37,246 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 11:46:37,246 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 11:46:37,247 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 11:46:37,247 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 11:46:37,247 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 11:46:37,247 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 11:46:37,247 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 11:46:37,247 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 11:46:37,248 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 11:46:37,248 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 11:46:37,248 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-19 11:46:37,248 - INFO - ⏸️  APScheduler skipped - Set ENABLE_SCHEDULER=true to run background jobs
+Propagating RC address → properties (force=False, city=8) ...
+  parsed_area updated:       0
+  parsed_settlement updated: 0
+  parsed_street updated:     0
+  parsed_city updated:       0
+
+Final coverage:
+  Окrug  (parsed_area):       6109/65380 (9%)
+  Мкр    (parsed_settlement): 2840/65380 (4%)
+  Улица  (parsed_street):     58113/65380 (88%)
+Done.
+✅ Синхронизация адресов завершена (код 0)

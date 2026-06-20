@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+{% set city_slug = current_city.slug if current_city else 'krasnodar' %}
+{% set city_name = current_city.name if current_city else 'Краснодар' %}
+{% set city_prep = (current_city.name_prepositional or current_city.name) if current_city else 'Краснодаре' %}
+{% set city_gen = (current_city.name_genitive or current_city.name) if current_city else 'Краснодара' %}
+
+{% block title %}Словарь недвижимости 2026 — все термины при покупке новостройки | InBack{% endblock %}
+{% block description %}Полный словарь терминов рынка недвижимости: ДДУ, эскроу-счёт, кэшбек за квартиру, льготная ипотека, семейная ипотека, IT-ипотека. Простые объяснения для покупателей новостроек в {{ city_prep }}.{% endblock %}
+{% block keywords %}словарь недвижимости, термины новостройки, что такое ДДУ, эскроу-счёт что это, кэшбек за квартиру, льготная ипотека, семейная ипотека, IT-ипотека, налоговый вычет, материнский капитал, словарь риелтора{% endblock %}
+{% block og_title %}Словарь недвижимости — все термины при покупке новостройки | InBack{% endblock %}
+{% block og_description %}Полный словарь терминов рынка недвижимости. ДДУ, эскроу, кэшбек, ипотека — объясняем простым языком для покупателей квартир.{% endblock %}
+{% block canonical_url %}<link rel="canonical" href="https://inback.ru/slovar-nedvizhimosti" />{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Главная", "item": "https://inback.ru/"},
+        {"@type": "ListItem", "position": 2, "name": "Словарь недвижимости", "item": "https://inback.ru/slovar-nedvizhimosti"}
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Что такое ДДУ (договор долевого участия)?",
+          "acceptedAnswer": {"@type": "Answer", "text": "ДДУ — договор долевого участия в строительстве. Это основной документ при покупке квартиры в новостройке, который заключается между покупателем и застройщиком. Регулируется Федеральным законом № 214-ФЗ. ДДУ подлежит обязательной регистрации в Росреестре, что защищает покупателя от двойных продаж."}
+        },
+        {
+          "@type": "Question",
+          "name": "Что такое эскроу-счёт?",
+          "acceptedAnswer": {"@type": "Answer", "text": "Эскроу-счёт — специальный банковский счёт, на котором хранятся деньги покупателя до завершения строительства. Застройщик получает их только после сдачи дома. Если стройка заморожена — деньги возвращаются покупателю. С 2019 года обязателен для большинства новостроек России."}
+        },
+        {
+          "@type": "Question",
+          "name": "Что такое кэшбек за квартиру?",
+          "acceptedAnswer": {"@type": "Answer", "text": "Кэшбек за квартиру — возврат части стоимости жилья на счёт покупателя после сделки. InBack возвращает покупателям до 500 000 ₽ (2,5–7% от стоимости) из агентской комиссии застройщика. Услуга бесплатна для покупателя."}
+        },
+        {
+          "@type": "Question",
+          "name": "Что такое семейная ипотека?",
+          "acceptedAnswer": {"@type": "Answer", "text": "Семейная ипотека — льготная программа ипотечного кредитования для семей с детьми. Ставка: 6% годовых. Условие: наличие ребёнка до 6 лет (или ребёнка-инвалида до 18 лет). Максимальная сумма для Краснодарского края: 12 млн ₽. Действует на новостройки."}
+        },
+        {
+          "@type": "Question",
+          "name": "Что такое IT-ипотека?",
+          "acceptedAnswer": {"@type": "Answer", "text": "IT-ипотека — льготная ипотека для сотрудников аккредитованных IT-компаний. Ставка: от 6% годовых. Условие: работа в аккредитованной IT-компании, доход от 150 000 ₽/мес (для Краснодара). Возраст заёмщика: 18–50 лет. Только на первичный рынок (новостройки)."}
+        },
+        {
+          "@type": "Question",
+          "name": "Что такое налоговый вычет при покупке квартиры?",
+          "acceptedAnswer": {"@type": "Answer", "text": "Имущественный налоговый вычет — возврат НДФЛ (13%) при покупке жилья. Максимум: 260 000 ₽ от стоимости квартиры (до 2 млн ₽) + 390 000 ₽ по уплаченным процентам по ипотеке (до 3 млн ₽). Итого до 650 000 ₽. Оформляется через ФНС или работодателя."}
+        },
+        {
+          "@type": "Question",
+          "name": "Что такое материнский капитал и как использовать при покупке квартиры?",
+          "acceptedAnswer": {"@type": "Answer", "text": "Материнский (семейный) капитал — государственная выплата за рождение детей. В 2025 году: 676 398 ₽ на первого ребёнка, 893 699 ₽ на второго. Можно использовать как первоначальный взнос или для погашения ипотеки. Оформляется через Социальный фонд России."}
+        },
+        {
+          "@type": "Question",
+          "name": "Что такое ЕГРН и для чего нужна выписка?",
+          "acceptedAnswer": {"@type": "Answer", "text": "ЕГРН — Единый государственный реестр недвижимости. Выписка из ЕГРН подтверждает право собственности и отсутствие обременений. Нужна при покупке вторичного жилья (проверка чистоты), при получении кэшбека от InBack и при сделках с банком."}
+        },
+        {
+          "@type": "Question",
+          "name": "Что такое аккредитация банка у застройщика?",
+          "acceptedAnswer": {"@type": "Answer", "text": "Аккредитация банка — подтверждение того, что банк проверил застройщика и готов выдавать ипотеку на его объекты. Чем больше банков аккредитовали ЖК, тем надёжнее застройщик и больше вариантов ипотечных программ у покупателя."}
+        }
+      ]
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://inback.ru/slovar-nedvizhimosti#webpage",
+      "url": "https://inback.ru/slovar-nedvizhimosti",
+      "name": "Словарь недвижимости 2026 — все термины при покупке новостройки",
+      "description": "Полный словарь терминов рынка недвижимости: ДДУ, эскроу-счёт, кэшбек, льготная ипотека, налоговый вычет.",
+      "inLanguage": "ru",
+      "isPartOf": {"@id": "https://inback.ru/#website"},
+      "breadcrumb": {"@id": "https://inback.ru/slovar-nedvizhimosti#breadcrumb"},
+      "about": [
+        {"@type": "DefinedTerm", "name": "ДДУ", "description": "Договор долевого участия в строительстве"},
+        {"@type": "DefinedTerm", "name": "Эскроу-счёт", "description": "Защищённый банковский счёт для хранения средств покупателя до сдачи дома"},
+        {"@type": "DefinedTerm", "name": "Кэшбек за квартиру", "description": "Возврат части стоимости квартиры на счёт покупателя"},
+        {"@type": "DefinedTerm", "name": "Семейная ипотека", "description": "Льготная ипотека для семей с детьми под 6% годовых"},
+        {"@type": "DefinedTerm", "name": "IT-ипотека", "description": "Льготная ипотека для сотрудников IT-компаний"},
+        {"@type": "DefinedTerm", "name": "Налоговый вычет", "description": "Возврат 13% НДФЛ при покупке жилья"}
+      ]
+    }
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+  <!-- Breadcrumbs -->
+  <div class="bg-white border-b border-gray-200">
+    <div class="max-w-5xl mx-auto px-4 py-3">
+      <nav class="flex items-center gap-2 text-sm text-gray-500">
+        <a href="/{{ city_slug }}/" class="hover:text-blue-600">Главная</a>
+        <span>/</span>
+        <span class="text-gray-900 font-medium">Словарь недвижимости</span>
+      </nav>
+    </div>
+  </div>
+
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="text-center mb-10">
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+        Словарь недвижимости 2026
+      </h1>
+      <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+        Все термины при покупке новостройки — объясняем простым языком без юридического жаргона
+      </p>
+      <div class="mt-4 flex flex-wrap justify-center gap-3 text-sm text-gray-500">
+        <span class="bg-blue-50 text-blue-700 px-3 py-1 rounded-full font-medium">{{ glossary_terms|length }} терминов</span>
+        <span class="bg-green-50 text-green-700 px-3 py-1 rounded-full font-medium">Обновлено в 2026 году</span>
+        <span class="bg-orange-50 text-orange-700 px-3 py-1 rounded-full font-medium">Специально для покупателей новостроек</span>
+      </div>
+    </div>
+
+    <!-- Alphabet quick nav -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-8">
+      <div class="flex flex-wrap gap-2 justify-center">
+        {% set letters = [] %}
+        {% for term in glossary_terms %}
+          {% set first = term.name[0] %}
+          {% if first not in letters %}
+            {% if letters.append(first) %}{% endif %}
+          {% endif %}
+        {% endfor %}
+        {% for letter in letters %}
+        <a href="#letter-{{ letter }}" class="w-9 h-9 flex items-center justify-center rounded-lg bg-gray-50 hover:bg-blue-50 hover:text-blue-600 text-gray-700 font-medium text-sm transition-colors">
+          {{ letter }}
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Terms grouped by letter -->
+    {% set current_letter = namespace(value='') %}
+    {% for term in glossary_terms %}
+      {% set first = term.name[0] %}
+      {% if first != current_letter.value %}
+        {% set current_letter.value = first %}
+        {% if not loop.first %}</div>{% endif %}
+        <div id="letter-{{ first }}" class="mb-6">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="text-3xl font-bold text-blue-600">{{ first }}</span>
+          <div class="flex-1 h-px bg-blue-100"></div>
+        </div>
+      {% endif %}
+
+      <!-- Term card -->
+      <div id="term-{{ term.slug }}" class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-4 scroll-mt-20">
+        <div class="flex items-start justify-between gap-4 mb-3">
+          <h2 class="text-xl font-bold text-gray-900">{{ term.name }}</h2>
+          {% if term.tag %}
+          <span class="shrink-0 text-xs font-medium px-2.5 py-1 rounded-full
+            {% if term.tag == 'ипотека' %}bg-blue-50 text-blue-700
+            {% elif term.tag == 'договор' %}bg-purple-50 text-purple-700
+            {% elif term.tag == 'кэшбек' %}bg-orange-50 text-orange-700
+            {% elif term.tag == 'налог' %}bg-green-50 text-green-700
+            {% else %}bg-gray-50 text-gray-600{% endif %}">
+            {{ term.tag }}
+          </span>
+          {% endif %}
+        </div>
+        {% if term.short %}
+        <p class="text-blue-700 font-medium text-sm mb-3 bg-blue-50 px-3 py-1.5 rounded-lg inline-block">{{ term.short }}</p>
+        {% endif %}
+        <p class="text-gray-700 leading-relaxed mb-4">{{ term.definition }}</p>
+        {% if term.example %}
+        <div class="bg-amber-50 border-l-4 border-amber-400 pl-4 pr-3 py-3 rounded-r-lg">
+          <p class="text-sm text-amber-800"><span class="font-semibold">Пример:</span> {{ term.example }}</p>
+        </div>
+        {% endif %}
+        {% if term.related_url %}
+        <div class="mt-4">
+          <a href="{{ term.related_url }}" class="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:underline font-medium">
+            <i class="fas fa-arrow-right text-xs"></i>
+            {{ term.related_label or 'Подробнее' }}
+          </a>
+        </div>
+        {% endif %}
+      </div>
+
+      {% if loop.last %}</div>{% endif %}
+    {% endfor %}
+
+    <!-- CTA Block -->
+    <div class="mt-12 bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-8 text-white text-center">
+      <h2 class="text-2xl font-bold mb-3">Купить квартиру в {{ city_prep }} с кэшбеком</h2>
+      <p class="text-blue-100 mb-6 max-w-lg mx-auto">
+        Более {{ complexes_count or 200 }} ЖК от проверенных застройщиков. Бесплатное юридическое сопровождение. Кэшбек до 500 000 ₽ на ваш счёт.
+      </p>
+      <div class="flex flex-wrap justify-center gap-3">
+        <a href="/{{ city_slug }}/novostrojki"
+           class="bg-white text-blue-700 font-bold px-6 py-3 rounded-xl hover:bg-blue-50 transition-colors">
+          Смотреть новостройки
+        </a>
+        <a href="/{{ city_slug }}/usloviya-keshbeka"
+           class="border border-white/40 text-white px-6 py-3 rounded-xl hover:bg-white/10 transition-colors">
+          Как получить кэшбек
+        </a>
+      </div>
+    </div>
+
+    <!-- Related guides -->
+    <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <a href="/{{ city_slug }}/usloviya-keshbeka"
+         class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow group">
+        <div class="text-2xl mb-2">💰</div>
+        <h3 class="font-bold text-gray-900 group-hover:text-blue-600 transition-colors mb-1">Условия кэшбека</h3>
+        <p class="text-sm text-gray-500">Как получить до 500 000 ₽ при покупке квартиры</p>
+      </a>
+      <a href="/{{ city_slug }}/semejnaya-ipoteka"
+         class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow group">
+        <div class="text-2xl mb-2">👨‍👩‍👧</div>
+        <h3 class="font-bold text-gray-900 group-hover:text-blue-600 transition-colors mb-1">Семейная ипотека</h3>
+        <p class="text-sm text-gray-500">Ставка 6%, до 12 млн ₽ для {{ city_gen }}</p>
+      </a>
+      <a href="/{{ city_slug }}/novostrojki"
+         class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow group">
+        <div class="text-2xl mb-2">🏗️</div>
+        <h3 class="font-bold text-gray-900 group-hover:text-blue-600 transition-colors mb-1">Каталог новостроек</h3>
+        <p class="text-sm text-gray-500">Квартиры от застройщика в {{ city_prep }}</p>
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

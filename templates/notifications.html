@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+
+{% block title %}Уведомления — InBack{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-3xl mx-auto px-4 py-8">
+
+    <!-- Page header -->
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Уведомления</h1>
+        <p class="text-sm text-gray-500 mt-0.5" id="notif-subtitle">Загрузка...</p>
+      </div>
+      <button onclick="markAllRead()" id="mark-all-btn"
+        class="hidden items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-sm text-gray-600 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm">
+        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+        </svg>
+        Отметить все прочитанными
+      </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex gap-1 bg-white border border-gray-200 rounded-2xl p-1 mb-6 shadow-sm">
+      <button onclick="switchTab('all')" id="tab-all"
+        class="tab-btn flex-1 py-2 px-4 rounded-xl text-sm font-medium transition-all bg-[#0088CC] text-white shadow-sm">
+        Все
+        <span id="badge-all" class="ml-1.5 bg-white/30 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden"></span>
+      </button>
+      <button onclick="switchTab('system')" id="tab-system"
+        class="tab-btn flex-1 py-2 px-4 rounded-xl text-sm font-medium transition-all text-gray-600 hover:text-gray-800 hover:bg-gray-50">
+        Системные
+        <span id="badge-system" class="ml-1.5 bg-gray-200 text-gray-600 text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden"></span>
+      </button>
+      <button onclick="switchTab('personal')" id="tab-personal"
+        class="tab-btn flex-1 py-2 px-4 rounded-xl text-sm font-medium transition-all text-gray-600 hover:text-gray-800 hover:bg-gray-50">
+        Личные
+        <span id="badge-personal" class="ml-1.5 bg-gray-200 text-gray-600 text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden"></span>
+      </button>
+    </div>
+
+    <!-- Notification list -->
+    <div id="notif-list" class="space-y-2">
+      <!-- Skeleton placeholders -->
+      <div class="skeleton-card bg-white rounded-2xl border border-gray-100 p-4 animate-pulse">
+        <div class="flex gap-3">
+          <div class="w-10 h-10 bg-gray-100 rounded-xl flex-shrink-0"></div>
+          <div class="flex-1 space-y-2">
+            <div class="h-3.5 bg-gray-100 rounded w-2/3"></div>
+            <div class="h-3 bg-gray-100 rounded w-full"></div>
+            <div class="h-3 bg-gray-100 rounded w-5/6"></div>
+          </div>
+        </div>
+      </div>
+      <div class="skeleton-card bg-white rounded-2xl border border-gray-100 p-4 animate-pulse">
+        <div class="flex gap-3">
+          <div class="w-10 h-10 bg-gray-100 rounded-xl flex-shrink-0"></div>
+          <div class="flex-1 space-y-2">
+            <div class="h-3.5 bg-gray-100 rounded w-1/2"></div>
+            <div class="h-3 bg-gray-100 rounded w-full"></div>
+            <div class="h-3 bg-gray-100 rounded w-3/4"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div id="notif-empty" class="hidden text-center py-20">
+      <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/>
+        </svg>
+      </div>
+      <p class="text-gray-500 font-medium">Уведомлений нет</p>
+      <p class="text-sm text-gray-400 mt-1" id="empty-sub">Здесь будут появляться уведомления от платформы</p>
+    </div>
+
+  </div>
+</div>
+
+<style>
+  .tab-btn { cursor: pointer; border: none; outline: none; }
+  .notif-card { transition: background 0.15s; }
+  .notif-card.unread { background: #fff; }
+  .notif-card.read { background: #fafafa; }
+  .notif-card:hover { background: #f3f4f6; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+  .notif-card { animation: fadeIn 0.18s ease both; }
+</style>
+
+<script>
+(function(){
+  var allNotifs = [];
+  var currentTab = 'all';
+
+  var TYPE_CONFIG = {
+    'success': { bg: 'bg-green-100', text: 'text-green-600', icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>' },
+    'warning': { bg: 'bg-amber-100', text: 'text-amber-600', icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>' },
+    'error':   { bg: 'bg-red-100',   text: 'text-red-600',   icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>' },
+    'info':    { bg: 'bg-blue-100',  text: 'text-blue-600',  icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/>' },
+    'deal':    { bg: 'bg-purple-100', text: 'text-purple-600', icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z"/>' },
+    'cashback':{ bg: 'bg-emerald-100', text: 'text-emerald-600', icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 01-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"/>' },
+  };
+
+  function getTypeConfig(type) {
+    return TYPE_CONFIG[type] || TYPE_CONFIG['info'];
+  }
+
+  function formatDate(iso) {
+    if (!iso) return '';
+    var d = new Date(iso.replace(' ', 'T'));
+    if (isNaN(d)) return iso;
+    var now = new Date();
+    var diff = now - d;
+    var mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'только что';
+    if (mins < 60) return mins + ' мин. назад';
+    var hours = Math.floor(mins / 60);
+    if (hours < 24) return hours + ' ч. назад';
+    var days = Math.floor(hours / 24);
+    if (days < 7) return days + ' дн. назад';
+    return d.toLocaleDateString('ru-RU', { day:'numeric', month:'short', year: d.getFullYear()!==now.getFullYear()?'numeric':undefined });
+  }
+
+  function sourceLabel(n) {
+    if (n.source === 'notification') return 'Системное';
+    if (n.source === 'user_notification') return 'Личное';
+    return '';
+  }
+
+  function renderCard(n, idx) {
+    var cfg = getTypeConfig(n.type);
+    var isUnread = !n.is_read;
+    var label = sourceLabel(n);
+    var actionBtn = n.action_url
+      ? '<a href="' + n.action_url + '" class="mt-3 inline-flex items-center gap-1 text-xs font-medium text-[#0088CC] hover:text-[#006699] transition-colors">Перейти <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></a>'
+      : '';
+    return '<div class="notif-card ' + (isUnread ? 'unread' : 'read') + ' rounded-2xl border ' + (isUnread ? 'border-blue-100' : 'border-gray-100') + ' p-4 cursor-pointer" style="animation-delay:' + (idx * 0.04) + 's" data-id="' + n.id + '" data-source="' + n.source + '" onclick="handleCardClick(this,\'' + n.id + '\',\'' + n.source + '\'' + (n.action_url ? ',\'' + n.action_url + '\'' : '') + ')">' +
+      '<div class="flex gap-3">' +
+        '<div class="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center ' + cfg.bg + '">' +
+          '<svg class="w-5 h-5 ' + cfg.text + '" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">' + cfg.icon + '</svg>' +
+        '</div>' +
+        '<div class="flex-1 min-w-0">' +
+          '<div class="flex items-start justify-between gap-2">' +
+            '<div class="flex items-center gap-2 flex-wrap">' +
+              (isUnread ? '<span class="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-1"></span>' : '') +
+              '<p class="text-sm font-semibold text-gray-900 leading-snug">' + escHtml(n.title || 'Уведомление') + '</p>' +
+              (label ? '<span class="text-[10px] font-medium px-1.5 py-0.5 rounded-full ' + (n.source==='notification' ? 'bg-blue-50 text-blue-500' : 'bg-purple-50 text-purple-500') + '">' + label + '</span>' : '') +
+            '</div>' +
+            '<span class="text-[11px] text-gray-400 whitespace-nowrap flex-shrink-0">' + formatDate(n.created_at) + '</span>' +
+          '</div>' +
+          '<p class="text-sm text-gray-600 mt-1 leading-relaxed">' + escHtml(n.message || '') + '</p>' +
+          actionBtn +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function getFiltered(tab) {
+    if (tab === 'system') return allNotifs.filter(function(n){ return n.source === 'notification'; });
+    if (tab === 'personal') return allNotifs.filter(function(n){ return n.source === 'user_notification'; });
+    return allNotifs;
+  }
+
+  function renderList() {
+    var list = getFiltered(currentTab);
+    var el = document.getElementById('notif-list');
+    var empty = document.getElementById('notif-empty');
+    var sub = document.getElementById('empty-sub');
+    if (!list.length) {
+      el.innerHTML = '';
+      empty.classList.remove('hidden');
+      if (currentTab === 'system') sub.textContent = 'Здесь будут системные уведомления от платформы';
+      else if (currentTab === 'personal') sub.textContent = 'Здесь будут личные уведомления от менеджеров';
+      else sub.textContent = 'Здесь будут появляться уведомления от платформы';
+    } else {
+      empty.classList.add('hidden');
+      el.innerHTML = list.map(renderCard).join('');
+    }
+    updateSubtitle();
+    updateMarkAllBtn();
+  }
+
+  function updateSubtitle() {
+    var list = getFiltered(currentTab);
+    var unread = list.filter(function(n){ return !n.is_read; }).length;
+    var sub = document.getElementById('notif-subtitle');
+    if (unread > 0) sub.textContent = unread + ' непрочитанных из ' + list.length;
+    else sub.textContent = list.length + ' уведомлений, все прочитаны';
+  }
+
+  function updateMarkAllBtn() {
+    var btn = document.getElementById('mark-all-btn');
+    var hasUnread = getFiltered(currentTab).some(function(n){ return !n.is_read; });
+    if (hasUnread) btn.classList.replace('hidden', 'flex');
+    else { btn.classList.remove('flex'); btn.classList.add('hidden'); }
+  }
+
+  function updateBadges() {
+    var allUnread = allNotifs.filter(function(n){ return !n.is_read; }).length;
+    var sysUnread = allNotifs.filter(function(n){ return !n.is_read && n.source==='notification'; }).length;
+    var perUnread = allNotifs.filter(function(n){ return !n.is_read && n.source==='user_notification'; }).length;
+    setBadge('badge-all', allUnread);
+    setBadge('badge-system', sysUnread);
+    setBadge('badge-personal', perUnread);
+  }
+
+  function setBadge(id, count) {
+    var el = document.getElementById(id);
+    if (count > 0) { el.textContent = count > 9 ? '9+' : count; el.classList.remove('hidden'); }
+    else el.classList.add('hidden');
+  }
+
+  window.switchTab = function(tab) {
+    currentTab = tab;
+    ['all','system','personal'].forEach(function(t){
+      var btn = document.getElementById('tab-' + t);
+      var badge = document.getElementById('badge-' + t);
+      if (t === tab) {
+        btn.classList.add('bg-[#0088CC]','text-white','shadow-sm');
+        btn.classList.remove('text-gray-600','hover:text-gray-800','hover:bg-gray-50');
+        if (badge && !badge.classList.contains('hidden')) {
+          badge.classList.replace('bg-gray-200','bg-white/30');
+          badge.classList.replace('text-gray-600','text-white');
+        }
+      } else {
+        btn.classList.remove('bg-[#0088CC]','text-white','shadow-sm');
+        btn.classList.add('text-gray-600','hover:text-gray-800','hover:bg-gray-50');
+        if (badge && !badge.classList.contains('hidden')) {
+          badge.classList.replace('bg-white/30','bg-gray-200');
+          badge.classList.replace('text-white','text-gray-600');
+        }
+      }
+    });
+    renderList();
+  };
+
+  window.handleCardClick = function(el, id, source, actionUrl) {
+    var notif = allNotifs.find(function(n){ return String(n.id)===String(id) && n.source===source; });
+    if (notif && !notif.is_read) {
+      markRead(id, source, function(){
+        notif.is_read = true;
+        el.classList.replace('unread','read');
+        el.classList.replace('border-blue-100','border-gray-100');
+        var dot = el.querySelector('.bg-blue-500.rounded-full');
+        if (dot) dot.remove();
+        updateSubtitle();
+        updateMarkAllBtn();
+        updateBadges();
+      });
+    }
+    if (actionUrl) { setTimeout(function(){ window.location.href = actionUrl; }, 150); }
+  };
+
+  function markRead(id, source, cb) {
+    fetch('/api/notifications/mark-read', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: parseInt(id), source: source })
+    }).then(function(r){ return r.json(); }).then(function(d){ if (d.success && cb) cb(); }).catch(function(){});
+  }
+
+  window.markAllRead = function() {
+    var toMark = getFiltered(currentTab).filter(function(n){ return !n.is_read; });
+    var done = 0;
+    if (!toMark.length) return;
+    toMark.forEach(function(n){
+      markRead(n.id, n.source, function(){
+        n.is_read = true;
+        done++;
+        if (done === toMark.length) renderList();
+      });
+    });
+    fetch('/api/notifications/mark-read', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ all: true })
+    }).then(function(r){ return r.json(); }).then(function(){
+      allNotifs.forEach(function(n){ n.is_read = true; });
+      renderList();
+      updateBadges();
+    }).catch(function(){});
+  };
+
+  function loadNotifications() {
+    fetch('/api/notifications')
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        allNotifs = (data.notifications || []);
+        updateBadges();
+        renderList();
+      })
+      .catch(function(){
+        document.getElementById('notif-list').innerHTML = '';
+        document.getElementById('notif-empty').classList.remove('hidden');
+        document.getElementById('notif-subtitle').textContent = 'Ошибка загрузки';
+      });
+  }
+
+  document.addEventListener('DOMContentLoaded', loadNotifications);
+})();
+</script>
+{% endblock %}

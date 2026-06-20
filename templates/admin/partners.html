@@ -1,0 +1,268 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Партнёры | Админ InBack{% endblock %}
+
+{% block content %}
+<div class="p-6">
+    <div class="mb-6 flex items-center justify-between flex-wrap gap-3">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Партнёры</h1>
+            <p class="text-gray-500 text-sm mt-1">Управление партнёрской сетью и назначение менеджеров</p>
+        </div>
+        <div class="flex items-center gap-3">
+            {% if pending_requests %}
+            <span class="bg-red-50 text-red-700 px-4 py-2 rounded-full text-sm font-semibold border border-red-200 flex items-center gap-2">
+                <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse inline-block"></span>
+                {{ pending_requests }} запрос{{ 'а' if pending_requests in [2,3,4] else ('ов' if pending_requests > 4 else '') }} на менеджера
+            </span>
+            {% endif %}
+            <span class="bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold border border-blue-200">
+                Всего: {{ partners_data|length }}
+            </span>
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in messages %}
+        <div class="mb-4 px-4 py-3 rounded-lg text-sm font-medium
+            {% if cat == 'success' %}bg-green-50 text-green-800 border border-green-200
+            {% elif cat == 'error' %}bg-red-50 text-red-800 border border-red-200
+            {% else %}bg-yellow-50 text-yellow-800 border border-yellow-200{% endif %}">
+            {{ msg }}
+        </div>
+        {% endfor %}
+    {% endwith %}
+
+    <!-- Stats bar -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+        {% set total = partners_data|length %}
+        {% set with_manager = partners_data | selectattr('manager') | list | length %}
+        {% set no_manager = total - with_manager %}
+        {% set total_refs = partners_data | map(attribute='refs_total') | sum %}
+        <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+            <div class="text-2xl font-bold text-gray-900">{{ total }}</div>
+            <div class="text-xs text-gray-500 mt-1 font-medium">Всего партнёров</div>
+        </div>
+        <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+            <div class="text-2xl font-bold text-green-600">{{ with_manager }}</div>
+            <div class="text-xs text-gray-500 mt-1 font-medium">С менеджером</div>
+        </div>
+        <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+            <div class="text-2xl font-bold text-amber-600">{{ no_manager }}</div>
+            <div class="text-xs text-gray-500 mt-1 font-medium">Без менеджера</div>
+        </div>
+        <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+            <div class="text-2xl font-bold" style="color:#0088CC;">{{ total_refs }}</div>
+            <div class="text-xs text-gray-500 mt-1 font-medium">Рефералов всего</div>
+        </div>
+    </div>
+
+    <!-- Filter tabs -->
+    <div class="flex gap-2 mb-5 flex-wrap">
+        <button onclick="filterPartners('all')" id="tab-all"
+            class="filter-tab px-4 py-2 rounded-full text-sm font-600 border transition-all active-tab">
+            Все партнёры
+        </button>
+        <button onclick="filterPartners('no_manager')" id="tab-no_manager"
+            class="filter-tab px-4 py-2 rounded-full text-sm font-600 border transition-all">
+            Без менеджера
+        </button>
+        <button onclick="filterPartners('has_manager')" id="tab-has_manager"
+            class="filter-tab px-4 py-2 rounded-full text-sm font-600 border transition-all">
+            С менеджером
+        </button>
+        <button onclick="filterPartners('requested')" id="tab-requested"
+            class="filter-tab px-4 py-2 rounded-full text-sm font-600 border transition-all relative">
+            Запросили менеджера
+            {% if pending_requests %}
+            <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">{{ pending_requests }}</span>
+            {% endif %}
+        </button>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="bg-gray-50 border-b border-gray-100">
+                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Партнёр</th>
+                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Контакты</th>
+                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Рефералы</th>
+                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Баланс</th>
+                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Дата</th>
+                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Запрос</th>
+                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Менеджер</th>
+                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Действие</th>
+                    </tr>
+                </thead>
+                <tbody id="partnersTable">
+                    {% for item in partners_data %}
+                    {% set p = item.partner %}
+                    <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors partner-row"
+                        data-has-manager="{{ 'yes' if item.manager else 'no' }}"
+                        data-has-request="{{ 'yes' if item.manager_request else 'no' }}">
+                        <td class="px-4 py-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                                    style="background: linear-gradient(135deg,#0088CC,#005f99);">
+                                    {{ p.full_name[0] if p.full_name else 'П' }}
+                                </div>
+                                <div>
+                                    <div class="font-semibold text-gray-900">{{ p.full_name }}</div>
+                                    <div class="text-xs text-gray-400 font-mono">{{ p.partner_id }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="text-gray-700 font-medium">{{ p.phone }}</div>
+                            {% if p.email %}
+                            <div class="text-xs text-gray-400 mt-0.5">{{ p.email }}</div>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="flex items-center gap-2">
+                                <span class="text-gray-900 font-semibold">{{ item.refs_total }}</span>
+                                {% if item.refs_credited > 0 %}
+                                <span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full font-semibold">{{ item.refs_credited }} зачислено</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="font-semibold" style="color:#0088CC;">{{ '{:,.0f}'.format(p.balance|float).replace(',', ' ') }} ₽</div>
+                            <div class="text-xs text-gray-400 mt-0.5">{{ '{:,.0f}'.format(p.total_earned|float).replace(',', ' ') }} ₽ всего</div>
+                        </td>
+                        <td class="px-4 py-3 text-gray-500 text-xs">
+                            {{ p.created_at.strftime('%d.%m.%Y') if p.created_at else '—' }}
+                        </td>
+                        <td class="px-4 py-3">
+                            {% if item.manager_request %}
+                            <div class="flex flex-col gap-1">
+                                <span class="inline-flex items-center gap-1 bg-red-50 text-red-700 text-xs px-2 py-1 rounded-full border border-red-200 font-semibold">
+                                    <span class="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></span>
+                                    Ожидает
+                                </span>
+                                {% if item.manager_request.message %}
+                                <span class="text-xs text-gray-500 truncate max-w-[120px]" title="{{ item.manager_request.message }}">{{ item.manager_request.message[:40] }}{% if item.manager_request.message|length > 40 %}…{% endif %}</span>
+                                {% endif %}
+                                <form method="POST" action="/admin/partners/manager-request/{{ item.manager_request.id }}/resolve" style="margin:0;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="text-xs text-green-700 underline hover:text-green-900 font-semibold">✓ Обработано</button>
+                                </form>
+                            </div>
+                            {% else %}
+                            <span class="text-gray-300 text-xs">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3">
+                            {% if item.manager %}
+                            <div class="flex items-center gap-2">
+                                <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                                    style="background:#0088CC;">
+                                    {{ item.manager.full_name[0] if item.manager.full_name else 'М' }}
+                                </div>
+                                <div>
+                                    <div class="text-gray-800 font-semibold text-xs">{{ item.manager.full_name }}</div>
+                                    <div class="text-gray-400 text-xs">{{ item.manager.manager_id }}</div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <span class="bg-amber-50 text-amber-700 text-xs px-2 py-1 rounded-full border border-amber-200 font-semibold">
+                                Не назначен
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3">
+                            <button onclick="openAssignModal({{ p.id }}, '{{ p.full_name }}', '{{ p.partner_id }}', {{ item.manager.id if item.manager else 'null' }})"
+                                class="text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all"
+                                style="color:#0088CC;border-color:#0088CC;"
+                                onmouseover="this.style.background='#0088CC';this.style.color='#fff'"
+                                onmouseout="this.style.background='';this.style.color='#0088CC'">
+                                {% if item.manager %}Изменить{% else %}Назначить{% endif %}
+                            </button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="px-4 py-16 text-center">
+                            <div class="text-gray-400">
+                                <i class="fas fa-users text-4xl mb-3 block"></i>
+                                <div class="font-semibold text-gray-600 mb-1">Партнёров пока нет</div>
+                                <div class="text-sm">Они появятся здесь после регистрации</div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Assign manager modal -->
+<div id="assignModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/50" onclick="closeAssignModal()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+        <button onclick="closeAssignModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+            <i class="fas fa-times text-lg"></i>
+        </button>
+        <h2 class="text-lg font-bold text-gray-900 mb-1">Назначить менеджера</h2>
+        <p class="text-sm text-gray-500 mb-5" id="modalPartnerName">—</p>
+
+        <form method="POST" id="assignForm" action="">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="mb-5">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Менеджер</label>
+                <select name="manager_id" id="managerSelect"
+                    class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-400 bg-white">
+                    <option value="">— Снять менеджера —</option>
+                    {% for mgr in managers %}
+                    <option value="{{ mgr.id }}">{{ mgr.full_name }} ({{ mgr.manager_id }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="flex gap-3">
+                <button type="button" onclick="closeAssignModal()"
+                    class="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-all">
+                    Отмена
+                </button>
+                <button type="submit"
+                    class="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all"
+                    style="background:linear-gradient(135deg,#0088CC,#005f99);">
+                    Сохранить
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.active-tab { background: #0088CC; color: #fff; border-color: #0088CC; }
+.filter-tab:not(.active-tab) { background: #fff; color: #475569; border-color: #e2e8f0; }
+.filter-tab:not(.active-tab):hover { border-color: #0088CC; color: #0088CC; }
+</style>
+
+<script>
+function openAssignModal(partnerId, name, partnerCode, currentManagerId) {
+    document.getElementById('modalPartnerName').textContent = name + ' · ' + partnerCode;
+    document.getElementById('assignForm').action = '/admin/partners/' + partnerId + '/assign-manager';
+    var sel = document.getElementById('managerSelect');
+    sel.value = currentManagerId || '';
+    document.getElementById('assignModal').classList.remove('hidden');
+}
+function closeAssignModal() {
+    document.getElementById('assignModal').classList.add('hidden');
+}
+
+function filterPartners(type) {
+    document.querySelectorAll('.filter-tab').forEach(function(t) { t.classList.remove('active-tab'); });
+    document.getElementById('tab-' + type).classList.add('active-tab');
+    document.querySelectorAll('.partner-row').forEach(function(row) {
+        if (type === 'all') { row.style.display = ''; }
+        else if (type === 'no_manager') { row.style.display = row.dataset.hasManager === 'no' ? '' : 'none'; }
+        else if (type === 'has_manager') { row.style.display = row.dataset.hasManager === 'yes' ? '' : 'none'; }
+        else if (type === 'requested') { row.style.display = row.dataset.hasRequest === 'yes' ? '' : 'none'; }
+    });
+}
+</script>
+{% endblock %}

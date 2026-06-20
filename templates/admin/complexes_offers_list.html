@@ -1,0 +1,335 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Управление акциями ЖК - Админ панель | InBack{% endblock %}
+{% block page_title %}Управление акциями ЖК{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <div class="flex items-center text-sm text-gray-500 mb-2">
+                <a href="{{ url_for('adm.admin_dashboard') }}" class="hover:text-[#0088CC]">Дашборд</a>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <span>Управление акциями ЖК</span>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-900">Управление акциями ЖК</h1>
+            <p class="text-gray-600 mt-1">Просмотр и управление специальными предложениями для жилых комплексов</p>
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="md:col-span-2">
+                <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Поиск ЖК</label>
+                <input type="text" 
+                       id="search" 
+                       placeholder="Введите название ЖК..."
+                       class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#0088CC] focus:border-[#0088CC]"
+                       onkeyup="filterComplexes()">
+            </div>
+            <div class="flex items-end">
+                <button onclick="resetFilters()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-md w-full">
+                    <i class="fas fa-times mr-1"></i>Сбросить
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Complexes Table -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        {% if complexes %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200" id="complexesTable">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            ЖК
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Застройщик
+                        </th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Активных акций
+                        </th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Действия
+                        </th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Обогащение
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for complex in complexes %}
+                    <tr class="hover:bg-gray-50 complex-row" data-complex-name="{{ complex.name|lower }}">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                {% if complex.image_url %}
+                                <div class="flex-shrink-0 h-12 w-12">
+                                    <img class="h-12 w-12 rounded-lg object-cover" src="{{ complex.image_url }}" alt="{{ complex.name }}">
+                                </div>
+                                {% else %}
+                                <div class="flex-shrink-0 h-12 w-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-building text-gray-400"></i>
+                                </div>
+                                {% endif %}
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900">{{ complex.name }}</div>
+                                    <div class="text-sm text-gray-500">
+                                        <i class="fas fa-map-marker-alt mr-1"></i>{{ complex.location or '—' }}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">{{ complex.developer.name if complex.developer else '—' }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            {% if complex.offers_count > 0 %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                <i class="fas fa-check-circle mr-1"></i>{{ complex.offers_count }}
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-600">
+                                <i class="fas fa-times-circle mr-1"></i>0
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <a href="{{ url_for('adm.admin_complex_offers', complex_id=complex.id) }}" 
+                               class="bg-[#0088CC] hover:bg-[#0077b3] text-white px-4 py-2 rounded-lg transition-colors inline-flex items-center">
+                                <i class="fas fa-cog mr-2"></i>Управлять акциями
+                            </a>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                            {% if complex.complex_id %}
+                            <button onclick="enrichComplex({{ complex.id }}, '{{ complex.name|e }}')"
+                                    id="enrich-btn-{{ complex.id }}"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-medium transition-colors">
+                                <i class="fas fa-satellite-dish text-xs"></i>Обогатить
+                            </button>
+                            {% else %}
+                            <span class="text-gray-300 text-xs">нет CIAN ID</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if pagination.pages > 1 %}
+        <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+            <div class="flex items-center justify-between">
+                <div class="text-sm text-gray-700">
+                    Показано <span class="font-medium">{{ (pagination.page - 1) * pagination.per_page + 1 }}</span>
+                    до <span class="font-medium">{{ min(pagination.page * pagination.per_page, pagination.total) }}</span>
+                    из <span class="font-medium">{{ pagination.total }}</span> результатов
+                </div>
+                <div class="flex space-x-2">
+                    {% if pagination.has_prev %}
+                    <a href="{{ url_for('adm.admin_complexes_offers', page=pagination.page - 1, search=search) }}" 
+                       class="bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-md hover:bg-gray-50">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                    {% else %}
+                    <span class="bg-gray-100 border border-gray-300 text-gray-400 px-3 py-2 rounded-md cursor-not-allowed">
+                        <i class="fas fa-chevron-left"></i>
+                    </span>
+                    {% endif %}
+
+                    {% for page_num in pagination.iter_pages(left_edge=1, left_current=1, right_current=2, right_edge=1) %}
+                        {% if page_num %}
+                            {% if page_num == pagination.page %}
+                            <span class="bg-[#0088CC] text-white px-3 py-2 rounded-md">{{ page_num }}</span>
+                            {% else %}
+                            <a href="{{ url_for('adm.admin_complexes_offers', page=page_num, search=search) }}" 
+                               class="bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-md hover:bg-gray-50">
+                                {{ page_num }}
+                            </a>
+                            {% endif %}
+                        {% else %}
+                            <span class="px-3 py-2">...</span>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if pagination.has_next %}
+                    <a href="{{ url_for('adm.admin_complexes_offers', page=pagination.page + 1, search=search) }}" 
+                       class="bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-md hover:bg-gray-50">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                    {% else %}
+                    <span class="bg-gray-100 border border-gray-300 text-gray-400 px-3 py-2 rounded-md cursor-not-allowed">
+                        <i class="fas fa-chevron-right"></i>
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-12">
+            <i class="fas fa-building text-gray-300 text-5xl mb-4"></i>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Нет жилых комплексов</h3>
+            <p class="text-gray-500 mb-4">В базе данных пока нет ни одного жилого комплекса</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Enrich Modal -->
+<div id="enrich-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 flex flex-col" style="max-height:80vh;">
+        <div class="flex items-center justify-between p-4 border-b">
+            <div>
+                <h3 class="font-semibold text-gray-900" id="enrich-modal-title">Обогащение ЖК</h3>
+                <div id="enrich-status-badge" class="hidden items-center gap-1 mt-0.5 px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700 w-fit">
+                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse"></span>
+                    <span id="enrich-status-text">Выполняется...</span>
+                </div>
+            </div>
+            <button onclick="closeEnrichModal()" class="text-gray-400 hover:text-gray-600 text-xl font-bold leading-none">×</button>
+        </div>
+        <pre id="enrich-log-content"
+             class="bg-gray-900 text-green-400 text-xs p-4 overflow-auto flex-1 whitespace-pre-wrap font-mono leading-relaxed rounded-b-xl"
+             style="min-height:250px;">Запуск...</pre>
+    </div>
+</div>
+
+<!-- JavaScript for filtering -->
+<script>
+function filterComplexes() {
+    const searchInput = document.getElementById('search').value.toLowerCase();
+    const rows = document.querySelectorAll('.complex-row');
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+        const complexName = row.getAttribute('data-complex-name');
+        if (complexName.includes(searchInput)) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    // Show message if no results
+    const noResultsRow = document.getElementById('no-results-row');
+    if (visibleCount === 0 && !noResultsRow) {
+        const tbody = document.querySelector('#complexesTable tbody');
+        const tr = document.createElement('tr');
+        tr.id = 'no-results-row';
+        tr.innerHTML = `
+            <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                <i class="fas fa-search text-3xl mb-2"></i>
+                <p>Ничего не найдено по запросу "${document.getElementById('search').value}"</p>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    } else if (visibleCount > 0 && noResultsRow) {
+        noResultsRow.remove();
+    }
+}
+
+function resetFilters() {
+    document.getElementById('search').value = '';
+    filterComplexes();
+}
+
+let _enrichLogTimer = null;
+let _currentEnrichId = null;
+
+function enrichComplex(complexId, complexName) {
+    _currentEnrichId = complexId;
+    const modal = document.getElementById('enrich-modal');
+    const title = document.getElementById('enrich-modal-title');
+    const logEl = document.getElementById('enrich-log-content');
+    const badge = document.getElementById('enrich-status-badge');
+    const statusText = document.getElementById('enrich-status-text');
+    const btn = document.getElementById('enrich-btn-' + complexId);
+
+    title.textContent = 'Обогащение: ' + complexName;
+    logEl.textContent = 'Запуск обогащения...';
+    badge.classList.remove('hidden');
+    badge.classList.add('flex');
+    badge.className = badge.className.replace('bg-green-100 text-green-700', 'bg-yellow-100 text-yellow-700');
+    statusText.textContent = 'Выполняется...';
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin text-xs"></i> Запуск...';
+    }
+
+    fetch('/admin/complex/' + complexId + '/enrich-single', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': window._csrfToken || ''},
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            logEl.textContent = data.message + '\n\nОжидание лога...\n';
+            _pollEnrichLog(complexId);
+        } else {
+            logEl.textContent = '❌ Ошибка: ' + data.message;
+            badge.className = badge.className.replace('bg-yellow-100 text-yellow-700', 'bg-red-100 text-red-700');
+            statusText.textContent = 'Ошибка';
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-satellite-dish text-xs"></i>Обогатить'; }
+        }
+    })
+    .catch(e => {
+        logEl.textContent = '❌ Сетевая ошибка: ' + e;
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-satellite-dish text-xs"></i>Обогатить'; }
+    });
+}
+
+function _pollEnrichLog(complexId) {
+    if (_enrichLogTimer) clearInterval(_enrichLogTimer);
+    _enrichLogTimer = setInterval(() => {
+        if (_currentEnrichId !== complexId) { clearInterval(_enrichLogTimer); return; }
+        fetch('/admin/complex/' + complexId + '/enrich-single-log')
+            .then(r => r.json())
+            .then(data => {
+                const logEl = document.getElementById('enrich-log-content');
+                if (logEl) {
+                    logEl.textContent = data.log || '(лог пуст)';
+                    logEl.scrollTop = logEl.scrollHeight;
+                }
+                const isDone = data.log && (
+                    data.log.includes('✅') || data.log.includes('Завершено') ||
+                    data.log.includes('ERROR') || data.log.includes('Traceback')
+                );
+                if (isDone) {
+                    clearInterval(_enrichLogTimer);
+                    const badge = document.getElementById('enrich-status-badge');
+                    const statusText = document.getElementById('enrich-status-text');
+                    const btn = document.getElementById('enrich-btn-' + complexId);
+                    if (badge) {
+                        badge.className = badge.className.replace('bg-yellow-100 text-yellow-700', 'bg-green-100 text-green-700');
+                    }
+                    if (statusText) statusText.textContent = 'Завершено';
+                    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-satellite-dish text-xs"></i>Обогатить'; }
+                }
+            })
+            .catch(() => {});
+    }, 2000);
+}
+
+function closeEnrichModal() {
+    if (_enrichLogTimer) clearInterval(_enrichLogTimer);
+    _currentEnrichId = null;
+    const modal = document.getElementById('enrich-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    const btn_all = document.querySelectorAll('[id^="enrich-btn-"]');
+    btn_all.forEach(b => { b.disabled = false; b.innerHTML = '<i class="fas fa-satellite-dish text-xs"></i>Обогатить'; });
+}
+
+</script>
+{% endblock %}

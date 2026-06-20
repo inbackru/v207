@@ -1,0 +1,14 @@
+[fix-empty] Запуск режима: no_photo_no_desc
+🔍 Режим: без фото и описания
+Traceback (most recent call last):
+  File "/home/runner/workspace/scripts/fix_empty_complexes.py", line 144, in <module>
+    main()
+  File "/home/runner/workspace/scripts/fix_empty_complexes.py", line 94, in main
+    complexes = get_empty_complexes(mode)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/scripts/fix_empty_complexes.py", line 63, in get_empty_complexes
+    cur.execute(f"""
+psycopg2.errors.UndefinedColumn: column rc.cian_url does not exist
+LINE 2:         SELECT rc.id, rc.name, rc.cian_url, c.id as city_id
+                                       ^
+

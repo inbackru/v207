@@ -1,0 +1,776 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Аналитика — InBack Admin{% endblock %}
+{% block page_title %}Аналитика{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+.tab-btn { transition: all .2s; }
+.tab-btn.active {
+    background: #0088CC;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(0,136,204,.35);
+}
+.tab-btn:not(.active):hover { background: #f0f9ff; color: #0088CC; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+.kpi-card { transition: box-shadow .2s, transform .15s; }
+.kpi-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,.10); transform: translateY(-1px); }
+.progress-bar { transition: width 1s cubic-bezier(.4,0,.2,1); }
+.manager-row:hover { background: #f8fafc; }
+.badge-green  { background:#dcfce7; color:#166534; }
+.badge-blue   { background:#dbeafe; color:#1d4ed8; }
+.badge-orange { background:#ffedd5; color:#9a3412; }
+.badge-red    { background:#fee2e2; color:#991b1b; }
+.badge-gray   { background:#f3f4f6; color:#374151; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% set fmt = "{:,.0f}".format %}
+
+<!-- Header gradient -->
+<div class="bg-gradient-to-r from-[#0088CC] to-[#005f99] rounded-2xl p-6 text-white mb-6">
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-5">
+        <div>
+            <h1 class="text-2xl font-bold">Аналитика продаж</h1>
+            <p class="text-blue-100 text-sm mt-0.5">Сводка по сделкам, менеджерам и маркетингу</p>
+        </div>
+        <div class="flex items-center gap-3 text-sm text-blue-100">
+            <i class="fas fa-sync-alt"></i>
+            <span>Данные в реальном времени</span>
+        </div>
+    </div>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white/15 backdrop-blur-sm rounded-xl p-4">
+            <div class="text-3xl font-extrabold">{{ total_deals }}</div>
+            <div class="text-blue-100 text-sm mt-0.5">Всего сделок</div>
+            <div class="text-xs text-blue-200 mt-1 flex items-center gap-1">
+                <i class="fas fa-circle text-green-300" style="font-size:6px"></i>
+                {{ active_deals }} активных
+            </div>
+        </div>
+        <div class="bg-white/15 backdrop-blur-sm rounded-xl p-4">
+            <div class="text-3xl font-extrabold">{{ conversion_rate }}%</div>
+            <div class="text-blue-100 text-sm mt-0.5">Конверсия</div>
+            <div class="text-xs text-blue-200 mt-1">{{ successful_deals }} успешных</div>
+        </div>
+        <div class="bg-white/15 backdrop-blur-sm rounded-xl p-4">
+            <div class="text-3xl font-extrabold">{{ fmt(successful_cashback).replace(",", " ") }} ₽</div>
+            <div class="text-blue-100 text-sm mt-0.5">Кэшбек выплачен</div>
+            <div class="text-xs text-blue-200 mt-1">{{ total_applications }} заявок</div>
+        </div>
+        <div class="bg-white/15 backdrop-blur-sm rounded-xl p-4">
+            <div class="text-3xl font-extrabold">{{ fmt(avg_deal_size).replace(",", " ") }} ₽</div>
+            <div class="text-blue-100 text-sm mt-0.5">Средний чек</div>
+            <div class="text-xs text-blue-200 mt-1">{{ fmt(successful_revenue).replace(",", " ") }} ₽ выручка</div>
+        </div>
+    </div>
+</div>
+
+<!-- Tab navigation -->
+<div class="flex gap-2 mb-6 bg-white rounded-xl p-1.5 shadow-sm border border-gray-100 w-fit">
+    <button class="tab-btn active px-5 py-2 rounded-lg text-sm font-semibold" onclick="switchTab('overview')">
+        <i class="fas fa-chart-pie mr-1.5"></i>Обзор
+    </button>
+    <button class="tab-btn px-5 py-2 rounded-lg text-sm font-semibold text-gray-600" onclick="switchTab('deals')">
+        <i class="fas fa-handshake mr-1.5"></i>Сделки
+    </button>
+    <button class="tab-btn px-5 py-2 rounded-lg text-sm font-semibold text-gray-600" onclick="switchTab('managers')">
+        <i class="fas fa-user-tie mr-1.5"></i>Менеджеры
+    </button>
+    <button class="tab-btn px-5 py-2 rounded-lg text-sm font-semibold text-gray-600" onclick="switchTab('marketing')">
+        <i class="fas fa-bullhorn mr-1.5"></i>Маркетинг
+    </button>
+</div>
+
+<!-- ═══════════════════════ TAB: ОБЗОР ═══════════════════════ -->
+<div id="tab-overview" class="tab-panel active space-y-6">
+
+    <!-- KPI row -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {% set kpis = [
+            ('fa-handshake', 'blue', total_deals, 'Всего сделок', active_deals|string + ' активных'),
+            ('fa-check-circle', 'green', successful_deals, 'Успешных', conversion_rate|string + '% конверсия'),
+            ('fa-times-circle', 'red', rejected_deals, 'Отклонено', ''),
+            ('fa-spinner', 'orange', active_deals, 'В работе', total_deals|string + ' всего')
+        ] %}
+        {% for icon, color, val, label, sub in kpis %}
+        <div class="kpi-card bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 rounded-lg
+                    {% if color=='blue' %}bg-blue-50{% elif color=='green' %}bg-green-50{% elif color=='red' %}bg-red-50{% else %}bg-orange-50{% endif %}
+                    flex items-center justify-center">
+                    <i class="fas {{ icon }}
+                        {% if color=='blue' %}text-[#0088CC]{% elif color=='green' %}text-green-600{% elif color=='red' %}text-red-500{% else %}text-orange-500{% endif %}"></i>
+                </div>
+            </div>
+            <div class="text-2xl font-bold text-gray-900">{{ val }}</div>
+            <div class="text-sm text-gray-500 mt-0.5">{{ label }}</div>
+            {% if sub %}<div class="text-xs text-gray-400 mt-1">{{ sub }}</div>{% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Monthly chart + mini funnel -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-semibold text-gray-900 flex items-center gap-2">
+                    <i class="fas fa-chart-line text-[#0088CC]"></i> Динамика за 6 месяцев
+                </h3>
+            </div>
+            <div style="height:260px"><canvas id="monthlyChart"></canvas></div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <h3 class="font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                <i class="fas fa-filter text-[#0088CC]"></i> Воронка продаж
+            </h3>
+            {% set max_v = [total_leads, total_users, total_deals, 1]|max %}
+            {% set stages_ov = [
+                (total_leads,      'Лиды',          '#0088CC', '100%'),
+                (total_users,      'Регистрации',   '#38bdf8', (total_users / max_v * 100)|round(0)|int|string + '%'),
+                (total_deals,      'Сделки',        '#f59e0b', (total_deals / max_v * 100)|round(0)|int|string + '%'),
+                (successful_deals, 'Успех',         '#22c55e', (successful_deals / max_v * 100)|round(0)|int|string + '%'),
+            ] %}
+            <div class="space-y-3">
+                {% for val, lbl, color, pct in stages_ov %}
+                <div>
+                    <div class="flex justify-between text-xs text-gray-600 mb-1">
+                        <span class="font-medium">{{ lbl }}</span>
+                        <span class="font-bold text-gray-800">{{ val }}</span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                        <div class="h-3 rounded-full progress-bar" style="width:{{ pct }};background:{{ color }}"></div>
+                    </div>
+                </div>
+                {% endfor %}
+                <div class="pt-2 border-t border-gray-100 text-xs text-gray-400">
+                    Конверсия лид → успех: <span class="font-semibold text-gray-700">{{ (successful_deals / total_leads * 100)|round(1) if total_leads > 0 else 0 }}%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Financials row -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="kpi-card bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-ruble-sign text-green-600"></i>
+                </div>
+                <span class="text-sm font-medium text-gray-500">Выручка (успешные)</span>
+            </div>
+            <div class="text-xl font-bold text-gray-900">{{ fmt(successful_revenue).replace(",", " ") }} ₽</div>
+            <div class="text-xs text-gray-400 mt-1">Средний чек {{ fmt(avg_deal_size).replace(",", " ") }} ₽</div>
+        </div>
+        <div class="kpi-card bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-coins text-[#0088CC]"></i>
+                </div>
+                <span class="text-sm font-medium text-gray-500">Кэшбек выплачен</span>
+            </div>
+            <div class="text-xl font-bold text-gray-900">{{ fmt(successful_cashback).replace(",", " ") }} ₽</div>
+            <div class="text-xs text-gray-400 mt-1">{{ paid_applications }} заявок выплачено</div>
+        </div>
+        <div class="kpi-card bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-file-alt text-orange-500"></i>
+                </div>
+                <span class="text-sm font-medium text-gray-500">Заявки на кэшбек</span>
+            </div>
+            <div class="text-xl font-bold text-gray-900">{{ total_applications }}</div>
+            <div class="flex gap-3 text-xs mt-2">
+                <span class="badge-blue px-2 py-0.5 rounded-full">{{ pending_applications }} ожидают</span>
+                <span class="badge-green px-2 py-0.5 rounded-full">{{ paid_applications }} выплачено</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════ TAB: СДЕЛКИ ═══════════════════════ -->
+<div id="tab-deals" class="tab-panel space-y-6">
+
+    <!-- Funnel bar chart -->
+    {% if funnel_data %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+        <h3 class="font-semibold text-gray-900 flex items-center gap-2 mb-4">
+            <i class="fas fa-stream text-[#0088CC]"></i> Распределение по стадиям
+        </h3>
+        <div style="height:{{ [funnel_data|length * 44 + 60, 200]|max }}px">
+            <canvas id="funnelChart"></canvas>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Monthly + rejection -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <h3 class="font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                <i class="fas fa-chart-bar text-[#0088CC]"></i> Сделки по месяцам
+            </h3>
+            <div style="height:240px"><canvas id="monthlyChartDeals"></canvas></div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <h3 class="font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                <i class="fas fa-times-circle text-red-500"></i> Причины отказов
+            </h3>
+            {% if rejection_data %}
+            <div class="space-y-3">
+                {% for r in rejection_data %}
+                <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="text-gray-700 truncate max-w-[65%]">{{ r.reason }}</span>
+                        <span class="font-semibold text-gray-900">{{ r.count }}</span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2">
+                        <div class="bg-red-400 h-2 rounded-full progress-bar" style="width:{{ (r.count / rejected_deals * 100) if rejected_deals > 0 else 0 }}%"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="flex flex-col items-center justify-center h-40 text-gray-400">
+                <i class="fas fa-check-circle text-3xl mb-2 text-green-300"></i>
+                <span class="text-sm">Отказов не зафиксировано</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Stacked summary -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+        <h3 class="font-semibold text-gray-900 flex items-center gap-2 mb-4">
+            <i class="fas fa-info-circle text-[#0088CC]"></i> Итоги по сделкам
+        </h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {% set summary_items = [
+                (total_deals, 'Всего', 'badge-blue'),
+                (active_deals, 'В работе', 'badge-orange'),
+                (successful_deals, 'Успешных', 'badge-green'),
+                (rejected_deals, 'Отклонено', 'badge-red'),
+            ] %}
+            {% for val, lbl, cls in summary_items %}
+            <div class="text-center p-4 rounded-xl bg-gray-50">
+                <div class="text-3xl font-extrabold text-gray-900 mb-1">{{ val }}</div>
+                <span class="{{ cls }} px-3 py-1 rounded-full text-xs font-medium">{{ lbl }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════ TAB: МЕНЕДЖЕРЫ ═══════════════════════ -->
+<div id="tab-managers" class="tab-panel space-y-6">
+
+    {% if manager_stats %}
+    <!-- Top 3 managers -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {% for m in manager_stats[:3] %}
+        <div class="kpi-card bg-white rounded-xl shadow-sm border {% if loop.index == 1 %}border-[#0088CC]{% else %}border-gray-100{% endif %} p-5 relative overflow-hidden">
+            {% if loop.index == 1 %}
+            <div class="absolute top-0 right-0 bg-[#0088CC] text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
+                <i class="fas fa-trophy mr-1"></i>#1
+            </div>
+            {% elif loop.index == 2 %}
+            <div class="absolute top-0 right-0 bg-gray-400 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">#2</div>
+            {% else %}
+            <div class="absolute top-0 right-0 bg-orange-400 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">#3</div>
+            {% endif %}
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-11 h-11 rounded-full bg-gradient-to-br from-[#0088CC] to-[#005f99] flex items-center justify-center text-white font-bold text-lg">
+                    {{ m.name[0] }}
+                </div>
+                <div>
+                    <div class="font-semibold text-gray-900 text-sm">{{ m.name }}</div>
+                    <div class="text-xs text-gray-500">{{ m.department }}</div>
+                </div>
+            </div>
+            <div class="grid grid-cols-3 gap-2 text-center">
+                <div>
+                    <div class="text-xl font-bold text-gray-900">{{ m.total_deals }}</div>
+                    <div class="text-xs text-gray-400">Сделок</div>
+                </div>
+                <div>
+                    <div class="text-xl font-bold text-green-600">{{ m.successful_deals }}</div>
+                    <div class="text-xs text-gray-400">Успешных</div>
+                </div>
+                <div>
+                    <div class="text-xl font-bold {% if m.conversion >= 50 %}text-green-600{% elif m.conversion >= 20 %}text-orange-500{% else %}text-gray-500{% endif %}">{{ m.conversion }}%</div>
+                    <div class="text-xs text-gray-400">Конверсия</div>
+                </div>
+            </div>
+            <div class="mt-3 pt-3 border-t border-gray-100 text-xs text-gray-600">
+                Кэшбек: <span class="font-semibold text-gray-900">{{ fmt(m.cashback).replace(",", " ") }} ₽</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Full managers table -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-5 py-4 border-b border-gray-100">
+            <h3 class="font-semibold text-gray-900 flex items-center gap-2">
+                <i class="fas fa-table text-[#0088CC]"></i> Все менеджеры
+            </h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="text-left py-3 px-4 font-semibold text-gray-600 text-xs uppercase tracking-wide">#</th>
+                        <th class="text-left py-3 px-4 font-semibold text-gray-600 text-xs uppercase tracking-wide">Менеджер</th>
+                        <th class="text-left py-3 px-4 font-semibold text-gray-600 text-xs uppercase tracking-wide">Отдел</th>
+                        <th class="text-center py-3 px-4 font-semibold text-gray-600 text-xs uppercase tracking-wide">Всего</th>
+                        <th class="text-center py-3 px-4 font-semibold text-gray-600 text-xs uppercase tracking-wide">Актив.</th>
+                        <th class="text-center py-3 px-4 font-semibold text-gray-600 text-xs uppercase tracking-wide">Успех</th>
+                        <th class="text-center py-3 px-4 font-semibold text-gray-600 text-xs uppercase tracking-wide">Конверсия</th>
+                        <th class="text-right py-3 px-4 font-semibold text-gray-600 text-xs uppercase tracking-wide">Кэшбек</th>
+                        <th class="text-right py-3 px-4 font-semibold text-gray-600 text-xs uppercase tracking-wide">Выручка</th>
+                        <th class="text-center py-3 px-4 font-semibold text-gray-600 text-xs uppercase tracking-wide">Задачи</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    {% for m in manager_stats %}
+                    <tr class="manager-row">
+                        <td class="py-3 px-4 text-gray-400 font-medium">{{ loop.index }}</td>
+                        <td class="py-3 px-4">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#0088CC] to-[#005f99] flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+                                    {{ m.name[0] }}
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900">{{ m.name }}</div>
+                                    <div class="text-xs text-gray-400">{{ m.role }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3 px-4 text-gray-600 text-xs">{{ m.department }}</td>
+                        <td class="py-3 px-4 text-center font-medium text-gray-800">{{ m.total_deals }}</td>
+                        <td class="py-3 px-4 text-center">
+                            {% if m.active_deals > 0 %}
+                            <span class="badge-blue px-2 py-0.5 rounded-full text-xs font-medium">{{ m.active_deals }}</span>
+                            {% else %}<span class="text-gray-300">—</span>{% endif %}
+                        </td>
+                        <td class="py-3 px-4 text-center">
+                            {% if m.successful_deals > 0 %}
+                            <span class="badge-green px-2 py-0.5 rounded-full text-xs font-medium">{{ m.successful_deals }}</span>
+                            {% else %}<span class="text-gray-300">—</span>{% endif %}
+                        </td>
+                        <td class="py-3 px-4 text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <div class="w-14 bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                                    <div class="h-1.5 rounded-full {% if m.conversion >= 50 %}bg-green-500{% elif m.conversion >= 20 %}bg-orange-400{% else %}bg-gray-300{% endif %}" style="width:{{ [m.conversion, 100]|min }}%"></div>
+                                </div>
+                                <span class="text-xs font-semibold {% if m.conversion >= 50 %}text-green-600{% elif m.conversion >= 20 %}text-orange-500{% else %}text-gray-400{% endif %}">{{ m.conversion }}%</span>
+                            </div>
+                        </td>
+                        <td class="py-3 px-4 text-right text-gray-700 text-xs">{{ fmt(m.cashback).replace(",", " ") }} ₽</td>
+                        <td class="py-3 px-4 text-right text-gray-700 text-xs">{{ fmt(m.revenue).replace(",", " ") }} ₽</td>
+                        <td class="py-3 px-4 text-center">
+                            {% if m.pending_tasks > 0 %}
+                            <span class="badge-red px-2 py-0.5 rounded-full text-xs font-medium">{{ m.pending_tasks }}</span>
+                            {% else %}<span class="text-gray-300">—</span>{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center text-gray-400">
+        <i class="fas fa-user-tie text-4xl mb-3 block"></i>
+        Нет данных по менеджерам
+    </div>
+    {% endif %}
+
+    <!-- Departments -->
+    {% if dept_stats %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-5 py-4 border-b border-gray-100">
+            <h3 class="font-semibold text-gray-900 flex items-center gap-2">
+                <i class="fas fa-sitemap text-[#0088CC]"></i> По отделам
+            </h3>
+        </div>
+        <div class="divide-y divide-gray-50">
+            {% for d in dept_stats %}
+            <div class="px-5 py-4 flex flex-wrap items-center gap-4">
+                <div class="flex-1 min-w-[120px]">
+                    <div class="font-semibold text-gray-900">{{ d.name }}</div>
+                    <div class="text-xs text-gray-400">{{ d.managers_count }} менеджеров</div>
+                </div>
+                <div class="flex flex-wrap gap-4 text-sm">
+                    <div class="text-center"><div class="font-bold text-gray-800">{{ d.total_deals }}</div><div class="text-xs text-gray-400">Сделок</div></div>
+                    <div class="text-center"><div class="font-bold text-green-600">{{ d.successful_deals }}</div><div class="text-xs text-gray-400">Успешных</div></div>
+                    <div class="text-center"><div class="font-bold {% if d.conversion >= 50 %}text-green-600{% elif d.conversion >= 20 %}text-orange-500{% else %}text-gray-500{% endif %}">{{ d.conversion }}%</div><div class="text-xs text-gray-400">Конверсия</div></div>
+                    <div class="text-center"><div class="font-bold text-gray-800">{{ fmt(d.cashback).replace(",", " ") }} ₽</div><div class="text-xs text-gray-400">Кэшбек</div></div>
+                </div>
+                <div class="w-full md:w-auto md:flex-1 md:max-w-[200px]">
+                    <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                        <div class="h-2 rounded-full bg-[#0088CC]" style="width:{{ d.conversion }}%"></div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- ═══════════════════════ TAB: МАРКЕТИНГ ═══════════════════════ -->
+<div id="tab-marketing" class="tab-panel space-y-6">
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="kpi-card bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mb-3">
+                <i class="fas fa-phone-alt text-[#0088CC]"></i>
+            </div>
+            <div class="text-2xl font-bold text-gray-900">{{ total_leads }}</div>
+            <div class="text-sm text-gray-500 mt-0.5">Лидов получено</div>
+            <div class="flex gap-2 mt-2">
+                <span class="badge-red px-2 py-0.5 rounded-full text-xs">{{ new_leads }} новых</span>
+            </div>
+        </div>
+        <div class="kpi-card bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <div class="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center mb-3">
+                <i class="fas fa-users text-green-600"></i>
+            </div>
+            <div class="text-2xl font-bold text-gray-900">{{ total_users }}</div>
+            <div class="text-sm text-gray-500 mt-0.5">Регистраций</div>
+            <div class="text-xs text-gray-400 mt-1">{{ lead_to_registration }}% от лидов</div>
+        </div>
+        <div class="kpi-card bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mb-3">
+                <i class="fas fa-exchange-alt text-[#0088CC]"></i>
+            </div>
+            <div class="text-2xl font-bold text-gray-900">{{ lead_to_deal }}%</div>
+            <div class="text-sm text-gray-500 mt-0.5">Лид → Сделка</div>
+            <div class="text-xs text-gray-400 mt-1">{{ total_deals }} сделок</div>
+        </div>
+        <div class="kpi-card bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <div class="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center mb-3">
+                <i class="fas fa-file-alt text-orange-500"></i>
+            </div>
+            <div class="text-2xl font-bold text-gray-900">{{ total_applications }}</div>
+            <div class="text-sm text-gray-500 mt-0.5">Заявок на кэшбек</div>
+            <div class="flex gap-1 mt-2 flex-wrap">
+                <span class="badge-blue px-2 py-0.5 rounded-full text-xs">{{ pending_applications }} ожидают</span>
+                <span class="badge-green px-2 py-0.5 rounded-full text-xs">{{ paid_applications }} выплачено</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leads chart + sources doughnut -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <h3 class="font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                <i class="fas fa-chart-area text-[#0088CC]"></i> Лиды и регистрации (6 мес.)
+            </h3>
+            <div style="height:240px"><canvas id="leadsChart"></canvas></div>
+        </div>
+        {% if source_data %}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <h3 class="font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                <i class="fas fa-pie-chart text-[#0088CC]"></i> Источники регистраций
+            </h3>
+            <div style="height:180px"><canvas id="sourcesChart"></canvas></div>
+            <div class="mt-3 space-y-1.5">
+                {% set src_colors = ['#0088CC','#38bdf8','#22c55e','#f59e0b','#ef4444','#8b5cf6'] %}
+                {% for s in source_data[:6] %}
+                <div class="flex items-center justify-between text-xs">
+                    <div class="flex items-center gap-1.5">
+                        <div class="w-2 h-2 rounded-full flex-shrink-0" style="background:{{ src_colors[loop.index0 % 6] }}"></div>
+                        <span class="text-gray-600 truncate max-w-[110px]">{{ s.source }}</span>
+                    </div>
+                    <span class="font-semibold text-gray-800">{{ s.count }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Status bars -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <h3 class="font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                <i class="fas fa-phone text-[#0088CC]"></i> Статус лидов
+            </h3>
+            <div class="space-y-4">
+                {% set lead_rows = [
+                    (new_leads, 'Новые', '#0088CC'),
+                    (processed_leads, 'Обработаны', '#f59e0b'),
+                    (called_leads, 'Звонок совершён', '#22c55e'),
+                ] %}
+                {% for cnt, lbl, color in lead_rows %}
+                <div>
+                    <div class="flex justify-between text-sm mb-1.5">
+                        <span class="text-gray-700">{{ lbl }}</span>
+                        <span class="font-semibold text-gray-900">{{ cnt }}</span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                        <div class="h-2.5 rounded-full progress-bar" style="width:{{ (cnt / total_leads * 100) if total_leads > 0 else 0 }}%;background:{{ color }}"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <h3 class="font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                <i class="fas fa-coins text-[#0088CC]"></i> Статус заявок на кэшбек
+            </h3>
+            <div class="space-y-4">
+                {% set app_rows = [
+                    (pending_applications, 'На рассмотрении', '#0088CC'),
+                    (approved_applications, 'Одобрены', '#f59e0b'),
+                    (paid_applications, 'Выплачены', '#22c55e'),
+                ] %}
+                {% for cnt, lbl, color in app_rows %}
+                <div>
+                    <div class="flex justify-between text-sm mb-1.5">
+                        <span class="text-gray-700">{{ lbl }}</span>
+                        <span class="font-semibold text-gray-900">{{ cnt }}</span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                        <div class="h-2.5 rounded-full progress-bar" style="width:{{ (cnt / total_applications * 100) if total_applications > 0 else 0 }}%;background:{{ color }}"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Interests + budget -->
+    {% if interest_data or budget_data %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {% if interest_data %}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <h3 class="font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                <i class="fas fa-heart text-[#0088CC]"></i> Интересы лидов
+            </h3>
+            <div class="space-y-3">
+                {% for item in interest_data %}
+                <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="text-gray-700">{{ item.interest }}</span>
+                        <span class="font-semibold text-gray-900">{{ item.count }}</span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                        <div class="bg-[#0088CC] h-2 rounded-full progress-bar" style="width:{{ (item.count / interest_data[0].count * 100) }}%"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        {% if budget_data %}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <h3 class="font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                <i class="fas fa-wallet text-[#0088CC]"></i> Бюджет лидов
+            </h3>
+            <div class="space-y-3">
+                {% for item in budget_data %}
+                <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="text-gray-700">{{ item.budget }}</span>
+                        <span class="font-semibold text-gray-900">{{ item.count }}</span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                        <div class="bg-green-500 h-2 rounded-full progress-bar" style="width:{{ (item.count / budget_data[0].count * 100) }}%"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+/* ─── Tab switching ─── */
+function switchTab(name) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    event.currentTarget.classList.add('active');
+    if (name === 'deals' && !window._dealsChartDone) { initDealsCharts(); window._dealsChartDone = true; }
+    if (name === 'marketing' && !window._mktChartDone) { initMarketingCharts(); window._mktChartDone = true; }
+}
+
+/* ─── Shared chart defaults ─── */
+Chart.defaults.font.family = "'Inter', 'system-ui', sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.color = '#6b7280';
+const gridColor = 'rgba(0,0,0,0.05)';
+
+/* ─── Overview: monthly line chart ─── */
+const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+new Chart(monthlyCtx, {
+    type: 'line',
+    data: {
+        labels: [{% for m in monthly_data %}'{{ m.month }}'{% if not loop.last %},{% endif %}{% endfor %}],
+        datasets: [
+            {
+                label: 'Всего сделок',
+                data: [{% for m in monthly_data %}{{ m.total }}{% if not loop.last %},{% endif %}{% endfor %}],
+                borderColor: '#0088CC',
+                backgroundColor: 'rgba(0,136,204,0.08)',
+                borderWidth: 2.5,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#0088CC',
+                pointRadius: 4,
+                pointHoverRadius: 6
+            },
+            {
+                label: 'Успешных',
+                data: [{% for m in monthly_data %}{{ m.successful }}{% if not loop.last %},{% endif %}{% endfor %}],
+                borderColor: '#22c55e',
+                backgroundColor: 'rgba(34,197,94,0.06)',
+                borderWidth: 2.5,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#22c55e',
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }
+        ]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+            legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } },
+            tooltip: { backgroundColor: '#1e293b', padding: 10, cornerRadius: 8 }
+        },
+        scales: {
+            x: { grid: { color: gridColor } },
+            y: { grid: { color: gridColor }, beginAtZero: true, ticks: { stepSize: 1 } }
+        }
+    }
+});
+
+/* ─── Deals tab charts (lazy) ─── */
+function initDealsCharts() {
+    {% if funnel_data %}
+    const funnelCtx = document.getElementById('funnelChart').getContext('2d');
+    new Chart(funnelCtx, {
+        type: 'bar',
+        data: {
+            labels: [{% for s in funnel_data %}'{{ s.label }}'{% if not loop.last %},{% endif %}{% endfor %}],
+            datasets: [{
+                label: 'Сделок',
+                data: [{% for s in funnel_data %}{{ s.count }}{% if not loop.last %},{% endif %}{% endfor %}],
+                backgroundColor: [{% for s in funnel_data %}'{{ s.color }}'{% if not loop.last %},{% endif %}{% endfor %}],
+                borderRadius: 6,
+                barThickness: 28
+            }]
+        },
+        options: {
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1e293b', padding: 10, cornerRadius: 8,
+                    callbacks: {
+                        afterLabel: ctx => {
+                            const amounts = [{% for s in funnel_data %}{{ s.amount }}{% if not loop.last %},{% endif %}{% endfor %}];
+                            return 'Сумма: ' + new Intl.NumberFormat('ru-RU').format(amounts[ctx.dataIndex]) + ' ₽';
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { grid: { color: gridColor }, beginAtZero: true },
+                y: { grid: { display: false } }
+            }
+        }
+    });
+    {% endif %}
+
+    const mCtx = document.getElementById('monthlyChartDeals').getContext('2d');
+    new Chart(mCtx, {
+        type: 'bar',
+        data: {
+            labels: [{% for m in monthly_data %}'{{ m.month }}'{% if not loop.last %},{% endif %}{% endfor %}],
+            datasets: [
+                { label: 'Всего', data: [{% for m in monthly_data %}{{ m.total }}{% if not loop.last %},{% endif %}{% endfor %}], backgroundColor: 'rgba(0,136,204,0.7)', borderRadius: 5 },
+                { label: 'Успешных', data: [{% for m in monthly_data %}{{ m.successful }}{% if not loop.last %},{% endif %}{% endfor %}], backgroundColor: 'rgba(34,197,94,0.75)', borderRadius: 5 }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: { legend: { position: 'top', labels: { usePointStyle: true } }, tooltip: { backgroundColor: '#1e293b', cornerRadius: 8 } },
+            scales: { x: { grid: { color: gridColor } }, y: { grid: { color: gridColor }, beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+    });
+}
+
+/* ─── Marketing tab charts (lazy) ─── */
+function initMarketingCharts() {
+    const lCtx = document.getElementById('leadsChart').getContext('2d');
+    new Chart(lCtx, {
+        type: 'line',
+        data: {
+            labels: [{% for m in monthly_leads %}'{{ m.month }}'{% if not loop.last %},{% endif %}{% endfor %}],
+            datasets: [
+                {
+                    label: 'Лиды',
+                    data: [{% for m in monthly_leads %}{{ m.leads }}{% if not loop.last %},{% endif %}{% endfor %}],
+                    borderColor: '#0088CC', backgroundColor: 'rgba(0,136,204,0.1)',
+                    borderWidth: 2.5, tension: 0.4, fill: true,
+                    pointBackgroundColor: '#0088CC', pointRadius: 4, pointHoverRadius: 6
+                },
+                {
+                    label: 'Регистрации',
+                    data: [{% for m in monthly_leads %}{{ m.registrations }}{% if not loop.last %},{% endif %}{% endfor %}],
+                    borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.07)',
+                    borderWidth: 2.5, tension: 0.4, fill: true,
+                    pointBackgroundColor: '#22c55e', pointRadius: 4, pointHoverRadius: 6
+                }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: { legend: { position: 'top', labels: { usePointStyle: true } }, tooltip: { backgroundColor: '#1e293b', cornerRadius: 8 } },
+            scales: { x: { grid: { color: gridColor } }, y: { grid: { color: gridColor }, beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+    });
+
+    {% if source_data %}
+    const sCtx = document.getElementById('sourcesChart').getContext('2d');
+    new Chart(sCtx, {
+        type: 'doughnut',
+        data: {
+            labels: [{% for s in source_data[:6] %}'{{ s.source }}'{% if not loop.last %},{% endif %}{% endfor %}],
+            datasets: [{
+                data: [{% for s in source_data[:6] %}{{ s.count }}{% if not loop.last %},{% endif %}{% endfor %}],
+                backgroundColor: ['#0088CC','#38bdf8','#22c55e','#f59e0b','#ef4444','#8b5cf6'],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            cutout: '60%',
+            plugins: {
+                legend: { display: false },
+                tooltip: { backgroundColor: '#1e293b', cornerRadius: 8 }
+            }
+        }
+    });
+    {% endif %}
+}
+</script>
+{% endblock %}

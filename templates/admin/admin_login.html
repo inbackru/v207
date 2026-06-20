@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход — Админ-панель InBack</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; }
+        .adm-login-bg {
+            min-height: 100vh;
+            background: #0f1923;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+            position: relative; overflow: hidden;
+        }
+        .adm-login-bg::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse at 20% 50%, rgba(0,136,204,0.12) 0%, transparent 60%),
+                        radial-gradient(ellipse at 80% 20%, rgba(0,136,204,0.08) 0%, transparent 50%);
+        }
+        .adm-card {
+            background: #fff; border-radius: 20px; padding: 40px;
+            width: 100%; max-width: 400px; position: relative; z-index: 1;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+        }
+        .adm-logo-mark {
+            width: 52px; height: 52px; border-radius: 14px;
+            background: linear-gradient(135deg, #0088CC, #005f99);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; color: #fff; font-size: 20px; margin: 0 auto 16px;
+        }
+        .adm-input {
+            width: 100%; padding: 11px 14px; border: 1.5px solid #e2e8f0;
+            border-radius: 10px; font-size: 14px; color: #1e293b;
+            outline: none; transition: border-color 0.15s; box-sizing: border-box;
+            font-family: inherit;
+        }
+        .adm-input:focus { border-color: #0088CC; box-shadow: 0 0 0 3px rgba(0,136,204,0.12); }
+        .adm-btn {
+            width: 100%; padding: 12px; border-radius: 10px; border: none; cursor: pointer;
+            background: linear-gradient(135deg, #0088CC, #005f99);
+            color: #fff; font-size: 15px; font-weight: 700; font-family: inherit;
+            transition: opacity 0.15s, transform 0.15s;
+        }
+        .adm-btn:hover { opacity: 0.92; transform: translateY(-1px); }
+        .adm-label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+        .flash-msg {
+            padding: 11px 14px; border-radius: 10px; font-size: 13.5px; font-weight: 500;
+            margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+        }
+        .flash-msg.success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .flash-msg.error   { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .flash-msg.info    { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+        .flash-msg.warning { background: #fef9c3; color: #854d0e; border: 1px solid #fde047; }
+    </style>
+</head>
+<body>
+<div class="adm-login-bg">
+    <div class="adm-card">
+        <div style="text-align:center;margin-bottom:24px;">
+            <div class="adm-logo-mark">In</div>
+            <h1 style="font-size:20px;font-weight:800;color:#0f1923;margin:0 0 4px;">Административная панель</h1>
+            <p style="font-size:13px;color:#64748b;margin:0;">InBack — система управления</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="flash-msg {{ category }}">
+                <span>{{ message }}</span>
+                <button onclick="this.parentElement.remove()" style="background:none;border:none;cursor:pointer;opacity:0.6;font-size:14px;">✕</button>
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <form method="POST" style="display:flex;flex-direction:column;gap:16px;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+            <div>
+                <label class="adm-label" for="email">
+                    <i class="fas fa-envelope" style="color:#0088CC;margin-right:5px;font-size:11px;"></i>Email
+                </label>
+                <input type="email" name="email" id="email" required
+                       class="adm-input" placeholder="admin@inback.ru" autocomplete="email">
+            </div>
+
+            <div>
+                <label class="adm-label" for="password">
+                    <i class="fas fa-lock" style="color:#0088CC;margin-right:5px;font-size:11px;"></i>Пароль
+                </label>
+                <div style="position:relative;">
+                    <input type="password" name="password" id="password" required
+                           class="adm-input" placeholder="Введите пароль" style="padding-right:44px;" autocomplete="current-password">
+                    <button type="button" onclick="togglePwd()"
+                            style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;font-size:14px;">
+                        <i id="pwd-icon" class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:8px;">
+                <input type="checkbox" name="remember" id="remember"
+                       style="width:15px;height:15px;accent-color:#0088CC;cursor:pointer;">
+                <label for="remember" style="font-size:13px;color:#475569;cursor:pointer;">Запомнить меня</label>
+            </div>
+
+            <button type="submit" class="adm-btn">
+                <i class="fas fa-sign-in-alt" style="margin-right:8px;"></i>Войти в панель
+            </button>
+        </form>
+
+        <div style="margin-top:20px;text-align:center;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;">
+            <a href="{{ url_for('index') }}"
+               style="font-size:12px;color:#94a3b8;text-decoration:none;display:flex;align-items:center;gap:4px;"
+               onmouseover="this.style.color='#0088CC'" onmouseout="this.style.color='#94a3b8'">
+                <i class="fas fa-home"></i> На главную
+            </a>
+            <span style="color:#e2e8f0;">|</span>
+            <a href="{{ url_for('auth.login') }}"
+               style="font-size:12px;color:#94a3b8;text-decoration:none;display:flex;align-items:center;gap:4px;"
+               onmouseover="this.style.color='#0088CC'" onmouseout="this.style.color='#94a3b8'">
+                <i class="fas fa-user"></i> Клиентский вход
+            </a>
+            <span style="color:#e2e8f0;">|</span>
+            <a href="{{ url_for('mgr.manager_login') }}"
+               style="font-size:12px;color:#94a3b8;text-decoration:none;display:flex;align-items:center;gap:4px;"
+               onmouseover="this.style.color='#0088CC'" onmouseout="this.style.color='#94a3b8'">
+                <i class="fas fa-user-tie"></i> Вход менеджера
+            </a>
+        </div>
+
+        <div style="margin-top:16px;text-align:center;">
+            <span style="font-size:11px;color:#cbd5e1;display:flex;align-items:center;justify-content:center;gap:4px;">
+                <i class="fas fa-shield-alt" style="color:#0088CC;"></i> Защищённое соединение SSL
+            </span>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePwd() {
+    const inp = document.getElementById('password');
+    const ico = document.getElementById('pwd-icon');
+    if (inp.type === 'password') {
+        inp.type = 'text';
+        ico.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+        inp.type = 'password';
+        ico.classList.replace('fa-eye-slash', 'fa-eye');
+    }
+}
+setTimeout(function() {
+    document.querySelectorAll('.flash-msg').forEach(function(el) {
+        el.style.transition = 'opacity 0.5s';
+        el.style.opacity = '0';
+        setTimeout(function() { el.remove(); }, 500);
+    });
+}, 5000);
+</script>
+</body>
+</html>

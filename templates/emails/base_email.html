@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}InBack{% endblock %}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+            line-height: 1.6;
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #0088CC 0%, #006699 100%);
+            padding: 32px 24px;
+            text-align: center;
+            color: white;
+        }
+        
+        .header .logo-wrapper {
+            margin-bottom: 12px;
+        }
+        
+        .header .logo-text {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            color: white;
+            text-decoration: none;
+        }
+
+        .header .logo-text span {
+            font-weight: 300;
+        }
+        
+        .header .tagline {
+            font-size: 14px;
+            opacity: 0.85;
+            font-weight: 400;
+            margin-top: 6px;
+            letter-spacing: 0.3px;
+        }
+        
+        .content {
+            padding: 40px 32px;
+        }
+        
+        .content h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0 0 24px 0;
+            color: #1d1d1f;
+        }
+        
+        .content h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 32px 0 16px 0;
+            color: #1d1d1f;
+        }
+        
+        .content p {
+            font-size: 16px;
+            margin: 0 0 16px 0;
+            color: #424245;
+        }
+        
+        .btn-primary {
+            display: inline-block;
+            background: linear-gradient(135deg, #0088CC 0%, #006699 100%);
+            color: white;
+            text-decoration: none;
+            padding: 16px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 24px 0;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 24px;
+            margin: 24px 0;
+        }
+        
+        .footer {
+            background-color: #f8f9fa;
+            padding: 32px 24px;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .footer .brand {
+            font-weight: 700;
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+
+        .footer .brand a {
+            color: #0088CC;
+            text-decoration: none;
+        }
+
+        .footer .brand-sub {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-bottom: 16px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        
+        .footer .contact {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 6px;
+        }
+
+        .footer .contact a {
+            color: #0088CC;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .footer .legal {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 16px;
+        }
+        
+        .social-links {
+            margin: 16px 0;
+        }
+        
+        .social-links a {
+            display: inline-block;
+            margin: 0 8px;
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 600px) {
+            .email-container {
+                margin: 0;
+                border-radius: 0;
+            }
+            
+            .content {
+                padding: 24px 20px;
+            }
+            
+            .header {
+                padding: 24px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <div class="logo-wrapper">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
+                    <tr>
+                        <td style="vertical-align: middle; padding-right: 10px;">
+                            <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                                    <tr>
+                                        <td style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 10px; text-align: center; vertical-align: middle; font-size: 22px;">
+                                            &#127968;
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </td>
+                        <td style="vertical-align: middle;">
+                            <div class="logo-text">In<span>Back</span></div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="tagline">Кэшбек на новостройки</div>
+        </div>
+        
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
+        
+        <div class="footer">
+            <div class="brand"><a href="https://inback.ru">InBack</a></div>
+            <div class="brand-sub">Недвижимость с выгодой</div>
+
+            <div class="contact">
+                <a href="tel:+78622666216">8 (862) 266-62-16</a>
+            </div>
+            <div class="contact">
+                <a href="mailto:info@inback.ru">info@inback.ru</a>
+            </div>
+            
+            <div class="social-links">
+                <a href="https://t.me/inback_krasnodar">Telegram</a>
+                <a href="https://wa.me/78622666216">WhatsApp</a>
+                <a href="https://vk.com/inback_krasnodar">VK</a>
+            </div>
+            
+            <div class="legal">
+                &copy; 2026 InBack. Все права защищены.<br>
+                Это письмо отправлено автоматически, не отвечайте на него.
+            </div>
+        </div>
+    </div>
+</body>
+</html>

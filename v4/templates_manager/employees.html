@@ -1,0 +1,498 @@
+{% extends "base.html" %}
+
+{% block title %}Сотрудники — InBack{% endblock %}
+
+{% block content %}
+<style>
+header { display: none !important; }
+body > footer, body > .footer, #footer-section { display: none !important; }
+@media (max-width: 767px) {
+    .employees-page-wrapper { padding-bottom: 80px !important; padding-top: 0 !important; }
+    .employees-page-wrapper > .max-w-7xl { padding-left: 12px !important; padding-right: 12px !important; padding-top: 12px !important; }
+    .employees-page-wrapper .employee-card-stats { display: flex !important; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f3f4f6; }
+    .employees-page-wrapper .employee-card-stats > div { flex: 1; }
+    .employees-page-wrapper h1 { font-size: 1.25rem !important; }
+    .employees-page-wrapper .grid.grid-cols-1.md\:grid-cols-3 { grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; }
+    .employees-page-wrapper .grid.grid-cols-1.md\:grid-cols-3 .p-4 { padding: 10px !important; }
+    .employees-page-wrapper .grid.grid-cols-1.md\:grid-cols-3 .text-2xl { font-size: 1.25rem !important; }
+    .employees-page-wrapper .grid.grid-cols-1.md\:grid-cols-3 .text-xs { font-size: 10px !important; }
+    #employeeProfileModal > div { width: 100vw !important; height: 100vh !important; max-width: 100vw !important; max-height: 100vh !important; margin: 0 !important; border-radius: 0 !important; }
+    #employeeProfileModal > div > #profileContent > div:first-child { border-radius: 0 !important; }
+    .employees-desktop-heading { display: none !important; }
+}
+</style>
+{% if sidebar_links is defined and sidebar_links %}
+{% include 'components/sidebar.html' %}
+{% endif %}
+
+<div class="{% if sidebar_links is defined and sidebar_links %}md:ml-[70px]{% endif %} transition-all duration-300 employees-page-wrapper">
+
+<div class="hidden max-md:flex items-center gap-3 px-4 py-3 bg-white border-b border-gray-200">
+    <a onclick="if(history.length>1){history.back()}else{location.href='{{ url_for("manager_dashboard") }}'};return false;" href="{{ url_for('manager_dashboard') }}" class="w-8 h-8 flex items-center justify-center rounded-lg bg-[#0088CC]/10 text-[#0088CC]">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    </a>
+    <div class="flex-1 min-w-0">
+        <h1 class="text-sm font-bold text-gray-900">Сотрудники</h1>
+        <p class="text-xs text-gray-500">{{ today.strftime('%d.%m.%Y') }}</p>
+    </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 py-6">
+    <div class="flex items-center justify-between mb-6 employees-desktop-heading">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Сотрудники</h1>
+            <p class="text-sm text-gray-500 mt-1">
+                {% if is_rop %}
+                Активность и статус команды
+                {% else %}
+                Коллеги в вашем отделе
+                {% endif %}
+            </p>
+        </div>
+        <div class="text-sm text-gray-400">
+            {{ today.strftime('%d.%m.%Y') }}
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+            <div class="text-2xl font-bold text-gray-900">{{ employees_data|length }}</div>
+            <div class="text-xs text-gray-500">Всего сотрудников</div>
+        </div>
+        <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+            <div class="text-2xl font-bold text-green-600">{{ employees_data|selectattr('is_currently_active')|list|length }}</div>
+            <div class="text-xs text-gray-500">Сейчас на работе</div>
+        </div>
+        <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+            <div class="text-2xl font-bold text-[#0088CC]">{{ employees_data|sum(attribute='active_deals') }}</div>
+            <div class="text-xs text-gray-500">Активных сделок</div>
+        </div>
+    </div>
+
+    <div class="space-y-4">
+        {% for emp in employees_data %}
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div class="p-5">
+                <div class="flex items-start gap-4">
+                    <button onclick="openEmployeeProfile({{ emp.manager.id }})" class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 block cursor-pointer">
+                        {% if emp.manager.profile_image %}
+                        <img src="{{ emp.manager.profile_image }}" alt="" class="w-full h-full object-cover">
+                        {% else %}
+                        <div class="w-full h-full bg-gradient-to-r from-[#0088CC] to-[#006699] flex items-center justify-center text-white font-bold text-base">
+                            {{ (emp.manager.full_name or emp.manager.email or '?')[0]|upper }}
+                        </div>
+                        {% endif %}
+                    </button>
+
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-3 mb-1 flex-wrap">
+                            <button onclick="openEmployeeProfile({{ emp.manager.id }})" class="text-base font-bold text-gray-900 hover:text-[#0088CC] transition-colors cursor-pointer">{{ emp.manager.full_name or emp.manager.email }}</button>
+                            {% if emp.is_currently_active %}
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-50 text-green-700">
+                                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                                На работе
+                            </span>
+                            {% elif emp.first_checkin %}
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-500">
+                                Ушёл
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-50 text-red-400">
+                                Не на работе
+                            </span>
+                            {% endif %}
+                            {% if emp.manager.id == current_manager.id %}
+                            <span class="text-xs text-[#0088CC] font-medium">(вы)</span>
+                            {% endif %}
+                        </div>
+                        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500">
+                            {% if emp.department %}
+                            <span><i class="fas fa-building mr-1"></i>{{ emp.department }}</span>
+                            {% endif %}
+                            {% if emp.role %}
+                            <span><i class="fas fa-id-badge mr-1"></i>{{ emp.role }}</span>
+                            {% endif %}
+                            <span><i class="fas fa-envelope mr-1"></i>{{ emp.manager.email }}</span>
+                            {% if emp.manager.phone %}
+                            <span><i class="fas fa-phone mr-1"></i>{{ emp.manager.phone }}</span>
+                            {% endif %}
+                            {% if emp.last_login %}
+                            <span title="Дата последнего входа"><i class="fas fa-sign-in-alt mr-1"></i>{{ emp.last_login|msk_time('%d.%m.%Y %H:%M') }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="hidden md:flex items-center gap-6 text-center">
+                        <div>
+                            <div class="text-lg font-bold text-gray-900">{{ emp.today_time }}</div>
+                            <div class="text-[10px] text-gray-400 uppercase">Сегодня</div>
+                        </div>
+                        <div>
+                            <div class="text-lg font-bold text-[#0088CC]">{{ emp.active_deals }}</div>
+                            <div class="text-[10px] text-gray-400 uppercase">Сделок</div>
+                        </div>
+                        {% if is_rop and emp.manager.id != current_manager.id %}
+                        <div>
+                            <button onclick="dismissEmployee({{ emp.manager.id }}, '{{ emp.manager.full_name or emp.manager.email }}', {{ emp.active_deals }})" 
+                                    class="text-xs px-3 py-1.5 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 hover:border-red-300 transition-all"
+                                    title="Уволить сотрудника">
+                                <i class="fas fa-user-slash mr-1"></i>Уволить
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="employee-card-stats hidden md:hidden items-center gap-4 text-center text-sm">
+                    <div>
+                        <div class="text-base font-bold text-gray-900">{{ emp.today_time }}</div>
+                        <div class="text-[10px] text-gray-400 uppercase">Сегодня</div>
+                    </div>
+                    <div>
+                        <div class="text-base font-bold text-[#0088CC]">{{ emp.active_deals }}</div>
+                        <div class="text-[10px] text-gray-400 uppercase">Сделок</div>
+                    </div>
+                    {% if is_rop and emp.manager.id != current_manager.id %}
+                    <div>
+                        <button onclick="dismissEmployee({{ emp.manager.id }}, '{{ emp.manager.full_name or emp.manager.email }}', {{ emp.active_deals }})" 
+                                class="text-xs px-3 py-1.5 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 hover:border-red-300 transition-all">
+                            <i class="fas fa-user-slash mr-1"></i>Уволить
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if is_rop and emp.recent_activities %}
+                <div class="mt-4 pt-4 border-t border-gray-100">
+                    <p class="text-xs font-bold text-gray-500 uppercase mb-3">Последняя активность</p>
+                    <div class="space-y-2">
+                        {% for act in emp.recent_activities[:3] %}
+                        <div class="flex items-center gap-3 text-sm">
+                            <div class="w-5 h-5 rounded-full bg-gray-50 flex items-center justify-center flex-shrink-0">
+                                {% if act.action == 'stage_change' %}
+                                <i class="fas fa-exchange-alt text-[#059669] text-[9px]"></i>
+                                {% elif act.action == 'task_created' or act.action == 'task_completed' %}
+                                <i class="fas fa-clipboard text-[#0088CC] text-[9px]"></i>
+                                {% elif act.action == 'comment_added' %}
+                                <i class="fas fa-comment text-[#0088CC] text-[9px]"></i>
+                                {% elif act.action == 'deal_created' %}
+                                <i class="fas fa-plus-circle text-[#059669] text-[9px]"></i>
+                                {% else %}
+                                <i class="fas fa-info-circle text-gray-400 text-[9px]"></i>
+                                {% endif %}
+                            </div>
+                            <span class="text-gray-600 flex-1 truncate">{{ act.description or act.action }}</span>
+                            <span class="text-[10px] text-gray-400 flex-shrink-0">{{ act.created_at|msk_time('%d.%m %H:%M') }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+
+        {% if not employees_data %}
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-8 text-center">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-users text-gray-400 text-2xl"></i>
+            </div>
+            <p class="text-gray-500">Нет сотрудников для отображения</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+</div>
+
+<div id="employeeProfileModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50" onclick="if(event.target===this)closeProfileModal()">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+        <div id="profileLoading" class="p-12 text-center">
+            <div class="w-10 h-10 border-3 border-[#0088CC] border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+            <p class="text-sm text-gray-400">Загрузка профиля...</p>
+        </div>
+        <div id="profileContent" class="hidden">
+            <div class="bg-gradient-to-r from-[#0088CC] to-[#006699] rounded-t-2xl p-6 text-white relative">
+                <button onclick="closeProfileModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors">
+                    <i class="fas fa-times text-white text-sm"></i>
+                </button>
+                <div class="flex items-center gap-5">
+                    <div id="profileAvatar" class="w-20 h-20 rounded-2xl overflow-hidden border-4 border-white/30 flex-shrink-0 shadow-lg"></div>
+                    <div>
+                        <h2 id="profileName" class="text-xl font-bold"></h2>
+                        <div class="flex flex-wrap items-center gap-2 mt-2" id="profileBadges"></div>
+                        <div id="profileOnlineStatus" class="mt-2"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 space-y-5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-white rounded-xl border border-gray-200 p-4">
+                        <h3 class="text-xs font-bold text-gray-400 uppercase mb-3">Контакты</h3>
+                        <div class="space-y-3" id="profileContacts"></div>
+                    </div>
+                    <div class="bg-white rounded-xl border border-gray-200 p-4">
+                        <h3 class="text-xs font-bold text-gray-400 uppercase mb-3">Статистика</h3>
+                        <div class="grid grid-cols-2 gap-3" id="profileStats"></div>
+                    </div>
+                </div>
+
+                <div id="profileSubordinatesSection" class="hidden">
+                    <h3 class="text-xs font-bold text-gray-400 uppercase mb-3">Подчинённые</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2" id="profileSubordinates"></div>
+                </div>
+
+                <div id="profileSupervisorSection" class="hidden">
+                    <h3 class="text-xs font-bold text-gray-400 uppercase mb-3">Руководитель</h3>
+                    <div id="profileSupervisor"></div>
+                </div>
+
+                <div id="profileActivitySection" class="hidden">
+                    <h3 class="text-xs font-bold text-gray-400 uppercase mb-3">Последняя активность</h3>
+                    <div class="space-y-2" id="profileActivities"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if is_rop %}
+<div id="dismissModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50">
+    <div class="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full mx-4">
+        <h3 class="text-lg font-bold text-gray-900 mb-2">Уволить сотрудника</h3>
+        <p class="text-sm text-gray-500 mb-4">Вы уверены, что хотите уволить <span id="dismissName" class="font-bold text-gray-700"></span>?</p>
+        <input type="hidden" id="dismissManagerId">
+        
+        <div id="dismissReassignSection" class="hidden mb-4">
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-3">
+                <p class="text-sm text-amber-800"><i class="fas fa-exclamation-triangle mr-1"></i>У сотрудника есть <span id="dismissDealsCount" class="font-bold"></span> активных сделок. Выберите кому их передать:</p>
+            </div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Новый ответственный</label>
+            <select id="dismissReassignTo" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0088CC] focus:border-[#0088CC]">
+                <option value="">— Выберите менеджера —</option>
+                {% for emp in employees_data %}
+                <option value="{{ emp.manager.id }}" data-self="{{ 'true' if emp.manager.id == current_manager.id else 'false' }}">{{ emp.manager.full_name or emp.manager.email }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div id="dismissNoDeals" class="hidden mb-4">
+            <p class="text-xs text-gray-500">Сотрудник будет деактивирован и не сможет войти в систему.</p>
+        </div>
+        
+        <div class="flex justify-end gap-3">
+            <button onclick="closeDismissModal()" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors">Отмена</button>
+            <button id="dismissConfirmBtn" onclick="confirmDismiss()" class="px-4 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium">Уволить</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function dismissEmployee(id, name, activeDeals) {
+    document.getElementById('dismissManagerId').value = id;
+    document.getElementById('dismissName').textContent = name;
+    
+    var reassignSelect = document.getElementById('dismissReassignTo');
+    for (var i = 0; i < reassignSelect.options.length; i++) {
+        if (reassignSelect.options[i].value == String(id)) {
+            reassignSelect.options[i].style.display = 'none';
+        } else {
+            reassignSelect.options[i].style.display = '';
+        }
+    }
+    reassignSelect.value = '';
+    
+    if (activeDeals > 0) {
+        document.getElementById('dismissReassignSection').classList.remove('hidden');
+        document.getElementById('dismissNoDeals').classList.add('hidden');
+        document.getElementById('dismissDealsCount').textContent = activeDeals;
+    } else {
+        document.getElementById('dismissReassignSection').classList.add('hidden');
+        document.getElementById('dismissNoDeals').classList.remove('hidden');
+    }
+    
+    document.getElementById('dismissModal').classList.remove('hidden');
+    document.getElementById('dismissModal').classList.add('flex');
+}
+
+function closeDismissModal() {
+    document.getElementById('dismissModal').classList.add('hidden');
+    document.getElementById('dismissModal').classList.remove('flex');
+}
+
+async function confirmDismiss() {
+    var id = document.getElementById('dismissManagerId').value;
+    var reassignTo = document.getElementById('dismissReassignTo').value;
+    var reassignSection = document.getElementById('dismissReassignSection');
+    
+    if (!reassignSection.classList.contains('hidden') && !reassignTo) {
+        alert('Выберите менеджера для передачи сделок');
+        return;
+    }
+    
+    var csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    var body = {};
+    if (reassignTo) body.reassign_to_id = parseInt(reassignTo);
+    
+    try {
+        var btn = document.getElementById('dismissConfirmBtn');
+        btn.disabled = true;
+        btn.textContent = 'Увольняем...';
+        
+        var res = await fetch('/api/manager/employees/' + id + '/dismiss', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
+            body: JSON.stringify(body)
+        });
+        var data = await res.json();
+        if (data.success) {
+            window.location.reload();
+        } else if (data.needs_reassignment) {
+            document.getElementById('dismissReassignSection').classList.remove('hidden');
+            document.getElementById('dismissNoDeals').classList.add('hidden');
+            document.getElementById('dismissDealsCount').textContent = data.active_deals_count;
+            btn.disabled = false;
+            btn.textContent = 'Уволить';
+        } else {
+            alert(data.error || 'Ошибка');
+            btn.disabled = false;
+            btn.textContent = 'Уволить';
+        }
+    } catch(e) {
+        alert('Ошибка сети');
+        btn.disabled = false;
+        btn.textContent = 'Уволить';
+    }
+}
+</script>
+{% endif %}
+
+<script>
+function openEmployeeProfile(managerId) {
+    var modal = document.getElementById('employeeProfileModal');
+    var loading = document.getElementById('profileLoading');
+    var content = document.getElementById('profileContent');
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    loading.classList.remove('hidden');
+    content.classList.add('hidden');
+    document.body.style.overflow = 'hidden';
+    
+    fetch('/api/manager/employee/' + managerId + '/profile')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (!data.success) {
+                alert(data.error || 'Ошибка загрузки');
+                closeProfileModal();
+                return;
+            }
+            var emp = data.employee;
+            
+            document.getElementById('profileName').textContent = emp.full_name;
+            
+            var avatarEl = document.getElementById('profileAvatar');
+            if (emp.avatar) {
+                avatarEl.innerHTML = '<img src="' + emp.avatar + '" alt="" class="w-full h-full object-cover">';
+            } else {
+                avatarEl.innerHTML = '<div class="w-full h-full bg-white/20 flex items-center justify-center text-white font-bold text-2xl">' + emp.initials + '</div>';
+            }
+            
+            var badges = '';
+            if (emp.role) badges += '<span class="bg-white/20 px-3 py-1 rounded-full text-xs font-medium">' + emp.role + '</span>';
+            if (emp.department) badges += '<span class="bg-white/20 px-3 py-1 rounded-full text-xs font-medium"><i class="fas fa-building mr-1"></i>' + emp.department + '</span>';
+            document.getElementById('profileBadges').innerHTML = badges;
+            
+            if (emp.is_online) {
+                document.getElementById('profileOnlineStatus').innerHTML = '<span class="inline-flex items-center gap-1.5 bg-green-500/30 px-3 py-1 rounded-full text-xs font-bold"><span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>В сети</span>';
+            } else {
+                document.getElementById('profileOnlineStatus').innerHTML = '<span class="inline-flex items-center gap-1.5 bg-white/15 px-3 py-1 rounded-full text-xs font-bold"><span class="w-2 h-2 rounded-full bg-gray-400"></span>Не в сети</span>';
+            }
+            
+            var contacts = '';
+            if (emp.email) contacts += '<div><p class="text-[10px] text-gray-400 uppercase">Почта</p><a href="mailto:' + emp.email + '" class="text-sm text-[#0088CC] hover:underline">' + emp.email + '</a></div>';
+            if (emp.phone) contacts += '<div><p class="text-[10px] text-gray-400 uppercase">Телефон</p><a href="tel:' + emp.phone + '" class="text-sm text-[#0088CC] hover:underline">' + emp.phone + '</a></div>';
+            if (emp.position) contacts += '<div><p class="text-[10px] text-gray-400 uppercase">Должность</p><p class="text-sm font-medium text-gray-900">' + emp.position + '</p></div>';
+            document.getElementById('profileContacts').innerHTML = contacts || '<p class="text-sm text-gray-400">Нет данных</p>';
+            
+            var stats = emp.stats;
+            document.getElementById('profileStats').innerHTML =
+                '<div class="text-center p-3 bg-gray-50 rounded-lg"><div class="text-xl font-bold text-[#0088CC]">' + stats.active_deals + '</div><div class="text-[10px] text-gray-500">Активных</div></div>' +
+                '<div class="text-center p-3 bg-gray-50 rounded-lg"><div class="text-xl font-bold text-[#059669]">' + stats.completed_deals + '</div><div class="text-[10px] text-gray-500">Завершённых</div></div>' +
+                '<div class="text-center p-3 bg-gray-50 rounded-lg"><div class="text-xl font-bold text-gray-900">' + stats.clients + '</div><div class="text-[10px] text-gray-500">Клиентов</div></div>' +
+                '<div class="text-center p-3 bg-gray-50 rounded-lg"><div class="text-xl font-bold text-amber-600">' + stats.pending_tasks + '</div><div class="text-[10px] text-gray-500">Задач</div></div>';
+            
+            if (emp.subordinates && emp.subordinates.length > 0) {
+                document.getElementById('profileSubordinatesSection').classList.remove('hidden');
+                var subsHtml = '';
+                emp.subordinates.forEach(function(sub) {
+                    var avatar = sub.avatar 
+                        ? '<img src="' + sub.avatar + '" alt="" class="w-full h-full object-cover">'
+                        : '<div class="w-full h-full bg-gradient-to-r from-[#0088CC] to-[#006699] flex items-center justify-center text-white font-bold text-xs">' + sub.initials + '</div>';
+                    subsHtml += '<button onclick="openEmployeeProfile(' + sub.id + ')" class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100 text-left">' +
+                        '<div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0">' + avatar + '</div>' +
+                        '<div class="min-w-0"><p class="text-sm font-medium text-gray-900 truncate">' + sub.full_name + '</p><p class="text-xs text-gray-500">' + sub.role + '</p></div></button>';
+                });
+                document.getElementById('profileSubordinates').innerHTML = subsHtml;
+            } else {
+                document.getElementById('profileSubordinatesSection').classList.add('hidden');
+            }
+            
+            if (emp.supervisor) {
+                document.getElementById('profileSupervisorSection').classList.remove('hidden');
+                var sup = emp.supervisor;
+                var supAvatar = sup.avatar
+                    ? '<img src="' + sup.avatar + '" alt="" class="w-full h-full object-cover">'
+                    : '<div class="w-full h-full bg-gradient-to-r from-[#0088CC] to-[#006699] flex items-center justify-center text-white font-bold text-xs">' + sup.initials + '</div>';
+                document.getElementById('profileSupervisor').innerHTML =
+                    '<button onclick="openEmployeeProfile(' + sup.id + ')" class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100 text-left w-full">' +
+                    '<div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0">' + supAvatar + '</div>' +
+                    '<div><p class="text-sm font-medium text-gray-900">' + sup.full_name + '</p><p class="text-xs text-gray-500">' + sup.role + '</p></div></button>';
+            } else {
+                document.getElementById('profileSupervisorSection').classList.add('hidden');
+            }
+            
+            if (emp.recent_activities && emp.recent_activities.length > 0) {
+                document.getElementById('profileActivitySection').classList.remove('hidden');
+                var actHtml = '';
+                emp.recent_activities.forEach(function(act) {
+                    var iconClass = 'fas fa-info-circle text-gray-400';
+                    if (act.action === 'stage_change') iconClass = 'fas fa-exchange-alt text-[#059669]';
+                    else if (act.action === 'task_created' || act.action === 'task_completed') iconClass = 'fas fa-clipboard text-[#0088CC]';
+                    else if (act.action === 'comment_added') iconClass = 'fas fa-comment text-[#0088CC]';
+                    else if (act.action === 'deal_created') iconClass = 'fas fa-plus-circle text-[#059669]';
+                    actHtml += '<div class="flex items-center gap-3 text-sm"><div class="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center flex-shrink-0"><i class="' + iconClass + ' text-[9px]"></i></div>' +
+                        '<span class="text-gray-600 flex-1 truncate">' + (act.description || act.action) + '</span>' +
+                        '<span class="text-[10px] text-gray-400 flex-shrink-0">' + act.created_at + '</span></div>';
+                });
+                document.getElementById('profileActivities').innerHTML = actHtml;
+            } else {
+                document.getElementById('profileActivitySection').classList.add('hidden');
+            }
+            
+            loading.classList.add('hidden');
+            content.classList.remove('hidden');
+        })
+        .catch(function(err) {
+            console.error('Profile load error:', err);
+            alert('Ошибка загрузки профиля');
+            closeProfileModal();
+        });
+}
+
+function closeProfileModal() {
+    var modal = document.getElementById('employeeProfileModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeProfileModal();
+        {% if is_rop %}closeDismissModal();{% endif %}
+    }
+});
+</script>
+
+{% set active_tab = 'clients' %}
+{% include 'components/manager_mobile_nav.html' %}
+{% endblock %}

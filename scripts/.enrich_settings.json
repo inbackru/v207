@@ -1,0 +1,17 @@
+{
+  "city_preset": "1",
+  "total_pages": 15,
+  "cian_region_id": 4820,
+  "city_id": 1,
+  "request_delay": 0.5,
+  "schedule_hour": 2,
+  "schedule_minute": 0,
+  "schedule_day_of_week": 6,
+  "proxy_url": "",
+  "proxy_rotate_seconds": 120,
+  "anticaptcha_key": "",
+  "use_vpn": false,
+  "create_new_jk": true,
+  "reset_on_run": false,
+  "cache_max_age_days": 7
+}

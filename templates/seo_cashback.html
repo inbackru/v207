@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block title %}Кэшбек при покупке квартиры в новостройке {{ (current_city.name_genitive or current_city.name) if current_city else 'Краснодара' }} — до 500 000 ₽ | InBack{% endblock %}
+{% block description %}Получите кэшбек до 500 000 ₽ при покупке квартиры в новостройке {{ (current_city.name_prepositional or (current_city.name if current_city else 'Краснодаре')) }}. Официальный возврат 2,5–5% от стоимости через InBack. {{ total_complexes }}+ ЖК-партнёров.{% endblock %}
+{% block keywords %}кэшбек при покупке квартиры, кэшбек новостройка {{ current_city.name if current_city else 'Краснодар' }}, возврат денег за квартиру, кэшбек застройщик, купить квартиру с кэшбеком {{ current_city.name if current_city else 'Краснодар' }}, скидка на квартиру, InBack кэшбек, как получить кэшбек{% endblock %}
+
+{% block head %}
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://inback.ru/{{ current_city.slug if current_city else 'krasnodar' }}/cashback-kvartiry" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Главная", "item": "https://inback.ru/"},
+        {"@type": "ListItem", "position": 2, "name": "{{ current_city.name if current_city else 'Краснодар' }}", "item": "https://inback.ru/{{ current_city.slug if current_city else 'krasnodar' }}"},
+        {"@type": "ListItem", "position": 3, "name": "Кэшбек при покупке квартиры", "item": "https://inback.ru/{{ current_city.slug if current_city else 'krasnodar' }}/cashback-kvartiry"}
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Как получить кэшбек при покупке квартиры?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Зарегистрируйтесь на InBack, выберите квартиру в одном из ЖК-партнёров, подайте заявку. После оформления сделки InBack переведёт вам кэшбек официально на карту."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Сколько составляет кэшбек?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Кэшбек составляет от 2,5% до 5% от стоимости квартиры. При цене квартиры 10 000 000 ₽ вы получите от 250 000 до 500 000 ₽."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Законно ли получать кэшбек за квартиру?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Да, это полностью законно. InBack получает агентское вознаграждение от застройщика и делится им с покупателем. Выплата оформляется официально и отражается в документах."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Когда выплачивается кэшбек?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Кэшбек выплачивается после государственной регистрации договора долевого участия (ДДУ). Обычно это занимает 7–14 рабочих дней после регистрации."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="container mx-auto px-4 py-3 text-sm">
+<nav aria-label="Breadcrumb">
+<ol class="inline-flex items-center space-x-1 md:space-x-3">
+<li class="inline-flex items-center">
+  <a class="text-[#0088CC] hover:underline inline-flex items-center" href="/">
+    <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
+    Главная
+  </a>
+</li>
+{% if current_city %}
+<li>
+  <div class="flex items-center">
+    <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
+    <a href="{{ url_for('city_pages.city_home', city_slug=current_city.slug) }}" class="text-[#0088CC] hover:underline ml-1 md:ml-2">{{ current_city.name }}</a>
+  </div>
+</li>
+{% endif %}
+<li aria-current="page">
+  <div class="flex items-center">
+    <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
+    <span class="text-gray-500 ml-1 md:ml-2">Кэшбек за квартиру</span>
+  </div>
+</li>
+</ol>
+</nav>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="bg-gradient-to-br from-[#0088CC] to-[#005f8e] py-16 md:py-24 text-white">
+  <div class="container mx-auto px-4">
+    <div class="max-w-3xl mx-auto text-center">
+      <div class="inline-flex items-center gap-2 bg-white/15 rounded-full px-4 py-1.5 text-sm font-medium mb-5">
+        <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+        Официальный возврат средств
+      </div>
+      <h1 class="text-4xl md:text-5xl font-black mb-4 leading-tight">
+        Кэшбек при покупке квартиры<br>
+        <span class="text-yellow-300">до 500 000 ₽</span>
+      </h1>
+      <p class="text-xl text-blue-100 mb-8">
+        Покупаете квартиру в новостройке {{ (current_city.name_prepositional or current_city.name) if current_city else 'Краснодаре' }} — InBack возвращает вам 2,5–5% от стоимости. Законно, официально, без скрытых условий.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <a href="{{ url_for('props.properties_city', city_slug=current_city.slug if current_city else 'krasnodar') if current_city else '/novostrojki' }}"
+           class="px-8 py-4 bg-white text-[#0088CC] font-bold rounded-xl hover:bg-blue-50 transition-colors shadow-lg text-base">
+          Выбрать квартиру с кэшбеком
+        </a>
+        <button onclick="openApplicationModal()"
+                class="px-8 py-4 bg-white/15 border border-white/30 text-white font-semibold rounded-xl hover:bg-white/25 transition-colors text-base">
+          Получить консультацию
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Key stats -->
+<section class="bg-white border-b border-gray-100 py-10">
+  <div class="container mx-auto px-4">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto text-center">
+      <div>
+        <div class="text-3xl font-black text-[#0088CC]">до 500 000 ₽</div>
+        <div class="text-sm text-gray-500 mt-1">Максимальный кэшбек</div>
+      </div>
+      <div>
+        <div class="text-3xl font-black text-[#0088CC]">2,5–5%</div>
+        <div class="text-sm text-gray-500 mt-1">От стоимости квартиры</div>
+      </div>
+      <div>
+        <div class="text-3xl font-black text-[#0088CC]">{{ total_complexes }}+</div>
+        <div class="text-sm text-gray-500 mt-1">ЖК-партнёров</div>
+      </div>
+      <div>
+        <div class="text-3xl font-black text-[#0088CC]">100%</div>
+        <div class="text-sm text-gray-500 mt-1">Официально и законно</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section class="py-16 bg-gray-50">
+  <div class="container mx-auto px-4 max-w-4xl">
+    <h2 class="text-3xl font-black text-center text-gray-900 mb-3">Как работает кэшбек за квартиру</h2>
+    <p class="text-center text-gray-500 mb-10">Простая схема без посредников и скрытых условий</p>
+    <div class="grid md:grid-cols-4 gap-6">
+      {% for step in [
+        ('1', 'fas fa-search', 'Выбираете квартиру', 'Находите подходящий ЖК в каталоге InBack и оставляете заявку'),
+        ('2', 'fas fa-handshake', 'Заключаете сделку', 'Покупаете квартиру через официального менеджера застройщика с участием InBack'),
+        ('3', 'fas fa-file-contract', 'Регистрация ДДУ', 'После гос. регистрации договора долевого участия InBack получает агентское'),
+        ('4', 'fas fa-wallet', 'Получаете кэшбек', 'InBack переводит вам кэшбек на карту в течение 7–14 рабочих дней'),
+      ] %}
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center relative">
+        <div class="w-10 h-10 bg-[#0088CC] text-white rounded-full flex items-center justify-center font-black text-lg mx-auto mb-4">{{ step[0] }}</div>
+        <i class="{{ step[1] }} text-2xl text-[#0088CC] mb-3 block"></i>
+        <h3 class="font-bold text-gray-900 mb-2">{{ step[2] }}</h3>
+        <p class="text-sm text-gray-500 leading-relaxed">{{ step[3] }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Cashback calculator table -->
+<section class="py-16 bg-white">
+  <div class="container mx-auto px-4 max-w-3xl">
+    <h2 class="text-3xl font-black text-center text-gray-900 mb-3">Сколько вы получите</h2>
+    <p class="text-center text-gray-500 mb-8">Расчёт кэшбека в зависимости от стоимости квартиры</p>
+    <div class="bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-[#0088CC] text-white">
+            <th class="text-left px-6 py-4 font-bold">Стоимость квартиры</th>
+            <th class="text-center px-4 py-4 font-bold">Кэшбек 2,5%</th>
+            <th class="text-center px-4 py-4 font-bold">Кэшбек 4%</th>
+            <th class="text-right px-6 py-4 font-bold text-yellow-200">Кэшбек 5%</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for price_m in [4, 6, 8, 10, 12, 15, 20] %}
+          <tr class="border-b border-gray-100 hover:bg-white transition-colors">
+            <td class="px-6 py-3.5 font-semibold text-gray-900">{{ price_m }} млн ₽</td>
+            <td class="text-center px-4 py-3.5 text-gray-600">{{ (price_m * 0.025 * 1000000)|int|format_number }} ₽</td>
+            <td class="text-center px-4 py-3.5 text-gray-700 font-medium">{{ (price_m * 0.04 * 1000000)|int|format_number }} ₽</td>
+            <td class="text-right px-6 py-3.5 text-emerald-700 font-bold">{{ [price_m * 0.05 * 1000000, 500000]|min|int|format_number }} ₽</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="text-center text-xs text-gray-400 mt-3">*Кэшбек 5% ограничен суммой 500 000 ₽</p>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="py-16 bg-gray-50">
+  <div class="container mx-auto px-4 max-w-3xl">
+    <h2 class="text-3xl font-black text-center text-gray-900 mb-10">Частые вопросы о кэшбеке</h2>
+    <div class="space-y-4">
+      {% for q, a in [
+        ('Как получить кэшбек при покупке квартиры?', 'Зарегистрируйтесь на InBack, выберите квартиру в одном из ЖК-партнёров, подайте заявку. После оформления сделки InBack переведёт вам кэшбек официально на карту.'),
+        ('Сколько составляет кэшбек?', 'Кэшбек составляет от 2,5% до 5% от стоимости квартиры. При цене квартиры 10 000 000 ₽ вы получите от 250 000 до 500 000 ₽.'),
+        ('Законно ли получать кэшбек за квартиру?', 'Да, это полностью законно. InBack получает агентское вознаграждение от застройщика и делится им с покупателем. Выплата оформляется официально и отражается в документах.'),
+        ('Когда выплачивается кэшбек?', 'Кэшбек выплачивается после государственной регистрации договора долевого участия (ДДУ). Обычно это занимает 7–14 рабочих дней после регистрации.'),
+        ('Влияет ли кэшбек на цену квартиры?', 'Нет. Цена квартиры у застройщика не изменяется. Кэшбек выплачивается из агентского вознаграждения InBack, которое застройщик платит нам как партнёру.'),
+        ('Можно ли получить кэшбек при покупке в ипотеку?', 'Да, кэшбек доступен как при покупке за наличные, так и в ипотеку. Сумма кэшбека рассчитывается от полной стоимости квартиры.'),
+      ] %}
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden" x-data="{ open: false }">
+        <button class="w-full text-left px-6 py-4 flex items-center justify-between font-semibold text-gray-900 hover:bg-gray-50 transition-colors faq-btn" onclick="this.parentElement.querySelector('.faq-body').classList.toggle('hidden'); this.querySelector('.faq-arrow').classList.toggle('rotate-180')">
+          <span>{{ q }}</span>
+          <svg class="faq-arrow w-5 h-5 text-gray-400 transition-transform flex-shrink-0 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+        <div class="faq-body hidden px-6 pb-4 text-gray-600 text-sm leading-relaxed border-t border-gray-50 pt-3">
+          {{ a }}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="py-16 bg-gradient-to-r from-[#0088CC] to-[#005f8e] text-white">
+  <div class="container mx-auto px-4 text-center max-w-2xl">
+    <h2 class="text-3xl font-black mb-4">Готовы получить кэшбек?</h2>
+    <p class="text-blue-100 mb-8 text-lg">Выберите квартиру в {{ total_complexes }}+ ЖК {{ (current_city.name_prepositional or current_city.name) if current_city else 'Краснодара' }} и получите до 500 000 ₽ обратно</p>
+    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+      <a href="{{ url_for('props.properties_city', city_slug=current_city.slug if current_city else 'krasnodar') if current_city else '/novostrojki' }}"
+         class="px-8 py-4 bg-white text-[#0088CC] font-bold rounded-xl hover:bg-blue-50 transition-colors shadow-lg">
+        Смотреть квартиры с кэшбеком
+      </a>
+      <a href="{{ url_for('devs.developers_city', city_slug=current_city.slug if current_city else 'krasnodar') }}"
+         class="px-8 py-4 bg-white/15 border border-white/30 text-white font-semibold rounded-xl hover:bg-white/25 transition-colors">
+        Список застройщиков-партнёров
+      </a>
+    </div>
+  </div>
+</section>
+{% endblock %}

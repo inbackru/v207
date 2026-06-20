@@ -1,0 +1,61 @@
+{
+  "name": "InBack — Кэшбек за новостройки",
+  "short_name": "InBack",
+  "description": "Получите до 500 000 ₽ кэшбека при покупке новостройки. Проверенные застройщики, юридическое сопровождение.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0088CC",
+  "theme_color": "#0088CC",
+  "lang": "ru",
+  "dir": "ltr",
+  "categories": ["finance", "real-estate", "lifestyle"],
+  "icons": [
+    { "src": "/static/images/icons/icon-72x72.png",   "sizes": "72x72",   "type": "image/png", "purpose": "any" },
+    { "src": "/static/images/icons/icon-96x96.png",   "sizes": "96x96",   "type": "image/png", "purpose": "any" },
+    { "src": "/static/images/icons/icon-128x128.png", "sizes": "128x128", "type": "image/png", "purpose": "any" },
+    { "src": "/static/images/icons/icon-144x144.png", "sizes": "144x144", "type": "image/png", "purpose": "any" },
+    { "src": "/static/images/icons/icon-152x152.png", "sizes": "152x152", "type": "image/png", "purpose": "any" },
+    { "src": "/static/images/icons/icon-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/static/images/icons/icon-384x384.png", "sizes": "384x384", "type": "image/png", "purpose": "any" },
+    { "src": "/static/images/icons/icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/static/images/icons/icon-192x192-maskable.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/static/images/icons/icon-512x512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "screenshots": [
+    {
+      "src": "/static/images/social-preview.jpg",
+      "sizes": "1200x630",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Главная страница InBack"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Поиск квартир",
+      "short_name": "Поиск",
+      "description": "Найдите квартиру в новостройке",
+      "url": "/novostrojki",
+      "icons": [{ "src": "/static/images/icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Мой кабинет",
+      "short_name": "Кабинет",
+      "description": "Личный кабинет и сделки",
+      "url": "/dashboard",
+      "icons": [{ "src": "/static/images/icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Избранное",
+      "short_name": "Избранное",
+      "description": "Сохранённые объекты",
+      "url": "/favorites",
+      "icons": [{ "src": "/static/images/icons/icon-96x96.png", "sizes": "96x96" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "iarc_rating_id": ""
+}

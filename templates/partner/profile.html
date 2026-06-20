@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+
+{% block title %}Профиль партнёра | InBack{% endblock %}
+
+{% block head %}
+<meta name="csrf-token" content="{{ csrf_token() if csrf_token else 'no-token' }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<style>
+header, #topContactBar {
+    display: none !important;
+}
+body {
+    padding-top: 0 !important;
+}
+#mobileBottomNav {
+    display: none !important;
+}
+@media (max-width: 767px) {
+    body > footer, body > .footer, #footer-section, footer {
+        display: none !important;
+    }
+}
+
+.partner-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 260px;
+    background: white;
+    border-right: 1px solid #e5e7eb;
+    z-index: 40;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+@media (max-width: 767px) {
+    .partner-sidebar {
+        display: none !important;
+    }
+}
+
+.partner-main {
+    margin-left: 260px;
+    min-height: 100vh;
+    background: #f3f4f6;
+}
+@media (max-width: 767px) {
+    .partner-main {
+        margin-left: 0;
+    }
+}
+
+.profile-input {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+    outline: none;
+    background: white;
+}
+.profile-input:focus {
+    border-color: #0088CC;
+    box-shadow: 0 0 0 3px rgba(0, 136, 204, 0.1);
+}
+.profile-input:disabled, .profile-input[readonly] {
+    background: #f9fafb;
+    color: #6b7280;
+    cursor: not-allowed;
+}
+.profile-input::placeholder {
+    color: #9ca3af;
+}
+
+@media (max-width: 767px) {
+    .profile-input {
+        font-size: 16px !important;
+    }
+}
+</style>
+
+<div class="partner-sidebar">
+    <div class="p-5 border-b border-gray-100">
+        <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold" style="background: linear-gradient(135deg, #0088CC, #006699);">
+                {{ partner.full_name[0] if partner.full_name else 'П' }}
+            </div>
+            <div>
+                <div class="font-semibold text-gray-800 text-sm">{{ partner.full_name }}</div>
+                <div class="text-xs text-gray-400">Партнёр</div>
+            </div>
+        </div>
+    </div>
+    <nav class="flex-1 py-4">
+        <a href="/partner/dashboard" class="flex items-center gap-3 px-5 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors" style="text-decoration: none;">
+            <i class="fas fa-home w-5 text-center"></i>
+            <span>Главная</span>
+        </a>
+        <a href="/partner/dashboard" onclick="sessionStorage.setItem('partnerTab','referrals-tab')" class="flex items-center gap-3 px-5 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors" style="text-decoration: none;">
+            <i class="fas fa-users w-5 text-center"></i>
+            <span>Рефералы</span>
+        </a>
+        <a href="/partner/dashboard" onclick="sessionStorage.setItem('partnerTab','withdrawals-tab')" class="flex items-center gap-3 px-5 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors" style="text-decoration: none;">
+            <i class="fas fa-wallet w-5 text-center"></i>
+            <span>Выплаты</span>
+        </a>
+        <div class="border-t border-gray-100 mt-2 pt-2">
+            <div class="flex items-center gap-3 px-5 py-3 text-sm font-medium" style="color: #0088CC; background: #f0f9ff; border-left: 3px solid #0088CC;">
+                <i class="fas fa-user-cog w-5 text-center"></i>
+                <span>Профиль</span>
+            </div>
+        </div>
+    </nav>
+    <div class="p-4 border-t border-gray-100">
+        <a href="/partner/logout" class="flex items-center gap-2 text-sm text-gray-500 hover:text-red-500 transition-colors">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Выйти</span>
+        </a>
+    </div>
+</div>
+
+<div class="partner-main">
+    <div class="md:hidden flex items-center gap-3 px-4 py-3 text-white" style="background: linear-gradient(135deg, #0088CC, #006699);">
+        <a href="/partner/dashboard" class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+            <i class="fas fa-arrow-left text-white"></i>
+        </a>
+        <h1 class="text-base font-bold">Профиль</h1>
+    </div>
+
+    <div class="hidden md:flex bg-white border-b border-gray-200 px-8 py-4 items-center justify-between">
+        <div class="flex items-center gap-3">
+            <a href="/partner/dashboard" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h1 class="text-xl font-bold text-gray-800">Настройки профиля</h1>
+        </div>
+    </div>
+
+    <div class="p-4 md:p-8 max-w-4xl">
+        {% if errors %}
+        <div class="mb-6 p-4 rounded-xl bg-red-50 border border-red-100">
+            <div class="flex items-start gap-3">
+                <i class="fas fa-exclamation-circle text-red-500 mt-0.5"></i>
+                <div>
+                    {% for error in errors %}
+                    <p class="text-sm text-red-700{% if not loop.first %} mt-1{% endif %}">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if success %}
+        <div class="mb-6 p-4 rounded-xl bg-green-50 border border-green-100">
+            <div class="flex items-center gap-3">
+                <i class="fas fa-check-circle text-green-500"></i>
+                <p class="text-sm text-green-700 font-medium">{{ success }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 md:p-8">
+                    <h2 class="text-lg font-bold text-gray-800 mb-6">
+                        <i class="fas fa-user mr-2" style="color: #0088CC;"></i>
+                        Личные данные
+                    </h2>
+
+                    <form method="POST" action="/partner/profile">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Имя</label>
+                                <input type="text" name="first_name" value="{{ partner.first_name or '' }}" class="profile-input" placeholder="Ваше имя" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Фамилия</label>
+                                <input type="text" name="last_name" value="{{ partner.last_name or '' }}" class="profile-input" placeholder="Ваша фамилия" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+                            <input type="email" name="email" value="{{ partner.email or '' }}" class="profile-input" placeholder="email@example.com">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Телефон</label>
+                            <input type="tel" value="{{ partner.phone or '' }}" class="profile-input" disabled>
+                            <p class="text-xs text-gray-400 mt-1">Номер телефона нельзя изменить</p>
+                        </div>
+
+                        <div class="border-t border-gray-100 pt-5 mt-5">
+                            <h3 class="text-base font-bold text-gray-800 mb-4">
+                                <i class="fas fa-lock mr-2" style="color: #0088CC;"></i>
+                                Сменить пароль
+                            </h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Новый пароль</label>
+                                    <input type="password" name="new_password" class="profile-input" placeholder="Минимум 6 символов" autocomplete="new-password">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Подтвердите пароль</label>
+                                    <input type="password" name="confirm_password" class="profile-input" placeholder="Повторите пароль" autocomplete="new-password">
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-2">Оставьте пустым, если не хотите менять пароль</p>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row gap-3 mt-6">
+                            <button type="submit" class="flex-1 py-3 rounded-xl text-white font-medium text-sm transition-all hover:shadow-lg" style="background: linear-gradient(135deg, #0088CC, #006699);">
+                                <i class="fas fa-save mr-2"></i>
+                                Сохранить изменения
+                            </button>
+                            <a href="/partner/dashboard" class="flex-1 py-3 rounded-xl text-center text-gray-600 font-medium text-sm border border-gray-200 hover:bg-gray-50 transition-all" style="text-decoration: none;">
+                                <i class="fas fa-arrow-left mr-2"></i>
+                                Назад
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">Информация</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-500">ID партнёра</span>
+                            <span class="text-sm font-mono font-medium text-gray-800">{{ partner.partner_id }}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-500">Реф. код</span>
+                            <span class="text-sm font-mono font-medium" style="color: #0088CC;">{{ partner.referral_code }}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-500">Уровень</span>
+                            <span class="text-sm font-medium text-gray-800">{{ partner.level or 1 }}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-500">Статус</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {% if partner.is_active %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
+                                {{ 'Активен' if partner.is_active else 'Неактивен' }}
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-500">Регистрация</span>
+                            <span class="text-sm text-gray-800">{{ partner.created_at.strftime('%d.%m.%Y') if partner.created_at else '—' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">Статистика</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-500">Баланс</span>
+                            <span class="text-sm font-bold" style="color: #0088CC;">{{ '{:,.0f}'.format(partner.balance|default(0)).replace(',', ' ') }} ₽</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-500">Заработано</span>
+                            <span class="text-sm font-medium text-green-600">{{ '{:,.0f}'.format(partner.total_earned|default(0)).replace(',', ' ') }} ₽</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-500">Рефералов</span>
+                            <span class="text-sm font-medium text-gray-800">{{ partner.total_referrals or 0 }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">Быстрые действия</h3>
+                    <div class="space-y-2">
+                        <a href="/partner/dashboard" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all" style="text-decoration: none;">
+                            <i class="fas fa-tachometer-alt" style="color: #0088CC;"></i>
+                            Дашборд
+                        </a>
+                        <a href="/partner/logout" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-all" style="text-decoration: none;">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Выйти из аккаунта
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

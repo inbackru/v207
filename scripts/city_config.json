@@ -1,0 +1,92 @@
+{
+    "1": {
+        "db_city_id": 1,
+        "name": "Краснодар",
+        "cian_city_id": 4820,
+        "cian_region_id": 4613,
+        "slug": "krasnodar",
+        "total_pages": 54,
+        "lat_min": 44.8,
+        "lat_max": 45.2,
+        "lon_min": 38.8,
+        "lon_max": 39.3
+    },
+    "2": {
+        "db_city_id": 2,
+        "name": "Сочи",
+        "cian_city_id": 4894,
+        "cian_region_id": 4613,
+        "slug": "sochi",
+        "total_pages": 30,
+        "lat_min": 43.4,
+        "lat_max": 43.8,
+        "lon_min": 39.6,
+        "lon_max": 40.4
+    },
+    "8": {
+        "db_city_id": 8,
+        "name": "Майкоп",
+        "cian_city_id": 4841,
+        "cian_region_id": 4562,
+        "slug": "maykop",
+        "total_pages": 10,
+        "lat_min": 44.5,
+        "lat_max": 44.7,
+        "lon_min": 40.0,
+        "lon_max": 40.3
+    },
+    "9": {
+        "name": "Курск",
+        "name_en": "kursk",
+        "slug": "kursk",
+        "cian_region_id": 4835,
+        "total_pages": 54,
+        "db_city_id": 9,
+        "lat": 0,
+        "lon": 0,
+        "lat_min": 51.55,
+        "lat_max": 51.90,
+        "lon_min": 35.90,
+        "lon_max": 36.45,
+        "region_name": "Россия",
+        "region_slug": "rossiya",
+        "price_splits": [
+            [null,      1500000],
+            [1500000,   2000000],
+            [2000000,   2500000],
+            [2500000,   3000000],
+            [3000000,   3500000],
+            [3500000,   4000000],
+            [4000000,   4500000],
+            [4500000,   5500000],
+            [5500000,   7000000],
+            [7000000,   null]
+        ]
+    },
+    "10": {
+        "db_city_id": 10,
+        "name": "Белгород",
+        "cian_city_id": 4598,
+        "cian_region_id": 4590,
+        "slug": "belgorod",
+        "total_pages": 20,
+        "lat_min": 50.47,
+        "lat_max": 50.72,
+        "lon_min": 36.35,
+        "lon_max": 36.85,
+        "region_name": "Белгородская область",
+        "region_slug": "belgorodskaya-oblast",
+        "price_splits": [
+            [null,      1500000],
+            [1500000,   2000000],
+            [2000000,   2500000],
+            [2500000,   3000000],
+            [3000000,   3500000],
+            [3500000,   4000000],
+            [4000000,   4500000],
+            [4500000,   5500000],
+            [5500000,   7000000],
+            [7000000,   null]
+        ]
+    }
+}

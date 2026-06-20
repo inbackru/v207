@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Карточка квартиры - {{ property.title }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            .print-area { box-shadow: none !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            body { background: white !important; padding: 0 !important; margin: 0 !important; }
+            .rounded-lg, .rounded-2xl, .rounded-3xl { border-radius: 8px !important; }
+        }
+        
+        body {
+            font-family: 'Manrope', sans-serif;
+        }
+        
+        .print-area {
+            width: 100%;
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+        
+        @media (min-width: 768px) {
+            .print-area {
+                padding: 40px;
+            }
+        }
+        
+        .qr-code {
+            width: 64px;
+            height: 64px;
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 md:flex md:justify-center md:items-start md:p-8 min-h-screen">
+    
+    <div class="no-print fixed bottom-6 right-6 md:top-6 md:bottom-auto md:right-6 z-[9999] flex gap-2">
+        <button onclick="shareObject()"
+           class="bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 px-4 py-3 md:px-3.5 md:py-2.5 rounded-2xl shadow-xl transition-all active:scale-95 flex items-center gap-2 font-semibold text-sm" title="Поделиться ссылкой">
+            <i class="fas fa-share-alt text-[#0088CC]"></i>
+            <span class="hidden md:inline">Поделиться</span>
+        </button>
+        <button id="savePdfBtn" onclick="savePDF(this)"
+           class="bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 px-4 py-3 md:px-3.5 md:py-2.5 rounded-2xl shadow-xl transition-all active:scale-95 flex items-center gap-2 font-semibold text-sm">
+            <i id="savePdfIcon" class="fas fa-file-pdf text-lg text-red-500"></i>
+            <span class="hidden md:inline" id="savePdfLabel">Скачать PDF</span>
+        </button>
+        <button onclick="printPage()"
+           class="bg-[#0088CC] hover:bg-[#006699] text-white px-4 py-3 md:px-3.5 md:py-2.5 rounded-2xl shadow-xl transition-all active:scale-95 flex items-center gap-2 font-semibold text-sm">
+            <i class="fas fa-print text-lg"></i>
+            <span class="hidden md:inline">Печать</span>
+        </button>
+    </div>
+    <!-- Share toast notification -->
+    <div id="share-toast" class="no-print fixed top-6 left-1/2 -translate-x-1/2 z-[99999] hidden">
+        <div class="bg-gray-900 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 text-sm font-semibold">
+            <i class="fas fa-check-circle text-green-400"></i>
+            Ссылка скопирована в буфер обмена
+        </div>
+    </div>
+    <script>
+    function printPage() {
+        if (window.self !== window.top) {
+            window.open(window.location.href + (window.location.href.includes('?') ? '&' : '?') + 'print=1', '_blank');
+        } else {
+            window.print();
+        }
+    }
+    function savePDF(btn) {
+        const icon = document.getElementById('savePdfIcon');
+        const label = document.getElementById('savePdfLabel');
+        btn = btn || document.getElementById('savePdfBtn');
+        if (btn) btn.disabled = true;
+        if (icon) { icon.className = 'fas fa-spinner fa-spin text-lg text-gray-400'; }
+        if (label) label.textContent = 'Генерация...';
+        window.location.href = '/object/{{ property.id }}/pdf/download';
+        setTimeout(() => {
+            if (btn) btn.disabled = false;
+            if (icon) { icon.className = 'fas fa-file-pdf text-lg text-red-500'; }
+            if (label) label.textContent = 'Скачать PDF';
+        }, 8000);
+    }
+    function shareObject() {
+        const url = '{{ object_url }}';
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(url).then(showShareToast).catch(() => fallbackCopy(url));
+        } else {
+            fallbackCopy(url);
+        }
+    }
+    function fallbackCopy(text) {
+        const el = document.createElement('textarea');
+        el.value = text;
+        el.style.position = 'fixed';
+        el.style.opacity = '0';
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        showShareToast();
+    }
+    function showShareToast() {
+        const toast = document.getElementById('share-toast');
+        toast.classList.remove('hidden');
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(-50%) translateY(-12px)';
+        toast.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+        requestAnimationFrame(() => {
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateX(-50%) translateY(0)';
+        });
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(-50%) translateY(-12px)';
+            setTimeout(() => toast.classList.add('hidden'), 280);
+        }, 2800);
+    }
+    </script>
+
+    <div class="print-area bg-white shadow-lg rounded-lg overflow-hidden">
+        <!-- Шапка документа -->
+        <div class="flex justify-between items-start border-b border-gray-200 pb-4 mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">Карточка объекта недвижимости</h1>
+                <p class="text-gray-600">Дата формирования: {{ current_date }}</p>
+            </div>
+            <div class="flex items-center gap-4">
+                {% if qr_code %}
+                <div class="qr-code bg-white border rounded">
+                    <img src="data:image/png;base64,{{ qr_code }}" alt="QR-код объекта" class="w-full h-full object-contain">
+                </div>
+                {% else %}
+                <div class="qr-code">
+                    QR-код<br/>объекта
+                </div>
+                {% endif %}
+                <div class="text-right">
+                    <p class="text-gray-600 text-sm">ID объекта:</p>
+                    <p class="font-semibold">{{ property.id }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Фото объекта вверху — главное фото + первые 3 из галереи -->
+        {% set main_photo = property.image or (property.gallery[0] if property.gallery else None) %}
+        {% if main_photo %}
+        <div class="mb-8">
+            <div class="grid grid-cols-4 gap-3 rounded-2xl overflow-hidden">
+                <div class="col-span-2 row-span-2">
+                    <img src="{{ main_photo }}" alt="Фото объекта" class="w-full h-56 object-cover rounded-2xl">
+                </div>
+                {% for img in (property.gallery or [])[1:4] %}
+                <div>
+                    <img src="{{ img }}" alt="Фото {{ loop.index + 1 }}" class="w-full h-[104px] object-cover rounded-xl">
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Основная и Финансовая информация -->
+        <div class="space-y-8 mb-10">
+            <!-- Основная информация -->
+            <section>
+                <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2 px-1">
+                    <div class="w-1.5 h-5 bg-[#0088CC] rounded-full"></div>
+                    Основные характеристики
+                </h2>
+                <div class="bg-gray-50/50 border border-gray-100 rounded-3xl overflow-hidden shadow-sm">
+                    <div class="grid grid-cols-1 sm:grid-cols-2">
+                        <div class="flex justify-between items-center border-b border-gray-100 p-4 text-sm hover:bg-white transition-colors">
+                            <span class="text-gray-400 font-bold uppercase text-[10px] tracking-wider">Тип объекта</span>
+                            <span class="font-bold text-gray-900">{{ property.property_type or 'Квартира' }}</span>
+                        </div>
+                        <div class="flex justify-between items-center border-b border-gray-100 p-4 text-sm hover:bg-white transition-colors">
+                            <span class="text-gray-400 font-bold uppercase text-[10px] tracking-wider">Жилой комплекс</span>
+                            <span class="font-bold text-[#0088CC]">{{ property.complex_name or property.residential_complex or 'Не указан' }}</span>
+                        </div>
+                        <div class="flex justify-between items-center border-b border-gray-100 p-4 text-sm hover:bg-white transition-colors">
+                            <span class="text-gray-400 font-bold uppercase text-[10px] tracking-wider">Статус</span>
+                            <span class="px-2 py-0.5 bg-green-50 text-green-600 rounded text-[10px] font-bold uppercase tracking-wider">{{ property.status or 'Свободна' }}</span>
+                        </div>
+                        <div class="flex justify-between items-start border-b border-gray-100 p-4 text-sm hover:bg-white transition-colors">
+                            <span class="text-gray-400 font-bold uppercase text-[10px] tracking-wider">Адрес</span>
+                            <span class="font-bold text-gray-900 text-right max-w-[60%] line-clamp-2 leading-tight">{{ property.address or (property.district + ', ' + (current_city.name if current_city else 'Краснодар')) }}</span>
+                        </div>
+                        <div class="flex justify-between items-center border-b border-gray-100 p-4 text-sm hover:bg-white transition-colors">
+                            <span class="text-gray-400 font-bold uppercase text-[10px] tracking-wider">Этажность</span>
+                            <span class="font-bold text-gray-900">{{ property.floor or '1' }} из {{ property.total_floors or property.floors_total or '25' }}</span>
+                        </div>
+                        <div class="flex justify-between items-center border-b border-gray-100 p-4 text-sm hover:bg-white transition-colors">
+                            <span class="text-gray-400 font-bold uppercase text-[10px] tracking-wider">Площадь</span>
+                            <span class="font-black text-gray-900 text-base">{{ property.area }} м²</span>
+                        </div>
+                        <div class="flex justify-between items-center p-4 text-sm hover:bg-white transition-colors sm:col-span-2">
+                            <span class="text-gray-400 font-bold uppercase text-[10px] tracking-wider">Комнат</span>
+                            <span class="font-bold text-gray-900">{{ "Студия" if property.rooms == 0 else (property.rooms|string ~ '-комнатная квартира') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Финансовая информация -->
+            <section>
+                <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2 px-1">
+                    <div class="w-1.5 h-5 bg-green-500 rounded-full"></div>
+                    Стоимость и выгода
+                </h2>
+                <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-md">
+                    <div class="flex flex-col lg:flex-row gap-10 lg:items-center">
+                        <div class="flex-1 space-y-6">
+                            <div>
+                                <p class="text-gray-400 font-bold uppercase text-[10px] tracking-widest mb-1">Цена застройщика</p>
+                                <p class="font-black text-3xl text-gray-900">{{ "{:,}".format(property.price).replace(',', ' ') }} <span class="text-lg font-bold italic">₽</span></p>
+                            </div>
+                            <div class="bg-green-50 rounded-2xl p-5 border border-green-100 flex justify-between items-center shadow-inner">
+                                <div>
+                                    <p class="text-green-700 font-bold text-xs flex items-center gap-2 mb-1">
+                                        <i class="fas fa-gift"></i>
+                                        Ваш кэшбек (до {{ property.cashback_percent or 5 }}%)
+                                    </p>
+                                    <p class="text-green-600 font-black text-2xl">+ {{ "{:,}".format(property.cashback_amount or 0).replace(',', ' ') }} ₽</p>
+                                </div>
+                                <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-green-500 shadow-sm">
+                                    <i class="fas fa-check-circle text-2xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="hidden lg:block w-px h-32 bg-gray-100"></div>
+                        <div class="block lg:hidden h-px w-full bg-gray-100/50"></div>
+
+                        <div class="flex-1 space-y-6">
+                            <div class="bg-[#0088CC]/5 rounded-2xl p-5 border border-[#0088CC]/10 shadow-inner">
+                                <p class="text-[#0088CC] font-bold text-xs uppercase tracking-widest mb-1">Цена с учётом выгоды (приблизительно)</p>
+                                <p class="font-black text-3xl text-[#0088CC] tracking-tight">{{ "{:,}".format(property.price - (property.cashback_amount or 0)).replace(',', ' ') }} ₽*</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-6 px-1">
+                                <div class="border-l-2 border-gray-100 pl-3">
+                                    <p class="text-gray-400 font-bold uppercase text-[9px] tracking-widest mb-1">За м²</p>
+                                    <p class="font-bold text-gray-700 text-sm italic">{{ "{:,}".format((property.price_per_sqm or (property.price / property.area))|int).replace(',', ' ') }} ₽</p>
+                                </div>
+                                <div class="border-l-2 border-gray-100 pl-3">
+                                    <p class="text-gray-400 font-bold uppercase text-[9px] tracking-widest mb-1">Ипотека</p>
+                                    <p class="font-bold text-gray-900 text-sm">{% if property.mortgage_available %}от 3.5%{% else %}Недоступна{% endif %}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Описание объекта -->
+        {% if property.complex_name or property.description %}
+        <div class="mb-10">
+            <h2 class="text-lg font-bold text-gray-900 mb-5 flex items-center gap-2">
+                <i class="fas fa-align-left text-[#0088CC]"></i>
+                Описание объекта
+            </h2>
+            <div class="bg-gray-50 p-6 rounded-3xl border border-gray-100">
+                {% if property.complex_name %}
+                <p class="text-gray-700 mb-4 leading-relaxed"><span class="font-black text-gray-900">{{ property.complex_name }}</span> — {{ property.complex_description or 'современный жилой комплекс с развитой инфраструктурой.' }}</p>
+                {% endif %}
+                {% if property.description %}
+                <div class="text-gray-600 text-sm leading-loose prose max-w-none">{{ property.description | safe }}</div>
+                {% endif %}
+                <div class="mt-6 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100">
+                        <i class="fas fa-hard-hat text-[#0088CC] text-sm"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Застройщик</p>
+                        <p class="text-gray-900 font-bold text-sm">{{ property.developer or property.developer_name or 'Информацию уточняйте у менеджера' }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Фото объекта -->
+        <div class="mb-10">
+            <h2 class="text-lg font-bold text-gray-900 mb-5 flex items-center gap-2">
+                <i class="fas fa-camera text-[#0088CC]"></i>
+                Визуализация объекта
+            </h2>
+            {% if property_images and property_images.photos and property_images.photos|length > 0 %}
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                    {% for photo in property_images.photos[:6] %}
+                    <div class="bg-gray-100 p-1.5 rounded-2xl shadow-sm border border-gray-100">
+                        <img src="{{ photo }}" alt="Фото {{ loop.index }}" class="w-full h-48 md:h-64 object-cover rounded-xl">
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if property_images.photos|length > 6 %}
+                <p class="text-xs text-gray-400 font-medium italic">И еще {{ property_images.photos|length - 6 }} фотографий доступны на официальном сайте InBack.ru</p>
+                {% endif %}
+            {% else %}
+            <div class="flex justify-center bg-gray-50 border-2 border-dashed border-gray-200 p-12 rounded-3xl">
+                <div class="text-center text-gray-400">
+                    <i class="fas fa-image text-5xl mb-3 opacity-10"></i>
+                    <p class="text-sm font-bold">Фотографии на стадии загрузки</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Планировка и Доп. информация -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-10">
+            <!-- Планировка -->
+            <div>
+                <h2 class="text-lg font-bold text-gray-900 mb-5 flex items-center gap-2">
+                    <i class="fas fa-drafting-compass text-[#0088CC]"></i>
+                    Планировка
+                </h2>
+                {% if property_images and property_images.floor_plan %}
+                <div class="flex justify-center bg-gray-50 p-6 rounded-3xl border border-gray-100">
+                    <img src="{{ property_images.floor_plan }}" alt="Планировка {{ property.title }}" class="max-w-full max-h-[400px] object-contain rounded-xl shadow-md">
+                </div>
+                {% else %}
+                <div class="flex justify-center bg-gray-50 border-2 border-dashed border-gray-200 p-12 rounded-3xl h-full">
+                    <div class="text-center text-gray-400 flex flex-col justify-center">
+                        <i class="fas fa-layer-group text-4xl mb-3 opacity-10"></i>
+                        <p class="text-sm font-bold">Схема планировки уточняется</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Детали объекта -->
+            <div>
+                <h2 class="text-lg font-bold text-gray-900 mb-5 flex items-center gap-2">
+                    <i class="fas fa-tasks text-[#0088CC]"></i>
+                    Детали объекта
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+                    <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                        <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Отделка</p>
+                        <p class="font-bold text-gray-900 text-sm">{{ property.finishing or property.renovation or 'Предчистовая' }}</p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                        <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Санузел</p>
+                        <p class="font-bold text-gray-900 text-sm">{{ property.bathroom_type or 'Совмещенный' }}</p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                        <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Балкон/Лоджия</p>
+                        <p class="font-bold text-gray-900 text-sm">{% if property.balcony and property.balcony != 'Нет' %}{{ property.balcony }}{% else %}Отсутствует{% endif %}</p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                        <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Окна</p>
+                        <p class="font-bold text-gray-900 text-sm">{{ property.windows_type or 'Пластиковые' }}</p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                        <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Лифты</p>
+                        <p class="font-bold text-gray-900 text-sm">{{ property.elevators or '2 пассажирских' }}</p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                        <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Паркинг</p>
+                        <p class="font-bold text-gray-900 text-sm">{{ property.parking_type or 'Наземная' }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Контактная информация -->
+        <div class="bg-gradient-to-br from-[#0088CC] to-[#006699] p-8 rounded-3xl text-white shadow-xl relative overflow-hidden">
+            <!-- Decorative circle -->
+            <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
+                <div>
+                    <h3 class="text-[10px] uppercase tracking-widest text-white/60 font-bold mb-2">Застройщик</h3>
+                    <p class="text-lg font-black leading-tight">{{ property.developer or property.developer_name or 'Не указан' }}</p>
+                    <p class="text-white/40 text-[10px] mt-2 italic">{{ property.developer_inn or 'ИНН не указан' }}</p>
+                </div>
+                <div>
+                    <h3 class="text-[10px] uppercase tracking-widest text-white/60 font-bold mb-2">Документация</h3>
+                    <p class="text-sm font-medium leading-relaxed">Проектная декларация доступна на сайте наш.дом.рф</p>
+                </div>
+                <div>
+                    <h3 class="text-[10px] uppercase tracking-widest text-white/60 font-bold mb-2">Отдел продаж</h3>
+                    <p class="text-2xl font-black">8 (862) 266-62-16</p>
+                    <p class="text-white/60 text-[10px] mt-1 italic">Бесплатно по РФ</p>
+                </div>
+                <div>
+                    <h3 class="text-[10px] uppercase tracking-widest text-white/60 font-bold mb-2">InBack.ru</h3>
+                    <p class="text-lg font-black">Официальный сервис кэшбека</p>
+                    <div class="mt-3 flex gap-2">
+                        <div class="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center text-[10px]"><i class="fab fa-telegram-plane"></i></div>
+                        <div class="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center text-[10px]"><i class="fab fa-whatsapp"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Подвал -->
+        <div class="mt-12 pt-6 border-t border-gray-100 text-center">
+            <p class="text-gray-400 text-[10px] uppercase tracking-widest font-bold mb-2">Информация для покупателя</p>
+            <p class="text-gray-500 text-xs leading-relaxed max-w-2xl mx-auto italic">Данная карточка объекта сгенерирована автоматически и действительна на дату формирования. Предложение не является публичной офертой. Актуальные цены и наличие уточняйте у менеджеров InBack.ru</p>
+            <div class="mt-6 flex flex-col items-center gap-2">
+                <div class="font-black text-gray-900 tracking-tighter text-xl">InBack<span class="text-[#0088CC]">.ru</span></div>
+                <p class="text-[10px] text-gray-400 font-medium">© 2026 Все права защищены.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to trigger PDF download
+        function downloadAsPDF() {
+            const originalTitle = document.title;
+            document.title = "InBack_Property_{{ property.id }}_{{ current_date }}";
+            window.print();
+            document.title = originalTitle;
+        }
+
+        // Auto-print on load if requested
+        if (window.location.search.includes('print=1')) {
+            window.addEventListener('load', function() {
+                setTimeout(() => window.print(), 500);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+{% block title %}Баланс{% if current_city %} — {{ current_city.name }}{% endif %} | InBack{% endblock %}
+{% block content %}
+{% if not current_user.is_authenticated %}
+<script>window.location.href = '/login?next=' + encodeURIComponent(window.location.pathname);</script>
+{% else %}
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-2 text-xs text-gray-400 mb-6">
+      <a href="/" class="hover:text-[#0088CC] transition-colors">Главная</a>
+      <span>/</span>
+      <span class="text-gray-700 font-medium">Баланс</span>
+    </nav>
+
+    <!-- Hero -->
+    <div class="mb-8">
+      <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">Мой баланс</h1>
+      <p class="text-sm text-gray-500">Кэшбек, история и вывод средств</p>
+    </div>
+
+    <!-- Balance Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div class="bg-gradient-to-br from-[#0088CC] to-[#006699] rounded-2xl p-5 text-white col-span-1 sm:col-span-2">
+        <div class="text-xs font-medium opacity-75 mb-2 uppercase tracking-wider">Доступно</div>
+        <div class="text-3xl sm:text-4xl font-bold mb-1" id="balance-total">—</div>
+        <div class="text-xs opacity-70">Текущий баланс</div>
+      </div>
+      <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-5 text-white">
+        <div class="text-xs opacity-75 mb-2 uppercase tracking-wider">Доступно к выводу</div>
+        <div class="text-2xl font-bold mb-1" id="available-amount">—</div>
+      </div>
+      <div class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-5 text-white">
+        <div class="text-xs opacity-75 mb-2 uppercase tracking-wider">Ожидает начисления</div>
+        <div class="text-2xl font-bold mb-1" id="pending-amount">—</div>
+      </div>
+    </div>
+
+    <!-- Stats row -->
+    <div class="grid grid-cols-2 gap-4 mb-8">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+            <i class="fas fa-arrow-down text-green-600"></i>
+          </div>
+          <div>
+            <div class="text-xs text-gray-400 mb-0.5">Всего заработано</div>
+            <div class="font-bold text-gray-900" id="total-earned">—</div>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+            <i class="fas fa-arrow-up text-blue-600"></i>
+          </div>
+          <div>
+            <div class="text-xs text-gray-400 mb-0.5">Всего выведено</div>
+            <div class="font-bold text-gray-900" id="total-withdrawn">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Registration bonus banner -->
+    <div id="registration-bonus-banner" class="hidden mb-8 bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-2xl p-5 flex items-center gap-4">
+      <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+        <i class="fas fa-gift text-amber-600 text-xl"></i>
+      </div>
+      <div>
+        <p class="font-bold text-amber-900">Приветственный бонус начислен!</p>
+        <p class="text-sm text-amber-700 mt-0.5">Оформите первую сделку, чтобы вывести бонусные средства</p>
+      </div>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-6">
+      <!-- Left: Transactions -->
+      <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6">
+        <h3 class="text-lg font-bold text-gray-900 mb-5">История операций</h3>
+        <div id="transactions-empty" class="hidden text-center py-8">
+          <div class="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+            <i class="fas fa-receipt text-gray-400 text-2xl"></i>
+          </div>
+          <p class="text-gray-500 text-sm">Операций пока нет</p>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm" id="transactions-table">
+            <thead>
+              <tr class="border-b border-gray-200">
+                <th class="text-left py-3 px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Дата</th>
+                <th class="text-left py-3 px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Описание</th>
+                <th class="text-right py-3 px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Сумма</th>
+                <th class="text-right py-3 px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden sm:table-cell">Баланс</th>
+              </tr>
+            </thead>
+            <tbody id="transactions-tbody"></tbody>
+          </table>
+        </div>
+        <div id="load-more-transactions" class="mt-4 text-center hidden">
+          <button onclick="loadMoreTransactions()" class="px-6 py-2.5 border-2 border-gray-200 text-gray-600 rounded-xl text-sm font-medium hover:border-[#0088CC] hover:text-[#0088CC] transition-colors">
+            Загрузить ещё
+          </button>
+        </div>
+      </div>
+
+      <!-- Right: Withdrawal -->
+      <div class="space-y-5">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6">
+          <h3 class="text-lg font-bold text-gray-900 mb-5 flex items-center gap-2">
+            <i class="fas fa-wallet text-[#0088CC]"></i>
+            Вывод средств
+          </h3>
+          <form id="withdrawal-form" class="space-y-4" onsubmit="submitWithdrawal(event)">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Сумма</label>
+              <input type="number" id="withdrawal-amount" required min="1" step="0.01"
+                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0088CC] focus:border-[#0088CC] transition-all text-sm"
+                     placeholder="Введите сумму">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Способ выплаты</label>
+              <select id="payout-method" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0088CC] text-sm"
+                      onchange="showPayoutDetails(this.value)">
+                <option value="">Выберите способ</option>
+                <option value="bank_card">Банковская карта</option>
+                <option value="bank_account">Банковский счёт</option>
+                <option value="yoomoney">ЮMoney</option>
+                <option value="qiwi">QIWI</option>
+              </select>
+            </div>
+            <div id="bank_card-details" class="payout-details hidden">
+              <input type="text" id="card-number" inputmode="numeric" placeholder="0000 0000 0000 0000" maxlength="19"
+                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm">
+            </div>
+            <div id="bank_account-details" class="payout-details hidden space-y-2">
+              <input type="text" id="account-number" placeholder="Номер счёта (20 цифр)" pattern="[0-9]{20}"
+                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm">
+              <input type="text" id="bank-name" placeholder="Название банка"
+                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm">
+            </div>
+            <div id="yoomoney-details" class="payout-details hidden">
+              <input type="text" id="yoomoney-wallet" placeholder="Номер кошелька ЮMoney"
+                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm">
+            </div>
+            <div id="qiwi-details" class="payout-details hidden">
+              <input type="tel" id="qiwi-phone" placeholder="+7..." pattern="\+7[0-9]{10}"
+                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm">
+            </div>
+            <button type="submit" class="w-full bg-gradient-to-r from-[#0088CC] to-[#006699] hover:from-[#006699] hover:to-[#0088CC] text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-md text-sm">
+              Создать заявку
+            </button>
+          </form>
+        </div>
+
+        <!-- Withdrawal requests -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+          <h3 class="text-base font-bold text-gray-900 mb-4">Мои заявки</h3>
+          <div id="withdrawals-list">
+            <p class="text-gray-500 text-center py-6 text-sm">У вас пока нет заявок</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  var transactionsOffset = 0;
+  var transactionsLimit = 20;
+  var balanceData = {};
+
+  function fmt(n) { return Math.floor(n||0).toLocaleString('ru-RU') + ' ₽'; }
+
+  function loadBalance() {
+    fetch('/api/balance')
+      .then(r=>r.json())
+      .then(data=>{
+        if (!data.success) return;
+        var MIN_W = 10001;
+        var withdrawable = (data.withdrawable_amount != null) ? data.withdrawable_amount : data.available_amount;
+        balanceData = data;
+        document.getElementById('balance-total').textContent = fmt(data.available_amount);
+        document.getElementById('available-amount').textContent = fmt(withdrawable >= MIN_W ? withdrawable : 0);
+        document.getElementById('pending-amount').textContent = fmt(data.pending_amount);
+        document.getElementById('total-earned').textContent = fmt(data.total_earned);
+        document.getElementById('total-withdrawn').textContent = fmt(data.total_withdrawn);
+        var banner = document.getElementById('registration-bonus-banner');
+        if (banner && data.registration_bonus_amount > 0 && !data.cashback_earned_amount) {
+          banner.classList.remove('hidden');
+        }
+      })
+      .catch(()=>{});
+  }
+
+  function loadTransactions(reset) {
+    if (reset) transactionsOffset = 0;
+    fetch('/api/balance/transactions?limit='+transactionsLimit+'&offset='+transactionsOffset)
+      .then(r=>r.json())
+      .then(data=>{
+        if (!data.success) return;
+        var tbody = document.getElementById('transactions-tbody');
+        if (reset) tbody.innerHTML = '';
+        if (data.total === 0) {
+          document.getElementById('transactions-empty').classList.remove('hidden');
+          document.getElementById('transactions-table').style.display='none';
+          return;
+        }
+        data.transactions.forEach(function(t){
+          var dt = new Date(t.created_at).toLocaleDateString('ru-RU', {day:'2-digit',month:'2-digit',year:'numeric'});
+          var color = t.amount>0?'text-green-600':'text-red-600';
+          var sign = t.amount>0?'+':'';
+          var row = '<tr class="border-b border-gray-100 hover:bg-gray-50">' +
+            '<td class="py-3 px-3 text-gray-500 whitespace-nowrap">'+dt+'</td>' +
+            '<td class="py-3 px-3 text-gray-700">'+esc(t.description||'')+'</td>' +
+            '<td class="py-3 px-3 text-right font-semibold '+color+'">'+sign+fmt(t.amount)+'</td>' +
+            '<td class="py-3 px-3 text-right text-gray-500 hidden sm:table-cell">'+fmt(t.balance_after)+'</td>' +
+            '</tr>';
+          tbody.insertAdjacentHTML('beforeend', row);
+        });
+        transactionsOffset += data.transactions.length;
+        document.getElementById('load-more-transactions').style.display = transactionsOffset < data.total ? 'block' : 'none';
+      })
+      .catch(()=>{});
+  }
+
+  function loadWithdrawals() {
+    fetch('/api/withdrawals')
+      .then(r=>r.json())
+      .then(data=>{
+        if (!data.success) return;
+        var container = document.getElementById('withdrawals-list');
+        if (!data.requests || data.requests.length===0) { container.innerHTML='<p class="text-gray-500 text-center py-6 text-sm">Заявок пока нет</p>'; return; }
+        var statusColors = {pending:'bg-yellow-100 text-yellow-800',approved:'bg-blue-100 text-blue-800',completed:'bg-green-100 text-green-800',rejected:'bg-red-100 text-red-800'};
+        var statusLabels = {pending:'На рассмотрении',approved:'Одобрена',completed:'Выполнена',rejected:'Отклонена'};
+        container.innerHTML = '';
+        data.requests.forEach(function(req){
+          var sc = statusColors[req.status]||'bg-gray-100 text-gray-800';
+          var sl = statusLabels[req.status]||req.status;
+          var d = document.createElement('div');
+          d.className = 'flex items-center justify-between py-3 border-b border-gray-100 last:border-0';
+          d.innerHTML = '<div><p class="text-sm font-semibold text-gray-900">'+fmt(req.amount)+'</p>' +
+            '<p class="text-xs text-gray-400">'+(req.created_at||'')+'</p></div>' +
+            '<span class="text-xs font-medium px-2.5 py-1 rounded-full '+sc+'">'+sl+'</span>';
+          container.appendChild(d);
+        });
+      })
+      .catch(()=>{});
+  }
+
+  window.loadMoreTransactions = function() { loadTransactions(false); };
+
+  window.showPayoutDetails = function(method) {
+    document.querySelectorAll('.payout-details').forEach(el=>el.classList.add('hidden'));
+    if (method) { var el = document.getElementById(method+'-details'); if(el) el.classList.remove('hidden'); }
+  };
+
+  window.submitWithdrawal = function(e) {
+    e.preventDefault();
+    var amount = document.getElementById('withdrawal-amount').value;
+    var method = document.getElementById('payout-method').value;
+    var details = {};
+    if (method==='bank_card') details.card_number = document.getElementById('card-number').value;
+    if (method==='bank_account') { details.account_number=document.getElementById('account-number').value; details.bank_name=document.getElementById('bank-name').value; }
+    if (method==='yoomoney') details.wallet=document.getElementById('yoomoney-wallet').value;
+    if (method==='qiwi') details.phone=document.getElementById('qiwi-phone').value;
+
+    fetch('/api/withdrawals', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-CSRFToken':(document.querySelector('meta[name="csrf-token"]')||{}).content||''},
+      body: JSON.stringify({amount:parseFloat(amount), payout_method:method, payout_details:details})
+    })
+    .then(r=>r.json())
+    .then(data=>{
+      if (data.success) { alert('Заявка создана!'); document.getElementById('withdrawal-form').reset(); loadWithdrawals(); loadBalance(); }
+      else { alert(data.error||'Ошибка'); }
+    })
+    .catch(()=>alert('Ошибка сети'));
+  };
+
+  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  // Card number mask
+  var cardInput = document.getElementById('card-number');
+  if (cardInput) {
+    cardInput.addEventListener('input', function(){
+      this.value = this.value.replace(/\D/g,'').replace(/(.{4})/g,'$1 ').trim().slice(0,19);
+    });
+  }
+
+  loadBalance();
+  loadTransactions(true);
+  loadWithdrawals();
+})();
+</script>
+{% endif %}
+{% endblock %}

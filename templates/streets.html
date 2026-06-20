@@ -1,0 +1,346 @@
+{% extends "base.html" %}
+
+{% block title %}Улицы Краснодара с новостройками | InBack{% endblock %}
+{% block description %}Полный список улиц Краснодара с новостройками и кэшбеком до 500 000 ₽. Выберите улицу и найдите квартиру с максимальным возвратом денег.{% endblock %}
+{% block keywords %}улицы краснодара, новостройки краснодар, кэшбек улицы{% endblock %}
+
+{% block breadcrumbs %}
+    <div class="container mx-auto px-4 py-3 text-sm">
+        <nav class="flex" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <li class="inline-flex items-center">
+                    <a href="{{ url_for('index') }}" class="text-[#0088CC] hover:underline inline-flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
+                        Главная
+                    </a>
+                </li>
+                <li aria-current="page">
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
+                        <span class="text-gray-500 ml-1 md:ml-2">Улицы Краснодара</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <main class="container mx-auto px-4 py-8">
+        <!-- SEO Text -->
+        <section class="mb-12 bg-white rounded-lg shadow-sm p-6">
+            <h1 class="text-3xl font-bold text-gray-800 mb-4">Новостройки Краснодара с кэшбеком на всех улицах города</h1>
+            <div class="prose max-w-none text-gray-700">
+                <p class="text-lg mb-4">Краснодар - быстроразвивающийся город с активным строительством новых жилых комплексов. Сервис InBack предоставляет возможность получить <strong>кэшбек до 500 000 рублей</strong> при покупке квартиры в новостройке на любой улице Краснодара.</p>
+                <p class="mb-4">В нашем каталоге представлены <strong>все улицы Краснодара</strong>, где ведется строительство новых жилых комплексов. Вы можете выбрать интересующую вас улицу и узнать о доступных новостройках, а также условиях получения кэшбека.</p>
+                
+                <h3 class="text-xl font-semibold mt-6 mb-3">Почему стоит покупать новостройку через InBack?</h3>
+                <ul class="list-disc pl-6 space-y-2 mt-2">
+                    <li>Возвращаем до 500 000 рублей от стоимости квартиры</li>
+                    <li>Работаем со всеми застройщиками в Краснодаре</li>
+                    <li>Новостройки на всех улицах города</li>
+                    <li>Официальное оформление кэшбека</li>
+                    <li>Дополнительные бонусы и скидки от партнеров</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Search and Alphabet Navigation -->
+        <div class="bg-white rounded-lg shadow-sm mb-6 sticky top-0 z-10">
+            <!-- Search Bar -->
+            <div class="px-4 py-3 border-b border-gray-200">
+                <div class="relative">
+                    <input type="text" 
+                           id="streetSearch" 
+                           data-street-search="true"
+                           placeholder="Поиск улицы..." 
+                           class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0088CC] focus:border-transparent">
+                    <svg class="w-5 h-5 absolute left-3 top-2.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </div>
+            </div>
+            
+            <!-- Alphabet Navigation -->
+            <div class="px-2 py-2 border-b border-gray-200 flex flex-wrap gap-1">
+                <a href="#all" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm bg-[#0088CC] text-white rounded" data-letter="all">Все</a>
+                <a href="#1" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="1">1</a>
+                <a href="#2" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="2">2</a>
+                <a href="#3" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="3">3</a>
+                <a href="#4" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="4">4</a>
+                <a href="#5" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="5">5</a>
+                <a href="#6" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="6">6</a>
+                <a href="#7" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="7">7</a>
+                <a href="#8" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="8">8</a>
+                <a href="#9" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="9">9</a>
+                <a href="#a" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="А">А</a>
+                <a href="#b" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="Б">Б</a>
+                <a href="#v" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="В">В</a>
+                <a href="#g" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="Г">Г</a>
+                <a href="#d" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="Д">Д</a>
+                <a href="#e" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="Е">Е</a>
+                <a href="#zh" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="Ж">Ж</a>
+                <a href="#z" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="З">З</a>
+                <a href="#i" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="И">И</a>
+                <a href="#k" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="К">К</a>
+                <a href="#l" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="Л">Л</a>
+                <a href="#m" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="М">М</a>
+                <a href="#n" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="Н">Н</a>
+                <a href="#o" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="О">О</a>
+                <a href="#p" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="П">П</a>
+                <a href="#r" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="Р">Р</a>
+                <a href="#s" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="С">С</a>
+                <a href="#t" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="Т">Т</a>
+                <a href="#u" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="У">У</a>
+                <a href="#f" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="Ф">Ф</a>
+                <a href="#h" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="Х">Х</a>
+                <a href="#c" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="Ц">Ц</a>
+                <a href="#ch" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="Ч">Ч</a>
+                <a href="#sh" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="Ш">Ш</a>
+                <a href="#sch" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="Щ">Щ</a>
+                <a href="#e2" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="Э">Э</a>
+                <a href="#ya" class="alphabet-link whitespace-nowrap px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded" data-letter="Я">Я</a>
+            </div>
+
+            <!-- Results Counter -->
+            <div class="px-4 py-2 text-sm text-gray-600 border-b border-gray-200">
+                Найдено <span id="results-count">{{ streets|length }}</span> улиц
+            </div>
+        </div>
+
+        <!-- Streets List -->
+        <div class="bg-white rounded-lg shadow-sm">
+            {% if streets %}
+            <div id="streets-container" class="divide-y divide-gray-200">
+                {% for street in streets %}
+                <div class="street-item p-4 hover:bg-gray-50 transition-colors" data-street="{{ street.name|lower }}" data-letter="{{ street.letter or street.name[0]|upper }}">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-1">{{ street.name }}</h3>
+                                    <p class="text-sm text-gray-600 mb-2">{{ street.district }}</p>
+                                    <div class="text-sm text-gray-500">
+                                        Новостройки с кэшбеком до 500 000 ₽
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <a href="{{ url_for('streets.street_detail', street_name=street.slug) }}" 
+                               class="inline-flex items-center px-4 py-2 bg-[#0088CC] text-white text-sm font-medium rounded-lg hover:bg-[#006699] transition-colors">
+                                Подробнее
+                                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Empty State (for search) -->
+            <div id="empty-state" class="hidden text-center py-12">
+                <div class="text-gray-400 text-6xl mb-4">🔍</div>
+                <h3 class="text-xl font-semibold text-gray-600 mb-2">Улицы не найдены</h3>
+                <p class="text-gray-500">Попробуйте изменить параметры поиска</p>
+            </div>
+            {% else %}
+            <!-- Empty State (no data for this city) -->
+            <div class="text-center py-16 px-4">
+                <div class="text-gray-400 text-6xl mb-4">🏗️</div>
+                <h3 class="text-xl font-semibold text-gray-600 mb-2">Данные пока не заполнены</h3>
+                <p class="text-gray-500 mb-6">
+                    Справочник улиц для {{ (current_city.name_genitive or current_city.name) if current_city else 'этого города' }} находится в разработке.<br>
+                    Скоро здесь появится полный список улиц с новостройками.
+                </p>
+                <a href="{{ url_for('props.properties') }}" 
+                   class="inline-flex items-center px-6 py-3 bg-[#0088CC] text-white font-medium rounded-lg hover:bg-[#006699] transition-colors">
+                    Смотреть все новостройки
+                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Streets search functionality
+(function() {
+    // Streets data for JavaScript
+    const streetsData = {{ streets|tojson|safe }};
+    let filteredStreets = [...streetsData];
+    
+    console.log('[Streets] Loaded:', streetsData.length, 'items');
+    
+    // Search functionality - isolated from other search systems
+    function setupStreetSearch() {
+        const searchInput = document.querySelector('input[data-street-search="true"]');
+        const alphabetLinks = document.querySelectorAll('.alphabet-link');
+        
+        console.log('[Streets] Setting up search:', {searchInput: !!searchInput, alphabetCount: alphabetLinks.length});
+        
+        if (!searchInput) {
+            console.error('[Streets] Search input not found');
+            return;
+        }
+        
+        // Remove any existing listeners to prevent duplicates
+        const newSearchInput = searchInput.cloneNode(true);
+        searchInput.parentNode.replaceChild(newSearchInput, searchInput);
+        
+        // Search input handler with event isolation
+        newSearchInput.addEventListener('input', function(e) {
+            e.stopPropagation();
+            const query = this.value.toLowerCase().trim();
+            console.log('[Streets] Search query:', query);
+            filterStreets(query);
+        });
+        
+        // Prevent SuperSearch from capturing this input
+        newSearchInput.addEventListener('focus', function(e) {
+            e.stopPropagation();
+            console.log('[Streets] Search focused');
+        });
+        
+        newSearchInput.addEventListener('keydown', function(e) {
+            e.stopPropagation();
+        });
+        
+        // Alphabet navigation handler
+        alphabetLinks.forEach((link, index) => {
+            // Clone to remove existing listeners
+            const newLink = link.cloneNode(true);
+            link.parentNode.replaceChild(newLink, link);
+            
+            newLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                
+                console.log('[Streets] Alphabet click:', this.dataset.letter);
+                
+                // Update active state
+                document.querySelectorAll('.alphabet-link').forEach(l => {
+                    l.classList.remove('bg-[#0088CC]', 'text-white');
+                    l.classList.add('text-gray-700', 'hover:bg-gray-100');
+                });
+                this.classList.add('bg-[#0088CC]', 'text-white');
+                this.classList.remove('text-gray-700', 'hover:bg-gray-100');
+                
+                const letter = this.dataset.letter;
+                filterByLetter(letter);
+            });
+        });
+    }
+
+    // Filter streets by search query
+    function filterStreets(query) {
+        if (!query) {
+            showAllStreets();
+            return;
+        }
+        
+        filteredStreets = streetsData.filter(street => {
+            const nameMatch = street.name && street.name.toLowerCase().includes(query);
+            const districtMatch = street.district && street.district.toLowerCase().includes(query);
+            return nameMatch || districtMatch;
+        });
+        
+        console.log('[Streets] Filtered results:', filteredStreets.length);
+        updateStreetsDisplay();
+    }
+
+    // Filter streets by letter
+    function filterByLetter(letter) {
+        if (letter === 'all') {
+            showAllStreets();
+            return;
+        }
+        
+        filteredStreets = streetsData.filter(street => {
+            if (!street.name) return false;
+            const streetLetter = street.letter || getFirstLetter(street.name);
+            return streetLetter === letter;
+        });
+        
+        console.log('[Streets] Filtered by letter results:', filteredStreets.length);
+        updateStreetsDisplay();
+    }
+    
+    // Get first letter of street name
+    function getFirstLetter(name) {
+        if (!name) return '';
+        const firstChar = name.charAt(0).toUpperCase();
+        return /\d/.test(firstChar) ? firstChar : firstChar;
+    }
+
+    // Show all streets
+    function showAllStreets() {
+        filteredStreets = [...streetsData];
+        updateStreetsDisplay();
+    }
+    
+    // Update streets display
+    function updateStreetsDisplay() {
+        const container = document.getElementById('streets-container');
+        const resultsCount = document.getElementById('results-count');
+        const emptyState = document.getElementById('empty-state');
+        
+        if (!container) {
+            console.error('[Streets] Container not found');
+            return;
+        }
+        
+        // Update results count
+        if (resultsCount) {
+            resultsCount.textContent = filteredStreets.length;
+        }
+        
+        // Get all street items
+        const streetItems = container.querySelectorAll('.street-item');
+        console.log('[Streets] Updating display:', filteredStreets.length, 'streets,', streetItems.length, 'DOM items');
+        
+        // Show/hide empty state
+        if (filteredStreets.length === 0) {
+            if (emptyState) emptyState.classList.remove('hidden');
+            streetItems.forEach(item => item.style.display = 'none');
+        } else {
+            if (emptyState) emptyState.classList.add('hidden');
+            
+            // Show/hide street items based on filter
+            streetItems.forEach(item => {
+                const streetName = item.dataset.street;
+                const isVisible = filteredStreets.some(street => 
+                    street.name && street.name.toLowerCase() === streetName.toLowerCase()
+                );
+                item.style.display = isVisible ? 'block' : 'none';
+            });
+        }
+    }
+    
+    // Initialize when page is ready
+    function initializeStreetSearch() {
+        console.log('[Streets] Initializing search functionality...');
+        setupStreetSearch();
+        updateStreetsDisplay();
+    }
+    
+    // Wait for DOM and other scripts to load, but initialize after everything else
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(initializeStreetSearch, 500); // Wait for other scripts
+        });
+    } else {
+        // DOM already loaded
+        setTimeout(initializeStreetSearch, 500);
+    }
+    
+})();
+</script>
+{% endblock %}

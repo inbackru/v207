@@ -1,0 +1,339 @@
+{% extends "base.html" %}
+
+{% block title %}InBack Журнал | Статьи о недвижимости {{ city_gen }}{% endblock %}
+{% block description %}InBack Журнал — {{ total_articles }} экспертных статей об ипотеке, кэшбеке, законах и аналитике в сфере недвижимости {{ city_gen }}. Полезные гайды и инструкции для покупателей новостроек.{% endblock %}
+{% block keywords %}блог о недвижимости, статьи об ипотеке, как купить квартиру в новостройке, кэшбек за квартиру советы, ипотека {{ city_name }}, покупка новостройки {{ city_name }}, семейная ипотека 2025, льготная ипотека новостройки, материнский капитал квартира, налоговый вычет при покупке квартиры, договор долевого участия ДДУ, приёмка квартиры в новостройке, как выбрать застройщика, новостройки советы эксперта, инвестиции в недвижимость {{ city_name }}{% endblock %}
+
+{% block og_title %}InBack Журнал | Экспертные статьи о недвижимости{% endblock %}
+{% block og_description %}{{ total_articles }} статей об ипотеке, кэшбеке, инструкциях и аналитике о недвижимости {{ city_gen }}{% endblock %}
+{% block og_type %}website{% endblock %}
+{% block twitter_title %}InBack Журнал | Статьи о недвижимости{% endblock %}
+{% block twitter_description %}Ипотека, законы, инструкции, аналитика о недвижимости в {{ city_prep }}{% endblock %}
+{% block canonical_url %}<link rel="canonical" href="{{ url_for('blog.blog', _external=True) }}" />{% endblock %}
+
+{% block head %}
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ url_for('blog.blog', _external=True) }}">
+<meta property="og:site_name" content="InBack">
+<meta property="og:locale" content="ru_RU">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Blog",
+      "name": "InBack Журнал",
+      "description": "Экспертные статьи об ипотеке, кэшбеке и покупке новостроек в {{ city_prep }}",
+      "url": "{{ url_for('blog.blog', _external=True) }}",
+      "inLanguage": "ru-RU",
+      "publisher": {
+        "@type": "Organization",
+        "name": "InBack",
+        "url": "https://inback.ru",
+        "logo": {"@type": "ImageObject", "url": "https://inback.ru/static/images/logo.png"}
+      }{% if articles and articles|length > 0 %},
+      "blogPost": [
+        {% for post in articles[:5] %}
+        {
+          "@type": "BlogPosting",
+          "headline": {{ post.title|tojson }},
+          "url": "{{ url_for('blog.blog_post', slug=post.slug, _external=True) }}",
+          "datePublished": "{{ post.published_at.isoformat() if post.published_at else '' }}"
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+      ]
+      {% endif %}
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Главная", "item": "https://inback.ru"},
+        {"@type": "ListItem", "position": 2, "name": "InBack Журнал", "item": "{{ url_for('blog.blog', _external=True) }}"}
+      ]
+    }
+  ]
+}
+</script>
+<style>
+.blog-card-img { transition: transform .4s ease; }
+.blog-card:hover .blog-card-img { transform: scale(1.04); }
+.cat-badge { font-size: 11px; font-weight: 600; letter-spacing: .3px; }
+.cat-tab.active { background: #0088CC; color: #fff; }
+.cat-tab { transition: background .15s, color .15s; }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<div class="bg-gray-50 border-b border-gray-100">
+  <div class="container mx-auto px-4 py-2 text-sm text-gray-500 flex items-center gap-1.5">
+    <a href="{{ url_for('index') }}" class="hover:text-[#0088CC]">Главная</a>
+    <span>/</span>
+    <span class="text-gray-700 font-medium">Журнал</span>
+    {% if search_query %}
+    <span>/</span>
+    <span class="text-gray-700">«{{ search_query }}»</span>
+    {% elif category_filter %}
+    <span>/</span>
+    <span class="text-gray-700">{{ all_categories|selectattr('slug','eq',category_filter)|map(attribute='name')|first or category_filter }}</span>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Page Header -->
+<section class="bg-white border-b border-gray-100 py-8">
+  <div class="container mx-auto px-4">
+    <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+      <div>
+        <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-1">InBack <span class="text-[#0088CC]">Журнал</span></h1>
+        <p class="text-gray-500 text-base">
+          {{ total_articles }} статей об ипотеке, кэшбеке и покупке новостроек
+          {% if current_city %} в {{ current_city.name_prepositional or current_city.name }}{% endif %}
+        </p>
+      </div>
+      <!-- Search -->
+      <form method="GET" action="/blog" class="flex gap-2 w-full lg:w-96">
+        <div class="relative flex-1">
+          <input type="text" name="search" value="{{ search_query or '' }}"
+                 placeholder="Найти статью..."
+                 class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#0088CC]/20 focus:border-[#0088CC] bg-gray-50">
+          <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+        </div>
+        <button type="submit" class="px-4 py-2.5 bg-[#0088CC] text-white rounded-xl text-sm font-medium hover:bg-[#006699] transition-colors whitespace-nowrap">
+          Найти
+        </button>
+        {% if search_query %}
+        <a href="/blog" class="px-3 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+          <i class="fas fa-times"></i>
+        </a>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- Category Tabs -->
+<div class="bg-white border-b border-gray-100 sticky top-0 z-20 shadow-sm">
+  <div class="container mx-auto px-4">
+    <div class="flex items-center gap-1 overflow-x-auto py-3 scrollbar-hide" style="-webkit-overflow-scrolling:touch;scrollbar-width:none;">
+      <a href="/blog{% if sort_order and sort_order != 'date_desc' %}?sort={{ sort_order }}{% endif %}"
+         class="cat-tab {% if not category_filter %}active{% endif %} flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium text-gray-600 hover:bg-gray-100 whitespace-nowrap">
+        Все
+        <span class="ml-1 text-xs opacity-70">{{ total_articles }}</span>
+      </a>
+      {% for cat in all_categories %}
+      {% set cnt = cat_counts.get(cat.id, 0) %}
+      {% if cnt > 0 %}
+      <a href="/blog/category/{{ cat.slug }}"
+         class="cat-tab {% if category_filter == cat.slug %}active{% endif %} flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium text-gray-600 hover:bg-gray-100 whitespace-nowrap">
+        {{ cat.name }}
+        <span class="ml-1 text-xs opacity-60">{{ cnt }}</span>
+      </a>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="container mx-auto px-4 py-8">
+
+  <!-- Sort + stats bar -->
+  <div class="flex items-center justify-between mb-6">
+    <p class="text-sm text-gray-500">
+      {% if search_query %}
+        Найдено: <strong class="text-gray-800">{{ total_articles }}</strong> по запросу «{{ search_query }}»
+      {% elif category_filter %}
+        <strong class="text-gray-800">{{ total_articles }}</strong> статей в категории
+      {% else %}
+        <strong class="text-gray-800">{{ total_articles }}</strong> статей
+      {% endif %}
+      {% if total_pages > 1 %} &bull; стр. {{ current_page }} из {{ total_pages }}{% endif %}
+    </p>
+    <select onchange="location.href=this.value" class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#0088CC]/20">
+      {% set base_url = '/blog?' + ('search=' + search_query + '&' if search_query else '') + ('category=' + category_filter + '&' if category_filter else '') %}
+      <option value="{{ base_url }}sort=date_desc" {% if sort_order == 'date_desc' or not sort_order %}selected{% endif %}>Сначала новые</option>
+      <option value="{{ base_url }}sort=date_asc"  {% if sort_order == 'date_asc' %}selected{% endif %}>Сначала старые</option>
+    </select>
+  </div>
+
+  {% if not articles %}
+  <!-- Empty state -->
+  <div class="text-center py-20">
+    <div class="text-6xl mb-4">📝</div>
+    <h2 class="text-xl font-semibold text-gray-800 mb-2">Статьи не найдены</h2>
+    <p class="text-gray-500 mb-4">
+      {% if search_query %}По запросу «{{ search_query }}» ничего не нашлось.{% else %}В этой категории пока нет статей.{% endif %}
+    </p>
+    <a href="/blog" class="inline-block px-5 py-2.5 bg-[#0088CC] text-white rounded-xl text-sm font-medium hover:bg-[#006699] transition-colors">
+      Все статьи
+    </a>
+  </div>
+  {% else %}
+
+  <!-- Hero article (page 1, no filters) -->
+  {% if hero_article and current_page == 1 and not search_query and not category_filter %}
+  <div class="mb-8">
+    <a href="{{ hero_article.url }}" class="blog-card group block relative rounded-2xl overflow-hidden bg-gray-900 shadow-lg hover:shadow-xl transition-shadow">
+      <div class="relative h-64 sm:h-80 lg:h-96 overflow-hidden">
+        {% if hero_article.featured_image %}
+        <img src="{{ hero_article.featured_image }}" alt="{{ hero_article.title }}"
+             class="blog-card-img w-full h-full object-cover opacity-70"
+             onerror="this.style.display='none'" loading="eager">
+        {% else %}
+        <div class="w-full h-full bg-gradient-to-br from-[#0088CC]/80 to-[#004477]"></div>
+        {% endif %}
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+        <div class="absolute bottom-0 left-0 right-0 p-6 lg:p-8">
+          {% if hero_article.category_name %}
+          <span class="cat-badge inline-block bg-[#0088CC] text-white px-2.5 py-0.5 rounded mb-2">{{ hero_article.category_name }}</span>
+          {% endif %}
+          <h2 class="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2 group-hover:text-blue-200 transition-colors line-clamp-3">
+            {{ hero_article.title }}
+          </h2>
+          <div class="flex items-center gap-3 text-white/70 text-sm">
+            <span>{{ hero_article.published_at|russian_date if hero_article.published_at else '' }}</span>
+            <span>&bull;</span>
+            <span>{{ hero_article.reading_time }} мин чтения</span>
+            {% if hero_article.views_count > 0 %}
+            <span>&bull;</span>
+            <span><i class="fas fa-eye text-xs mr-1"></i>{{ hero_article.views_count }}</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+  {% endif %}
+
+  <!-- Articles Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-5" id="articles-container">
+    {% for article in articles %}
+    {% if not (loop.first and hero_article and current_page == 1 and not search_query and not category_filter and article.id == hero_article.id) %}
+    <article class="blog-card group bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md overflow-hidden transition-shadow flex flex-col">
+      <a href="{{ article.url }}" class="block flex-shrink-0">
+        <div class="relative overflow-hidden" style="height:180px">
+          {% if article.featured_image %}
+          <img src="{{ article.featured_image }}" alt="{{ article.title }}"
+               class="blog-card-img w-full h-full object-cover"
+               onerror="this.parentElement.style.background='linear-gradient(135deg,#f0f9ff,#e0f2fe)';this.remove()"
+               loading="lazy">
+          {% else %}
+          <div class="w-full h-full flex items-center justify-center p-5"
+               style="background:linear-gradient(135deg,#f0f9ff 0%,#e0f2fe 100%);">
+            <div class="text-center">
+              <div class="w-10 h-10 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mx-auto mb-2">
+                <i class="fas fa-newspaper text-[#0088CC] text-xl"></i>
+              </div>
+              <p class="text-xs text-gray-500 font-medium line-clamp-2 leading-tight">{{ article.title }}</p>
+            </div>
+          </div>
+          {% endif %}
+          {% if article.category_name %}
+          <div class="absolute top-2 left-2">
+            <span class="cat-badge bg-white/90 backdrop-blur text-gray-700 px-2 py-0.5 rounded-full shadow-sm border border-gray-100">
+              {{ article.category_name }}
+            </span>
+          </div>
+          {% endif %}
+        </div>
+      </a>
+      <div class="p-4 flex flex-col flex-1">
+        <a href="{{ article.url }}" class="block flex-1">
+          <h2 class="font-semibold text-gray-900 text-sm leading-snug mb-2 line-clamp-3 group-hover:text-[#0088CC] transition-colors">
+            {{ article.title }}
+          </h2>
+          {% if article.excerpt %}
+          <p class="text-xs text-gray-500 line-clamp-2 mb-3 leading-relaxed">
+            {{ article.excerpt|striptags|truncate(100) }}
+          </p>
+          {% endif %}
+        </a>
+        <div class="flex items-center justify-between mt-auto pt-2 border-t border-gray-50">
+          <span class="text-[11px] text-gray-400">
+            {{ article.published_at|russian_date if article.published_at else '' }}
+          </span>
+          <span class="text-[11px] text-gray-400 flex items-center gap-1">
+            <i class="fas fa-clock text-[9px]"></i>{{ article.reading_time }} мин
+          </span>
+        </div>
+      </div>
+    </article>
+    {% endif %}
+    {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+  {% if total_pages > 1 %}
+  {% set base_q = ('?search=' + search_query if search_query else ('?category=' + category_filter if category_filter else '?')) %}
+  {% set extra_q = ('&sort=' + sort_order if sort_order and sort_order != 'date_desc' else '') %}
+  <nav class="flex justify-center items-center gap-1.5 mt-10" aria-label="Страницы">
+    {% if current_page > 1 %}
+    <a href="/blog{{ base_q }}&page={{ current_page - 1 }}{{ extra_q }}"
+       class="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 text-sm text-gray-700 transition-colors">
+      ← Назад
+    </a>
+    {% endif %}
+
+    {% for p in range(1, total_pages + 1) %}
+      {% if p == current_page %}
+      <span class="px-4 py-2 bg-[#0088CC] text-white rounded-lg text-sm font-semibold">{{ p }}</span>
+      {% elif p == 1 or p == total_pages or (p >= current_page - 2 and p <= current_page + 2) %}
+      <a href="/blog{{ base_q }}&page={{ p }}{{ extra_q }}"
+         class="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 text-sm text-gray-700 transition-colors">{{ p }}</a>
+      {% elif p == current_page - 3 or p == current_page + 3 %}
+      <span class="px-2 text-gray-400 text-sm">…</span>
+      {% endif %}
+    {% endfor %}
+
+    {% if current_page < total_pages %}
+    <a href="/blog{{ base_q }}&page={{ current_page + 1 }}{{ extra_q }}"
+       class="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 text-sm text-gray-700 transition-colors">
+      Далее →
+    </a>
+    {% endif %}
+  </nav>
+  {% endif %}
+
+  {% endif %}
+</div>
+
+<!-- CTA Block -->
+<div class="container mx-auto px-4 mb-12">
+  <div class="relative overflow-hidden bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-100 rounded-2xl p-8 lg:p-10">
+    <div class="hidden lg:block absolute right-8 top-1/2 -translate-y-1/2 opacity-5">
+      <svg class="w-32 h-32 text-blue-300" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+      </svg>
+    </div>
+    <div class="relative z-10 lg:flex lg:items-center lg:justify-between lg:gap-8">
+      <div class="mb-6 lg:mb-0">
+        <h3 class="text-2xl font-bold text-gray-800 mb-2">Остались вопросы? Получите консультацию</h3>
+        <p class="text-gray-600">Расскажем об ипотеке, кэшбеке и покупке новостроек. Бесплатно.</p>
+      </div>
+      <div class="flex-shrink-0">
+        <button onclick="openApplicationModal()"
+                class="w-full lg:w-auto px-8 py-4 bg-gradient-to-r from-[#0088CC] to-[#006699] text-white rounded-xl hover:from-[#006699] hover:to-[#004477] transition-all shadow-lg font-semibold text-base whitespace-nowrap">
+          Получить консультацию
+        </button>
+        <p class="text-xs text-gray-500 text-center mt-2">Ответим в течение 5 минут</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Popular topics cloud -->
+<div class="container mx-auto px-4 mb-10">
+  <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Популярные темы</h3>
+  <div class="flex flex-wrap gap-2">
+    {% set topics = ['Семейная ипотека', 'Льготная ипотека', 'ДДУ', 'Приёмка квартиры', 'Кэшбек до 500 000 ₽', 'Налоговый вычет', 'Материнский капитал', 'Эскроу-счёт', 'Выбор застройщика', 'Планировки квартир', 'Ипотека 2025', 'Новостройки Краснодара', 'Районы Сочи', 'Инвестиции в недвижимость'] %}
+    {% for t in topics %}
+    <a href="/blog?search={{ t|urlencode }}"
+       class="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-xs text-gray-600 hover:border-[#0088CC] hover:text-[#0088CC] transition-colors">
+      {{ t }}
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

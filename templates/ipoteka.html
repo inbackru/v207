@@ -1,0 +1,882 @@
+{% extends "base.html" %}
+
+{% block title %}Ипотека в {{ city_prep }} 2026: все программы и лучшие условия | InBack{% endblock %}
+{% block description %}Все программы ипотеки 2026 в {{ city_prep }}: семейная 3.5%, IT-ипотека 3.5%, военная 3.5%, рассрочка 0%. Помощь в выборе и оформлении. Калькуляторы и консультации.{% endblock %}
+{% block keywords %}ипотека 2026 {{ city_name }}, программы ипотеки, лучшие условия ипотеки, семейная ипотека, IT ипотека, военная ипотека, ипотека на новостройку, купить квартиру в ипотеку, ипотека без первоначального взноса, ипотека под низкий процент, ипотека с господдержкой, льготная ипотека 2026, ипотека калькулятор, рассрочка от застройщика, ипотека с материнским капиталом, ипотека с кэшбеком, оформить ипотеку онлайн, ипотека одобрение за 1 день, ипотека первый взнос 10 процентов, ипотека без справок, ипотека для молодой семьи, ипотека {{ city_region }}, ипотека в {{ city_prep }}, ипотека на вторичку, ипотека рефинансирование 2026, квартира в кредит 2026, жилищный кредит, ставка ипотека сейчас, дешёвая ипотека новостройка{% endblock %}
+
+{% block og_title %}Ипотека в {{ city_prep }} 2026: все программы и лучшие условия | InBack{% endblock %}
+{% block og_description %}Все программы ипотеки в {{ city_prep }} 2026: семейная 3.5%, IT-ипотека 3.5%, военная 3.5%, рассрочка 0%. Помощь в выборе и оформлении.{% endblock %}
+{% block twitter_title %}Ипотека в {{ city_prep }} 2026: все программы и лучшие условия | InBack{% endblock %}
+{% block twitter_description %}Семейная, IT, военная ипотека в {{ city_prep }}. Рассрочка от застройщика. Калькуляторы и консультации.{% endblock %}
+{% block twitter_image %}{{ url_for('static', filename='images/ipoteka-og.jpg', _external=True) }}{% endblock %}
+
+{% block head %}
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ url_for('city_pages.ipoteka_city', city_slug=current_city.slug if current_city else 'krasnodar', _external=True) }}">
+<meta property="og:site_name" content="InBack">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="{{ url_for('city_pages.ipoteka_city', city_slug=current_city.slug if current_city else 'krasnodar', _external=True) }}">
+<link rel="canonical" href="{{ url_for('city_pages.ipoteka_city', city_slug=current_city.slug if current_city else 'krasnodar', _external=True) }}" />
+
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"HowTo","name":"Как получить кэшбек за новостройку","description":"Пошаговая инструкция получения кэшбека при покупке квартиры в новостройке","totalTime":"P60D","step":[{"@type":"HowToStep","text":"Зарегистрируйтесь на сайте или оставьте заявку","name":"Регистрация на сайте"},{"@type":"HowToStep","text":"Выберите новостройку из каталога или укажите уже выбранную","name":"Выбор новостройки"},{"@type":"HowToStep","text":"Мы регистрируем вас как нашего клиента у застройщика перед покупкой","name":"Оформление сделки"},{"@type":"HowToStep","text":"После оформления собственности деньги поступают на ваш счет","name":"Получение кэшбека"}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Главная","item":"https://inback.ru/"},{"@type":"ListItem","position":2,"name":"Ипотека","item":"{{ url_for('city_pages.ipoteka_city', city_slug=current_city.slug if current_city else 'krasnodar', _external=True) }}"}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое кэшбек за новостройку?","acceptedAnswer":{"@type":"Answer","text":"Кэшбек за новостройку - это возврат части комиссии, которую застройщик платит агентам по недвижимости. Мы помогаем получить эту комиссию вам напрямую, без посредников. В среднем это составляет от 2,5% до 5% от стоимости квартиры."}},{"@type":"Question","name":"Как работает ваш сервис?","acceptedAnswer":{"@type":"Answer","text":"Процесс получения кэшбека состоит из 4 шагов: 1) Вы регистрируетесь на нашем сайте. 2) Выбираете интересующую новостройку. 3) Мы оформляем вас как нашего клиента у застройщика. 4) После покупки квартиры получаете кэшбек на банковский счет."}},{"@type":"Question","name":"Когда я получу кэшбек?","acceptedAnswer":{"@type":"Answer","text":"Выплата кэшбека происходит после: полной оплаты квартиры, оформления права собственности, завершения проверки документов (до 10 рабочих дней). В среднем весь процесс занимает от 1 до 3 месяцев после покупки."}},{"@type":"Question","name":"Нужно ли платить за ваш сервис?","acceptedAnswer":{"@type":"Answer","text":"Наш сервис полностью бесплатный для покупателей. Мы получаем вознаграждение от застройщиков, а вам возвращаем максимальную часть этой комиссии в виде кэшбека. Никаких скрытых платежей нет."}}]}
+</script>
+
+<style>
+/* ===== HERO ===== */
+.ipoteka-hero-gradient {
+    background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 30%, #e0f2fe 60%, #f0fdf4 100%);
+}
+@keyframes float-gentle { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-12px) rotate(3deg)} }
+@keyframes float-gentle-reverse { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(12px) rotate(-3deg)} }
+@keyframes float-orbit { 0%{transform:translateY(0) translateX(0) rotate(0)} 25%{transform:translateY(-8px) translateX(6px) rotate(5deg)} 50%{transform:translateY(-14px) translateX(0) rotate(0)} 75%{transform:translateY(-8px) translateX(-6px) rotate(-5deg)} 100%{transform:translateY(0) translateX(0) rotate(0)} }
+@keyframes float-slow-spin { 0%,100%{transform:translateY(0) rotate(0)} 25%{transform:translateY(-10px) rotate(8deg)} 50%{transform:translateY(-6px) rotate(0)} 75%{transform:translateY(-12px) rotate(-8deg)} }
+
+/* ===== ПРОГРАММЫ — tabs ===== */
+.prog-tab {
+    cursor: pointer;
+    transition: all .25s;
+    border-left: 3px solid transparent;
+}
+.prog-tab.active {
+    background: #fff;
+    border-left-color: #0088CC;
+    box-shadow: 0 4px 24px rgba(0,136,204,.10);
+}
+.prog-tab:hover:not(.active) { background: rgba(255,255,255,.6); }
+
+.prog-panel { display: none; }
+.prog-panel.active { display: block; }
+
+/* ===== КАЛЬКУЛЯТОР ===== */
+.calc-slider { -webkit-appearance: none; appearance: none; height: 6px; border-radius: 99px; outline: none; background: #e5e7eb; cursor: pointer; }
+.calc-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: #0088CC; border: 3px solid #fff; box-shadow: 0 2px 8px rgba(0,136,204,.35); cursor: pointer; }
+.calc-slider::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: #0088CC; border: 3px solid #fff; box-shadow: 0 2px 8px rgba(0,136,204,.35); cursor: pointer; }
+
+/* ===== FAQ ===== */
+.faq-body { max-height: 0; overflow: hidden; transition: max-height .35s cubic-bezier(.4,0,.2,1); }
+.faq-body.open { max-height: 400px; }
+.faq-chevron { transition: transform .3s; }
+.faq-item.open .faq-chevron { transform: rotate(180deg); }
+
+/* ===== STEPS ===== */
+.step-connector { width: 2px; background: linear-gradient(to bottom, #0088CC 0%, #e5e7eb 100%); }
+
+/* ===== БАНКИ ===== */
+.bank-logo-wrap { transition: all .25s; filter: grayscale(1) opacity(.6); }
+.bank-logo-wrap:hover { filter: grayscale(0) opacity(1); transform: translateY(-2px); }
+
+/* ===== BADGE ===== */
+.ip-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(0,136,204,.08); color: #0088CC;
+    border: 1px solid rgba(0,136,204,.18);
+    border-radius: 99px; padding: 5px 14px; font-size: .75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+}
+
+/* program card accent */
+.prog-accent-family { background: linear-gradient(135deg,#fef9f0,#fef3e2); border-color: #f59e0b22; }
+.prog-accent-it     { background: linear-gradient(135deg,#f0f7ff,#e0f2fe); border-color: #0088CC22; }
+.prog-accent-mil    { background: linear-gradient(135deg,#f0fdf4,#dcfce7); border-color: #16a34a22; }
+.prog-accent-dev    { background: linear-gradient(135deg,#faf5ff,#ede9fe); border-color: #7c3aed22; }
+.prog-accent-mat    { background: linear-gradient(135deg,#fff0f3,#ffe4e8); border-color: #e11d4822; }
+
+.prog-rate-family { color: #d97706; }
+.prog-rate-it     { color: #0088CC; }
+.prog-rate-mil    { color: #16a34a; }
+.prog-rate-dev    { color: #7c3aed; }
+.prog-rate-mat    { color: #e11d48; }
+
+.prog-icon-family { background: #fef3e2; }
+.prog-icon-it     { background: rgba(0,136,204,.10); }
+.prog-icon-mil    { background: #dcfce7; }
+.prog-icon-dev    { background: #ede9fe; }
+.prog-icon-mat    { background: #ffe4e8; }
+
+@media(max-width:767px){
+    .prog-sidebar { display:flex; overflow-x:auto; gap:8px; padding-bottom:4px; border-left:none!important; }
+    .prog-tab { border-left:none!important; border-bottom:3px solid transparent; border-radius:12px!important; white-space:nowrap; padding:10px 16px!important; }
+    .prog-tab.active { border-bottom-color:#0088CC; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- =================== HERO (без изменений) =================== -->
+<section class="ipoteka-hero-gradient relative overflow-hidden">
+    <div class="absolute inset-0 overflow-hidden hidden md:block">
+        <div class="absolute top-16 left-[8%]" style="animation:float-gentle 5s ease-in-out infinite">
+            <div class="w-16 h-16 bg-white rounded-2xl shadow-lg flex items-center justify-center">
+                <svg class="w-8 h-8 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            </div>
+        </div>
+        <div class="absolute top-24 right-[10%]" style="animation:float-gentle-reverse 6s ease-in-out infinite;animation-delay:.5s">
+            <div class="w-14 h-14 bg-white rounded-2xl shadow-lg flex items-center justify-center">
+                <svg class="w-7 h-7 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+            </div>
+        </div>
+        <div class="absolute top-40 left-[20%] hidden lg:block" style="animation:float-orbit 8s ease-in-out infinite;animation-delay:1s">
+            <div class="w-12 h-12 bg-white rounded-xl shadow-md flex items-center justify-center">
+                <span class="text-[#0088CC] font-bold text-sm">%</span>
+            </div>
+        </div>
+        <div class="absolute bottom-40 left-[12%] hidden lg:block" style="animation:float-slow-spin 7s ease-in-out infinite;animation-delay:1.5s">
+            <div class="w-14 h-14 bg-white rounded-2xl shadow-lg flex items-center justify-center">
+                <svg class="w-7 h-7 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+            </div>
+        </div>
+        <div class="absolute bottom-32 right-[8%] hidden lg:block" style="animation:float-gentle 5.5s ease-in-out infinite;animation-delay:2s">
+            <div class="w-14 h-14 bg-white rounded-2xl shadow-lg flex items-center justify-center">
+                <svg class="w-7 h-7 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            </div>
+        </div>
+        <div class="absolute top-32 right-[30%] hidden lg:block" style="animation:float-gentle-reverse 6.5s ease-in-out infinite;animation-delay:.8s">
+            <div class="w-12 h-12 bg-white rounded-xl shadow-md flex items-center justify-center">
+                <svg class="w-6 h-6 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            </div>
+        </div>
+        <div class="absolute top-20 left-1/4 w-2 h-2 bg-[#0088CC]/20 rounded-full"></div>
+        <div class="absolute top-44 right-1/3 w-3 h-3 bg-[#0088CC]/15 rounded-full"></div>
+        <div class="absolute bottom-28 left-1/3 w-2 h-2 bg-[#0088CC]/25 rounded-full"></div>
+        <div class="absolute top-36 left-[45%] w-2 h-2 bg-[#0088CC]/15 rounded-full"></div>
+    </div>
+
+    <div class="container mx-auto px-4 py-20 md:py-28 relative z-10">
+        <div class="max-w-3xl mx-auto text-center">
+            <span class="page-hero-badge">Все программы ипотеки</span>
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-gray-900 leading-tight">
+                Ипотека в <span class="text-[#0088CC]">{{ city_prep }}</span><br class="hidden md:block"> лучшие условия 2026
+            </h1>
+            <p class="text-xl md:text-2xl mb-10 text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                Все программы ипотеки: семейная, IT, военная, рассрочка от застройщика. Подберем лучшие условия с кэшбеком до 500 000 ₽
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="openApplicationModal()" class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-[#0088CC] to-[#006699] text-white rounded-xl hover:shadow-xl transition-all duration-300 transform hover:scale-[1.03] shadow-lg font-semibold text-lg">
+                    Подать заявку
+                </button>
+                <a href="#calculator" class="inline-flex items-center justify-center px-8 py-4 bg-white text-gray-800 rounded-xl hover:bg-gray-50 transition-all font-semibold text-lg shadow-md border border-gray-100">
+                    <svg class="w-5 h-5 mr-2 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                    Рассчитать платеж
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="w-full">
+        <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full" preserveAspectRatio="none" style="height:60px;display:block">
+            <path d="M0 60V30C240 5 480 50 720 30C960 10 1200 45 1440 25V60H0Z" fill="white"/>
+        </svg>
+    </div>
+</section>
+
+
+<!-- =================== БЛОК 1: ПРОГРАММЫ (tabs) =================== -->
+<section class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-12">
+                <span class="ip-badge">Программы 2026</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mt-4 mb-3">
+                    Выберите вашу программу
+                </h2>
+                <p class="text-gray-500 text-lg max-w-xl mx-auto">Подберём ипотеку под вашу ситуацию — одобрение за 1 день</p>
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-6 md:gap-8">
+                <!-- Sidebar tabs -->
+                <div class="prog-sidebar md:flex md:flex-col md:w-64 lg:w-72 shrink-0 border-l border-gray-100 md:border-l-0 space-y-1">
+                    <button class="prog-tab active text-left px-5 py-4 rounded-xl md:rounded-l-none md:rounded-r-xl" onclick="switchProg('family', this)">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">👨‍👩‍👧</span>
+                            <div>
+                                <div class="font-semibold text-gray-900 text-sm">Семейная</div>
+                                <div class="text-xs text-amber-600 font-bold">от 3.5%</div>
+                            </div>
+                        </div>
+                    </button>
+                    <button class="prog-tab text-left px-5 py-4 rounded-xl md:rounded-l-none md:rounded-r-xl" onclick="switchProg('it', this)">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">💻</span>
+                            <div>
+                                <div class="font-semibold text-gray-900 text-sm">IT-ипотека</div>
+                                <div class="text-xs text-[#0088CC] font-bold">от 5%</div>
+                            </div>
+                        </div>
+                    </button>
+                    <button class="prog-tab text-left px-5 py-4 rounded-xl md:rounded-l-none md:rounded-r-xl" onclick="switchProg('mil', this)">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">🎖️</span>
+                            <div>
+                                <div class="font-semibold text-gray-900 text-sm">Военная</div>
+                                <div class="text-xs text-green-600 font-bold">3.5% / 0% взнос</div>
+                            </div>
+                        </div>
+                    </button>
+                    <button class="prog-tab text-left px-5 py-4 rounded-xl md:rounded-l-none md:rounded-r-xl" onclick="switchProg('dev', this)">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">🏗️</span>
+                            <div>
+                                <div class="font-semibold text-gray-900 text-sm">Рассрочка</div>
+                                <div class="text-xs text-violet-600 font-bold">0% от застройщика</div>
+                            </div>
+                        </div>
+                    </button>
+                    <button class="prog-tab text-left px-5 py-4 rounded-xl md:rounded-l-none md:rounded-r-xl" onclick="switchProg('mat', this)">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">💰</span>
+                            <div>
+                                <div class="font-semibold text-gray-900 text-sm">Маткапитал</div>
+                                <div class="text-xs text-rose-600 font-bold">630 380 ₽</div>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Panel content -->
+                <div class="flex-1 min-w-0">
+
+                    <!-- Семейная -->
+                    <div id="prog-family" class="prog-panel active prog-accent-family rounded-2xl border p-8 md:p-10">
+                        <div class="flex items-start gap-5 mb-8">
+                            <div class="prog-icon-family w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shrink-0">👨‍👩‍👧</div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-gray-900">Семейная ипотека</h3>
+                                <p class="text-gray-500 mt-1">Для семей с детьми, рождёнными с 2018 года</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4 mb-8">
+                            <div class="bg-white/70 rounded-xl p-4 text-center border border-amber-100">
+                                <div class="text-2xl font-bold prog-rate-family">3.5%</div>
+                                <div class="text-xs text-gray-500 mt-1">Ставка</div>
+                            </div>
+                            <div class="bg-white/70 rounded-xl p-4 text-center border border-amber-100">
+                                <div class="text-2xl font-bold prog-rate-family">6 млн</div>
+                                <div class="text-xs text-gray-500 mt-1">Максимум</div>
+                            </div>
+                            <div class="bg-white/70 rounded-xl p-4 text-center border border-amber-100">
+                                <div class="text-2xl font-bold prog-rate-family">20%</div>
+                                <div class="text-xs text-gray-500 mt-1">Первый взнос</div>
+                            </div>
+                        </div>
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-start gap-3 text-gray-700">
+                                <span class="mt-0.5 w-5 h-5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 text-xs font-bold">✓</span>
+                                Ребёнок рождён с 1 января 2018 года — достаточно одного
+                            </li>
+                            <li class="flex items-start gap-3 text-gray-700">
+                                <span class="mt-0.5 w-5 h-5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 text-xs font-bold">✓</span>
+                                Можно использовать материнский капитал в счёт взноса
+                            </li>
+                            <li class="flex items-start gap-3 text-gray-700">
+                                <span class="mt-0.5 w-5 h-5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 text-xs font-bold">✓</span>
+                                Только новостройки — максимальная выгода с кэшбеком InBack
+                            </li>
+                        </ul>
+                        <a href="{{ url_for('mortgage.family_mortgage') }}" class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold px-6 py-3 rounded-xl transition-colors">
+                            Подробнее о программе
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                        </a>
+                    </div>
+
+                    <!-- IT -->
+                    <div id="prog-it" class="prog-panel prog-accent-it rounded-2xl border p-8 md:p-10">
+                        <div class="flex items-start gap-5 mb-8">
+                            <div class="prog-icon-it w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shrink-0">💻</div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-gray-900">IT-ипотека</h3>
+                                <p class="text-gray-500 mt-1">Для специалистов аккредитованных IT-компаний</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4 mb-8">
+                            <div class="bg-white/70 rounded-xl p-4 text-center border border-blue-100">
+                                <div class="text-2xl font-bold prog-rate-it">5%</div>
+                                <div class="text-xs text-gray-500 mt-1">Ставка</div>
+                            </div>
+                            <div class="bg-white/70 rounded-xl p-4 text-center border border-blue-100">
+                                <div class="text-2xl font-bold prog-rate-it">9 млн</div>
+                                <div class="text-xs text-gray-500 mt-1">Максимум</div>
+                            </div>
+                            <div class="bg-white/70 rounded-xl p-4 text-center border border-blue-100">
+                                <div class="text-2xl font-bold prog-rate-it">20%</div>
+                                <div class="text-xs text-gray-500 mt-1">Первый взнос</div>
+                            </div>
+                        </div>
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-start gap-3 text-gray-700">
+                                <span class="mt-0.5 w-5 h-5 rounded-full bg-blue-100 text-[#0088CC] flex items-center justify-center shrink-0 text-xs font-bold">✓</span>
+                                Работа в аккредитованной IT-компании
+                            </li>
+                            <li class="flex items-start gap-3 text-gray-700">
+                                <span class="mt-0.5 w-5 h-5 rounded-full bg-blue-100 text-[#0088CC] flex items-center justify-center shrink-0 text-xs font-bold">✓</span>
+                                Возраст от 22 до 44 лет включительно
+                            </li>
+                            <li class="flex items-start gap-3 text-gray-700">
+                                <span class="mt-0.5 w-5 h-5 rounded-full bg-blue-100 text-[#0088CC] flex items-center justify-center shrink-0 text-xs font-bold">✓</span>
+                                Только квартиры в новостройках у застройщика
+                            </li>
+                        </ul>
+                        <a href="{{ url_for('mortgage.it_mortgage') }}" class="inline-flex items-center gap-2 bg-[#0088CC] hover:bg-[#006699] text-white font-semibold px-6 py-3 rounded-xl transition-colors">
+                            Подробнее о программе
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                        </a>
+                    </div>
+
+                    <!-- Военная -->
+                    <div id="prog-mil" class="prog-panel prog-accent-mil rounded-2xl border p-8 md:p-10">
+                        <div class="flex items-start gap-5 mb-8">
+                            <div class="prog-icon-mil w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shrink-0">🎖️</div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-gray-900">Военная ипотека</h3>
+                                <p class="text-gray-500 mt-1">Для участников накопительно-ипотечной системы</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4 mb-8">
+                            <div class="bg-white/70 rounded-xl p-4 text-center border border-green-100">
+                                <div class="text-2xl font-bold prog-rate-mil">3.5%</div>
+                                <div class="text-xs text-gray-500 mt-1">Ставка</div>
+                            </div>
+                            <div class="bg-white/70 rounded-xl p-4 text-center border border-green-100">
+                                <div class="text-2xl font-bold prog-rate-mil">4.6 млн</div>
+                                <div class="text-xs text-gray-500 mt-1">Максимум</div>
+                            </div>
+                            <div class="bg-white/70 rounded-xl p-4 text-center border border-green-100">
+                                <div class="text-2xl font-bold prog-rate-mil">0%</div>
+                                <div class="text-xs text-gray-500 mt-1">Первый взнос</div>
+                            </div>
+                        </div>
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-start gap-3 text-gray-700">
+                                <span class="mt-0.5 w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center shrink-0 text-xs font-bold">✓</span>
+                                Участник НИС — государство платит взносы за вас
+                            </li>
+                            <li class="flex items-start gap-3 text-gray-700">
+                                <span class="mt-0.5 w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center shrink-0 text-xs font-bold">✓</span>
+                                Без первоначального взноса из личных средств
+                            </li>
+                            <li class="flex items-start gap-3 text-gray-700">
+                                <span class="mt-0.5 w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center shrink-0 text-xs font-bold">✓</span>
+                                Доступна покупка вторичного жилья
+                            </li>
+                        </ul>
+                        <a href="{{ url_for('mortgage.military_mortgage') }}" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors">
+                            Подробнее о программе
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                        </a>
+                    </div>
+
+                    <!-- Рассрочка -->
+                    <div id="prog-dev" class="prog-panel prog-accent-dev rounded-2xl border p-8 md:p-10">
+                        <div class="flex items-start gap-5 mb-8">
+                            <div class="prog-icon-dev w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shrink-0">🏗️</div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-gray-900">Рассрочка от застройщика</h3>
+                                <p class="text-gray-500 mt-1">Беспроцентная — без банков и страховок</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4 mb-8">
+                            <div class="bg-white/70 rounded-xl p-4 text-center border border-violet-100">
+                                <div class="text-2xl font-bold prog-rate-dev">0%</div>
+                                <div class="text-xs text-gray-500 mt-1">Ставка</div>
+                            </div>
+                            <div class="bg-white/70 rounded-xl p-4 text-center border border-violet-100">
+                                <div class="text-2xl font-bold prog-rate-dev">5 лет</div>
+                                <div class="text-xs text-gray-500 mt-1">Срок</div>
+                            </div>
+                            <div class="bg-white/70 rounded-xl p-4 text-center border border-violet-100">
+                                <div class="text-2xl font-bold prog-rate-dev">30%</div>
+                                <div class="text-xs text-gray-500 mt-1">Первый взнос</div>
+                            </div>
+                        </div>
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-start gap-3 text-gray-700">
+                                <span class="mt-0.5 w-5 h-5 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center shrink-0 text-xs font-bold">✓</span>
+                                Без подтверждения дохода и кредитной истории
+                            </li>
+                            <li class="flex items-start gap-3 text-gray-700">
+                                <span class="mt-0.5 w-5 h-5 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center shrink-0 text-xs font-bold">✓</span>
+                                Одобрение за 1 день, минимум документов
+                            </li>
+                            <li class="flex items-start gap-3 text-gray-700">
+                                <span class="mt-0.5 w-5 h-5 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center shrink-0 text-xs font-bold">✓</span>
+                                Нет переплат, страховок и скрытых комиссий банка
+                            </li>
+                        </ul>
+                        <a href="{{ url_for('mortgage.developer_mortgage') }}" class="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors">
+                            Подробнее о программе
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                        </a>
+                    </div>
+
+                    <!-- Маткапитал -->
+                    <div id="prog-mat" class="prog-panel prog-accent-mat rounded-2xl border p-8 md:p-10">
+                        <div class="flex items-start gap-5 mb-8">
+                            <div class="prog-icon-mat w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shrink-0">💰</div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-gray-900">Материнский капитал</h3>
+                                <p class="text-gray-500 mt-1">Использование сертификата при покупке жилья</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 mb-8">
+                            <div class="bg-white/70 rounded-xl p-4 text-center border border-rose-100">
+                                <div class="text-xl font-bold prog-rate-mat">630 380 ₽</div>
+                                <div class="text-xs text-gray-500 mt-1">На второго ребёнка</div>
+                            </div>
+                            <div class="bg-white/70 rounded-xl p-4 text-center border border-rose-100">
+                                <div class="text-xl font-bold prog-rate-mat">833 024 ₽</div>
+                                <div class="text-xs text-gray-500 mt-1">На первого ребёнка</div>
+                            </div>
+                        </div>
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-start gap-3 text-gray-700">
+                                <span class="mt-0.5 w-5 h-5 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center shrink-0 text-xs font-bold">✓</span>
+                                В счёт первоначального взноса или погашения долга
+                            </li>
+                            <li class="flex items-start gap-3 text-gray-700">
+                                <span class="mt-0.5 w-5 h-5 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center shrink-0 text-xs font-bold">✓</span>
+                                Совместим с семейной и стандартной ипотекой
+                            </li>
+                            <li class="flex items-start gap-3 text-gray-700">
+                                <span class="mt-0.5 w-5 h-5 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center shrink-0 text-xs font-bold">✓</span>
+                                Помогаем оформить документы — бесплатно
+                            </li>
+                        </ul>
+                        <a href="{{ url_for('mortgage.maternal_capital') }}" class="inline-flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white font-semibold px-6 py-3 rounded-xl transition-colors">
+                            Подробнее о программе
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                        </a>
+                    </div>
+
+                </div><!-- /panel wrapper -->
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- =================== БЛОК 2: ЦИФРЫ / ПОЧЕМУ INBACK =================== -->
+<section class="py-20 bg-gray-50 overflow-hidden">
+    <div class="container mx-auto px-4">
+        <div class="max-w-6xl mx-auto">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <!-- Left: text -->
+                <div>
+                    <span class="ip-badge">Наши результаты</span>
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mt-4 mb-5">
+                        Почему тысячи покупателей выбрали InBack
+                    </h2>
+                    <p class="text-gray-500 leading-relaxed mb-8">
+                        Мы не берём деньги с покупателей — получаем комиссию от застройщиков и возвращаем её вам. Это называется кэшбек. Честно, прозрачно, юридически чисто.
+                    </p>
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-4 bg-white rounded-xl p-4 border border-gray-100">
+                            <div class="w-10 h-10 rounded-xl bg-[#0088CC]/10 flex items-center justify-center shrink-0">
+                                <svg class="w-5 h-5 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-gray-900">Одобрение за 1 день</div>
+                                <div class="text-sm text-gray-500">Без лишних справок и очередей</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 bg-white rounded-xl p-4 border border-gray-100">
+                            <div class="w-10 h-10 rounded-xl bg-[#0088CC]/10 flex items-center justify-center shrink-0">
+                                <svg class="w-5 h-5 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-gray-900">Без скрытых комиссий</div>
+                                <div class="text-sm text-gray-500">Полная прозрачность — сервис бесплатный</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 bg-white rounded-xl p-4 border border-gray-100">
+                            <div class="w-10 h-10 rounded-xl bg-[#0088CC]/10 flex items-center justify-center shrink-0">
+                                <svg class="w-5 h-5 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-gray-900">Персональный менеджер</div>
+                                <div class="text-sm text-gray-500">Ведём от заявки до получения кэшбека</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: big stats -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-white rounded-2xl p-7 border border-gray-100 shadow-sm">
+                        <div class="text-4xl font-black text-[#0088CC] mb-2">2%</div>
+                        <div class="text-sm font-semibold text-gray-900">Ставка от</div>
+                        <div class="text-xs text-gray-400 mt-1">по льготным программам</div>
+                    </div>
+                    <div class="bg-[#0088CC] rounded-2xl p-7 text-white shadow-lg">
+                        <div class="text-4xl font-black mb-2">500к</div>
+                        <div class="text-sm font-semibold">Кэшбек до</div>
+                        <div class="text-xs text-white/70 mt-1">при покупке новостройки</div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-7 border border-gray-100 shadow-sm col-span-2">
+                        <div class="text-4xl font-black text-gray-900 mb-2">130+</div>
+                        <div class="text-sm font-semibold text-gray-900">застройщиков-партнёров</div>
+                        <div class="text-xs text-gray-400 mt-1">в {{ city_prep }} и {{ city_region }}</div>
+                    </div>
+                    <div class="bg-gray-50 rounded-2xl p-7 border border-gray-100">
+                        <div class="text-4xl font-black text-gray-900 mb-2">1</div>
+                        <div class="text-sm font-semibold text-gray-900">день</div>
+                        <div class="text-xs text-gray-400 mt-1">до предварительного решения</div>
+                    </div>
+                    <div class="bg-gray-50 rounded-2xl p-7 border border-gray-100">
+                        <div class="text-4xl font-black text-gray-900 mb-2">0₽</div>
+                        <div class="text-sm font-semibold text-gray-900">стоимость</div>
+                        <div class="text-xs text-gray-400 mt-1">сервис бесплатный</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- =================== БЛОК 3: КАЛЬКУЛЯТОР =================== -->
+<section id="calculator" class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-12">
+                <span class="ip-badge">Калькулятор</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mt-4 mb-3">Рассчитайте платёж</h2>
+                <p class="text-gray-500 text-lg">Укажите параметры — получите результат мгновенно</p>
+            </div>
+
+            <div class="bg-gray-50 rounded-3xl border border-gray-100 overflow-hidden shadow-sm">
+                <!-- Program quick-select -->
+                <div class="flex overflow-x-auto border-b border-gray-100 bg-white px-2">
+                    <button class="calc-prog-btn px-4 py-4 text-sm font-semibold whitespace-nowrap border-b-2 border-[#0088CC] text-[#0088CC]" onclick="setCalcRate(3.5, this)">Семейная 3.5%</button>
+                    <button class="calc-prog-btn px-4 py-4 text-sm font-semibold whitespace-nowrap border-b-2 border-transparent text-gray-500 hover:text-gray-800" onclick="setCalcRate(5, this)">IT 5%</button>
+                    <button class="calc-prog-btn px-4 py-4 text-sm font-semibold whitespace-nowrap border-b-2 border-transparent text-gray-500 hover:text-gray-800" onclick="setCalcRate(3.5, this)">Военная 3.5%</button>
+                    <button class="calc-prog-btn px-4 py-4 text-sm font-semibold whitespace-nowrap border-b-2 border-transparent text-gray-500 hover:text-gray-800" onclick="setCalcRate(13, this)">Стандартная 13%</button>
+                </div>
+
+                <div class="grid lg:grid-cols-5 gap-0">
+                    <!-- Sliders -->
+                    <div class="lg:col-span-3 p-8 md:p-10 space-y-8">
+                        <div>
+                            <div class="flex justify-between items-center mb-4">
+                                <label class="text-gray-700 font-semibold text-sm">Стоимость квартиры</label>
+                                <span class="text-base font-bold text-[#0088CC] bg-[#0088CC]/8 rounded-lg px-3 py-1" id="propertyPrice">5 000 000 ₽</span>
+                            </div>
+                            <input type="range" min="1000000" max="30000000" step="100000" value="5000000" class="calc-slider w-full" id="propertyPriceRange">
+                            <div class="flex justify-between text-xs text-gray-400 mt-2"><span>1 млн</span><span>30 млн</span></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-4">
+                                <label class="text-gray-700 font-semibold text-sm">Первоначальный взнос</label>
+                                <span class="text-base font-bold text-[#0088CC] bg-[#0088CC]/8 rounded-lg px-3 py-1" id="downPayment">1 000 000 ₽ (20%)</span>
+                            </div>
+                            <input type="range" min="10" max="80" step="5" value="20" class="calc-slider w-full" id="downPaymentRange">
+                            <div class="flex justify-between text-xs text-gray-400 mt-2"><span>10%</span><span>80%</span></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-4">
+                                <label class="text-gray-700 font-semibold text-sm">Срок кредита</label>
+                                <span class="text-base font-bold text-[#0088CC] bg-[#0088CC]/8 rounded-lg px-3 py-1" id="loanTerm">20 лет</span>
+                            </div>
+                            <input type="range" min="1" max="30" step="1" value="20" class="calc-slider w-full" id="loanTermRange">
+                            <div class="flex justify-between text-xs text-gray-400 mt-2"><span>1 год</span><span>30 лет</span></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-4">
+                                <label class="text-gray-700 font-semibold text-sm">Процентная ставка</label>
+                                <span class="text-base font-bold text-[#0088CC] bg-[#0088CC]/8 rounded-lg px-3 py-1" id="interestRate">3.5%</span>
+                            </div>
+                            <input type="range" min="2" max="20" step="0.1" value="3.5" class="calc-slider w-full" id="interestRateRange">
+                            <div class="flex justify-between text-xs text-gray-400 mt-2"><span>2%</span><span>20%</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Result panel -->
+                    <div class="lg:col-span-2 bg-gradient-to-br from-[#0088CC] to-[#005f8e] p-8 md:p-10 flex flex-col justify-between">
+                        <div>
+                            <p class="text-white/70 text-xs uppercase tracking-widest mb-2">Ежемесячный платёж</p>
+                            <div class="text-5xl font-black text-white mb-6" id="monthlyPayment">32 450 ₽</div>
+
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center py-3 border-b border-white/15">
+                                    <span class="text-white/70 text-sm">Сумма кредита</span>
+                                    <span class="text-white font-semibold text-sm" id="loanAmount">4 000 000 ₽</span>
+                                </div>
+                                <div class="flex justify-between items-center py-3 border-b border-white/15">
+                                    <span class="text-white/70 text-sm">Переплата</span>
+                                    <span class="text-white font-semibold text-sm" id="overpayment">2 788 000 ₽</span>
+                                </div>
+                                <div class="flex justify-between items-center py-3">
+                                    <span class="text-white/70 text-sm">Кэшбек InBack</span>
+                                    <span class="text-white font-bold text-sm bg-white/20 px-3 py-1 rounded-lg" id="cashbackAmount">до 125 000 ₽</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button onclick="openApplicationModal()" class="mt-8 w-full bg-white text-[#0088CC] py-4 rounded-xl font-bold hover:bg-gray-50 transition-colors text-base shadow-lg">
+                            Подать заявку
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- =================== БЛОК 4: БАНКИ-ПАРТНЁРЫ =================== -->
+<section class="py-16 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-10">
+                <span class="ip-badge">Банки-партнёры</span>
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mt-4 mb-2">Работаем с ведущими банками</h2>
+                <p class="text-gray-500">Подберём лучшее предложение среди всех партнёров</p>
+            </div>
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 items-center">
+                    <div class="bank-logo-wrap flex items-center justify-center h-14">
+                        <img src="{{ url_for('static', filename='images/banks/vtb.png') }}" alt="ВТБ" class="h-10 w-auto">
+                    </div>
+                    <div class="bank-logo-wrap flex items-center justify-center h-14">
+                        <img src="{{ url_for('static', filename='images/banks/sber.jpg') }}" alt="Сбер" class="h-10 w-auto">
+                    </div>
+                    <div class="bank-logo-wrap flex items-center justify-center h-14">
+                        <img src="{{ url_for('static', filename='images/banks/alfa.png') }}" alt="Альфа-Банк" class="h-10 w-auto">
+                    </div>
+                    <div class="bank-logo-wrap flex items-center justify-center h-14">
+                        <img src="{{ url_for('static', filename='images/banks/domrf.png') }}" alt="Дом.РФ" class="h-10 w-auto">
+                    </div>
+                    <div class="bank-logo-wrap flex items-center justify-center h-14">
+                        <img src="{{ url_for('static', filename='images/banks/rosselhoz.jpg') }}" alt="Россельхозбанк" class="h-10 w-auto">
+                    </div>
+                </div>
+                <div class="border-t border-gray-100 mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <p class="text-gray-500 text-sm text-center sm:text-left">Не знаете, какой банк лучше? Мы сравним за вас — бесплатно</p>
+                    <button onclick="openApplicationModal()" class="shrink-0 inline-flex items-center gap-2 bg-[#0088CC] hover:bg-[#006699] text-white font-semibold px-6 py-3 rounded-xl transition-colors text-sm">
+                        Получить консультацию
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- =================== БЛОК 5: КАК ЭТО РАБОТАЕТ =================== -->
+<section class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-14">
+                <span class="ip-badge">Пошагово</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mt-4 mb-3">Как получить ипотеку с кэшбеком</h2>
+                <p class="text-gray-500 text-lg">4 шага — и деньги на вашем счёте</p>
+            </div>
+
+            <div class="space-y-4">
+                <div class="flex gap-5 items-stretch group">
+                    <div class="flex flex-col items-center">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#0088CC] to-[#006699] flex items-center justify-center text-white font-black text-lg shadow-md shrink-0 group-hover:scale-110 transition-transform">1</div>
+                        <div class="step-connector flex-1 mt-2"></div>
+                    </div>
+                    <div class="bg-gray-50 rounded-2xl p-6 flex-1 mb-4 border border-gray-100 group-hover:border-[#0088CC]/20 group-hover:shadow-sm transition-all">
+                        <h4 class="font-bold text-gray-900 mb-1">Зарегистрируйтесь или оставьте заявку</h4>
+                        <p class="text-gray-500 text-sm leading-relaxed">Укажите ваши данные и желаемые параметры ипотеки — займёт 2 минуты</p>
+                    </div>
+                </div>
+                <div class="flex gap-5 items-stretch group">
+                    <div class="flex flex-col items-center">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#0088CC] to-[#006699] flex items-center justify-center text-white font-black text-lg shadow-md shrink-0 group-hover:scale-110 transition-transform">2</div>
+                        <div class="step-connector flex-1 mt-2"></div>
+                    </div>
+                    <div class="bg-gray-50 rounded-2xl p-6 flex-1 mb-4 border border-gray-100 group-hover:border-[#0088CC]/20 group-hover:shadow-sm transition-all">
+                        <h4 class="font-bold text-gray-900 mb-1">Выберите новостройку из каталога</h4>
+                        <p class="text-gray-500 text-sm leading-relaxed">Или скажите нам уже выбранный объект — мы поможем с оформлением</p>
+                    </div>
+                </div>
+                <div class="flex gap-5 items-stretch group">
+                    <div class="flex flex-col items-center">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#0088CC] to-[#006699] flex items-center justify-center text-white font-black text-lg shadow-md shrink-0 group-hover:scale-110 transition-transform">3</div>
+                        <div class="step-connector flex-1 mt-2"></div>
+                    </div>
+                    <div class="bg-gray-50 rounded-2xl p-6 flex-1 mb-4 border border-gray-100 group-hover:border-[#0088CC]/20 group-hover:shadow-sm transition-all">
+                        <h4 class="font-bold text-gray-900 mb-1">Мы оформляем вас у застройщика</h4>
+                        <p class="text-gray-500 text-sm leading-relaxed">Регистрируем как нашего клиента до покупки — это обязательное условие для кэшбека</p>
+                    </div>
+                </div>
+                <div class="flex gap-5 items-start group">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center shrink-0 shadow-md group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                    <div class="bg-green-50 rounded-2xl p-6 flex-1 border border-green-100 group-hover:shadow-sm transition-all">
+                        <h4 class="font-bold text-gray-900 mb-1">Получите кэшбек на счёт</h4>
+                        <p class="text-gray-500 text-sm leading-relaxed">После оформления собственности деньги поступают на ваш банковский счёт — в среднем 2.5–5% от стоимости квартиры</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-10 bg-gradient-to-r from-[#0088CC]/8 to-[#0088CC]/4 rounded-2xl p-6 flex flex-col sm:flex-row items-center gap-4 border border-[#0088CC]/15">
+                <div class="text-3xl shrink-0">💡</div>
+                <div>
+                    <div class="font-semibold text-gray-900">Средний кэшбек — от 2.5% до 5% от стоимости квартиры</div>
+                    <div class="text-sm text-gray-500 mt-0.5">При покупке квартиры за 5 млн ₽ вы получите от 125 000 до 250 000 ₽ обратно</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- =================== БЛОК 6: CTA =================== -->
+<section class="py-16 px-4">
+    <div class="container mx-auto">
+        <div class="max-w-5xl mx-auto relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0088CC] via-[#0077b6] to-[#005f8e] p-10 md:p-16 text-center shadow-2xl">
+            <!-- decorative circles -->
+            <div class="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-white/5"></div>
+            <div class="absolute -bottom-16 -left-16 w-56 h-56 rounded-full bg-white/5"></div>
+            <div class="absolute top-10 left-10 w-8 h-8 rounded-full bg-white/10"></div>
+            <div class="absolute bottom-10 right-16 w-5 h-5 rounded-full bg-white/10"></div>
+
+            <div class="relative z-10">
+                <div class="inline-flex items-center gap-2 bg-white/15 text-white/90 rounded-full px-4 py-2 text-sm font-semibold mb-6">
+                    🎁 Бесплатная консультация — без обязательств
+                </div>
+                <h3 class="text-2xl md:text-4xl font-black text-white mb-4 leading-tight">
+                    Получите лучшие условия ипотеки<br class="hidden md:block"> в {{ city_prep }}
+                </h3>
+                <p class="text-white/75 text-lg mb-8 max-w-xl mx-auto">
+                    Подберём программу, рассчитаем платёж и оформим кэшбек до 500 000 ₽
+                </p>
+                <button onclick="openApplicationModal()" class="bg-white text-[#0088CC] font-bold py-4 px-10 rounded-xl hover:bg-gray-50 transition-all text-lg shadow-xl">
+                    Подобрать ипотеку
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- =================== БЛОК 7: FAQ =================== -->
+<section class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="max-w-3xl mx-auto">
+            <div class="text-center mb-12">
+                <span class="ip-badge">FAQ</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mt-4 mb-3">Часто задают</h2>
+                <p class="text-gray-500">Ответы на самые популярные вопросы об ипотеке и кэшбеке</p>
+            </div>
+
+            <div class="space-y-3">
+                {% set faqs = [
+                    ('Что такое кэшбек за новостройку?', 'Кэшбек — это возврат части комиссии, которую застройщик платит агентам по недвижимости. Мы помогаем получить эту комиссию вам напрямую, без посредников. В среднем это 2.5–5% от стоимости квартиры.'),
+                    ('Как работает сервис InBack?', '4 шага: 1) Регистрируетесь на сайте. 2) Выбираете новостройку. 3) Мы оформляем вас у застройщика. 4) После покупки получаете кэшбек на банковский счёт. Всё бесплатно для покупателя.'),
+                    ('Когда я получу кэшбек?', 'Выплата происходит после: полной оплаты квартиры, оформления права собственности и проверки документов (до 10 рабочих дней). В среднем — 1–3 месяца после покупки.'),
+                    ('Какой максимальный кэшбек?', 'Размер зависит от застройщика (2.5–7%), ЖК и типа квартиры. Средний — 3–5% от стоимости. Максимум — 500 000 ₽ и выше для дорогих объектов.'),
+                    ('Нужно ли платить за ваш сервис?', 'Нет. Сервис полностью бесплатный для покупателей. Мы получаем вознаграждение от застройщиков и возвращаем вам максимальную часть. Никаких скрытых платежей.'),
+                    ('В каких городах вы работаете?', 'Сейчас работаем в {{ city_prep }} и {{ city_region }}: Краснодар, Сочи, Анапа, Геленджик, Новороссийск, Армавир, Туапсе, Майкоп, Курск. Постоянно расширяем географию.')
+                ] %}
+
+                {% for question, answer in faqs %}
+                <div class="faq-item border border-gray-100 rounded-2xl bg-gray-50 overflow-hidden">
+                    <button class="w-full flex justify-between items-center text-left p-6 gap-4 group" onclick="toggleFAQ(this)">
+                        <h3 class="font-semibold text-gray-900 group-hover:text-[#0088CC] transition-colors">{{ question }}</h3>
+                        <svg class="faq-chevron w-5 h-5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div class="faq-body">
+                        <p class="text-gray-600 leading-relaxed px-6 pb-6">{{ answer }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+/* ======= Program tabs ======= */
+function switchProg(key, btn) {
+    document.querySelectorAll('.prog-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.prog-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('prog-' + key).classList.add('active');
+}
+
+/* ======= Calculator ======= */
+function fmtN(n) { return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0'); }
+
+function setCalcRate(rate, btn) {
+    document.querySelectorAll('.calc-prog-btn').forEach(b => {
+        b.classList.remove('border-[#0088CC]', 'text-[#0088CC]');
+        b.classList.add('border-transparent', 'text-gray-500');
+    });
+    btn.classList.add('border-[#0088CC]', 'text-[#0088CC]');
+    btn.classList.remove('border-transparent', 'text-gray-500');
+    document.getElementById('interestRateRange').value = rate;
+    updateCalculator();
+}
+
+function updateCalculator() {
+    const price = +document.getElementById('propertyPriceRange').value;
+    const dpPct = +document.getElementById('downPaymentRange').value;
+    const years = +document.getElementById('loanTermRange').value;
+    const rate  = +document.getElementById('interestRateRange').value;
+
+    const dp = price * dpPct / 100;
+    const loan = price - dp;
+    const mr = rate / 100 / 12;
+    const n = years * 12;
+    const pmt = mr > 0 ? loan * mr * Math.pow(1+mr,n) / (Math.pow(1+mr,n)-1) : loan/n;
+    const total = pmt * n;
+    const over = total - loan;
+    const cb = price * 0.025;
+
+    document.getElementById('propertyPrice').textContent = fmtN(price) + '\u00a0₽';
+    document.getElementById('downPayment').textContent   = fmtN(Math.round(dp)) + '\u00a0₽\u00a0(' + dpPct + '%)';
+    document.getElementById('loanTerm').textContent      = years + '\u00a0лет';
+    document.getElementById('interestRate').textContent  = rate + '%';
+    document.getElementById('monthlyPayment').textContent = fmtN(Math.round(pmt)) + '\u00a0₽';
+    document.getElementById('loanAmount').textContent    = fmtN(Math.round(loan)) + '\u00a0₽';
+    document.getElementById('overpayment').textContent   = fmtN(Math.round(over)) + '\u00a0₽';
+    document.getElementById('cashbackAmount').textContent = 'до\u00a0' + fmtN(Math.round(cb)) + '\u00a0₽';
+
+    /* progress fill on sliders */
+    ['propertyPriceRange','downPaymentRange','loanTermRange','interestRateRange'].forEach(id => {
+        const el = document.getElementById(id);
+        const pct = (el.value - el.min) / (el.max - el.min) * 100;
+        el.style.background = `linear-gradient(to right, #0088CC ${pct}%, #e5e7eb ${pct}%)`;
+    });
+}
+
+/* ======= FAQ ======= */
+function toggleFAQ(btn) {
+    const item = btn.closest('.faq-item');
+    const body = btn.nextElementSibling;
+    const isOpen = item.classList.contains('open');
+
+    document.querySelectorAll('.faq-item.open').forEach(el => {
+        el.classList.remove('open');
+        el.querySelector('.faq-body').classList.remove('open');
+    });
+
+    if (!isOpen) {
+        item.classList.add('open');
+        body.classList.add('open');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    updateCalculator();
+    ['propertyPriceRange','downPaymentRange','loanTermRange','interestRateRange'].forEach(id => {
+        document.getElementById(id).addEventListener('input', updateCalculator);
+    });
+});
+</script>
+{% endblock %}

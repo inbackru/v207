@@ -1,0 +1,1251 @@
+{% extends "base.html" if not request.args.get("partial") else "manager/partial_base.html" %}
+
+{% block title %}{{ deal.deal_number }} — {{ deal.status_display }} | InBack{% endblock %}
+
+{% block head %}
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<style>
+    header { display: none !important; }
+    body { padding-top: 0 !important; }
+    :root {
+        --brand-primary: #0088CC;
+        --brand-success: #059669;
+    }
+    .stage-pipeline {
+        display: flex;
+        overflow-x: auto;
+        gap: 3px;
+        padding: 6px 0;
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e1 transparent;
+    }
+    .stage-pipeline::-webkit-scrollbar { height: 4px; }
+    .stage-pipeline::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .stage-btn {
+        padding: 8px 14px;
+        font-size: 11px;
+        white-space: nowrap;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 2px solid transparent;
+        font-weight: 600;
+        position: relative;
+        letter-spacing: 0.01em;
+    }
+    .stage-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .stage-btn.active {
+        border-color: rgba(0,0,0,0.3);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+        font-weight: 800;
+        transform: scale(1.05);
+    }
+    .stage-btn.passed { opacity: 0.85; }
+    .stage-btn.future { opacity: 0.35; }
+    .stage-btn.future:hover { opacity: 0.7; }
+    .stage-separator {
+        display: flex;
+        align-items: center;
+        color: #d1d5db;
+        font-size: 10px;
+        flex-shrink: 0;
+    }
+    .activity-item { border-left: 3px solid #e5e7eb; padding-left: 16px; margin-left: 8px; }
+    .activity-item.comment { border-left-color: var(--brand-primary); }
+    .activity-item.stage_change { border-left-color: var(--brand-success); }
+    .activity-item.field_update { border-left-color: #f59e0b; }
+    .activity-item.task_created, .activity-item.task_completed { border-left-color: #0088CC; }
+    .activity-item.comment_added { border-left-color: #06b6d4; }
+    .task-item.completed .task-title { text-decoration: line-through; color: #9ca3af; }
+    .task-item.overdue { border-color: #fca5a5 !important; background: #fef2f2 !important; }
+    .task-item.overdue .task-due { color: #ef4444; font-weight: 600; }
+    .task-item.overdue .task-title { color: #dc2626; }
+    .priority-urgent { color: #ef4444; }
+    .priority-high { color: #f59e0b; }
+    .priority-normal { color: #6b7280; }
+    .priority-low { color: #93c5fd; }
+    .dashboard-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .client-avatar {
+        width: 48px; height: 48px;
+        background: linear-gradient(135deg, #0088CC, #006699);
+        border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        color: white; font-weight: 700; font-size: 18px;
+        flex-shrink: 0;
+    }
+
+    @media (max-width: 767px) {
+        body > footer, body > .footer, #footer-section { display: none !important; }
+        body { padding-top: 0 !important; }
+
+        .max-w-7xl { padding-left: 10px !important; padding-right: 10px !important; }
+        .py-4 { padding-top: 4px !important; padding-bottom: 80px !important; }
+
+        .mb-6.flex.items-center.justify-between { display: none !important; }
+
+        nav[aria-label="Breadcrumb"] { display: none !important; }
+
+        .stage-pipeline {
+            padding: 8px 4px;
+            gap: 6px;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            flex-wrap: nowrap !important;
+            touch-action: pan-x !important;
+        }
+        .stage-pipeline::-webkit-scrollbar { display: none; }
+        .stage-btn {
+            padding: 8px 14px;
+            font-size: 11px;
+            flex-shrink: 0 !important;
+            white-space: nowrap !important;
+            border-radius: 20px;
+            min-height: 36px;
+        }
+        .stage-btn:hover { transform: none; }
+        .stage-separator { display: none !important; }
+        .dashboard-card.p-4.mb-6 { padding: 10px !important; margin-bottom: 10px !important; overflow: visible !important; }
+
+        .grid.grid-cols-1.lg\:grid-cols-3 { grid-template-columns: 1fr !important; }
+        .lg\:col-span-2 { grid-column: span 1 !important; }
+        .grid.grid-cols-3.gap-2 { grid-template-columns: 1fr 1fr 1fr !important; }
+        .grid.grid-cols-2.gap-4 { grid-template-columns: 1fr !important; }
+        .grid.grid-cols-3.gap-4 { grid-template-columns: 1fr !important; }
+        .grid.grid-cols-2.gap-3 { grid-template-columns: 1fr !important; }
+
+        .dashboard-card { border-radius: 10px; }
+        .dashboard-card.p-6 { padding: 12px !important; }
+        .space-y-6 > * + * { margin-top: 10px !important; }
+        .space-y-4 > * + * { margin-top: 8px !important; }
+        .gap-6 { gap: 10px !important; }
+
+        .tab-btn { padding: 8px 12px !important; font-size: 12px !important; }
+
+        #tab-comment .flex.gap-3 textarea { font-size: 13px !important; min-height: 48px !important; }
+        #tab-task .flex.flex-wrap.gap-2 button { font-size: 10px !important; padding: 4px 8px !important; }
+
+        .task-item { padding: 10px !important; gap: 10px !important; }
+        .activity-item { padding-left: 10px; margin-left: 4px; }
+
+        .flex.gap-3.flex-wrap { flex-direction: column; }
+        .flex.gap-3.flex-wrap .flex-1.min-w-\[180px\] { min-width: 100% !important; }
+
+        .client-avatar { width: 36px; height: 36px; font-size: 14px; border-radius: 10px; }
+
+        .fixed.inset-0.bg-black\/50.z-50 > div,
+        .fixed.inset-0.z-50 > .flex > div,
+        #closingModalContent,
+        .fixed.inset-0 > .bg-white.rounded-2xl {
+            position: fixed !important;
+            inset: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            border-radius: 0 !important;
+            margin: 0 !important;
+            max-width: 100% !important;
+            overflow-y: auto !important;
+        }
+        .fixed.inset-0.z-50 .flex.items-center.justify-center {
+            align-items: stretch !important;
+            padding: 0 !important;
+        }
+        .fixed.inset-0.z-50 .flex.items-center.justify-center > div {
+            min-height: 100vh !important;
+        }
+
+        .deal-card-top-header { display: none !important; }
+        header, #header-section, .site-header { display: none !important; }
+
+        .deal-info-sidebar .dashboard-card { margin-bottom: 10px !important; }
+        .deal-info-sidebar .p-6 { padding: 12px !important; }
+        .deal-info-sidebar .text-sm { font-size: 12px !important; }
+        .deal-info-sidebar h3 { font-size: 14px !important; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if not request.args.get("partial") %}
+{% if sidebar_links is defined and sidebar_links %}
+{% include 'components/sidebar.html' %}
+{% endif %}
+{% endif %}
+
+<div class="{% if not request.args.get('partial') %}{% if sidebar_links is defined and sidebar_links %}md:ml-[70px]{% endif %} transition-all duration-300{% endif %}">
+
+{% if not request.args.get("partial") %}
+<div class="bg-white border-b border-gray-200 shadow-sm deal-card-top-header">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between py-3">
+            <div class="flex items-center gap-3">
+                <div class="hidden md:flex w-8 h-8 bg-gradient-to-r from-[#0088CC] to-[#006699] rounded-lg items-center justify-center text-white font-bold text-sm">
+                    In
+                </div>
+                <span class="hidden md:inline font-bold text-gray-900 text-lg">InBack</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="{{ url_for('manager_dashboard') }}" class="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-gray-700 px-4 py-2 rounded-full border border-blue-200 transition-colors">
+                    <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+                    </svg>
+                    <span class="text-sm font-medium">Дашборд</span>
+                </a>
+                {% if user_profile %}
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full overflow-hidden">
+                        {% if user_profile.avatar %}
+                        <img src="{{ user_profile.avatar }}" alt="{{ user_profile.name }}" class="w-full h-full object-cover">
+                        {% else %}
+                        <div class="w-full h-full bg-gradient-to-r from-[#0088CC] to-[#006699] flex items-center justify-center text-white font-bold text-sm">
+                            {{ user_profile.initials }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="hidden max-md:flex items-center gap-3 px-4 py-3 bg-white border-b border-gray-200 deal-card-mobile-header">
+    <a onclick="if(history.length>1){history.back()}else{location.href='{{ url_for("manager_deals_kanban") }}'};return false;" href="{{ url_for('manager_deals_kanban') }}" class="w-8 h-8 flex items-center justify-center rounded-lg bg-[#0088CC]/10 text-[#0088CC]">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    </a>
+    <div class="flex-1 min-w-0">
+        <h1 class="text-sm font-bold text-gray-900 truncate">Сделка {{ deal.deal_number }}</h1>
+        <p class="text-xs text-gray-500 truncate">{{ deal.client_name or 'Клиент' }}</p>
+    </div>
+    <div class="flex items-center gap-2">
+        {% if deal.current_stage_config %}
+        <span class="text-[10px] px-2 py-1 rounded-full font-medium" style="background: {{ deal.current_stage_config.color }}20; color: {{ deal.current_stage_config.color }};">
+            {{ deal.current_stage_config.name }}
+        </span>
+        {% endif %}
+    </div>
+</div>
+
+<div class="{% if not request.args.get('partial') %}py-4{% endif %}" data-deal-id="{{ deal.id }}">
+    <div class="{% if not request.args.get('partial') %}max-w-7xl mx-auto px-4{% else %}px-6 py-6{% endif %}">
+{% if not request.args.get("partial") %}
+        <nav class="flex mb-4 text-sm max-md:hidden" aria-label="Breadcrumb">
+            <ol class="flex items-center space-x-2">
+                <li><a href="{{ url_for('manager_dashboard') }}" class="text-gray-500 hover:text-[#0088CC]">Дашборд</a></li>
+                <li><i class="fas fa-chevron-right text-gray-300 text-xs"></i></li>
+                <li><a href="{{ url_for('manager_deals') }}" class="text-gray-500 hover:text-[#0088CC]">Сделки</a></li>
+                <li><i class="fas fa-chevron-right text-gray-300 text-xs"></i></li>
+                <li class="text-gray-900 font-medium">{{ deal.deal_number }}</li>
+            </ol>
+        </nav>
+{% endif %}
+
+        <div class="mb-6 flex items-center justify-between flex-wrap gap-3">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-[#0088CC]/10 rounded-xl flex items-center justify-center text-[#0088CC]">
+                    <i class="fas fa-handshake text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">{{ deal.deal_number }}</h1>
+                    <p class="text-gray-500 text-sm">{{ deal.residential_complex.name if deal.residential_complex else (deal.residential_complex_name or 'Не указан ЖК') }}</p>
+                    {% if deal.source %}
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 mt-1 rounded-full text-[10px] font-medium bg-blue-50 text-[#0088CC]">
+                        <i class="fas fa-globe text-[8px]"></i>{{ deal.source }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="px-3 py-1.5 rounded-full text-sm font-bold" style="background-color: {{ deal.status_color }}20; color: {{ deal.status_color }}">
+                    {{ deal.status_display }}
+                </span>
+                {% if deal.is_locked %}
+                <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
+                    <i class="fas fa-lock mr-1"></i>Только чтение
+                </span>
+                {% endif %}
+{% if not request.args.get("partial") %}
+                <button onclick="window.print()" class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="fas fa-print"></i>
+                </button>
+{% endif %}
+            </div>
+        </div>
+
+        {% if deal.is_locked and deal.status == 'rejected' %}
+        <div class="dashboard-card p-4 mb-4 border-l-4 border-red-400 bg-red-50/50">
+            <div class="flex items-start gap-3">
+                <div class="w-9 h-9 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i class="fas fa-times-circle text-red-500"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-bold text-red-700">Сделка проиграна</p>
+                    {% if deal.rejection_reason %}
+                    <p class="text-sm text-red-600 mt-1"><span class="font-medium">Причина:</span> {{ deal.rejection_reason }}</p>
+                    {% endif %}
+                    {% if deal.closing_comment %}
+                    <p class="text-sm text-gray-600 mt-1">{{ deal.closing_comment }}</p>
+                    {% endif %}
+                    {% if deal.closed_at %}
+                    <p class="text-xs text-gray-400 mt-1">{{ deal.closed_at|msk_time('%d.%m.%Y в %H:%M') }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% elif deal.is_locked and deal.status in ['completed', 'successful'] %}
+        <div class="dashboard-card p-4 mb-4 border-l-4 border-green-400 bg-green-50/50">
+            <div class="flex items-start gap-3">
+                <div class="w-9 h-9 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i class="fas fa-trophy text-[#059669]"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-bold text-[#059669]">Сделка успешно завершена</p>
+                    {% if deal.closing_comment %}
+                    <p class="text-sm text-gray-600 mt-1">{{ deal.closing_comment }}</p>
+                    {% endif %}
+                    {% if deal.closed_at %}
+                    <p class="text-xs text-gray-400 mt-1">{{ deal.closed_at|msk_time('%d.%m.%Y в %H:%M') }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="dashboard-card p-4 mb-6">
+            <div class="flex items-center gap-2 mb-3">
+                <span class="w-6 h-6 bg-[#0088CC]/10 rounded-md flex items-center justify-center">
+                    <i class="fas fa-route text-[#0088CC] text-[10px]"></i>
+                </span>
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Этапы сделки</span>
+            </div>
+            <div class="stage-pipeline" id="stagePipeline">
+                {% set stage_groups = [
+                    ('Начало', ['new', 'in_progress', 'calculation']),
+                    ('Встречи', ['meeting_scheduled', 'meeting_done', 'postponed']),
+                    ('Бронь', ['verbal_reserve', 'reserved']),
+                    ('Документы', ['documents', 'mortgage']),
+                    ('ДДУ', ['ddu_preparation', 'ddu_signing']),
+                    ('Финал', ['registration', 'receivables', 'completed']),
+                ] %}
+                {% set effective_status = deal.status %}
+                {% set current_idx = stages.index(effective_status) if effective_status in stages else -1 %}
+                {% for group_name, group_stages in stage_groups %}
+                    {% if not loop.first %}
+                    <div class="stage-separator"><i class="fas fa-chevron-right"></i></div>
+                    {% endif %}
+                    {% for stage in group_stages %}
+                        {% if stage in stages %}
+                        {% set stage_idx = stages.index(stage) %}
+                        {% set is_active = (effective_status == stage) %}
+                        {% set is_passed = stage_idx < current_idx %}
+                        <button class="stage-btn {{ 'active' if is_active else ('passed' if is_passed else 'future') }}"
+                                style="background: {{ stage_colors[stage] }}{{ 'ff' if is_active else ('80' if is_passed else '20') }}; color: {{ '#fff' if is_active or is_passed else stage_colors[stage] }};"
+                                onclick="changeStage('{{ stage }}')"
+                                data-stage="{{ stage }}"
+                                title="{{ stage_labels[stage] }}">
+                            {% if is_passed %}<i class="fas fa-check mr-1 text-[9px]"></i>{% endif %}
+                            {% if is_active %}<i class="fas fa-circle mr-1 text-[6px] animate-pulse"></i>{% endif %}
+                            {{ stage_labels[stage] }}
+                        </button>
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+                <div class="stage-separator"><i class="fas fa-chevron-right"></i></div>
+                {% set is_rejected = (effective_status == 'rejected') %}
+                <button class="stage-btn {{ 'active' if is_rejected else 'future' }}"
+                        style="background: {{ stage_colors['rejected'] }}{{ 'ff' if is_rejected else '20' }}; color: {{ '#fff' if is_rejected else stage_colors['rejected'] }};"
+                        onclick="changeStage('rejected')"
+                        data-stage="rejected"
+                        title="Отклонена">
+                    {% if is_rejected %}<i class="fas fa-times mr-1 text-[9px]"></i>{% endif %}
+                    {{ stage_labels['rejected'] }}
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 space-y-6">
+                <div class="dashboard-card p-6">
+                    <div class="flex items-center gap-2 mb-6">
+                        <div class="flex border-b border-gray-200 w-full">
+                            <button class="px-6 py-3 text-sm font-semibold border-b-2 border-[#0088CC] text-[#0088CC] tab-btn active" data-tab="comment">
+                                <i class="fas fa-comment mr-2"></i>Комментарий
+                            </button>
+                            <button class="px-6 py-3 text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 tab-btn" data-tab="task">
+                                <i class="fas fa-tasks mr-2"></i>Задача
+                                {% set active_tasks = tasks|list|selectattr('is_completed', 'equalto', false)|list if tasks else [] %}
+                                {% if active_tasks|length > 0 %}
+                                <span class="ml-1 px-1.5 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full">{{ active_tasks|length }}</span>
+                                {% endif %}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="tab-comment">
+                        <div class="flex gap-3">
+                            <textarea id="commentText" rows="3" placeholder="Напишите комментарий к сделке..."
+                                      class="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0088CC] focus:border-transparent resize-none text-sm transition-all"></textarea>
+                            <button onclick="addComment()" class="bg-[#0088CC] hover:bg-[#006699] text-white w-12 h-12 rounded-xl transition-all shadow-md shadow-[#0088CC]/20 flex items-center justify-center self-end">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="tab-task" class="hidden">
+                        <div class="space-y-4">
+                            <div class="flex flex-wrap gap-2 mb-1">
+                                <span class="text-xs text-gray-400 self-center mr-1">Быстрые:</span>
+                                <button type="button" onclick="fillTaskTemplate('Позвонить клиенту', 'high')" class="px-3 py-1.5 bg-sky-50 text-[#0088CC] text-xs rounded-lg hover:bg-sky-100 transition-all border border-sky-200">
+                                    <i class="fas fa-phone mr-1"></i>Позвонить клиенту
+                                </button>
+                                <button type="button" onclick="fillTaskTemplate('Отправить подборку', 'normal')" class="px-3 py-1.5 bg-sky-50 text-[#0088CC] text-xs rounded-lg hover:bg-sky-100 transition-all border border-sky-200">
+                                    <i class="fas fa-paper-plane mr-1"></i>Отправить подборку
+                                </button>
+                                <button type="button" onclick="fillTaskTemplate('Назначить встречу', 'high')" class="px-3 py-1.5 bg-sky-50 text-[#0088CC] text-xs rounded-lg hover:bg-sky-100 transition-all border border-sky-200">
+                                    <i class="fas fa-calendar-check mr-1"></i>Назначить встречу
+                                </button>
+                                <button type="button" onclick="fillTaskTemplate('Подготовить документы', 'normal')" class="px-3 py-1.5 bg-sky-50 text-[#0088CC] text-xs rounded-lg hover:bg-sky-100 transition-all border border-sky-200">
+                                    <i class="fas fa-file-alt mr-1"></i>Подготовить документы
+                                </button>
+                                <button type="button" onclick="fillTaskTemplate('Уточнить детали', 'normal')" class="px-3 py-1.5 bg-sky-50 text-[#0088CC] text-xs rounded-lg hover:bg-sky-100 transition-all border border-sky-200">
+                                    <i class="fas fa-question-circle mr-1"></i>Уточнить детали
+                                </button>
+                            </div>
+                            <input type="text" id="taskTitle" placeholder="Что нужно сделать?"
+                                   class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0088CC] focus:border-transparent text-sm transition-all">
+                            <div class="flex gap-3 flex-wrap">
+                                <div class="flex-1 min-w-[180px] relative">
+                                    <i class="far fa-calendar absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                    <input type="datetime-local" id="taskDueDate"
+                                           class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0088CC] focus:border-transparent text-sm transition-all">
+                                </div>
+                                <select id="taskPriority" class="px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:ring-2 focus:ring-[#0088CC] outline-none">
+                                    <option value="low">Низкий</option>
+                                    <option value="normal" selected>Обычный</option>
+                                    <option value="high">Высокий</option>
+                                    <option value="urgent">Срочный</option>
+                                </select>
+                                <button onclick="addTask()" class="bg-[#059669] hover:bg-[#047857] text-white px-6 py-3 rounded-xl transition-all shadow-md shadow-[#059669]/20 font-semibold">
+                                    <i class="fas fa-plus mr-2"></i>Создать
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-card p-6" id="tasksSection">
+                    <h3 class="text-base font-bold text-gray-900 mb-4 flex items-center">
+                        <span class="w-8 h-8 bg-sky-50 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-tasks text-[#0088CC] text-sm"></i>
+                        </span>
+                        Задачи
+                        <span class="ml-2 text-xs text-gray-400 font-normal" id="tasksCounter"></span>
+                    </h3>
+                    <div id="tasksList" class="space-y-3">
+                        {% set task_list = tasks|list if tasks else [] %}
+                        {% if task_list|length == 0 %}
+                        <p class="text-sm text-gray-400 text-center py-4">Нет задач. Создайте первую задачу во вкладке выше.</p>
+                        {% endif %}
+                        {% for task in task_list %}
+                        <div class="task-item flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-[#0088CC]/30 hover:bg-blue-50/30 transition-all {{ 'completed' if task.is_completed else '' }} {{ 'overdue' if task.is_overdue else '' }}" data-task-id="{{ task.id }}">
+                            <button onclick="toggleTask({{ task.id }})" class="w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-all {{ 'bg-[#059669] border-[#059669]' if task.is_completed else 'border-gray-200 hover:border-[#059669] bg-white' }}">
+                                {% if task.is_completed %}<i class="fas fa-check text-white text-xs"></i>{% endif %}
+                            </button>
+                            <div class="flex-1 min-w-0">
+                                <span class="task-title text-sm font-medium {{ 'text-gray-400' if task.is_completed else 'text-gray-900' }}">{{ task.title }}</span>
+                                {% if task.due_date %}
+                                <div class="flex items-center mt-1">
+                                    <span class="task-due text-[11px] {{ 'text-red-500 font-bold' if task.is_overdue else 'text-gray-400' }}">
+                                        <i class="far fa-clock mr-1"></i>{{ task.due_date.strftime('%d.%m %H:%M') }}
+                                    </span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-gray-100 priority-{{ task.priority }}">
+                                {{ task.priority_label if task.priority_label else task.priority }}
+                            </span>
+                            <button onclick="deleteTask({{ task.id }})" class="w-8 h-8 flex items-center justify-center text-gray-300 hover:text-red-500 transition-colors">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="dashboard-card p-6">
+                    <h3 class="text-base font-bold text-gray-900 mb-6 flex items-center">
+                        <span class="w-8 h-8 bg-[#0088CC]/10 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-stream text-[#0088CC] text-sm"></i>
+                        </span>
+                        Лента активности
+                    </h3>
+                    <div id="activityFeed" class="space-y-6">
+                        {% if not activity %}
+                        <p class="text-sm text-gray-400 text-center py-4">Пока нет записей</p>
+                        {% endif %}
+                        {% for item in activity %}
+                            <div class="activity-item {{ item.type if item.type == 'comment' else item.action }}">
+                            <div class="flex items-center gap-2 mb-2">
+                                <div class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                                    {% if item.type == 'comment' %}
+                                    <i class="fas fa-comment text-[#0088CC] text-[10px]"></i>
+                                    {% elif item.action == 'stage_change' %}
+                                    <i class="fas fa-exchange-alt text-[#059669] text-[10px]"></i>
+                                    {% elif item.action == 'field_update' %}
+                                    <i class="fas fa-edit text-yellow-500 text-[10px]"></i>
+                                    {% elif item.action == 'task_created' %}
+                                    <i class="fas fa-plus-circle text-purple-500 text-[10px]"></i>
+                                    {% elif item.action == 'task_completed' %}
+                                    <i class="fas fa-check-circle text-purple-500 text-[10px]"></i>
+                                    {% elif item.action == 'comment_added' %}
+                                    <i class="fas fa-comment-dots text-cyan-500 text-[10px]"></i>
+                                    {% else %}
+                                    <i class="fas fa-info-circle text-gray-400 text-[10px]"></i>
+                                    {% endif %}
+                                </div>
+                                <span class="text-xs font-bold text-gray-900">{{ item.author }}</span>
+                                <span class="text-[10px] text-gray-400 ml-auto bg-gray-50 px-2 py-0.5 rounded-full">{{ item.created_at|msk_time('%d.%m.%Y %H:%M') }}</span>
+                                {% if item.type == 'comment' and item.is_pinned %}
+                                <i class="fas fa-thumbtack text-yellow-500 text-[10px] ml-1"></i>
+                                {% endif %}
+                            </div>
+                            {% if item.type == 'comment' %}
+                            <div class="bg-[#0088CC]/5 p-4 rounded-2xl border border-[#0088CC]/10 relative group">
+                                <p class="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">{{ item.text }}</p>
+                                <div class="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button onclick="pinComment({{ item.id }})" class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm text-gray-400 hover:text-yellow-500 transition-colors" title="Закрепить"><i class="fas fa-thumbtack text-xs"></i></button>
+                                    <button onclick="deleteComment({{ item.id }})" class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm text-gray-400 hover:text-red-500 transition-colors" title="Удалить"><i class="fas fa-trash text-xs"></i></button>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="pl-4 py-1 border-l-2 border-gray-100">
+                                <p class="text-sm text-gray-600 italic">{{ item.description }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="dashboard-card p-6">
+                    <h3 class="text-base font-bold text-gray-900 mb-4 flex items-center">
+                        <span class="w-8 h-8 bg-[#0088CC]/10 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-user text-[#0088CC] text-sm"></i>
+                        </span>
+                        Клиент
+                    </h3>
+                    <div class="flex items-center gap-4 mb-4 p-3 bg-gray-50 rounded-xl">
+                        <div class="client-avatar">
+                            {{ (deal.client.full_name or deal.client.email or '?')[0]|upper }}
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-sm font-bold text-gray-900 truncate">{{ deal.client.full_name or 'Не указано' }}</p>
+                            {% if deal.client.email %}
+                            <a href="mailto:{{ deal.client.email }}" class="text-xs text-[#0088CC] hover:underline truncate block">{{ deal.client.email }}</a>
+                            {% endif %}
+                            {% if deal.client.phone %}
+                            <a href="tel:{{ deal.client.phone }}" class="text-xs text-gray-500 hover:text-[#0088CC] truncate block mt-0.5">
+                                <i class="fas fa-phone text-[9px] mr-1"></i>{{ deal.client.phone }}
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                {% if deal.client and deal.client.quiz_completed %}
+                <div class="dashboard-card p-6">
+                    <h3 class="text-base font-bold text-gray-900 flex items-center mb-4">
+                        <span class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-clipboard-list text-amber-600 text-sm"></i>
+                        </span>
+                        Предпочтения клиента
+                    </h3>
+                    <div class="space-y-2">
+                        {% if deal.client.preferred_district %}
+                        <div class="flex justify-between items-center p-2 hover:bg-gray-50 rounded-lg">
+                            <span class="text-sm text-gray-500"><i class="fas fa-bullseye mr-1.5 text-gray-400"></i>Цель</span>
+                            <span class="text-sm font-semibold text-gray-900">{{ deal.client.preferred_district }}</span>
+                        </div>
+                        {% endif %}
+                        {% if deal.client.property_type %}
+                        <div class="flex justify-between items-center p-2 hover:bg-gray-50 rounded-lg">
+                            <span class="text-sm text-gray-500"><i class="fas fa-home mr-1.5 text-gray-400"></i>Тип</span>
+                            <span class="text-sm font-semibold text-gray-900">{{ deal.client.property_type }}</span>
+                        </div>
+                        {% endif %}
+                        {% if deal.client.room_count %}
+                        <div class="flex justify-between items-center p-2 hover:bg-gray-50 rounded-lg">
+                            <span class="text-sm text-gray-500"><i class="fas fa-door-open mr-1.5 text-gray-400"></i>Комнат</span>
+                            <span class="text-sm font-semibold text-gray-900">{{ deal.client.room_count }}</span>
+                        </div>
+                        {% endif %}
+                        {% if deal.client.budget_range %}
+                        <div class="flex justify-between items-center p-2 hover:bg-gray-50 rounded-lg">
+                            <span class="text-sm text-gray-500"><i class="fas fa-credit-card mr-1.5 text-gray-400"></i>Оплата</span>
+                            <span class="text-sm font-semibold text-gray-900">{{ deal.client.budget_range }}</span>
+                        </div>
+                        {% endif %}
+                        {% if deal.client.timing %}
+                        <div class="flex justify-between items-center p-2 hover:bg-gray-50 rounded-lg">
+                            <span class="text-sm text-gray-500"><i class="fas fa-clock mr-1.5 text-gray-400"></i>Сроки</span>
+                            <span class="text-sm font-semibold text-gray-900">{{ deal.client.timing }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="dashboard-card p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-base font-bold text-gray-900 flex items-center">
+                            <span class="w-8 h-8 bg-[#0088CC]/10 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-info-circle text-[#0088CC] text-sm"></i>
+                            </span>
+                            О сделке
+                        </h3>
+                        <button onclick="toggleEditMode()" id="editToggleBtn" class="text-xs font-semibold text-[#0088CC] hover:text-[#006699] bg-[#0088CC]/5 px-3 py-1.5 rounded-lg transition-all">
+                            <i class="fas fa-edit mr-1"></i>Изменить
+                        </button>
+                    </div>
+
+                    <div id="dealInfo" class="space-y-3">
+                        <div class="flex justify-between items-center p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                            <span class="text-sm text-gray-500">Жилой комплекс</span>
+                            <span class="text-sm font-semibold text-gray-900" id="field-rc">{{ deal.residential_complex.name if deal.residential_complex else (deal.residential_complex_name or '-') }}</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                            <span class="text-sm text-gray-500">Ответственный</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-semibold text-gray-900" id="field-responsible">{{ deal.manager.full_name if deal.manager else '-' }}</span>
+                                {% if can_change_responsible is defined and can_change_responsible and not deal.is_locked %}
+                                <button onclick="document.getElementById('reassignModal').classList.remove('hidden')" class="text-[#0088CC] hover:text-[#006da3] text-xs" title="Сменить ответственного">
+                                    <i class="fas fa-exchange-alt"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center p-3 bg-[#0088CC]/5 rounded-xl border border-[#0088CC]/10">
+                            <span class="text-sm text-[#0088CC] font-medium">Стоимость</span>
+                            <span class="text-xl font-bold text-[#0088CC]" id="field-price">{{ "{:,.0f}".format(deal.property_price|float).replace(',', ' ') }} ₽</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center p-3 bg-[#059669]/5 rounded-xl border border-[#059669]/10">
+                            <span class="text-sm text-[#059669] font-medium">Кэшбек</span>
+                            <span class="text-xl font-bold text-[#059669]" id="field-cashback">{{ "{:,.0f}".format(deal.cashback_amount|float).replace(',', ' ') }} ₽</span>
+                        </div>
+                        
+                        {% if deal.property_price and deal.cashback_amount %}
+                        <div class="flex justify-between items-center px-2">
+                            <span class="text-xs text-gray-400">Процент кэшбека</span>
+                            <span class="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded">{{ "%.1f"|format(deal.get_cashback_percentage()) }}%</span>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="border-t border-gray-100 my-2"></div>
+                        
+                        <div class="grid grid-cols-3 gap-2">
+                            <div class="text-center p-3 bg-gray-50 rounded-xl">
+                                <span class="block text-[10px] text-gray-400 uppercase font-bold mb-1">Комнат</span>
+                                <span class="text-sm font-bold text-gray-900" id="field-rooms">{{ deal.property_rooms or '-' }}</span>
+                            </div>
+                            <div class="text-center p-3 bg-gray-50 rounded-xl">
+                                <span class="block text-[10px] text-gray-400 uppercase font-bold mb-1">Площадь</span>
+                                <span class="text-sm font-bold text-gray-900" id="field-area">{{ deal.property_area|string + ' м²' if deal.property_area else '-' }}</span>
+                            </div>
+                            <div class="text-center p-3 bg-gray-50 rounded-xl">
+                                <span class="block text-[10px] text-gray-400 uppercase font-bold mb-1">Этаж</span>
+                                <span class="text-sm font-bold text-gray-900" id="field-floor">{{ deal.property_floor or '-' }}</span>
+                            </div>
+                        </div>
+
+                        {% if deal.property_description %}
+                        <div class="mt-3 p-3 bg-orange-50/30 rounded-xl border border-orange-100/50">
+                            <span class="text-[10px] text-orange-400 uppercase font-bold block mb-2">Описание объекта</span>
+                            <p class="text-xs text-gray-700 leading-relaxed" id="field-desc">{{ deal.property_description }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div id="dealEditForm" class="hidden space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-[10px] text-gray-400 uppercase font-bold block mb-1">Стоимость (₽)</label>
+                                <input type="number" id="edit-price" value="{{ deal.property_price|float|int }}" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#0088CC] transition-all">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-gray-400 uppercase font-bold block mb-1">Кэшбек (₽)</label>
+                                <input type="number" id="edit-cashback" value="{{ deal.cashback_amount|float|int }}" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#059669] transition-all">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <label class="text-[10px] text-gray-400 uppercase font-bold block mb-1">Комнат</label>
+                                <input type="text" id="edit-rooms" value="{{ deal.property_rooms or '' }}" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#0088CC] transition-all">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-gray-400 uppercase font-bold block mb-1">Площадь (м²)</label>
+                                <input type="number" id="edit-area" value="{{ deal.property_area or '' }}" step="0.1" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#0088CC] transition-all">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-gray-400 uppercase font-bold block mb-1">Этаж</label>
+                                <input type="number" id="edit-floor" value="{{ deal.property_floor or '' }}" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#0088CC] transition-all">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-gray-400 uppercase font-bold block mb-1">Описание объекта</label>
+                            <textarea id="edit-desc" rows="3" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm resize-none focus:ring-2 focus:ring-[#0088CC] transition-all">{{ deal.property_description or '' }}</textarea>
+                        </div>
+                        <div class="flex gap-3 pt-2">
+                            <button onclick="saveDealFields()" class="flex-1 bg-[#059669] text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-[#047857] transition-all shadow-md shadow-[#059669]/20">
+                                <i class="fas fa-save mr-2"></i>Сохранить
+                            </button>
+                            <button onclick="toggleEditMode()" class="flex-1 bg-gray-100 text-gray-600 px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-200 transition-all">Отмена</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-card p-6">
+                    <h3 class="text-base font-bold text-gray-900 mb-4 flex items-center">
+                        <span class="w-8 h-8 bg-yellow-50 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-sticky-note text-yellow-500 text-sm"></i>
+                        </span>
+                        Заметки
+                    </h3>
+                    <textarea id="dealNotes" rows="4" placeholder="Напишите внутренние заметки к сделке..."
+                              class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm resize-none focus:ring-2 focus:ring-[#0088CC] focus:border-transparent transition-all bg-gray-50/30">{{ deal.notes or '' }}</textarea>
+                    <button onclick="saveNotes(this)" class="mt-3 w-full bg-white border border-gray-200 hover:border-[#0088CC] hover:text-[#0088CC] text-gray-600 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center">
+                        <i class="fas fa-save mr-2"></i>Сохранить заметки
+                    </button>
+                </div>
+
+                <div class="dashboard-card p-6">
+                    <h3 class="text-base font-bold text-gray-900 mb-4 flex items-center">
+                        <span class="w-8 h-8 bg-[#0088CC]/10 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-calendar text-[#0088CC] text-sm"></i>
+                        </span>
+                        Важные даты
+                    </h3>
+                    <div class="grid grid-cols-1 gap-4">
+                        <div class="relative">
+                            <label class="text-[10px] text-gray-400 uppercase font-bold absolute left-4 top-2 z-10">Дата договора</label>
+                            <input type="date" id="contractDate" value="{{ deal.contract_date.strftime('%Y-%m-%d') if deal.contract_date else '' }}"
+                                   onchange="saveDate('contract_date', this.value)"
+                                   class="w-full pl-4 pr-4 pt-7 pb-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#0088CC] transition-all bg-gray-50/30 font-medium">
+                        </div>
+                        <div class="relative">
+                            <label class="text-[10px] text-gray-400 uppercase font-bold absolute left-4 top-2 z-10">Дата завершения</label>
+                            <input type="date" id="completionDate" value="{{ deal.completion_date.strftime('%Y-%m-%d') if deal.completion_date else '' }}"
+                                   onchange="saveDate('completion_date', this.value)"
+                                   class="w-full pl-4 pr-4 pt-7 pb-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#0088CC] transition-all bg-gray-50/30 font-medium">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const DEAL_ID = {{ deal.id }};
+const IS_PANEL = {{ 'true' if request.args.get('partial') else 'false' }};
+const DEAL_IS_LOCKED = {{ 'true' if deal.is_locked else 'false' }};
+
+function refreshDeal() {
+    if (IS_PANEL && typeof window.reloadDealPanel === 'function') {
+        window.reloadDealPanel();
+    } else if (IS_PANEL && typeof window.loadDealContent === 'function') {
+        window.loadDealContent(DEAL_ID);
+    } else {
+        location.reload();
+    }
+}
+
+(function() {
+    const tabBtns = document.querySelectorAll('[data-deal-id="{{ deal.id }}"] .tab-btn');
+    tabBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const container = this.closest('[data-deal-id="{{ deal.id }}"]');
+            container.querySelectorAll('.tab-btn').forEach(function(b) {
+                b.classList.remove('active', 'border-[#0088CC]', 'text-[#0088CC]');
+                b.classList.add('border-transparent', 'text-gray-500');
+            });
+            this.classList.add('active', 'border-[#0088CC]', 'text-[#0088CC]');
+            this.classList.remove('border-transparent', 'text-gray-500');
+            const tabComment = container.querySelector('#tab-comment');
+            const tabTask = container.querySelector('#tab-task');
+            if (tabComment) tabComment.classList.toggle('hidden', this.dataset.tab !== 'comment');
+            if (tabTask) tabTask.classList.toggle('hidden', this.dataset.tab !== 'task');
+        });
+    });
+})();
+
+function fillTaskTemplate(title, priority) {
+    const titleEl = document.getElementById('taskTitle');
+    const priorityEl = document.getElementById('taskPriority');
+    if (titleEl) {
+        titleEl.value = title;
+        titleEl.focus();
+    }
+    if (priorityEl && priority) priorityEl.value = priority;
+}
+
+async function changeStage(stage) {
+    if (DEAL_IS_LOCKED) { alert('Сделка завершена и не может быть изменена'); return; }
+    const closingStages = ['completed', 'rejected'];
+    let extraData = {};
+
+    if (closingStages.includes(stage)) {
+        const result = await showDealClosingModal();
+        if (result === 'cancel') return;
+        if (result.action === 'success') { stage = 'completed'; extraData.closing_comment = result.comment || ''; }
+        if (result.action === 'lost') { stage = 'rejected'; extraData.rejection_reason = result.reason || ''; extraData.closing_comment = result.comment || ''; }
+    } else {
+        const taskResult = await showTaskReminderModal(stage);
+        if (taskResult.action === 'cancel') return;
+        if (taskResult.action === 'create_task') {
+            await createTaskFromReminder(taskResult.title, taskResult.due_date, taskResult.priority);
+        }
+    }
+
+    try {
+        const res = await fetch('/api/deals/' + DEAL_ID + '/stage', {
+            method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({stage: stage, ...extraData})
+        });
+        const data = await res.json();
+        if (data.success) refreshDeal();
+        else alert(data.error || 'Ошибка');
+    } catch(e) { alert('Ошибка при смене этапа'); }
+}
+
+async function createTaskFromReminder(title, dueDate, priority) {
+    if (!title) return;
+    try {
+        const res = await fetch('/api/deals/' + DEAL_ID + '/tasks', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({title: title, due_date: dueDate || null, priority: priority || 'medium'})
+        });
+        const data = await res.json();
+        if (!data.success) console.error('Task creation failed:', data.error);
+    } catch(e) { console.error('Task creation error:', e); }
+}
+
+function showDealClosingModal() {
+    return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4';
+        overlay.innerHTML = `
+            <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6" id="closingModalContent">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-flag-checkered text-gray-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900">Завершение сделки</h3>
+                    <p class="text-sm text-gray-500 mt-2">Выберите результат сделки</p>
+                </div>
+                <div id="closingChoiceStep" class="space-y-3">
+                    <button id="closingSuccess" class="w-full py-3.5 bg-[#059669] hover:bg-[#047857] text-white rounded-xl font-semibold transition-all flex items-center justify-center gap-2">
+                        <i class="fas fa-trophy"></i> Сделка успешна
+                    </button>
+                    <button id="closingLost" class="w-full py-3.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold transition-all flex items-center justify-center gap-2">
+                        <i class="fas fa-times-circle"></i> Сделка проиграна
+                    </button>
+                    <button id="closingCancel" class="w-full py-2.5 text-gray-400 hover:text-gray-600 text-sm transition-all">
+                        Отмена
+                    </button>
+                </div>
+                <div id="closingLostStep" class="hidden space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Причина проигрыша</label>
+                        <select id="closingReason" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-red-300 focus:border-red-400 outline-none">
+                            <option value="">Выберите причину...</option>
+                            <option value="Клиент выбрал другое агентство">Клиент выбрал другое агентство</option>
+                            <option value="Клиент передумал покупать">Клиент передумал покупать</option>
+                            <option value="Не подошёл объект">Не подошёл объект</option>
+                            <option value="Не одобрили ипотеку">Не одобрили ипотеку</option>
+                            <option value="Клиент не выходит на связь">Клиент не выходит на связь</option>
+                            <option value="Цена не устроила">Цена не устроила</option>
+                            <option value="Купил напрямую у застройщика">Купил напрямую у застройщика</option>
+                            <option value="Другая причина">Другая причина</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Комментарий</label>
+                        <textarea id="closingComment" rows="3" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-red-300 focus:border-red-400 outline-none resize-none" placeholder="Опишите подробности..."></textarea>
+                    </div>
+                    <div class="flex gap-3">
+                        <button id="closingLostBack" class="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold transition-all text-sm">
+                            <i class="fas fa-arrow-left mr-1"></i> Назад
+                        </button>
+                        <button id="closingLostConfirm" class="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold transition-all text-sm">
+                            <i class="fas fa-check mr-1"></i> Подтвердить
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        overlay.querySelector('#closingSuccess').onclick = () => {
+            document.body.removeChild(overlay);
+            resolve({action: 'success', comment: ''});
+        };
+        overlay.querySelector('#closingLost').onclick = () => {
+            overlay.querySelector('#closingChoiceStep').classList.add('hidden');
+            overlay.querySelector('#closingLostStep').classList.remove('hidden');
+            const header = overlay.querySelector('h3');
+            header.textContent = 'Сделка проиграна';
+            header.classList.add('text-red-600');
+            overlay.querySelector('.fa-flag-checkered').className = 'fas fa-times-circle text-red-500 text-2xl';
+            overlay.querySelector('.fa-flag-checkered')?.closest('div')?.classList?.remove('bg-gray-100');
+        };
+        overlay.querySelector('#closingLostBack').onclick = () => {
+            overlay.querySelector('#closingChoiceStep').classList.remove('hidden');
+            overlay.querySelector('#closingLostStep').classList.add('hidden');
+            const header = overlay.querySelector('h3');
+            header.textContent = 'Завершение сделки';
+            header.classList.remove('text-red-600');
+        };
+        overlay.querySelector('#closingLostConfirm').onclick = () => {
+            const reason = overlay.querySelector('#closingReason').value;
+            const comment = overlay.querySelector('#closingComment').value.trim();
+            document.body.removeChild(overlay);
+            resolve({action: 'lost', reason: reason, comment: comment});
+        };
+        overlay.querySelector('#closingCancel').onclick = () => { document.body.removeChild(overlay); resolve('cancel'); };
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) { document.body.removeChild(overlay); resolve('cancel'); } });
+    });
+}
+
+function showTaskReminderModal(stage) {
+    const stageLabels = {};
+    document.querySelectorAll('[data-stage-key]').forEach(el => {
+        stageLabels[el.dataset.stageKey] = el.textContent.trim();
+    });
+    const stageLabel = stageLabels[stage] || stage;
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+    return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4';
+        overlay.innerHTML = `
+            <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+                <div class="text-center mb-5">
+                    <div class="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-clipboard-list text-[#0088CC] text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900">Создать задачу?</h3>
+                    <p class="text-sm text-gray-500 mt-2">Этап: <span class="font-semibold text-gray-700">${stageLabel}</span></p>
+                </div>
+                <div id="taskReminderChoice" class="space-y-2">
+                    <button id="reminderCreate" class="w-full py-3 bg-[#0088CC] hover:bg-[#006699] text-white rounded-xl font-semibold transition-all flex items-center justify-center gap-2">
+                        <i class="fas fa-plus"></i> Да, создать задачу
+                    </button>
+                    <button id="reminderSkip" class="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold transition-all">
+                        Пропустить
+                    </button>
+                    <button id="reminderCancel" class="w-full py-2 text-gray-400 hover:text-gray-600 text-sm transition-all">
+                        Отмена
+                    </button>
+                </div>
+                <div id="taskReminderForm" class="hidden space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Название задачи</label>
+                        <input id="reminderTaskTitle" type="text" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#0088CC]/30 focus:border-[#0088CC] outline-none" value="Задача по этапу: ${stageLabel}">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Срок</label>
+                            <input id="reminderTaskDate" type="date" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#0088CC]/30 focus:border-[#0088CC] outline-none" value="${tomorrowStr}">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Приоритет</label>
+                            <select id="reminderTaskPriority" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#0088CC]/30 focus:border-[#0088CC] outline-none">
+                                <option value="low">Низкий</option>
+                                <option value="medium" selected>Средний</option>
+                                <option value="high">Высокий</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex gap-3 pt-1">
+                        <button id="reminderFormBack" class="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold transition-all text-sm">
+                            <i class="fas fa-arrow-left mr-1"></i> Назад
+                        </button>
+                        <button id="reminderFormSave" class="flex-1 py-2.5 bg-[#0088CC] hover:bg-[#006699] text-white rounded-xl font-semibold transition-all text-sm">
+                            <i class="fas fa-check mr-1"></i> Создать и перейти
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        overlay.querySelector('#reminderCreate').onclick = () => {
+            overlay.querySelector('#taskReminderChoice').classList.add('hidden');
+            overlay.querySelector('#taskReminderForm').classList.remove('hidden');
+            overlay.querySelector('#reminderTaskTitle').focus();
+        };
+        overlay.querySelector('#reminderFormBack').onclick = () => {
+            overlay.querySelector('#taskReminderChoice').classList.remove('hidden');
+            overlay.querySelector('#taskReminderForm').classList.add('hidden');
+        };
+        overlay.querySelector('#reminderFormSave').onclick = () => {
+            const title = overlay.querySelector('#reminderTaskTitle').value.trim();
+            const dueDate = overlay.querySelector('#reminderTaskDate').value;
+            const priority = overlay.querySelector('#reminderTaskPriority').value;
+            if (!title) { overlay.querySelector('#reminderTaskTitle').classList.add('border-red-400'); return; }
+            document.body.removeChild(overlay);
+            resolve({action: 'create_task', title: title, due_date: dueDate, priority: priority});
+        };
+        overlay.querySelector('#reminderSkip').onclick = () => { document.body.removeChild(overlay); resolve({action: 'continue'}); };
+        overlay.querySelector('#reminderCancel').onclick = () => { document.body.removeChild(overlay); resolve({action: 'cancel'}); };
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) { document.body.removeChild(overlay); resolve({action: 'cancel'}); } });
+    });
+}
+
+function showConfirmModal(title, message, icon, iconColor, confirmText, cancelText) {
+    return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4';
+        overlay.innerHTML = `
+            <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6">
+                <div class="text-center mb-5">
+                    <div class="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3" style="background: ${iconColor}15">
+                        <i class="${icon} text-2xl" style="color: ${iconColor}"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900">${title}</h3>
+                    <p class="text-sm text-gray-500 mt-2">${message}</p>
+                </div>
+                <div class="flex gap-3">
+                    <button id="confirmCancel" class="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold transition-all text-sm">
+                        ${cancelText}
+                    </button>
+                    <button id="confirmOk" class="flex-1 py-2.5 text-white rounded-xl font-semibold transition-all text-sm" style="background: ${iconColor}">
+                        ${confirmText}
+                    </button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        overlay.querySelector('#confirmOk').onclick = () => { document.body.removeChild(overlay); resolve(true); };
+        overlay.querySelector('#confirmCancel').onclick = () => { document.body.removeChild(overlay); resolve(false); };
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) { document.body.removeChild(overlay); resolve(false); } });
+    });
+}
+
+async function addComment() {
+    if (DEAL_IS_LOCKED) { alert('Сделка завершена — добавление невозможно'); return; }
+    const el = document.getElementById('commentText');
+    if (!el) return;
+    const text = el.value.trim();
+    if (!text) return;
+    try {
+        const res = await fetch('/api/deals/' + DEAL_ID + '/comments', {
+            method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({text: text})
+        });
+        const data = await res.json();
+        if (data.success) refreshDeal();
+        else alert(data.error || 'Ошибка');
+    } catch(e) { alert('Ошибка при добавлении комментария'); }
+}
+
+async function deleteComment(id) {
+    if (!confirm('Удалить комментарий?')) return;
+    try {
+        const res = await fetch('/api/deals/' + DEAL_ID + '/comments/' + id, {method: 'DELETE'});
+        const data = await res.json();
+        if (data.success) refreshDeal();
+    } catch(e) { alert('Ошибка'); }
+}
+
+async function pinComment(id) {
+    try {
+        const res = await fetch('/api/deals/' + DEAL_ID + '/comments/' + id + '/pin', {
+            method: 'POST', headers: {'Content-Type': 'application/json'}
+        });
+        const data = await res.json();
+        if (data.success) refreshDeal();
+    } catch(e) { alert('Ошибка'); }
+}
+
+async function addTask() {
+    if (DEAL_IS_LOCKED) { alert('Сделка завершена — добавление невозможно'); return; }
+    const titleEl = document.getElementById('taskTitle');
+    if (!titleEl) return;
+    const title = titleEl.value.trim();
+    if (!title) { alert('Введите название задачи'); return; }
+    const dueDateEl = document.getElementById('taskDueDate');
+    const priorityEl = document.getElementById('taskPriority');
+    const dueDate = dueDateEl ? dueDateEl.value : '';
+    const priority = priorityEl ? priorityEl.value : 'normal';
+    try {
+        const res = await fetch('/api/deals/' + DEAL_ID + '/tasks', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({title: title, due_date: dueDate, priority: priority})
+        });
+        const data = await res.json();
+        if (data.success) refreshDeal();
+        else alert(data.error || 'Ошибка');
+    } catch(e) { alert('Ошибка при создании задачи'); }
+}
+
+async function toggleTask(id) {
+    const taskEl = document.querySelector(`[data-task-id="${id}"]`);
+    const isCompleted = taskEl ? taskEl.classList.contains('completed') : false;
+    if (!isCompleted) {
+        const confirmed = await showConfirmModal(
+            'Подтвердить выполнение',
+            'Вы уверены, что задача выполнена?',
+            'fas fa-check-circle',
+            '#059669',
+            'Выполнена',
+            'Отмена'
+        );
+        if (!confirmed) return;
+    }
+    try {
+        const res = await fetch('/api/deals/' + DEAL_ID + '/tasks/' + id + '/toggle', {method: 'POST', headers: {'Content-Type': 'application/json'}});
+        const data = await res.json();
+        if (data.success) refreshDeal();
+    } catch(e) { alert('Ошибка'); }
+}
+
+async function deleteTask(id) {
+    if (!confirm('Удалить задачу?')) return;
+    try {
+        const res = await fetch('/api/deals/' + DEAL_ID + '/tasks/' + id, {method: 'DELETE'});
+        const data = await res.json();
+        if (data.success) refreshDeal();
+    } catch(e) { alert('Ошибка'); }
+}
+
+function toggleEditMode() {
+    const info = document.getElementById('dealInfo');
+    const form = document.getElementById('dealEditForm');
+    const btn = document.getElementById('editToggleBtn');
+    if (!info || !form || !btn) return;
+    const isEditing = !form.classList.contains('hidden');
+    info.classList.toggle('hidden', !isEditing);
+    form.classList.toggle('hidden', isEditing);
+    btn.innerHTML = isEditing ? '<i class="fas fa-edit mr-1"></i>Изменить' : '<i class="fas fa-times mr-1"></i>Отмена';
+}
+
+async function saveDealFields() {
+    const data = {
+        property_price: document.getElementById('edit-price').value,
+        cashback_amount: document.getElementById('edit-cashback').value,
+        property_rooms: document.getElementById('edit-rooms').value,
+        property_area: document.getElementById('edit-area').value,
+        property_floor: document.getElementById('edit-floor').value,
+        property_description: document.getElementById('edit-desc').value
+    };
+    try {
+        const res = await fetch('/api/deals/' + DEAL_ID, {
+            method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        if (result.success) refreshDeal();
+        else alert(result.error || 'Ошибка');
+    } catch(e) { alert('Ошибка при сохранении'); }
+}
+
+async function saveNotes(btnElement) {
+    const notesEl = document.getElementById('dealNotes');
+    if (!notesEl) return;
+    const notes = notesEl.value;
+    try {
+        const res = await fetch('/api/deals/' + DEAL_ID, {
+            method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({notes: notes})
+        });
+        const result = await res.json();
+        if (result.success && btnElement) {
+            btnElement.innerHTML = '<i class="fas fa-check mr-1 text-green-500"></i>Сохранено';
+            setTimeout(function() { btnElement.innerHTML = '<i class="fas fa-save mr-2"></i>Сохранить заметки'; }, 2000);
+        }
+        else if (!result.success) alert(result.error || 'Ошибка');
+    } catch(e) { alert('Ошибка'); }
+}
+
+async function saveDate(field, value) {
+    try {
+        const data = {};
+        data[field] = value;
+        const res = await fetch('/api/deals/' + DEAL_ID, {
+            method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        if (!result.success) alert(result.error || 'Ошибка');
+    } catch(e) { alert('Ошибка'); }
+}
+</script>
+</div>
+
+{% if can_change_responsible is defined and can_change_responsible and not deal.is_locked %}
+<div id="reassignModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+    <div class="bg-white rounded-xl shadow-xl max-w-sm w-full mx-4 p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-gray-900 text-sm">Сменить ответственного</h3>
+            <button onclick="document.getElementById('reassignModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="mb-4">
+            <label class="block text-xs font-medium text-gray-500 mb-1">Новый ответственный менеджер</label>
+            <select id="newResponsibleManager" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-[#0088CC] focus:border-[#0088CC]">
+                {% for m in available_managers %}
+                <option value="{{ m.id }}" {% if m.id == deal.manager_id %}selected{% endif %}>{{ m.full_name }}{% if m.department %} ({{ m.department.name }}){% endif %}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="document.getElementById('reassignModal').classList.add('hidden')" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50">Отмена</button>
+            <button onclick="reassignDeal()" class="flex-1 px-3 py-2 bg-[#0088CC] text-white rounded-lg text-sm font-medium hover:bg-[#006da3]">Назначить</button>
+        </div>
+    </div>
+</div>
+<script>
+function reassignDeal() {
+    const newId = document.getElementById('newResponsibleManager').value;
+    fetch('/api/deals/{{ deal.id }}/reassign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ manager_id: parseInt(newId) })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('reassignModal').classList.add('hidden');
+            location.reload();
+        } else {
+            alert(data.error || 'Ошибка');
+        }
+    });
+}
+</script>
+{% endif %}
+
+<script>
+(function() {
+    if (window.innerWidth > 767) return;
+    var pipeline = document.getElementById('stagePipeline');
+    if (!pipeline) return;
+    var active = pipeline.querySelector('.stage-btn.active');
+    if (active) {
+        setTimeout(function() {
+            active.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }, 200);
+    }
+})();
+</script>
+{% set active_tab = 'deals' %}
+{% include 'components/manager_mobile_nav.html' %}
+
+{% endblock %}

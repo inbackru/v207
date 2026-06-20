@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Админ-панель — InBack{% endblock %}</title>
+    <meta name="description" content="{% block description %}Административная панель управления платформой InBack{% endblock %}">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    {% block head %}{% endblock %}
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f1f5f9; margin: 0; }
+
+        /* ── Sidebar ── */
+        .adm-sidebar {
+            position: fixed; top: 0; left: 0; bottom: 0; width: 248px;
+            background: #0f1923; display: flex; flex-direction: column;
+            z-index: 100; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent;
+        }
+        .adm-sidebar::-webkit-scrollbar { width: 4px; }
+        .adm-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+        .adm-main { margin-left: 248px; min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* ── Logo ── */
+        .adm-logo { padding: 18px 20px 14px; border-bottom: 1px solid rgba(255,255,255,0.07); flex-shrink: 0; }
+        .adm-logo-mark {
+            width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+            background: linear-gradient(135deg,#0088CC,#005f99);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; color: #fff; font-size: 14px;
+        }
+        .adm-logo-text { font-weight: 800; color: #fff; font-size: 16px; }
+        .adm-logo-text span { color: #0088CC; }
+        .adm-logo-sub { font-size: 10.5px; color: #475569; margin-top: 1px; }
+
+        /* ── Admin card ── */
+        .adm-card {
+            margin: 12px; padding: 11px 13px;
+            background: rgba(255,255,255,0.05); border-radius: 11px;
+            border: 1px solid rgba(255,255,255,0.07); flex-shrink: 0;
+        }
+        .adm-avatar {
+            width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; overflow: hidden;
+            background: linear-gradient(135deg,#0088CC,#005f99);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; color: #fff; font-size: 14px;
+        }
+        .adm-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .adm-name { font-weight: 600; color: #fff; font-size: 12.5px; line-height: 1.3; }
+        .adm-role-badge {
+            display: inline-flex; align-items: center; gap: 3px; margin-top: 4px;
+            padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700;
+            background: rgba(0,136,204,0.15); color: #38bdf8;
+            border: 1px solid rgba(0,136,204,0.2);
+        }
+
+        /* ── Nav ── */
+        .adm-nav { flex: 1; padding: 6px 0; }
+        .adm-nav-section {
+            padding: 10px 18px 4px; font-size: 10px; font-weight: 700;
+            color: #475569; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 4px;
+        }
+        .adm-nav-item {
+            display: flex; align-items: center; gap: 9px;
+            padding: 9px 18px; font-size: 13px; font-weight: 500;
+            color: #94a3b8; cursor: pointer; border: none; background: none;
+            width: 100%; text-align: left; text-decoration: none;
+            border-left: 3px solid transparent; transition: all 0.14s; line-height: 1;
+        }
+        .adm-nav-item:hover { color: #e2e8f0; background: rgba(255,255,255,0.04); }
+        .adm-nav-item.active { color: #fff; background: rgba(0,136,204,0.12); border-left-color: #0088CC; }
+        .adm-nav-item i { width: 15px; text-align: center; font-size: 12.5px; flex-shrink: 0; }
+
+        /* ── Sidebar footer ── */
+        .adm-sidebar-footer { padding: 10px; border-top: 1px solid rgba(255,255,255,0.07); flex-shrink: 0; }
+        .adm-logout {
+            display: flex; align-items: center; gap: 8px; padding: 9px 12px;
+            border-radius: 8px; font-size: 13px; color: #64748b;
+            text-decoration: none; transition: all 0.14s; width: 100%;
+            background: none; border: none; cursor: pointer;
+        }
+        .adm-logout:hover { color: #ef4444; background: rgba(239,68,68,0.08); }
+
+        /* ── Topbar ── */
+        .adm-topbar {
+            background: #fff; border-bottom: 1px solid #e2e8f0;
+            padding: 0 24px; height: 58px; display: flex; flex-shrink: 0;
+            align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 50;
+        }
+        .adm-page-title { font-size: 15px; font-weight: 700; color: #1e293b; }
+        .adm-topbar-right { display: flex; align-items: center; gap: 10px; }
+        .adm-chip {
+            display: flex; align-items: center; gap: 5px;
+            padding: 5px 12px; border-radius: 20px;
+            background: #f1f5f9; border: 1px solid #e2e8f0;
+            font-size: 12px; color: #475569; font-weight: 600; text-decoration: none;
+        }
+        .adm-chip:hover { border-color: #0088CC; color: #0088CC; }
+        .adm-menu-btn { background: none; border: none; color: #64748b; font-size: 18px; cursor: pointer; display: none; }
+
+        /* ── Content ── */
+        .adm-content { flex: 1; padding: 24px; }
+
+        /* ── Flash messages ── */
+        .adm-flash {
+            padding: 12px 16px; border-radius: 10px; margin-bottom: 16px;
+            font-size: 13.5px; font-weight: 500; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+        }
+        .adm-flash.success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .adm-flash.error   { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .adm-flash.info    { background: #dbeafe; color: #0088CC; border: 1px solid #bfdbfe; }
+        .adm-flash.warning { background: #fef9c3; color: #854d0e; border: 1px solid #fde047; }
+
+        /* ── Mobile ── */
+        .adm-drawer {
+            position: fixed; top: 0; left: 0; bottom: 0; width: 260px;
+            background: #0f1923; z-index: 200; overflow-y: auto;
+            transform: translateX(-100%); transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+            display: flex; flex-direction: column;
+        }
+        .adm-drawer.open { transform: translateX(0); }
+        .adm-drawer-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 199;
+        }
+        .adm-drawer-overlay.open { display: block; }
+
+        @media (max-width: 1023px) {
+            .adm-sidebar { display: none; }
+            .adm-main { margin-left: 0; }
+            .adm-menu-btn { display: block; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Mobile drawer overlay -->
+<div class="adm-drawer-overlay" id="admDrawerOverlay" onclick="admCloseDrawer()"></div>
+
+<!-- Mobile drawer -->
+<div class="adm-drawer" id="admDrawer">
+    <div class="adm-logo" style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:9px;">
+            <div class="adm-logo-mark">In</div>
+            <div>
+                <div class="adm-logo-text">In<span>Back</span></div>
+                <div class="adm-logo-sub">Админ-панель</div>
+            </div>
+        </div>
+        <button onclick="admCloseDrawer()" style="background:none;border:none;color:#475569;font-size:16px;cursor:pointer;padding:4px;"><i class="fas fa-times"></i></button>
+    </div>
+    {% include 'admin/_sidebar_nav.html' ignore missing %}
+    <div style="padding:10px;border-top:1px solid rgba(255,255,255,0.07);flex-shrink:0;">
+        <a href="{{ url_for('adm.admin_logout') }}" class="adm-logout"><i class="fas fa-sign-out-alt"></i> Выйти</a>
+    </div>
+</div>
+
+<!-- Desktop sidebar -->
+<aside class="adm-sidebar">
+    <div class="adm-logo">
+        <div style="display:flex;align-items:center;gap:9px;">
+            <div class="adm-logo-mark">In</div>
+            <div>
+                <div class="adm-logo-text">In<span>Back</span></div>
+                <div class="adm-logo-sub">Панель управления</div>
+            </div>
+        </div>
+    </div>
+
+    {% if admin %}
+    <div class="adm-card">
+        <div style="display:flex;align-items:center;gap:9px;">
+            <div class="adm-avatar">
+                {% if admin.profile_image %}
+                <img src="{{ admin.profile_image }}" alt="Фото" onerror="this.style.display='none';this.parentElement.innerHTML='<span>{{ (admin.full_name or 'А')[0] }}</span>'">
+                {% else %}
+                <span>{{ (admin.full_name or 'А')[0] }}</span>
+                {% endif %}
+            </div>
+            <div>
+                <div class="adm-name">{{ admin.full_name or 'Администратор' }}</div>
+                <div class="adm-role-badge"><i class="fas fa-shield-alt" style="font-size:8px;"></i> Администратор</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <nav class="adm-nav" id="admSidebarNav">
+        <div class="adm-nav-section">Основное</div>
+        <a href="{{ url_for('adm.admin_dashboard') }}"        class="adm-nav-item" data-route="admin_dashboard"><i class="fas fa-th-large"></i> Дашборд</a>
+        <a href="{{ url_for('adm.admin_analytics') }}"        class="adm-nav-item" data-route="admin_analytics"><i class="fas fa-chart-bar"></i> Аналитика</a>
+        <a href="{{ url_for('adm.admin_price_analytics') }}"  class="adm-nav-item" data-route="admin_price_analytics"><i class="fas fa-chart-line"></i> Аналитика цен</a>
+        <a href="{{ url_for('adm.admin_users') }}"            class="adm-nav-item" data-route="admin_users"><i class="fas fa-users"></i> Пользователи</a>
+        <a href="{{ url_for('adm.admin_managers') }}"         class="adm-nav-item" data-route="admin_managers"><i class="fas fa-user-tie"></i> Менеджеры</a>
+        <a href="{{ url_for('adm.admin_deal_stages') }}"      class="adm-nav-item" data-route="admin_deal_stages"><i class="fas fa-stream"></i> Этапы сделок</a>
+        <a href="{{ url_for('adm.admin_org_tree') }}"         class="adm-nav-item" data-route="admin_org_tree"><i class="fas fa-sitemap"></i> Орг. структура</a>
+        <a href="{{ url_for('adm.admin_deals_archive') }}"    class="adm-nav-item" data-route="admin_deals_archive"><i class="fas fa-archive"></i> Архив сделок</a>
+        <a href="{{ url_for('adm.admin_attendance') }}"       class="adm-nav-item" data-route="admin_attendance"><i class="fas fa-clock"></i> Посещаемость</a>
+        <a href="{{ url_for('adm.admin_scheduler') }}"        class="adm-nav-item" data-route="admin_scheduler"><i class="fas fa-cogs"></i> Фоновые задачи</a>
+        <a href="{{ url_for('adm.admin_trendagent_import') }}" class="adm-nav-item" data-route="admin_trendagent_import"><i class="fas fa-cloud-download-alt"></i> TrendAgent импорт</a>
+        <a href="{{ url_for('adm.admin_districts_manager') }}" class="adm-nav-item" data-route="admin_districts_manager"><i class="fas fa-layer-group"></i> Районы городов</a>
+        <a href="{{ url_for('adm.admin_nearby_manager') }}"   class="adm-nav-item" data-route="admin_nearby_manager"><i class="fas fa-map-pin"></i> Инфраструктура POI</a>
+
+        <div class="adm-nav-section" style="margin-top:6px;">Контент</div>
+        <a href="{{ url_for('adm.admin_reviews') }}"          class="adm-nav-item" data-route="admin_reviews"><i class="fas fa-comments"></i> Отзывы о ЖК</a>
+        <a href="{{ url_for('adm.admin_tg_promotions') }}"   class="adm-nav-item" data-route="admin_tg_promotions"><i class="fab fa-telegram"></i> Акции из Telegram</a>
+        <a href="{{ url_for('adm.admin_banners') }}"          class="adm-nav-item" data-route="admin_banners"><i class="fas fa-bullhorn"></i> Баннеры</a>
+        <a href="{{ url_for('adm.admin_chat_settings') }}"    class="adm-nav-item" data-route="admin_chat_settings"><i class="fas fa-comments"></i> Настройки чата</a>
+        <a href="{{ url_for('adm.admin_push_broadcast') }}"  class="adm-nav-item" data-route="admin_push_broadcast"><i class="fas fa-bell"></i> Push-рассылки</a>
+        <a href="{{ url_for('adm.admin_notifications_management') }}" class="adm-nav-item" data-route="admin_notifications_management"><i class="fas fa-envelope-open-text"></i> Системные уведомления</a>
+        <a href="{{ url_for('adm.admin_blog') }}"             class="adm-nav-item" data-route="admin_blog"><i class="fas fa-blog"></i> Блог</a>
+        <a href="{{ url_for('adm.admin_jobs_management') }}"  class="adm-nav-item" data-route="admin_jobs_management"><i class="fas fa-briefcase"></i> Вакансии</a>
+
+        <div class="adm-nav-section" style="margin-top:6px;">CRM / Финансы</div>
+        <a href="{{ url_for('adm.admin_partners') }}"         class="adm-nav-item" data-route="admin_partners"><i class="fas fa-handshake"></i> Партнёры</a>
+        <a href="{{ url_for('adm.admin_cashback_analytics') }}" class="adm-nav-item" data-route="admin_cashback_analytics"><i class="fas fa-money-bill-wave"></i> Кэшбек</a>
+        <a href="{{ url_for('adm.admin_complex_cashback') }}" class="adm-nav-item" data-route="admin_complex_cashback"><i class="fas fa-percentage"></i> Кэшбек ЖК</a>
+
+        <div class="adm-nav-section" style="margin-top:6px;">Данные</div>
+        <a href="{{ url_for('adm.admin_cities') }}"            class="adm-nav-item" data-route="admin_cities"><i class="fas fa-city"></i> Города</a>
+        <a href="{{ url_for('adm.admin_developers') }}"        class="adm-nav-item" data-route="admin_developers"><i class="fas fa-hard-hat"></i> Застройщики</a>
+        <a href="{{ url_for('adm.admin_deduplication') }}"    class="adm-nav-item" data-route="admin_deduplication"><i class="fas fa-clone"></i> Дедупликация</a>
+
+        <div class="adm-nav-section" style="margin-top:6px;">Парсер ЦИАН</div>
+        <a href="{{ url_for('adm.admin_enrichment') }}"        class="adm-nav-item" data-route="admin_enrichment"><i class="fas fa-satellite-dish"></i> Центр парсера</a>
+        <a href="{{ url_for('adm.admin_addresses') }}"         class="adm-nav-item" data-route="admin_addresses"><i class="fas fa-map-marked-alt"></i> Адреса ЖК/квартир</a>
+
+        <div class="adm-nav-section" style="margin-top:6px;">Разработка</div>
+        <a href="{{ url_for('adm.admin_client_management') }}" class="adm-nav-item" data-route="admin_client_management"><i class="fas fa-users-cog"></i> Клиенты (dev)</a>
+    </nav>
+
+    <div class="adm-sidebar-footer">
+        <a href="{{ url_for('index') }}" class="adm-logout"><i class="fas fa-home"></i> На главную</a>
+        <a href="{{ url_for('adm.admin_logout') }}" class="adm-logout" style="color:#64748b;" onmouseover="this.style.color='#ef4444';this.style.background='rgba(239,68,68,0.08)'" onmouseout="this.style.color='#64748b';this.style.background=''">
+            <i class="fas fa-sign-out-alt"></i> Выйти
+        </a>
+    </div>
+</aside>
+
+<!-- Main -->
+<div class="adm-main">
+    <!-- Topbar -->
+    <header class="adm-topbar">
+        <div style="display:flex;align-items:center;gap:12px;">
+            <button class="adm-menu-btn" onclick="admOpenDrawer()"><i class="fas fa-bars"></i></button>
+            <div class="adm-page-title">{% block page_title %}Админ-панель{% endblock %}</div>
+        </div>
+        <div class="adm-topbar-right">
+            <a href="{{ url_for('adm.admin_profile') }}" class="adm-chip" title="Профиль">
+                <i class="fas fa-user-shield" style="color:#0088CC;font-size:11px;"></i>
+                {{ admin.full_name.split(' ')[0] if admin and admin.full_name else 'Профиль' }}
+            </a>
+            <a href="{{ url_for('index') }}" class="adm-chip hidden lg:flex" title="На сайт">
+                <i class="fas fa-external-link-alt" style="font-size:10px;"></i>
+                Сайт
+            </a>
+            <a href="{{ url_for('adm.admin_logout') }}"
+               style="padding:6px 10px;border-radius:8px;color:#94a3b8;font-size:13px;text-decoration:none;transition:all 0.15s;"
+               onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#94a3b8'"
+               title="Выйти">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+        </div>
+    </header>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div style="padding: 16px 24px 0;">
+        {% for category, message in messages %}
+        <div class="adm-flash {{ category }}" id="flash-{{ loop.index }}">
+            <span><i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'error' else 'info-circle' }} mr-2"></i>{{ message }}</span>
+            <button onclick="this.parentElement.remove()" style="background:none;border:none;cursor:pointer;opacity:0.6;font-size:14px;">✕</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- Content -->
+    <main class="adm-content">
+        {% block content %}{% endblock %}
+    </main>
+</div>
+
+<script>
+/* ── Mobile drawer ── */
+function admOpenDrawer() {
+    document.getElementById('admDrawer').classList.add('open');
+    document.getElementById('admDrawerOverlay').classList.add('open');
+}
+function admCloseDrawer() {
+    document.getElementById('admDrawer').classList.remove('open');
+    document.getElementById('admDrawerOverlay').classList.remove('open');
+}
+
+/* ── Active nav item ── */
+(function() {
+    var path = window.location.pathname;
+    document.querySelectorAll('.adm-nav-item').forEach(function(el) {
+        var href = el.getAttribute('href');
+        if (href && path.startsWith(href) && href !== '/') {
+            el.classList.add('active');
+        }
+    });
+    // Special case: exact match for dashboard
+    if (path === '/admin' || path === '/admin/') {
+        var dash = document.querySelector('[data-route="admin_dashboard"]');
+        if (dash) dash.classList.add('active');
+    }
+})();
+
+/* ── Auto-dismiss flash ── */
+setTimeout(function() {
+    document.querySelectorAll('.adm-flash').forEach(function(el) {
+        el.style.transition = 'opacity 0.5s';
+        el.style.opacity = '0';
+        setTimeout(function() { el.remove(); }, 500);
+    });
+}, 5000);
+
+/* ── CSRF helper ── */
+function getAdminCSRF() {
+    return document.querySelector('meta[name="csrf-token"]')?.content || '';
+}
+
+{% block scripts %}{% endblock %}
+</script>
+</body>
+</html>

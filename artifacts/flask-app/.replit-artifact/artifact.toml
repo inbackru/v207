@@ -1,0 +1,13 @@
+kind = "web"
+previewPath = "/"
+title = "InBack Flask App"
+version = "1.0.0"
+id = "flask-inback-app"
+
+[[services]]
+localPort = 5000
+name = "Flask App"
+paths = ["/"]
+
+[services.development]
+run = "cd /home/runner/workspace && .venv/bin/gunicorn --bind 0.0.0.0:5000 --reuse-port --reload main:app"

@@ -1,0 +1,1117 @@
+{% extends "base.html" %}
+
+{% block title %}Партнёрский кабинет · {{ partner.partner_id }} | InBack{% endblock %}
+
+{% block head %}
+<meta name="csrf-token" content="{{ csrf_token() if csrf_token else 'no-token' }}">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+/* ── reset site chrome ── */
+header, #topContactBar, #mobileBottomNav,
+body > footer, .footer, #footer-section, footer,
+.floating-invite-banner { display: none !important; }
+body { padding-top: 0 !important; background: #f1f5f9; }
+
+/* ── layout ── */
+.pb-sidebar {
+    position: fixed; top: 0; left: 0; bottom: 0; width: 240px;
+    background: #0f1923; display: flex; flex-direction: column;
+    z-index: 100; overflow-y: auto;
+}
+.pb-main { margin-left: 240px; min-height: 100vh; }
+
+/* ── sidebar nav ── */
+.pb-logo { padding: 20px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+.pb-logo-inner { display: flex; align-items: center; gap: 10px; }
+.pb-logo-mark {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg,#0088CC,#005f99);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; color: #fff; font-size: 15px; letter-spacing: -0.5px;
+}
+.pb-logo-text { font-weight: 800; color: #fff; font-size: 17px; }
+.pb-logo-text span { color: #0088CC; }
+
+.pb-partner-card {
+    margin: 14px 12px; padding: 12px 14px;
+    background: rgba(255,255,255,0.05); border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.07);
+}
+.pb-avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: linear-gradient(135deg,#0088CC,#005f99);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; color: #fff; font-size: 15px; flex-shrink: 0;
+}
+.pb-partner-name { font-weight: 600; color: #fff; font-size: 13px; line-height: 1.3; }
+.pb-partner-id {
+    font-size: 11px; color: #64748b; font-family: monospace;
+    margin-top: 2px; letter-spacing: 0.3px;
+}
+.pb-level-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: 20px; font-size: 10px;
+    font-weight: 700; margin-top: 6px;
+    background: rgba(0,136,204,0.15); color: #0088CC;
+    border: 1px solid rgba(0,136,204,0.2);
+}
+
+.pb-nav { padding: 8px 0; flex: 1; }
+.pb-nav-label {
+    padding: 10px 18px 5px; font-size: 10px; font-weight: 700;
+    color: #475569; text-transform: uppercase; letter-spacing: 0.8px;
+}
+.pb-nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 18px; font-size: 13.5px; font-weight: 500;
+    color: #94a3b8; cursor: pointer; border: none; background: none;
+    width: 100%; text-align: left; text-decoration: none;
+    border-left: 3px solid transparent; transition: all 0.15s;
+}
+.pb-nav-item:hover { color: #e2e8f0; background: rgba(255,255,255,0.04); }
+.pb-nav-item.active { color: #fff; background: rgba(0,136,204,0.12); border-left-color: #0088CC; }
+.pb-nav-item i { width: 16px; text-align: center; font-size: 13px; }
+
+.pb-sidebar-footer { padding: 12px; border-top: 1px solid rgba(255,255,255,0.07); }
+.pb-logout {
+    display: flex; align-items: center; gap: 8px; padding: 9px 12px;
+    border-radius: 8px; font-size: 13px; color: #64748b;
+    text-decoration: none; transition: all 0.15s; width: 100%;
+}
+.pb-logout:hover { color: #ef4444; background: rgba(239,68,68,0.08); }
+
+/* ── top bar ── */
+.pb-topbar {
+    background: #fff; border-bottom: 1px solid #e2e8f0;
+    padding: 0 28px; height: 60px; display: flex;
+    align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50;
+}
+.pb-breadcrumb { font-size: 14px; font-weight: 600; color: #1e293b; }
+.pb-breadcrumb span { color: #94a3b8; font-weight: 400; }
+.pb-topbar-right { display: flex; align-items: center; gap: 12px; }
+.pb-id-chip {
+    display: flex; align-items: center; gap-6px; padding: 5px 12px; gap: 6px;
+    background: #f1f5f9; border-radius: 20px; border: 1px solid #e2e8f0;
+    font-size: 12px; color: #475569; font-family: monospace; font-weight: 600;
+}
+.pb-id-chip i { color: #0088CC; font-size: 11px; }
+.pb-balance-chip {
+    padding: 6px 14px; border-radius: 20px;
+    background: linear-gradient(135deg,#0088CC,#005f99);
+    color: #fff; font-size: 13px; font-weight: 700;
+}
+
+/* ── content sections ── */
+.pb-section { display: none; animation: fadeIn 0.2s ease; }
+.pb-section.active { display: block; }
+@keyframes fadeIn { from { opacity:0; transform: translateY(4px); } to { opacity:1; transform: translateY(0); } }
+
+/* ── stat cards ── */
+.pb-stat {
+    background: #fff; border-radius: 14px; padding: 20px 22px;
+    border: 1px solid #e8edf2; transition: box-shadow 0.2s;
+}
+.pb-stat:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+.pb-stat-icon {
+    width: 42px; height: 42px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px; font-size: 17px;
+}
+.pb-stat-val { font-size: 24px; font-weight: 800; color: #0f172a; line-height: 1; }
+.pb-stat-label { font-size: 12.5px; color: #64748b; margin-top: 4px; font-weight: 500; }
+.pb-stat-sub { font-size: 11.5px; color: #94a3b8; margin-top: 3px; }
+
+/* ── referral link ── */
+.pb-ref-link-wrap {
+    display: flex; gap: 10px; align-items: stretch;
+}
+.pb-ref-link-input {
+    flex: 1; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px;
+    padding: 11px 14px; font-size: 13px; color: #475569; font-family: monospace;
+    outline: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pb-copy-btn {
+    display: flex; align-items: center; gap: 7px; padding: 11px 20px;
+    background: linear-gradient(135deg,#0088CC,#005f99); color: #fff;
+    border: none; border-radius: 10px; font-size: 13.5px; font-weight: 600;
+    cursor: pointer; white-space: nowrap; transition: all 0.2s;
+}
+.pb-copy-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,136,204,0.3); }
+
+/* ── share btns ── */
+.pb-share-btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 9px 18px; border-radius: 9px; font-size: 13px;
+    font-weight: 600; color: #fff; border: none; cursor: pointer; transition: all 0.2s;
+    text-decoration: none;
+}
+.pb-share-btn:hover { transform: translateY(-1px); }
+.pb-share-wa { background: #25D366; }
+.pb-share-tg { background: #0088CC; }
+.pb-share-vk { background: #4C75A3; }
+
+/* ── manager info block ── */
+.pb-manager-card {
+    background: linear-gradient(135deg, #f0f9ff, #e8f4fd);
+    border: 1px solid #bae6fd; border-radius: 14px; padding: 18px 20px;
+}
+.pb-manager-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: linear-gradient(135deg,#0088CC,#005f99);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; color: #fff; font-size: 16px; flex-shrink: 0;
+}
+
+/* ── table ── */
+.pb-table { width: 100%; border-collapse: collapse; }
+.pb-table th {
+    background: #f8fafc; padding: 11px 16px; text-align: left;
+    font-size: 11.5px; font-weight: 700; color: #64748b;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    border-bottom: 1px solid #e8edf2;
+}
+.pb-table td {
+    padding: 13px 16px; font-size: 13.5px; color: #334155;
+    border-bottom: 1px solid #f1f5f9;
+}
+.pb-table tr:last-child td { border-bottom: none; }
+.pb-table tbody tr:hover td { background: #fafbfc; }
+
+/* ── badges ── */
+.badge-credited { background: #dcfce7; color: #166534; padding: 3px 10px; border-radius: 20px; font-size: 11.5px; font-weight: 700; }
+.badge-pending { background: #fef9c3; color: #854d0e; padding: 3px 10px; border-radius: 20px; font-size: 11.5px; font-weight: 700; }
+.badge-l1 { background: #dbeafe; color: #1d4ed8; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+.badge-l2 { background: #f3e8ff; color: #6b21a8; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+
+/* ── mobile ── */
+.pb-mobile-topbar {
+    display: none; background: #0f1923; padding: 12px 16px;
+    align-items: center; justify-content: space-between;
+}
+.pb-mobile-tabs {
+    display: none; background: #fff; border-bottom: 1px solid #e2e8f0;
+    overflow-x: auto; scrollbar-width: none;
+}
+.pb-mobile-tab {
+    flex-shrink: 0; padding: 12px 16px; font-size: 12.5px;
+    font-weight: 600; color: #94a3b8; border-bottom: 2px solid transparent;
+    cursor: pointer; white-space: nowrap; background: none; border: none;
+    border-bottom: 2px solid transparent; text-decoration: none; display: block;
+}
+.pb-mobile-tab.active { color: #0088CC; border-bottom-color: #0088CC; }
+.pb-mobile-menu-btn { background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; }
+
+@media (max-width: 767px) {
+    .pb-sidebar { display: none; }
+    .pb-main { margin-left: 0; }
+    .pb-topbar { display: none; }
+    .pb-mobile-topbar { display: flex; }
+    .pb-mobile-tabs { display: flex; }
+    .pb-stat-val { font-size: 20px; }
+    .pb-ref-link-wrap { flex-direction: column; }
+    .pb-table th, .pb-table td { padding: 10px 12px; font-size: 12.5px; }
+}
+
+/* mobile drawer */
+.pb-drawer {
+    position: fixed; top: 0; left: 0; bottom: 0; width: 260px;
+    background: #0f1923; z-index: 200; transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+    overflow-y: auto;
+}
+.pb-drawer.open { transform: translateX(0); }
+.pb-drawer-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    z-index: 199;
+}
+.pb-drawer-overlay.open { display: block; }
+
+/* info box */
+.pb-info-box {
+    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;
+    padding: 14px 16px;
+}
+.pb-info-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px; }
+.pb-info-row:last-child { margin-bottom: 0; }
+.pb-info-label { font-size: 12px; color: #94a3b8; min-width: 110px; font-weight: 500; }
+.pb-info-val { font-size: 13.5px; color: #1e293b; font-weight: 600; }
+
+/* copy toast */
+.pb-toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: #0f172a; color: #fff; padding: 10px 24px; border-radius: 12px;
+    font-size: 13.5px; font-weight: 600; opacity: 0; transition: all 0.25s;
+    z-index: 9999; pointer-events: none; white-space: nowrap;
+}
+.pb-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* section card */
+.pb-card {
+    background: #fff; border-radius: 14px; border: 1px solid #e8edf2; overflow: hidden;
+}
+.pb-card-head {
+    padding: 18px 22px 14px; border-bottom: 1px solid #f1f5f9;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.pb-card-title { font-size: 15px; font-weight: 700; color: #0f172a; }
+.pb-card-body { padding: 20px 22px; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Mobile drawer overlay -->
+<div class="pb-drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+<!-- Sidebar (desktop) -->
+<aside class="pb-sidebar" id="pbSidebar">
+    <div class="pb-logo">
+        <div class="pb-logo-inner">
+            <div class="pb-logo-mark">In</div>
+            <div class="pb-logo-text">In<span>Back</span></div>
+        </div>
+        <div style="font-size:11px;color:#475569;margin-top:6px;letter-spacing:0.3px;">Партнёрская CPA платформа</div>
+    </div>
+
+    <div class="pb-partner-card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div class="pb-avatar">{{ partner.full_name[0] if partner.full_name else 'П' }}</div>
+            <div>
+                <div class="pb-partner-name">{{ partner.full_name }}</div>
+                <div class="pb-partner-id">{{ partner.partner_id }}</div>
+            </div>
+        </div>
+        <div class="pb-level-badge">
+            <i class="fas fa-trophy" style="font-size:9px;"></i>
+            Уровень {{ partner.level or 1 }}
+        </div>
+    </div>
+
+    <nav class="pb-nav">
+        <div class="pb-nav-label">Кабинет</div>
+        <button class="pb-nav-item active" onclick="switchSection('overview')" id="nav-overview">
+            <i class="fas fa-th-large"></i> Главная
+        </button>
+        <button class="pb-nav-item" onclick="switchSection('referrals')" id="nav-referrals">
+            <i class="fas fa-users"></i> Рефералы
+        </button>
+        <button class="pb-nav-item" onclick="switchSection('withdrawals')" id="nav-withdrawals">
+            <i class="fas fa-wallet"></i> Выплаты
+        </button>
+        <button class="pb-nav-item" onclick="switchSection('structure')" id="nav-structure">
+            <i class="fas fa-sitemap"></i> Структура
+        </button>
+
+        <div class="pb-nav-label" style="margin-top:8px;">Аккаунт</div>
+        <a href="/partner/profile" class="pb-nav-item">
+            <i class="fas fa-user-cog"></i> Профиль
+        </a>
+        <button class="pb-nav-item" onclick="switchSection('conditions')" id="nav-conditions">
+            <i class="fas fa-file-contract"></i> Условия
+        </button>
+    </nav>
+
+    <div class="pb-sidebar-footer">
+        <a href="/partner/logout" class="pb-logout">
+            <i class="fas fa-sign-out-alt"></i> Выйти из кабинета
+        </a>
+    </div>
+</aside>
+
+<!-- Mobile drawer (same structure) -->
+<div class="pb-drawer" id="mobileDrawer">
+    <div class="pb-logo" style="display:flex;align-items:center;justify-content:space-between;">
+        <div class="pb-logo-inner">
+            <div class="pb-logo-mark">In</div>
+            <div class="pb-logo-text">In<span>Back</span></div>
+        </div>
+        <button onclick="closeDrawer()" style="background:none;border:none;color:#64748b;font-size:18px;cursor:pointer;"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="pb-partner-card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div class="pb-avatar">{{ partner.full_name[0] if partner.full_name else 'П' }}</div>
+            <div>
+                <div class="pb-partner-name">{{ partner.full_name }}</div>
+                <div class="pb-partner-id">{{ partner.partner_id }}</div>
+            </div>
+        </div>
+        <div class="pb-level-badge"><i class="fas fa-trophy" style="font-size:9px;"></i> Уровень {{ partner.level or 1 }}</div>
+    </div>
+    <nav class="pb-nav">
+        <button class="pb-nav-item active" onclick="switchSection('overview');closeDrawer()" id="mnav-overview"><i class="fas fa-th-large"></i> Главная</button>
+        <button class="pb-nav-item" onclick="switchSection('referrals');closeDrawer()" id="mnav-referrals"><i class="fas fa-users"></i> Рефералы</button>
+        <button class="pb-nav-item" onclick="switchSection('withdrawals');closeDrawer()" id="mnav-withdrawals"><i class="fas fa-wallet"></i> Выплаты</button>
+        <button class="pb-nav-item" onclick="switchSection('structure');closeDrawer()" id="mnav-structure"><i class="fas fa-sitemap"></i> Структура</button>
+        <a href="/partner/profile" class="pb-nav-item"><i class="fas fa-user-cog"></i> Профиль</a>
+        <button class="pb-nav-item" onclick="switchSection('conditions');closeDrawer()" id="mnav-conditions"><i class="fas fa-file-contract"></i> Условия</button>
+    </nav>
+    <div class="pb-sidebar-footer">
+        <a href="/partner/logout" class="pb-logout"><i class="fas fa-sign-out-alt"></i> Выйти</a>
+    </div>
+</div>
+
+<!-- Main content -->
+<div class="pb-main">
+    <!-- Mobile top bar -->
+    <div class="pb-mobile-topbar">
+        <div style="display:flex;align-items:center;gap:10px;">
+            <button class="pb-mobile-menu-btn" onclick="openDrawer()"><i class="fas fa-bars"></i></button>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <div class="pb-logo-mark" style="width:30px;height:30px;font-size:13px;">In</div>
+                <span style="color:#fff;font-weight:700;font-size:15px;">InBack</span>
+            </div>
+        </div>
+        <div style="font-size:13px;font-weight:700;color:#fff;">{{ '{:,.0f}'.format(partner.balance|float).replace(',', ' ') }} ₽</div>
+    </div>
+    <!-- Mobile tabs -->
+    <div class="pb-mobile-tabs">
+        <button class="pb-mobile-tab active" onclick="switchSection('overview')" id="mtab-overview">Главная</button>
+        <button class="pb-mobile-tab" onclick="switchSection('referrals')" id="mtab-referrals">Рефералы</button>
+        <button class="pb-mobile-tab" onclick="switchSection('withdrawals')" id="mtab-withdrawals">Выплаты</button>
+        <button class="pb-mobile-tab" onclick="switchSection('structure')" id="mtab-structure">Структура</button>
+    </div>
+
+    <!-- Desktop top bar -->
+    <div class="pb-topbar">
+        <div class="pb-breadcrumb" id="topbarTitle">Главная</div>
+        <div class="pb-topbar-right">
+            <div class="pb-id-chip">
+                <i class="fas fa-fingerprint"></i>
+                {{ partner.partner_id }}
+            </div>
+            {% if assigned_manager %}
+            <div class="pb-id-chip" title="Ваш менеджер">
+                <i class="fas fa-headset" style="color:#10b981;"></i>
+                {{ assigned_manager.full_name }}
+            </div>
+            {% endif %}
+            <div class="pb-balance-chip">
+                {{ '{:,.0f}'.format(partner.balance|float).replace(',', ' ') }} ₽
+            </div>
+            <a href="/partner/logout" style="color:#94a3b8;font-size:13px;text-decoration:none;padding:6px 10px;border-radius:8px;transition:all 0.15s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#94a3b8'">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+        </div>
+    </div>
+
+    <div style="padding: 24px 28px;" class="pb-page-content">
+
+        <!-- ═══ OVERVIEW ═══ -->
+        <div class="pb-section active" id="section-overview">
+
+            <!-- Stats grid -->
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;" class="pb-stats-grid">
+                <div class="pb-stat">
+                    <div class="pb-stat-icon" style="background:rgba(0,136,204,0.1);">
+                        <i class="fas fa-ruble-sign" style="color:#0088CC;"></i>
+                    </div>
+                    <div class="pb-stat-val">{{ '{:,.0f}'.format(partner.balance|float).replace(',', ' ') }} ₽</div>
+                    <div class="pb-stat-label">Баланс</div>
+                    <div class="pb-stat-sub">Доступно для вывода</div>
+                </div>
+                <div class="pb-stat">
+                    <div class="pb-stat-icon" style="background:rgba(16,185,129,0.1);">
+                        <i class="fas fa-chart-line" style="color:#10b981;"></i>
+                    </div>
+                    <div class="pb-stat-val">{{ '{:,.0f}'.format(partner.total_earned|float).replace(',', ' ') }} ₽</div>
+                    <div class="pb-stat-label">Заработано</div>
+                    <div class="pb-stat-sub">За всё время</div>
+                </div>
+                <div class="pb-stat">
+                    <div class="pb-stat-icon" style="background:rgba(245,158,11,0.1);">
+                        <i class="fas fa-user-clock" style="color:#f59e0b;"></i>
+                    </div>
+                    <div class="pb-stat-val">{{ '{:,.0f}'.format(total_pending_amount|float).replace(',', ' ') }} ₽</div>
+                    <div class="pb-stat-label">Ожидает сделок</div>
+                    <div class="pb-stat-sub">{{ refs_pending }} реф{% if refs_pending == 1 %}ерал{% elif refs_pending in [2,3,4] %}ерала{% else %}ералов{% endif %}</div>
+                </div>
+                <div class="pb-stat">
+                    <div class="pb-stat-icon" style="background:rgba(0,136,204,0.08);">
+                        <i class="fas fa-users" style="color:#0088CC;"></i>
+                    </div>
+                    <div class="pb-stat-val">{{ partner.total_referrals or 0 }}</div>
+                    <div class="pb-stat-label">Рефералов</div>
+                    <div class="pb-stat-sub">{{ refs_credited }} зачислено</div>
+                </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start;">
+                <div>
+                    <!-- Referral link -->
+                    <div class="pb-card" style="margin-bottom:20px;">
+                        <div class="pb-card-head">
+                            <div class="pb-card-title"><i class="fas fa-link" style="color:#0088CC;margin-right:8px;"></i>Ваша реферальная ссылка</div>
+                            <span style="font-size:11.5px;color:#10b981;font-weight:600;background:#dcfce7;padding:3px 10px;border-radius:20px;">Активна</span>
+                        </div>
+                        <div class="pb-card-body">
+                            <div class="pb-ref-link-wrap" style="margin-bottom:14px;">
+                                <input type="text" class="pb-ref-link-input" id="refLinkInput" value="{{ referral_link }}" readonly onclick="this.select()">
+                                <button class="pb-copy-btn" onclick="copyLink()">
+                                    <i class="fas fa-copy"></i>
+                                    <span id="copyBtnText">Копировать</span>
+                                </button>
+                            </div>
+                            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                                <a href="https://wa.me/?text={{ referral_link | urlencode }}" target="_blank" class="pb-share-btn pb-share-wa">
+                                    <i class="fab fa-whatsapp"></i> WhatsApp
+                                </a>
+                                <a href="https://t.me/share/url?url={{ referral_link | urlencode }}" target="_blank" class="pb-share-btn pb-share-tg">
+                                    <i class="fab fa-telegram-plane"></i> Telegram
+                                </a>
+                                <a href="https://vk.com/share.php?url={{ referral_link | urlencode }}" target="_blank" class="pb-share-btn pb-share-vk">
+                                    <i class="fab fa-vk"></i> ВКонтакте
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent referrals mini table -->
+                    <div class="pb-card">
+                        <div class="pb-card-head">
+                            <div class="pb-card-title"><i class="fas fa-users" style="color:#0088CC;margin-right:8px;"></i>Последние рефералы</div>
+                            <button onclick="switchSection('referrals')" style="font-size:13px;color:#0088CC;background:none;border:none;cursor:pointer;font-weight:600;">Все →</button>
+                        </div>
+                        <div style="overflow-x:auto;">
+                            <table class="pb-table">
+                                <thead>
+                                    <tr>
+                                        <th>Партнёр</th>
+                                        <th>Уровень</th>
+                                        <th>Бонус</th>
+                                        <th>Статус</th>
+                                        <th>Дата</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="miniReferralsBody">
+                                    <tr><td colspan="5" style="text-align:center;padding:28px;color:#94a3b8;font-size:13px;"><i class="fas fa-spinner fa-spin" style="color:#0088CC;margin-right:8px;"></i>Загрузка...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right column -->
+                <div>
+                    <!-- Partner info -->
+                    <div class="pb-card" style="margin-bottom:16px;">
+                        <div class="pb-card-head">
+                            <div class="pb-card-title">Ваш профиль</div>
+                        </div>
+                        <div class="pb-card-body" style="padding:16px 20px;">
+                            <div class="pb-info-box">
+                                <div class="pb-info-row">
+                                    <span class="pb-info-label"><i class="fas fa-fingerprint" style="width:14px;color:#0088CC;margin-right:4px;"></i>ID партнёра</span>
+                                    <span class="pb-info-val" style="font-family:monospace;">{{ partner.partner_id }}</span>
+                                </div>
+                                <div class="pb-info-row">
+                                    <span class="pb-info-label"><i class="fas fa-qrcode" style="width:14px;color:#0088CC;margin-right:4px;"></i>Реф. код</span>
+                                    <span class="pb-info-val" style="font-family:monospace;letter-spacing:1px;">{{ partner.referral_code }}</span>
+                                </div>
+                                <div class="pb-info-row">
+                                    <span class="pb-info-label"><i class="fas fa-star" style="width:14px;color:#f59e0b;margin-right:4px;"></i>Уровень</span>
+                                    <span class="pb-info-val">Уровень {{ partner.level or 1 }}</span>
+                                </div>
+                                <div class="pb-info-row">
+                                    <span class="pb-info-label"><i class="fas fa-calendar" style="width:14px;color:#94a3b8;margin-right:4px;"></i>С нами с</span>
+                                    <span class="pb-info-val">{{ partner.created_at.strftime('%d.%m.%Y') if partner.created_at else '—' }}</span>
+                                </div>
+                                <div class="pb-info-row">
+                                    <span class="pb-info-label"><i class="fas fa-phone" style="width:14px;color:#94a3b8;margin-right:4px;"></i>Телефон</span>
+                                    <span class="pb-info-val">{{ partner.phone }}</span>
+                                </div>
+                                {% if partner.email %}
+                                <div class="pb-info-row">
+                                    <span class="pb-info-label"><i class="fas fa-envelope" style="width:14px;color:#94a3b8;margin-right:4px;"></i>Email</span>
+                                    <span class="pb-info-val" style="font-size:12.5px;">{{ partner.email }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Assigned manager -->
+                    {% if assigned_manager %}
+                    <div class="pb-card" style="margin-bottom:16px;">
+                        <div class="pb-card-head">
+                            <div class="pb-card-title"><i class="fas fa-headset" style="color:#10b981;margin-right:8px;"></i>Ваш менеджер</div>
+                        </div>
+                        <div class="pb-card-body" style="padding:16px 20px;">
+                            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+                                <div class="pb-manager-avatar">{{ assigned_manager.full_name[0] if assigned_manager.full_name else 'М' }}</div>
+                                <div>
+                                    <div style="font-weight:700;color:#0f172a;font-size:14px;">{{ assigned_manager.full_name }}</div>
+                                    <div style="font-size:12px;color:#64748b;margin-top:2px;">{{ assigned_manager.manager_id }}</div>
+                                </div>
+                            </div>
+                            <div style="display:flex;flex-direction:column;gap:8px;">
+                            {% if assigned_manager.phone %}
+                            <a href="tel:{{ assigned_manager.phone }}" style="display:flex;align-items:center;gap:8px;padding:9px 12px;background:#f8fafc;border-radius:8px;text-decoration:none;color:#0f172a;font-size:13px;font-weight:500;border:1px solid #e2e8f0;transition:all 0.15s;" onmouseover="this.style.borderColor='#0088CC'" onmouseout="this.style.borderColor='#e2e8f0'">
+                                <i class="fas fa-phone" style="color:#0088CC;font-size:12px;"></i>
+                                {{ assigned_manager.phone }}
+                            </a>
+                            {% endif %}
+                            {% if assigned_manager.email %}
+                            <a href="mailto:{{ assigned_manager.email }}" style="display:flex;align-items:center;gap:8px;padding:9px 12px;background:#f8fafc;border-radius:8px;text-decoration:none;color:#0f172a;font-size:13px;font-weight:500;border:1px solid #e2e8f0;transition:all 0.15s;" onmouseover="this.style.borderColor='#0088CC'" onmouseout="this.style.borderColor='#e2e8f0'">
+                                <i class="fas fa-envelope" style="color:#0088CC;font-size:12px;"></i>
+                                {{ assigned_manager.email }}
+                            </a>
+                            {% endif %}
+                            {% if assigned_manager.telegram_id %}
+                            <a href="https://t.me/{{ assigned_manager.telegram_id }}" target="_blank" style="display:flex;align-items:center;gap:8px;padding:9px 12px;background:#f8fafc;border-radius:8px;text-decoration:none;color:#0f172a;font-size:13px;font-weight:500;border:1px solid #e2e8f0;transition:all 0.15s;" onmouseover="this.style.borderColor='#0088CC'" onmouseout="this.style.borderColor='#e2e8f0'">
+                                <i class="fab fa-telegram" style="color:#0088CC;font-size:12px;"></i>
+                                @{{ assigned_manager.telegram_id }}
+                            </a>
+                            {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="pb-card" style="margin-bottom:16px;">
+                        <div class="pb-card-head">
+                            <div class="pb-card-title"><i class="fas fa-headset" style="color:#94a3b8;margin-right:8px;"></i>Персональный менеджер</div>
+                        </div>
+                        <div class="pb-card-body" style="padding:16px 20px;">
+                            <div style="text-align:center;margin-bottom:14px;">
+                                <div style="width:48px;height:48px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">
+                                    <i class="fas fa-user-tie" style="color:#94a3b8;font-size:18px;"></i>
+                                </div>
+                                <div style="font-size:13px;color:#64748b;margin-bottom:12px;">
+                                    Персональный менеджер поможет вам зарабатывать больше и ответит на все вопросы
+                                </div>
+                            </div>
+                            <button onclick="openManagerRequestModal()"
+                                style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;background:linear-gradient(135deg,#0088CC,#005f99);color:#fff;border:none;border-radius:10px;font-size:13.5px;font-weight:700;cursor:pointer;transition:all 0.2s;"
+                                onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 14px rgba(0,136,204,0.35)'"
+                                onmouseout="this.style.transform='';this.style.boxShadow=''">
+                                <i class="fas fa-paper-plane"></i>
+                                Запросить менеджера
+                            </button>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Commission rates -->
+                    <div class="pb-card">
+                        <div class="pb-card-head">
+                            <div class="pb-card-title">Ставки вознаграждения</div>
+                        </div>
+                        <div class="pb-card-body" style="padding:14px 20px;">
+                            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f1f5f9;">
+                                <div>
+                                    <div style="font-size:13px;font-weight:600;color:#1e293b;">Уровень 1</div>
+                                    <div style="font-size:11.5px;color:#94a3b8;margin-top:2px;">Прямые рефералы</div>
+                                </div>
+                                <div style="font-size:18px;font-weight:800;color:#0088CC;">20 000 ₽</div>
+                            </div>
+                            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;">
+                                <div>
+                                    <div style="font-size:13px;font-weight:600;color:#1e293b;">Уровень 2</div>
+                                    <div style="font-size:11.5px;color:#94a3b8;margin-top:2px;">Рефералы партнёров</div>
+                                </div>
+                                <div style="font-size:18px;font-weight:800;color:#7c3aed;">5 000 ₽</div>
+                            </div>
+                            <div style="background:#f0f9ff;border-radius:8px;padding:10px 12px;font-size:11.5px;color:#0369a1;border:1px solid #bae6fd;margin-top:4px;">
+                                <i class="fas fa-info-circle" style="margin-right:4px;"></i>
+                                Бонус зачисляется после завершения сделки рефералом
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ REFERRALS ═══ -->
+        <div class="pb-section" id="section-referrals">
+            <!-- Stats strip -->
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;">
+                <div class="pb-stat">
+                    <div class="pb-stat-icon" style="background:#dbeafe;"><i class="fas fa-users" style="color:#1d4ed8;"></i></div>
+                    <div class="pb-stat-val">{{ partner.total_referrals or 0 }}</div>
+                    <div class="pb-stat-label">Всего рефералов</div>
+                </div>
+                <div class="pb-stat">
+                    <div class="pb-stat-icon" style="background:#dcfce7;"><i class="fas fa-check-circle" style="color:#16a34a;"></i></div>
+                    <div class="pb-stat-val">{{ refs_credited }}</div>
+                    <div class="pb-stat-label">Бонус начислен</div>
+                    <div class="pb-stat-sub">{{ '{:,.0f}'.format(partner.total_earned|float).replace(',', ' ') }} ₽ заработано</div>
+                </div>
+                <div class="pb-stat">
+                    <div class="pb-stat-icon" style="background:#fef9c3;"><i class="fas fa-clock" style="color:#ca8a04;"></i></div>
+                    <div class="pb-stat-val">{{ refs_pending }}</div>
+                    <div class="pb-stat-label">Ожидают сделки</div>
+                    <div class="pb-stat-sub">~{{ '{:,.0f}'.format(total_pending_amount|float).replace(',', ' ') }} ₽ ожидается</div>
+                </div>
+            </div>
+
+            <div class="pb-card">
+                <div class="pb-card-head">
+                    <div class="pb-card-title">История рефералов</div>
+                    <div style="font-size:12px;color:#94a3b8;">Список всех приглашённых партнёров</div>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table class="pb-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Имя</th>
+                                <th>Телефон</th>
+                                <th>Уровень</th>
+                                <th>Бонус</th>
+                                <th>Статус</th>
+                                <th>Дата</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fullReferralsBody">
+                            <tr><td colspan="7" style="text-align:center;padding:36px;color:#94a3b8;"><i class="fas fa-spinner fa-spin" style="color:#0088CC;"></i></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ WITHDRAWALS ═══ -->
+        <div class="pb-section" id="section-withdrawals">
+            <div style="display:grid;grid-template-columns:1fr 380px;gap:20px;align-items:start;">
+                <div class="pb-card">
+                    <div class="pb-card-head">
+                        <div class="pb-card-title"><i class="fas fa-history" style="color:#0088CC;margin-right:8px;"></i>История выплат</div>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table class="pb-table">
+                            <thead>
+                                <tr><th>#</th><th>Сумма</th><th>Способ</th><th>Дата заявки</th><th>Статус</th></tr>
+                            </thead>
+                            <tbody id="withdrawalsTableBody">
+                                <tr><td colspan="5" style="text-align:center;padding:36px;color:#94a3b8;"><i class="fas fa-spinner fa-spin" style="color:#0088CC;"></i></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="pb-card">
+                    <div class="pb-card-head">
+                        <div class="pb-card-title"><i class="fas fa-paper-plane" style="color:#0088CC;margin-right:8px;"></i>Запрос на вывод</div>
+                    </div>
+                    <div class="pb-card-body">
+                        <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:14px 16px;margin-bottom:20px;">
+                            <div style="font-size:12px;color:#0369a1;margin-bottom:4px;font-weight:600;">Доступно для вывода</div>
+                            <div style="font-size:28px;font-weight:800;color:#0088CC;">{{ '{:,.0f}'.format(partner.balance|float).replace(',', ' ') }} ₽</div>
+                        </div>
+                        <form id="withdrawalForm" onsubmit="submitWithdrawal(event)" style="display:flex;flex-direction:column;gap:14px;">
+                            <div>
+                                <label style="display:block;font-size:12.5px;font-weight:600;color:#374151;margin-bottom:6px;">Сумма вывода (₽)</label>
+                                <input type="number" id="withdrawAmount" min="1000" step="100" placeholder="Минимум 1 000 ₽"
+                                    style="width:100%;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;outline:none;box-sizing:border-box;"
+                                    onfocus="this.style.borderColor='#0088CC'" onblur="this.style.borderColor='#e2e8f0'">
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:12.5px;font-weight:600;color:#374151;margin-bottom:6px;">Способ получения</label>
+                                <select id="paymentMethod" style="width:100%;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;outline:none;background:#fff;box-sizing:border-box;">
+                                    <option value="">Выберите способ</option>
+                                    <option value="card">Банковская карта</option>
+                                    <option value="sbp">СБП (Система быстрых платежей)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:12.5px;font-weight:600;color:#374151;margin-bottom:6px;">Реквизиты</label>
+                                <input type="text" id="paymentDetails" placeholder="Номер карты или телефон для СБП"
+                                    style="width:100%;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;outline:none;box-sizing:border-box;"
+                                    onfocus="this.style.borderColor='#0088CC'" onblur="this.style.borderColor='#e2e8f0'">
+                            </div>
+                            <button type="submit" id="withdrawSubmitBtn" class="pb-copy-btn" style="justify-content:center;">
+                                <i class="fas fa-paper-plane"></i> Отправить запрос
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ STRUCTURE ═══ -->
+        <div class="pb-section" id="section-structure">
+            <div class="pb-card">
+                <div class="pb-card-head">
+                    <div class="pb-card-title"><i class="fas fa-sitemap" style="color:#0088CC;margin-right:8px;"></i>Структура партнёрской сети</div>
+                </div>
+                <div class="pb-card-body" id="structureContent">
+                    <div style="text-align:center;padding:36px;color:#94a3b8;"><i class="fas fa-spinner fa-spin" style="color:#0088CC;margin-right:8px;"></i>Загрузка структуры...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ CONDITIONS ═══ -->
+        <div class="pb-section" id="section-conditions">
+            <div class="pb-card">
+                <div class="pb-card-head">
+                    <div class="pb-card-title"><i class="fas fa-file-contract" style="color:#0088CC;margin-right:8px;"></i>Условия партнёрской программы</div>
+                </div>
+                <div class="pb-card-body">
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:24px;">
+                        <div style="background:#f0f9ff;border-radius:12px;padding:18px;border:1px solid #bae6fd;">
+                            <div style="font-size:28px;font-weight:900;color:#0088CC;margin-bottom:4px;">20 000 ₽</div>
+                            <div style="font-size:14px;font-weight:700;color:#1e293b;margin-bottom:8px;">За партнёра уровня 1</div>
+                            <ul style="font-size:13px;color:#475569;padding-left:18px;margin:0;line-height:1.8;">
+                                <li>Регистрируется по вашей ссылке</li>
+                                <li>Приводит покупателя</li>
+                                <li>Покупатель закрывает сделку</li>
+                            </ul>
+                        </div>
+                        <div style="background:#faf5ff;border-radius:12px;padding:18px;border:1px solid #e9d5ff;">
+                            <div style="font-size:28px;font-weight:900;color:#7c3aed;margin-bottom:4px;">5 000 ₽</div>
+                            <div style="font-size:14px;font-weight:700;color:#1e293b;margin-bottom:8px;">За партнёра уровня 2</div>
+                            <ul style="font-size:13px;color:#475569;padding-left:18px;margin:0;line-height:1.8;">
+                                <li>Партнёр вашего партнёра</li>
+                                <li>Автоматическое начисление</li>
+                                <li>Без ограничений на количество</li>
+                            </ul>
+                        </div>
+                        <div style="background:#f0fdf4;border-radius:12px;padding:18px;border:1px solid #bbf7d0;">
+                            <div style="font-size:28px;font-weight:900;color:#16a34a;margin-bottom:4px;">до 500к ₽</div>
+                            <div style="font-size:14px;font-weight:700;color:#1e293b;margin-bottom:8px;">Кэшбек для покупателя</div>
+                            <ul style="font-size:13px;color:#475569;padding-left:18px;margin:0;line-height:1.8;">
+                                <li>До 5% от стоимости квартиры</li>
+                                <li>Бесплатный подбор</li>
+                                <li>Помощь с ипотекой</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div style="background:#fef9c3;border:1px solid #fde047;border-radius:10px;padding:14px 16px;font-size:13px;color:#713f12;">
+                        <i class="fas fa-exclamation-triangle" style="margin-right:6px;"></i>
+                        <strong>Важно:</strong> Бонус начисляется на ваш баланс после того, как привлечённый партнёр успешно закроет сделку с покупателем. Минимальная сумма для вывода — 1 000 ₽. Срок обработки заявок — 1-3 рабочих дня.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /pb-page-content -->
+</div><!-- /pb-main -->
+
+<!-- Manager request modal -->
+<div id="managerRequestModal" style="display:none;position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;padding:16px;">
+    <div style="position:absolute;inset:0;background:rgba(0,0,0,0.55);" onclick="closeManagerRequestModal()"></div>
+    <div style="position:relative;background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.2);width:100%;max-width:440px;padding:28px;">
+        <button onclick="closeManagerRequestModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;line-height:1;"><i class="fas fa-times"></i></button>
+        <div style="text-align:center;margin-bottom:20px;">
+            <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#0088CC,#005f99);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+                <i class="fas fa-headset" style="color:#fff;font-size:22px;"></i>
+            </div>
+            <h3 style="font-size:18px;font-weight:800;color:#0f172a;margin-bottom:6px;">Запрос менеджера</h3>
+            <p style="font-size:13.5px;color:#64748b;line-height:1.5;">Мы назначим вам персонального менеджера InBack, который поможет зарабатывать больше</p>
+        </div>
+        <div style="margin-bottom:16px;">
+            <label style="display:block;font-size:12.5px;font-weight:700;color:#374151;margin-bottom:6px;">Ваше сообщение (необязательно)</label>
+            <textarea id="managerRequestMessage" rows="3" placeholder="Например: хочу узнать об условиях, нужна помощь с привлечением клиентов..."
+                style="width:100%;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:13.5px;resize:none;outline:none;box-sizing:border-box;font-family:inherit;"
+                onfocus="this.style.borderColor='#0088CC'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+        </div>
+        <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:12px 14px;margin-bottom:18px;font-size:12.5px;color:#0369a1;">
+            <i class="fas fa-info-circle" style="margin-right:5px;"></i>
+            После отправки запроса менеджер свяжется с вами по номеру <strong>{{ partner.phone }}</strong> в течение 1 рабочего дня
+        </div>
+        <div style="display:flex;gap:10px;">
+            <button onclick="closeManagerRequestModal()" style="flex:1;padding:11px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:13.5px;font-weight:600;color:#64748b;background:#fff;cursor:pointer;">Отмена</button>
+            <button onclick="submitManagerRequest()" id="managerRequestBtn" style="flex:2;padding:11px;background:linear-gradient(135deg,#0088CC,#005f99);color:#fff;border:none;border-radius:10px;font-size:13.5px;font-weight:700;cursor:pointer;">
+                <i class="fas fa-paper-plane" style="margin-right:6px;"></i>Отправить запрос
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="pb-toast" id="pbToast">Ссылка скопирована!</div>
+
+<script>
+var _csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+function getCSRFToken() { return _csrfToken; }
+
+/* ── Navigation ── */
+var sections = ['overview','referrals','withdrawals','structure','conditions'];
+var sectionTitles = {
+    overview: 'Главная', referrals: 'Рефералы',
+    withdrawals: 'Выплаты', structure: 'Структура', conditions: 'Условия'
+};
+var loaders = { referrals: false, withdrawals: false, structure: false };
+
+function switchSection(name) {
+    sections.forEach(function(s) {
+        var el = document.getElementById('section-' + s);
+        if (el) el.classList.toggle('active', s === name);
+        ['nav-','mnav-','mtab-'].forEach(function(p) {
+            var n = document.getElementById(p + s);
+            if (n) n.classList.toggle('active', s === name);
+        });
+    });
+    var tb = document.getElementById('topbarTitle');
+    if (tb) tb.textContent = sectionTitles[name] || name;
+    if (name === 'referrals' && !loaders.referrals) { loaders.referrals = true; loadReferrals(); }
+    if (name === 'withdrawals' && !loaders.withdrawals) { loaders.withdrawals = true; loadWithdrawals(); }
+    if (name === 'structure' && !loaders.structure) { loaders.structure = true; loadStructure(); }
+}
+
+/* ── Mobile drawer ── */
+function openDrawer() {
+    document.getElementById('mobileDrawer').classList.add('open');
+    document.getElementById('drawerOverlay').classList.add('open');
+}
+function closeDrawer() {
+    document.getElementById('mobileDrawer').classList.remove('open');
+    document.getElementById('drawerOverlay').classList.remove('open');
+}
+
+/* ── Copy link ── */
+function copyLink() {
+    var val = document.getElementById('refLinkInput').value;
+    navigator.clipboard.writeText(val).then(showToast).catch(function() {
+        var tmp = document.createElement('input');
+        tmp.value = val; document.body.appendChild(tmp); tmp.select();
+        document.execCommand('copy'); document.body.removeChild(tmp); showToast();
+    });
+}
+function showToast(msg) {
+    var t = document.getElementById('pbToast');
+    t.textContent = msg || 'Ссылка скопирована!';
+    t.classList.add('show');
+    setTimeout(function() { t.classList.remove('show'); }, 2500);
+    var btn = document.getElementById('copyBtnText');
+    if (btn) { btn.textContent = 'Скопировано!'; setTimeout(function() { btn.textContent = 'Копировать'; }, 2000); }
+}
+
+/* ── Referrals ── */
+function statusBadge(s) {
+    if (s === 'credited') return '<span class="badge-credited"><i class="fas fa-check" style="font-size:10px;margin-right:3px;"></i>Начислен</span>';
+    if (s === 'pending') return '<span class="badge-pending"><i class="fas fa-clock" style="font-size:10px;margin-right:3px;"></i>Ожидает сделки</span>';
+    return '<span style="background:#f1f5f9;color:#64748b;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:600;">' + s + '</span>';
+}
+function levelBadge(l) {
+    return l === 2 ? '<span class="badge-l2">L2</span>' : '<span class="badge-l1">L1</span>';
+}
+
+var _referrals = null;
+function loadReferrals() {
+    fetch('/partner/api/referrals', { credentials: 'same-origin', headers: { 'X-CSRFToken': getCSRFToken() } })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        _referrals = data.referrals || [];
+        renderReferralTable(_referrals, 'fullReferralsBody', true);
+        renderReferralTable(_referrals.slice(0, 5), 'miniReferralsBody', false);
+    })
+    .catch(function() {
+        ['fullReferralsBody','miniReferralsBody'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#ef4444;padding:28px;">Ошибка загрузки</td></tr>';
+        });
+    });
+}
+
+function renderReferralTable(refs, tbodyId, full) {
+    var tbody = document.getElementById(tbodyId);
+    if (!tbody) return;
+    if (!refs || refs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="' + (full?7:5) + '" style="text-align:center;padding:36px;"><div style="color:#94a3b8;"><div style="font-size:32px;margin-bottom:10px;">👥</div><div style="font-weight:600;margin-bottom:4px;">Нет рефералов</div><div style="font-size:13px;">Поделитесь вашей ссылкой — они появятся здесь</div></div></td></tr>';
+        return;
+    }
+    var html = '';
+    refs.forEach(function(r, i) {
+        html += '<tr>';
+        if (full) html += '<td style="color:#94a3b8;font-size:12px;">' + (i+1) + '</td>';
+        html += '<td style="font-weight:600;">' + (r.name || '—') + '</td>';
+        html += '<td style="color:#64748b;">' + (r.phone || '—') + '</td>';
+        if (full) html += '<td>' + levelBadge(r.level) + '</td>';
+        else html += '<td>' + levelBadge(r.level) + '</td>';
+        html += '<td style="font-weight:700;color:' + (r.status==='credited'?'#16a34a':'#ca8a04') + ';">' + (r.bonus_amount ? Number(r.bonus_amount).toLocaleString('ru-RU') + ' ₽' : '—') + '</td>';
+        html += '<td>' + statusBadge(r.status) + '</td>';
+        html += '<td style="color:#94a3b8;font-size:12.5px;">' + (r.created_at || '—') + '</td>';
+        html += '</tr>';
+    });
+    tbody.innerHTML = html;
+}
+
+/* ── Withdrawals ── */
+function loadWithdrawals() {
+    fetch('/partner/api/withdrawals', { credentials: 'same-origin', headers: { 'X-CSRFToken': getCSRFToken() } })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        var list = data.withdrawals || data || [];
+        if (!Array.isArray(list)) list = [];
+        var tbody = document.getElementById('withdrawalsTableBody');
+        if (!tbody) return;
+        if (list.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:36px;color:#94a3b8;"><div style="font-size:28px;margin-bottom:8px;">💰</div><div>Выплат ещё не было</div></td></tr>';
+            return;
+        }
+        var methods = { card: 'Карта', sbp: 'СБП' };
+        var html = '';
+        list.forEach(function(w, i) {
+            html += '<tr>';
+            html += '<td style="color:#94a3b8;font-size:12px;">' + (i+1) + '</td>';
+            html += '<td style="font-weight:700;color:#0f172a;">' + (w.amount ? Number(w.amount).toLocaleString('ru-RU') + ' ₽' : '—') + '</td>';
+            html += '<td>' + (methods[w.payment_method] || w.payment_method || '—') + '</td>';
+            html += '<td style="color:#94a3b8;font-size:12.5px;">' + (w.created_at || w.date || '—') + '</td>';
+            html += '<td>' + withdrawStatusBadge(w.status) + '</td>';
+            html += '</tr>';
+        });
+        tbody.innerHTML = html;
+    })
+    .catch(function() {
+        var el = document.getElementById('withdrawalsTableBody');
+        if (el) el.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#ef4444;padding:28px;">Ошибка загрузки</td></tr>';
+    });
+}
+function withdrawStatusBadge(s) {
+    var map = {
+        pending: ['#fef9c3','#854d0e','Ожидает'],
+        approved: ['#dcfce7','#166534','Одобрено'],
+        paid: ['#dcfce7','#166534','Выплачено'],
+        rejected: ['#fee2e2','#991b1b','Отклонено']
+    };
+    var c = map[s] || ['#f1f5f9','#64748b', s];
+    return '<span style="background:' + c[0] + ';color:' + c[1] + ';padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:700;">' + c[2] + '</span>';
+}
+
+/* ── Structure ── */
+function loadStructure() {
+    fetch('/partner/api/structure', { credentials: 'same-origin', headers: { 'X-CSRFToken': getCSRFToken() } })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        var s = data.structure || {};
+        var l1 = s.level1 || []; var l2 = s.level2 || [];
+        var cont = document.getElementById('structureContent');
+        if (!cont) return;
+        if (!l1.length && !l2.length) {
+            cont.innerHTML = '<div style="text-align:center;padding:48px;color:#94a3b8;"><div style="font-size:48px;margin-bottom:12px;">🌐</div><div style="font-weight:600;font-size:15px;margin-bottom:6px;">Структура пуста</div><div style="font-size:13px;">Привлекайте партнёров — они появятся здесь</div></div>';
+            return;
+        }
+        var html = '';
+        if (l1.length) {
+            html += '<div style="margin-bottom:24px;"><div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:14px;display:flex;align-items:center;gap:8px;"><span class="badge-l1">L1</span> Прямые рефералы (' + l1.length + ')</div>';
+            html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;">';
+            l1.forEach(function(p) {
+                html += '<div style="background:#f8fafc;border-radius:12px;padding:14px 16px;border:1px solid #e8edf2;">';
+                html += '<div style="display:flex;align-items:center;gap:10px;">';
+                html += '<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#0088CC,#005f99);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;flex-shrink:0;">' + ((p.name||'?')[0].toUpperCase()) + '</div>';
+                html += '<div><div style="font-weight:600;color:#1e293b;font-size:13.5px;">' + (p.name||'—') + '</div>';
+                html += '<div style="font-size:11.5px;color:#94a3b8;margin-top:2px;">' + (p.joined||'—') + '</div></div>';
+                html += '</div></div>';
+            });
+            html += '</div></div>';
+        }
+        if (l2.length) {
+            html += '<div><div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:14px;display:flex;align-items:center;gap:8px;"><span class="badge-l2">L2</span> Рефералы партнёров (' + l2.length + ')</div>';
+            html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;">';
+            l2.forEach(function(p) {
+                html += '<div style="background:#f8fafc;border-radius:12px;padding:14px 16px;border:1px solid #e8edf2;">';
+                html += '<div style="display:flex;align-items:center;gap:10px;">';
+                html += '<div style="width:34px;height:34px;border-radius:50%;background:#7c3aed;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;flex-shrink:0;">' + ((p.name||'?')[0].toUpperCase()) + '</div>';
+                html += '<div><div style="font-weight:600;color:#1e293b;font-size:13.5px;">' + (p.name||'—') + '</div>';
+                html += '<div style="font-size:11.5px;color:#94a3b8;margin-top:2px;">от ' + (p.parent_name||'—') + ' · ' + (p.joined||'—') + '</div></div>';
+                html += '</div></div>';
+            });
+            html += '</div></div>';
+        }
+        cont.innerHTML = html;
+    })
+    .catch(function() {
+        var cont = document.getElementById('structureContent');
+        if (cont) cont.innerHTML = '<div style="text-align:center;color:#ef4444;padding:36px;">Ошибка загрузки структуры</div>';
+    });
+}
+
+/* ── Withdrawal form ── */
+function submitWithdrawal(e) {
+    e.preventDefault();
+    var btn = document.getElementById('withdrawSubmitBtn');
+    var amount = document.getElementById('withdrawAmount').value;
+    var method = document.getElementById('paymentMethod').value;
+    var details = document.getElementById('paymentDetails').value;
+    if (!amount || !method || !details) { showToast('Заполните все поля'); return; }
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+    fetch('/partner/api/withdrawal', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken() },
+        body: JSON.stringify({ amount: parseFloat(amount), payment_method: method, payment_details: details })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Отправить запрос';
+        if (data.success || data.status === 'ok') {
+            document.getElementById('withdrawalForm').reset();
+            showToast('Запрос отправлен! Ожидайте обработки.');
+            loaders.withdrawals = false; loadWithdrawals();
+        } else {
+            showToast(data.error || data.message || 'Ошибка. Попробуйте позже.');
+        }
+    })
+    .catch(function() {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Отправить запрос';
+        showToast('Ошибка сети. Попробуйте позже.');
+    });
+}
+
+/* ── Manager request modal ── */
+function openManagerRequestModal() {
+    var modal = document.getElementById('managerRequestModal');
+    modal.style.display = 'flex';
+}
+function closeManagerRequestModal() {
+    var modal = document.getElementById('managerRequestModal');
+    modal.style.display = 'none';
+    document.getElementById('managerRequestMessage').value = '';
+    var btn = document.getElementById('managerRequestBtn');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-paper-plane" style="margin-right:6px;"></i>Отправить запрос';
+}
+function submitManagerRequest() {
+    var btn = document.getElementById('managerRequestBtn');
+    var msg = document.getElementById('managerRequestMessage').value.trim();
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i>Отправка...';
+    fetch('/partner/api/request-manager', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken() },
+        body: JSON.stringify({ message: msg })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        closeManagerRequestModal();
+        if (data.success) {
+            showToast(data.message || 'Запрос отправлен!');
+        } else {
+            showToast(data.message || 'Ошибка. Попробуйте позже.');
+        }
+    })
+    .catch(function() {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane" style="margin-right:6px;"></i>Отправить запрос';
+        showToast('Ошибка сети. Попробуйте позже.');
+    });
+}
+
+/* ── Init ── */
+document.addEventListener('DOMContentLoaded', function() {
+    // Load mini referrals on page load
+    fetch('/partner/api/referrals', { credentials: 'same-origin', headers: { 'X-CSRFToken': getCSRFToken() } })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        _referrals = data.referrals || [];
+        renderReferralTable(_referrals.slice(0, 5), 'miniReferralsBody', false);
+    })
+    .catch(function() {
+        var el = document.getElementById('miniReferralsBody');
+        if (el) el.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:20px;font-size:13px;">Нет данных</td></tr>';
+    });
+
+    // Responsive stats grid
+    function updateGrid() {
+        var grid = document.querySelector('.pb-stats-grid');
+        if (!grid) return;
+        grid.style.gridTemplateColumns = window.innerWidth < 640 ? 'repeat(2,1fr)' : 'repeat(4,1fr)';
+    }
+    updateGrid();
+    window.addEventListener('resize', updateGrid);
+});
+</script>
+{% endblock %}

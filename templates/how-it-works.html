@@ -1,0 +1,898 @@
+{% extends "base.html" %}
+
+{% block title %}Как получить кэшбек за новостройку | InBack{% endblock %}
+{% block description %}Как получить кэшбек 2,5-5% за новостройку? Пошаговая инструкция работы сервиса InBack. Официальный возврат денег от застройщика при покупке квартиры в {{ city_prep }}.{% endblock %}
+{% block keywords %}как получить кэшбек за квартиру, кэшбек за новостройку, возврат денег за квартиру, система кэшбека inback, оформление кэшбека, этапы получения кэшбека, как работает кэшбек при покупке квартиры, кэшбек от застройщика законно, сколько можно вернуть при покупке квартиры, инструкция кэшбек новостройка, когда выплачивается кэшбек, кэшбек после регистрации сделки, сервис возврата денег за недвижимость, схема кэшбека за квартиру, кэшбек без скрытых платежей, партнёрская программа застройщики кэшбек{% endblock %}
+
+{% block og_title %}Как получить кэшбек за новостройку | InBack{% endblock %}
+{% block og_description %}Как получить кэшбек 2,5-5% за новостройку? Пошаговая инструкция работы сервиса InBack. Официальный возврат денег от застройщика.{% endblock %}
+{% block og_image_tag %}<meta property="og:image" content="{{ url_for('static', filename='images/how-it-works-og.jpg', _external=True) }}"/>{% endblock %}
+{% block twitter_title %}Как получить кэшбек за новостройку | InBack{% endblock %}
+{% block twitter_description %}Пошаговая инструкция получения кэшбека при покупке квартиры. Официальный возврат денег от застройщика.{% endblock %}
+{% block twitter_image %}{{ url_for('static', filename='images/how-it-works-og.jpg', _external=True) }}{% endblock %}
+{% block canonical_url %}<link rel="canonical" href="{{ url_for('main.how_it_works', _external=True) }}" />{% endblock %}
+
+{% block head %}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Главная", "item": "https://inback.ru/"},
+        {"@type": "ListItem", "position": 2, "name": "Как это работает", "item": "https://inback.ru/how-it-works"}
+      ]
+    },
+    {
+      "@type": "HowTo",
+      "@id": "https://inback.ru/how-it-works#howto",
+      "name": "Как получить кэшбек при покупке новостройки",
+      "description": "Пошаговая инструкция получения кэшбека до 500 000 ₽ при покупке квартиры в новостройке через сервис InBack. Бесплатно, без скрытых условий.",
+      "totalTime": "P60D",
+      "estimatedCost": {
+        "@type": "MonetaryAmount",
+        "currency": "RUB",
+        "value": "0"
+      },
+      "supply": [
+        {"@type": "HowToSupply", "name": "Паспорт гражданина РФ"},
+        {"@type": "HowToSupply", "name": "Договор долевого участия (ДДУ)"}
+      ],
+      "step": [
+        {
+          "@type": "HowToStep",
+          "position": 1,
+          "name": "Зарегистрируйтесь на InBack",
+          "text": "Создайте бесплатный аккаунт на inback.ru. Регистрация занимает 1 минуту — нужен только номер телефона.",
+          "url": "https://inback.ru/how-it-works#step1"
+        },
+        {
+          "@type": "HowToStep",
+          "position": 2,
+          "name": "Выберите квартиру в каталоге",
+          "text": "Откройте каталог новостроек в {{ city_prep }}. На каждой карточке указан размер кэшбека. Используйте фильтры: район, комнатность, цена, застройщик.",
+          "url": "https://inback.ru/how-it-works#step2"
+        },
+        {
+          "@type": "HowToStep",
+          "position": 3,
+          "name": "Оставьте заявку через InBack",
+          "text": "Нажмите «Получить кэшбек» на странице квартиры или позвоните нам. Менеджер свяжется в течение 15 минут, поможет с документами и записью на показ.",
+          "url": "https://inback.ru/how-it-works#step3"
+        },
+        {
+          "@type": "HowToStep",
+          "position": 4,
+          "name": "Подпишите договор с застройщиком",
+          "text": "Мы сопроводим вас на всех этапах сделки: ипотека, проверка документов, переговоры с застройщиком. Наш юрист проверит ДДУ бесплатно.",
+          "url": "https://inback.ru/how-it-works#step4"
+        },
+        {
+          "@type": "HowToStep",
+          "position": 5,
+          "name": "Получите кэшбек на банковскую карту",
+          "text": "После регистрации ДДУ в Росреестре InBack перечислит кэшбек на ваш банковский счёт. Средний размер выплаты — 150 000 ₽, максимум — 500 000 ₽.",
+          "url": "https://inback.ru/how-it-works#step5"
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+<style>
+@keyframes floatElement1 { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-18px) rotate(3deg)} }
+@keyframes floatElement2 { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-14px) rotate(-4deg)} }
+@keyframes floatElement3 { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-22px) rotate(5deg)} }
+@keyframes floatElement4 { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-10px) rotate(-3deg)} }
+@keyframes floatElement5 { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-16px) rotate(2deg)} }
+@keyframes floatElement6 { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-20px) rotate(-5deg)} }
+.float-el-1 { animation: floatElement1 6s ease-in-out infinite; }
+.float-el-2 { animation: floatElement2 7s ease-in-out infinite 0.5s; }
+.float-el-3 { animation: floatElement3 5s ease-in-out infinite 1s; }
+.float-el-4 { animation: floatElement4 8s ease-in-out infinite 1.5s; }
+.float-el-5 { animation: floatElement5 6.5s ease-in-out infinite 0.8s; }
+.float-el-6 { animation: floatElement6 7.5s ease-in-out infinite 1.2s; }
+.hero-gradient-steps { background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 30%, #e0f2fe 60%, #f0fdf4 100%); }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Breadcrumbs -->
+<div class="container mx-auto px-4 py-3 text-sm">
+    <nav aria-label="Breadcrumb" class="flex">
+        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+            <li class="inline-flex items-center">
+                <a class="text-[#0088CC] hover:underline inline-flex items-center" href="{{ url_for('index') }}">
+                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewbox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
+                    Главная
+                </a>
+            </li>
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewbox="0 0 20 20"><path clip-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" fill-rule="evenodd"></path></svg>
+                    <span class="text-gray-500 ml-1 md:ml-2">Как это работает</span>
+                </div>
+            </li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Hero Section (Skillbox-style) -->
+<section class="hero-gradient-steps relative overflow-hidden">
+    <div class="container mx-auto px-4 py-20 md:py-28 relative z-10">
+        <div class="max-w-3xl mx-auto text-center relative">
+            <div class="w-fit px-4 py-1 bg-black bg-opacity-5 rounded-full mb-6 mx-auto">
+                <span class="text-sm font-medium uppercase">4 простых шага к кэшбеку</span>
+            </div>
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-gray-900 leading-tight">
+                Как работает сервис<br class="hidden md:block"> <span class="text-[#0088CC]">InBack</span>
+            </h1>
+            <p class="text-lg md:text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
+                Получите кэшбек до 5% от стоимости квартиры! Простая и&nbsp;прозрачная система возврата денег за покупку недвижимости в&nbsp;новостройке.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="openApplicationModal()" class="inline-flex items-center justify-center px-8 py-3.5 bg-[#0088CC] text-white rounded-xl hover:bg-[#006699] transition-all font-semibold text-base shadow-lg shadow-[#0088CC]/20 hover:shadow-xl hover:shadow-[#0088CC]/30">
+                    Получить кэшбек
+                </button>
+                <a class="inline-flex items-center justify-center px-8 py-3.5 bg-white text-gray-800 rounded-xl hover:bg-gray-50 transition-all font-semibold text-base shadow-md border border-gray-100" href="#steps">
+                    <svg class="w-5 h-5 mr-2 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    Смотреть шаги
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Elements -->
+    <div class="hidden md:block absolute inset-0 pointer-events-none" aria-hidden="true">
+        <!-- Step 1 circle -->
+        <div class="absolute top-[12%] left-[6%] float-el-1">
+            <div class="w-16 h-16 rounded-full bg-[#0088CC]/10 flex items-center justify-center shadow-lg border border-[#0088CC]/20">
+                <span class="text-[#0088CC] font-bold text-2xl">1</span>
+            </div>
+        </div>
+        <!-- Percentage badge -->
+        <div class="absolute top-[8%] right-[8%] float-el-2">
+            <div class="w-20 h-20 rounded-2xl bg-white shadow-xl border border-green-100 flex items-center justify-center">
+                <span class="text-green-600 font-bold text-2xl">5%</span>
+            </div>
+        </div>
+        <!-- Ruble symbol -->
+        <div class="absolute top-[45%] left-[3%] float-el-3">
+            <div class="w-14 h-14 rounded-full bg-amber-50 flex items-center justify-center shadow-lg border border-amber-200">
+                <span class="text-amber-600 font-bold text-xl">₽</span>
+            </div>
+        </div>
+        <!-- Search icon -->
+        <div class="absolute top-[50%] right-[4%] float-el-4">
+            <div class="w-16 h-16 rounded-2xl bg-white shadow-xl border border-[#0088CC]/15 flex items-center justify-center">
+                <svg class="w-7 h-7 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </div>
+        </div>
+        <!-- Step 4 circle -->
+        <div class="absolute bottom-[12%] left-[12%] float-el-5">
+            <div class="w-14 h-14 rounded-full bg-orange-50 flex items-center justify-center shadow-lg border border-orange-200">
+                <span class="text-orange-600 font-bold text-xl">4</span>
+            </div>
+        </div>
+        <!-- Checkmark -->
+        <div class="absolute bottom-[15%] right-[12%] float-el-6">
+            <div class="w-16 h-16 rounded-2xl bg-white shadow-xl border border-green-100 flex items-center justify-center">
+                <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+            </div>
+        </div>
+
+        <!-- Small decorative dots -->
+        <div class="absolute top-[20%] left-[22%] w-3 h-3 bg-[#0088CC]/20 rounded-full float-el-4"></div>
+        <div class="absolute top-[30%] right-[20%] w-4 h-4 bg-amber-400/25 rounded-full float-el-1"></div>
+        <div class="absolute bottom-[25%] left-[25%] w-2.5 h-2.5 bg-green-400/25 rounded-full float-el-2"></div>
+        <div class="absolute bottom-[30%] right-[22%] w-3.5 h-3.5 bg-[#0088CC]/15 rounded-full float-el-6"></div>
+        <div class="absolute top-[65%] left-[18%] w-2 h-2 bg-orange-400/20 rounded-full float-el-3"></div>
+        <div class="absolute top-[15%] right-[25%] w-2.5 h-2.5 bg-[#0088CC]/25 rounded-full float-el-5"></div>
+    </div>
+
+    <!-- Bottom wave -->
+    <div class="absolute bottom-0 left-0 right-0">
+        <svg viewBox="0 0 1440 60" fill="none" class="w-full"><path d="M0 60V30C240 5 480 0 720 15C960 30 1200 45 1440 30V60H0Z" fill="white"/></svg>
+    </div>
+</section>
+
+<!-- How It Works Steps Section -->
+<section id="steps" class="py-24 bg-white relative overflow-hidden">
+    <div class="absolute top-0 left-0 w-full h-full pointer-events-none" aria-hidden="true">
+        <div class="absolute top-20 right-0 w-96 h-96 bg-[#0088CC]/3 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-20 left-0 w-80 h-80 bg-green-500/3 rounded-full blur-3xl"></div>
+    </div>
+    <div class="container mx-auto px-4 relative z-10">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-20">
+                <div class="w-fit px-4 py-1 bg-black bg-opacity-5 rounded-full mb-6 mx-auto">
+                    <span class="text-sm font-medium uppercase">Инструкция</span>
+                </div>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Как получить кэшбек за новостройку</h2>
+                <p class="text-xl text-gray-600">4 простых шага к покупке недвижимости вместе с InBack</p>
+            </div>
+
+            <div class="relative">
+                <div class="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-[#0088CC]/20 via-green-400/20 via-[#0088CC]/20 to-amber-400/20 -translate-x-1/2"></div>
+
+                <div class="space-y-24 md:space-y-32">
+                    <div class="relative">
+                        <div class="hidden md:flex absolute left-1/2 -translate-x-1/2 top-8 w-14 h-14 bg-white rounded-2xl shadow-lg shadow-[#0088CC]/10 border-2 border-[#0088CC]/20 items-center justify-center z-20">
+                            <span class="text-[#0088CC] font-black text-xl">01</span>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-8 md:gap-16 items-center">
+                            <div class="order-2 md:order-1 md:pr-12">
+                                <div class="md:hidden flex items-center gap-3 mb-4">
+                                    <div class="w-12 h-12 bg-[#0088CC] rounded-2xl flex items-center justify-center shadow-lg shadow-[#0088CC]/25">
+                                        <span class="text-white font-black text-lg">01</span>
+                                    </div>
+                                    <div class="h-px flex-1 bg-gradient-to-r from-[#0088CC]/20 to-transparent"></div>
+                                </div>
+                                <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Найдите квартиру</h2>
+                                <p class="text-lg text-gray-600 mb-8 leading-relaxed">
+                                    Найдите идеальную квартиру в {{ city_prep }} по вашим параметрам. 
+                                    Используйте удобные фильтры по цене, району и планировке.
+                                </p>
+                                <div class="grid sm:grid-cols-2 gap-4">
+                                    <div class="bg-gray-50 rounded-2xl p-5 hover:bg-[#0088CC]/5 transition-colors">
+                                        <div class="w-10 h-10 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mb-3">
+                                            <svg class="w-5 h-5 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                                        </div>
+                                        <h4 class="font-semibold text-gray-900 mb-1.5 text-sm">Большая база новостроек</h4>
+                                        <p class="text-gray-500 text-sm leading-relaxed">Большой выбор квартир в новостройках от надежных застройщиков</p>
+                                    </div>
+                                    <div class="bg-gray-50 rounded-2xl p-5 hover:bg-[#0088CC]/5 transition-colors">
+                                        <div class="w-10 h-10 bg-[#0088CC]/10 rounded-xl flex items-center justify-center mb-3">
+                                            <svg class="w-5 h-5 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                                        </div>
+                                        <h4 class="font-semibold text-gray-900 mb-1.5 text-sm">Удобные фильтры</h4>
+                                        <p class="text-gray-500 text-sm leading-relaxed">Поиск по цене, количеству комнат, району, застройщику и другим параметрам</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="order-1 md:order-2 md:pl-12">
+                                <div class="bg-white p-6 md:p-8 rounded-3xl shadow-xl shadow-[#0088CC]/5 border border-gray-100 relative group hover:shadow-2xl hover:shadow-[#0088CC]/10 transition-shadow duration-500">
+                                    <div class="absolute -top-3 -right-3 w-24 h-24 bg-[#0088CC]/5 rounded-full blur-2xl group-hover:bg-[#0088CC]/10 transition-colors"></div>
+                                    <div class="space-y-4 relative">
+                                        <div class="bg-gray-50 p-4 rounded-2xl">
+                                            <div class="flex items-center space-x-2 mb-3">
+                                                <div class="w-5 h-5 bg-[#0088CC] rounded-lg flex items-center justify-center">
+                                                    <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                                </div>
+                                                <div class="flex-1 h-3.5 bg-white rounded-lg border border-gray-200"></div>
+                                                <div class="w-16 h-7 bg-[#0088CC] rounded-lg"></div>
+                                            </div>
+                                            <div class="grid grid-cols-3 gap-2">
+                                                <div class="h-10 bg-white rounded-lg border border-gray-200"></div>
+                                                <div class="h-10 bg-white rounded-lg border border-gray-200"></div>
+                                                <div class="h-10 bg-white rounded-lg border border-gray-200"></div>
+                                            </div>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <div class="bg-gray-50 p-3 rounded-2xl">
+                                                <div class="w-full h-20 bg-gradient-to-br from-[#0088CC]/10 to-[#0088CC]/5 rounded-xl mb-3"></div>
+                                                <div class="w-3/4 h-2.5 bg-gray-200 rounded-full mb-1.5"></div>
+                                                <div class="w-1/2 h-2 bg-gray-100 rounded-full"></div>
+                                            </div>
+                                            <div class="bg-gray-50 p-3 rounded-2xl">
+                                                <div class="w-full h-20 bg-gradient-to-br from-green-100/60 to-green-50 rounded-xl mb-3"></div>
+                                                <div class="w-3/4 h-2.5 bg-gray-200 rounded-full mb-1.5"></div>
+                                                <div class="w-1/2 h-2 bg-gray-100 rounded-full"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="relative">
+                        <div class="hidden md:flex absolute left-1/2 -translate-x-1/2 top-8 w-14 h-14 bg-white rounded-2xl shadow-lg shadow-green-500/10 border-2 border-green-200 items-center justify-center z-20">
+                            <span class="text-green-600 font-black text-xl">02</span>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-8 md:gap-16 items-center">
+                            <div class="md:pr-12">
+                                <div class="bg-white p-6 md:p-8 rounded-3xl shadow-xl shadow-green-500/5 border border-gray-100 relative group hover:shadow-2xl hover:shadow-green-500/10 transition-shadow duration-500">
+                                    <div class="absolute -top-3 -left-3 w-24 h-24 bg-green-500/5 rounded-full blur-2xl group-hover:bg-green-500/10 transition-colors"></div>
+                                    <div class="space-y-4 relative">
+                                        <div class="bg-gray-50 p-4 rounded-2xl">
+                                            <div class="flex items-center justify-between mb-3">
+                                                <h4 class="font-semibold text-gray-900 text-sm">Консультация</h4>
+                                                <div class="w-7 h-7 bg-green-500 rounded-lg flex items-center justify-center">
+                                                    <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a8.959 8.959 0 01-4.906-1.436L3 21l2.436-5.094A8.959 8.959 0 013 12c0-4.418 3.582-8 8-8s8 3.582 8 8z"/></svg>
+                                                </div>
+                                            </div>
+                                            <div class="space-y-2.5">
+                                                <div class="flex justify-between items-center">
+                                                    <span class="text-sm text-gray-500">Эксперт:</span>
+                                                    <span class="font-semibold text-sm">Персональный менеджер</span>
+                                                </div>
+                                                <div class="flex justify-between items-center">
+                                                    <span class="text-sm text-gray-500">Услуга:</span>
+                                                    <span class="font-semibold text-sm text-green-600 bg-green-50 px-2.5 py-0.5 rounded-full">Бесплатно</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="bg-green-50 p-4 rounded-2xl border border-green-100">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
+                                                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                </div>
+                                                <p class="text-sm text-green-700 font-medium">Проверка документов</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="md:pl-12">
+                                <div class="md:hidden flex items-center gap-3 mb-4">
+                                    <div class="w-12 h-12 bg-green-500 rounded-2xl flex items-center justify-center shadow-lg shadow-green-500/25">
+                                        <span class="text-white font-black text-lg">02</span>
+                                    </div>
+                                    <div class="h-px flex-1 bg-gradient-to-r from-green-400/20 to-transparent"></div>
+                                </div>
+                                <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Получите консультацию</h2>
+                                <p class="text-lg text-gray-600 mb-8 leading-relaxed">
+                                    Получите бесплатную консультацию от нашего эксперта. 
+                                    Мы поможем выбрать лучший вариант, проверим документы и расскажем о всех условиях сделки.
+                                </p>
+                                <div class="bg-gray-50 rounded-2xl p-6">
+                                    <h4 class="font-semibold text-gray-900 mb-4 text-sm uppercase tracking-wide">Что включает консультация:</h4>
+                                    <ul class="space-y-3">
+                                        <li class="flex items-center space-x-3">
+                                            <div class="w-6 h-6 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                <svg class="w-3.5 h-3.5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                            </div>
+                                            <span class="text-gray-700">Помощь в выборе квартиры</span>
+                                        </li>
+                                        <li class="flex items-center space-x-3">
+                                            <div class="w-6 h-6 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                <svg class="w-3.5 h-3.5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                            </div>
+                                            <span class="text-gray-700">Проверка документов застройщика</span>
+                                        </li>
+                                        <li class="flex items-center space-x-3">
+                                            <div class="w-6 h-6 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                <svg class="w-3.5 h-3.5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                            </div>
+                                            <span class="text-gray-700">Расчет размера кэшбека</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="relative">
+                        <div class="hidden md:flex absolute left-1/2 -translate-x-1/2 top-8 w-14 h-14 bg-white rounded-2xl shadow-lg shadow-[#0088CC]/10 border-2 border-[#0088CC]/20 items-center justify-center z-20">
+                            <span class="text-[#0088CC] font-black text-xl">03</span>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-8 md:gap-16 items-center">
+                            <div class="order-2 md:order-1 md:pr-12">
+                                <div class="md:hidden flex items-center gap-3 mb-4">
+                                    <div class="w-12 h-12 bg-[#0088CC] rounded-2xl flex items-center justify-center shadow-lg shadow-[#0088CC]/25">
+                                        <span class="text-white font-black text-lg">03</span>
+                                    </div>
+                                    <div class="h-px flex-1 bg-gradient-to-r from-[#0088CC]/20 to-transparent"></div>
+                                </div>
+                                <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Оформление сделки</h2>
+                                <p class="text-lg text-gray-600 mb-8 leading-relaxed">
+                                    Оформляем сделку безопасную сделку с нашей платформой. 
+                                    Все документы готовим мы, вам остается только подписать договор.
+                                </p>
+                                <div class="bg-gray-50 rounded-2xl p-6">
+                                    <h4 class="font-semibold text-gray-900 mb-4 text-sm uppercase tracking-wide">Что мы делаем:</h4>
+                                    <ul class="space-y-3">
+                                        <li class="flex items-center space-x-3">
+                                            <div class="w-6 h-6 bg-[#0088CC]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                <svg class="w-3.5 h-3.5 text-[#0088CC]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                            </div>
+                                            <span class="text-gray-700">Регистрируем как нашего клиента</span>
+                                        </li>
+                                        <li class="flex items-center space-x-3">
+                                            <div class="w-6 h-6 bg-[#0088CC]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                <svg class="w-3.5 h-3.5 text-[#0088CC]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                            </div>
+                                            <span class="text-gray-700">Готовим все документы для сделки</span>
+                                        </li>
+                                        <li class="flex items-center space-x-3">
+                                            <div class="w-6 h-6 bg-[#0088CC]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                <svg class="w-3.5 h-3.5 text-[#0088CC]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                            </div>
+                                            <span class="text-gray-700">Сопровождаем на всех этапах</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="order-1 md:order-2 md:pl-12">
+                                <div class="bg-white p-6 md:p-8 rounded-3xl shadow-xl shadow-[#0088CC]/5 border border-gray-100 relative group hover:shadow-2xl hover:shadow-[#0088CC]/10 transition-shadow duration-500">
+                                    <div class="absolute -bottom-3 -right-3 w-24 h-24 bg-[#0088CC]/5 rounded-full blur-2xl group-hover:bg-[#0088CC]/10 transition-colors"></div>
+                                    <div class="space-y-4 relative">
+                                        <div class="bg-gray-50 p-4 rounded-2xl">
+                                            <div class="flex items-center justify-between mb-3">
+                                                <h4 class="font-semibold text-gray-900 text-sm">Документы</h4>
+                                                <div class="w-7 h-7 bg-[#0088CC] rounded-lg flex items-center justify-center">
+                                                    <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                </div>
+                                            </div>
+                                            <div class="space-y-2.5">
+                                                <div class="flex items-center justify-between bg-white rounded-xl px-3 py-2">
+                                                    <span class="text-sm text-gray-600">Договор ДДУ</span>
+                                                    <div class="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                                                        <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center justify-between bg-white rounded-xl px-3 py-2">
+                                                    <span class="text-sm text-gray-600">Эскроу-счет</span>
+                                                    <div class="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                                                        <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="bg-[#0088CC]/5 p-4 rounded-2xl border border-[#0088CC]/10">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
+                                                    <svg class="w-5 h-5 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                                </div>
+                                                <p class="text-sm text-[#0088CC] font-medium">Сделка оформлена</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="relative">
+                        <div class="hidden md:flex absolute left-1/2 -translate-x-1/2 top-8 w-14 h-14 bg-white rounded-2xl shadow-lg shadow-amber-500/10 border-2 border-amber-200 items-center justify-center z-20">
+                            <span class="text-amber-600 font-black text-xl">04</span>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-8 md:gap-16 items-center">
+                            <div class="md:pr-12">
+                                <div class="bg-white p-6 md:p-8 rounded-3xl shadow-xl shadow-amber-500/5 border border-gray-100 relative group hover:shadow-2xl hover:shadow-amber-500/10 transition-shadow duration-500">
+                                    <div class="absolute -top-3 -left-3 w-24 h-24 bg-amber-500/5 rounded-full blur-2xl group-hover:bg-amber-500/10 transition-colors"></div>
+                                    <div class="space-y-4 relative">
+                                        <div class="bg-gradient-to-br from-amber-50 to-orange-50 p-5 rounded-2xl border border-amber-100">
+                                            <div class="text-center">
+                                                <div class="text-3xl font-bold text-amber-600 mb-1">750 000 ₽</div>
+                                                <p class="text-sm text-amber-700 font-medium">Кэшбек получен!</p>
+                                            </div>
+                                        </div>
+                                        <div class="bg-gray-50 p-4 rounded-2xl">
+                                            <div class="flex items-center justify-between mb-3">
+                                                <h4 class="font-semibold text-gray-900 text-sm">Перевод</h4>
+                                                <div class="w-7 h-7 bg-green-500 rounded-lg flex items-center justify-center">
+                                                    <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                </div>
+                                            </div>
+                                            <div class="space-y-2.5">
+                                                <div class="flex justify-between items-center">
+                                                    <span class="text-sm text-gray-500">Банковская карта:</span>
+                                                    <span class="font-semibold text-sm">**** 1234</span>
+                                                </div>
+                                                <div class="flex justify-between items-center">
+                                                    <span class="text-sm text-gray-500">Срок перевода:</span>
+                                                    <span class="font-semibold text-sm text-green-600 bg-green-50 px-2.5 py-0.5 rounded-full">30 дней</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="md:pl-12">
+                                <div class="md:hidden flex items-center gap-3 mb-4">
+                                    <div class="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-500/25">
+                                        <span class="text-white font-black text-lg">04</span>
+                                    </div>
+                                    <div class="h-px flex-1 bg-gradient-to-r from-amber-400/20 to-transparent"></div>
+                                </div>
+                                <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Получите кэшбек</h2>
+                                <p class="text-lg text-gray-600 mb-8 leading-relaxed">
+                                    Получите кэшбек до 5% от стоимости квартиры в течение 30 дней после сделки. 
+                                    Сумма зависит от обьекта и может отличаться!
+                                </p>
+                                <div class="bg-gray-50 rounded-2xl p-6">
+                                    <h4 class="font-semibold text-gray-900 mb-4 text-sm uppercase tracking-wide">Условия выплаты кэшбека:</h4>
+                                    <ul class="space-y-3">
+                                        <li class="flex items-center space-x-3">
+                                            <div class="w-6 h-6 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                <svg class="w-3.5 h-3.5 text-amber-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                            </div>
+                                            <span class="text-gray-700">После оформления права собственности</span>
+                                        </li>
+                                        <li class="flex items-center space-x-3">
+                                            <div class="w-6 h-6 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                <svg class="w-3.5 h-3.5 text-amber-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                            </div>
+                                            <span class="text-gray-700">В течение 30 дней после сделки</span>
+                                        </li>
+                                        <li class="flex items-center space-x-3">
+                                            <div class="w-6 h-6 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                <svg class="w-3.5 h-3.5 text-amber-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                            </div>
+                                            <span class="text-gray-700">До 2 млн рублей кэшбека</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Comparison Section -->
+<section class="py-20 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-10">Давайте сравним</h2>
+
+            <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+                <div class="grid md:grid-cols-2">
+                    <div class="p-8 md:p-10 border-b md:border-b-0 md:border-r border-gray-200">
+                        <div class="mb-8">
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">Без помощи</h3>
+                            <p class="text-gray-500">Весь процесс — на ваших плечах</p>
+                        </div>
+
+                        <div class="space-y-8">
+                            <div class="flex items-start gap-4">
+                                <div class="flex-shrink-0 mt-0.5">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900 mb-1">Долго</h4>
+                                    <p class="text-gray-500 text-sm">Поиск квартиры, сравнение цен, объезд новостроек — на всё уходят недели и месяцы</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-4">
+                                <div class="flex-shrink-0 mt-0.5">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900 mb-1">Невыгодно</h4>
+                                    <p class="text-gray-500 text-sm">Покупаете по полной цене без скидок и бонусов, переплачивая сотни тысяч рублей</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-4">
+                                <div class="flex-shrink-0 mt-0.5">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900 mb-1">Есть риски</h4>
+                                    <p class="text-gray-500 text-sm">Сделка может сорваться — возможны проблемы с документами и ненадёжными застройщиками</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-4">
+                                <div class="flex-shrink-0 mt-0.5">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900 mb-1">Всё на ваших плечах</h4>
+                                    <p class="text-gray-500 text-sm">Много звонков, переговоры и показы займут время и силы</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-8 md:p-10">
+                        <div class="mb-8">
+                            <h3 class="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+                                <span class="inline-flex items-center justify-center w-7 h-7 bg-[#0088CC] rounded-lg">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                </span>
+                                С InBack
+                            </h3>
+                            <p class="text-gray-500">Возьмём все процессы на себя</p>
+                        </div>
+
+                        <div class="space-y-8">
+                            <div class="flex items-start gap-4">
+                                <div class="flex-shrink-0 mt-0.5">
+                                    <svg class="w-5 h-5 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900 mb-1">Быстро</h4>
+                                    <p class="text-gray-500 text-sm">Подберём лучшие варианты за счёт собственной базы и проверенных застройщиков</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-4">
+                                <div class="flex-shrink-0 mt-0.5">
+                                    <svg class="w-5 h-5 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900 mb-1">Выгодно</h4>
+                                    <p class="text-gray-500 text-sm">Вернём до 5% от стоимости квартиры — кэшбек перечислим на вашу карту после сделки</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-4">
+                                <div class="flex-shrink-0 mt-0.5">
+                                    <svg class="w-5 h-5 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900 mb-1">Безопасно</h4>
+                                    <p class="text-gray-500 text-sm">Проверим документы, оформим сделку по закону — без рисков для вас</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-4">
+                                <div class="flex-shrink-0 mt-0.5">
+                                    <svg class="w-5 h-5 text-[#0088CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900 mb-1">Комфортно</h4>
+                                    <p class="text-gray-500 text-sm">Персональный менеджер возьмёт на себя переговоры, показы и оформление документов</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Cashback Calculator Section -->
+<section id="calculator" class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="max-w-6xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-12">
+                <!-- Фирменный бейдж калькулятора -->
+                <div class="w-fit px-4 py-1 bg-black bg-opacity-5 rounded-full mb-6 mx-auto">
+                    <span class="text-sm font-medium uppercase">Калькулятор кэшбека</span>
+                </div>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Рассчитайте ваш кэшбек
+                </h2>
+                <p class="text-lg text-gray-600">Узнайте, сколько вы можете сэкономить при покупке недвижимости</p>
+            </div>
+            
+            <!-- Calculator -->
+            <div class="bg-gray-50 rounded-2xl p-8 md:p-12">
+                <div class="grid lg:grid-cols-2 gap-12 items-center">
+                    <!-- Calculator Content -->
+                    <div>
+                        <div class="mb-8">
+                            <div class="text-5xl md:text-6xl font-bold text-[#0088CC] mb-2" id="cashback-amount-main">
+                                до 62 500 ₽
+                            </div>
+                            <div class="text-lg text-gray-600">
+                                Ваш кэшбек от покупки недвижимости
+                            </div>
+                        </div>
+                        
+                        <!-- Slider -->
+                        <div class="mb-8">
+                            <div class="flex justify-between items-center mb-6">
+                                <label class="text-lg font-medium text-gray-900">Стоимость недвижимости</label>
+                                <div class="text-xl font-bold text-gray-900" id="property-price-display-main">2 500 000 ₽</div>
+                            </div>
+                            
+                            <div class="relative">
+                                <input 
+                                    type="range" 
+                                    id="property-price-slider-main" 
+                                    min="1000000" 
+                                    max="15000000" 
+                                    step="100000" 
+                                    value="2500000"
+                                    class="cashback-slider w-full h-2 bg-gray-200 rounded-full appearance-none cursor-pointer"
+                                >
+                                <div class="flex justify-between text-sm text-gray-500 mt-2">
+                                    <span>1 млн ₽</span>
+                                    <span>15 млн ₽</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-sm text-gray-500 mb-8">
+                            <span class="bg-blue-50 text-[#0088CC] px-4 py-2 rounded-full">
+                                Расчет от 2,5% от стоимости недвижимости
+                            </span>
+                        </div>
+                        
+                        <button 
+                            onclick="openApplicationModal()" 
+                            class="bg-[#0088CC] hover:bg-[#006699] text-white font-medium px-8 py-4 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md"
+                        >
+                            Получить консультацию
+                        </button>
+                    </div>
+                    
+                    <!-- Benefits -->
+                    <div class="space-y-6">
+                        <div class="flex items-center space-x-4 p-4 bg-white rounded-xl shadow-sm">
+                            <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-percentage text-[#0088CC] text-lg"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900 text-lg">Кэшбек до 5%</h4>
+                                <p class="text-gray-600 text-sm">Возврат средств за пользование сервисом</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-4 p-4 bg-white rounded-xl shadow-sm">
+                            <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-shield-alt text-[#0088CC] text-lg"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900 text-lg">Юридическая защита</h4>
+                                <p class="text-gray-600 text-sm">Проверка документов и сопровождение</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-4 p-4 bg-white rounded-xl shadow-sm">
+                            <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-users text-[#0088CC] text-lg"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900 text-lg">Персональный менеджер</h4>
+                                <p class="text-gray-600 text-sm">Индивидуальный подход к каждому</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="py-16 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="max-w-3xl mx-auto">
+            <div class="w-fit px-4 py-1 bg-black bg-opacity-5 rounded-full mb-6 mx-auto">
+                <span class="text-sm font-medium uppercase">Часто задаваемые вопросы</span>
+            </div>
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4 text-center">Часто задаваемые вопросы</h2>
+            
+            <div class="space-y-4">
+                <div class="bg-gray-50 rounded-xl p-6">
+                    <button class="flex justify-between items-center w-full text-left" onclick="toggleFAQ(1)">
+                        <h3 class="text-lg font-medium">Обязательно ли регистрироваться на сайте для получения кэшбека?</h3>
+                        <i class="fas fa-chevron-down text-[#0088CC] transition-transform" id="faq-icon-1"></i>
+                    </button>
+                    <div class="mt-3 text-gray-600 hidden" id="faq-content-1">
+                        <p>Да, регистрация на сайте и подача заявки — обязательное условие. Мы должны зарегистрировать вас как нашего клиента у застройщика ДО заключения договора купли-продажи.</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-xl p-6">
+                    <button class="flex justify-between items-center w-full text-left" onclick="toggleFAQ(2)">
+                        <h3 class="text-lg font-medium">Можно ли получить кэшбек за уже купленную квартиру?</h3>
+                        <i class="fas fa-chevron-down text-[#0088CC] transition-transform" id="faq-icon-2"></i>
+                    </button>
+                    <div class="mt-3 text-gray-600 hidden" id="faq-content-2">
+                        <p>К сожалению, нет. Кэшбек доступен только при условии предварительной регистрации клиента у застройщика через наш сервис до заключения договора.</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-xl p-6">
+                    <button class="flex justify-between items-center w-full text-left" onclick="toggleFAQ(3)">
+                        <h3 class="text-lg font-medium">Какие документы нужны для получения кэшбека?</h3>
+                        <i class="fas fa-chevron-down text-[#0088CC] transition-transform" id="faq-icon-3"></i>
+                    </button>
+                    <div class="mt-3 text-gray-600 hidden" id="faq-content-3">
+                        <p>После покупки квартиры вам понадобится: договор купли-продажи или ДДУ, паспорт и банковские реквизиты для вознаграждения.</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-xl p-6">
+                    <button class="flex justify-between items-center w-full text-left" onclick="toggleFAQ(4)">
+                        <h3 class="text-lg font-medium">Какой максимальный кэшбек я могу получить?</h3>
+                        <i class="fas fa-chevron-down text-[#0088CC] transition-transform" id="faq-icon-4"></i>
+                    </button>
+                    <div class="mt-3 text-gray-600 hidden" id="faq-content-4">
+                        <p>Размер кэшбека зависит от обьекта и составляет от 2,5% до 5% от стоимости квартиры. В некоторых случаях возможны дополнительные бонусы за крупные покупки.</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-xl p-6">
+                    <button class="flex justify-between items-center w-full text-left" onclick="toggleFAQ(5)">
+                        <h3 class="text-lg font-medium">Нужно ли платить за ваш сервис?</h3>
+                        <i class="fas fa-chevron-down text-[#0088CC] transition-transform" id="faq-icon-5"></i>
+                    </button>
+                    <div class="mt-3 text-gray-600 hidden" id="faq-content-5">
+                        <p>Наш сервис абсолютно бесплатен для покупателей. Мы получаем комиссию от застройщиков только после успешного завершения сделки.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-16 bg-gradient-to-r from-[#0088CC] to-[#006699] text-white">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4">Готовы получить кэшбек за вашу квартиру?</h2>
+        <p class="text-xl mb-8 opacity-90">Оставьте заявку и получите персональную консультацию по максимальному кэшбеку</p>
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+            <button onclick="openApplicationModal()" class="px-8 py-4 bg-white text-[#0088CC] font-bold rounded-lg hover:bg-gray-100 transition duration-300">
+                Рассчитать мой кэшбек
+            </button>
+            <a href="tel:+78001234567" class="px-8 py-4 border-2 border-white text-white font-bold rounded-lg hover:bg-white hover:text-[#0088CC] transition duration-300">
+                Позвонить нам
+            </a>
+        </div>
+    </div>
+</section>
+
+<style>
+    .cashback-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #0088CC;
+        cursor: pointer;
+    }
+
+    .cashback-slider::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #0088CC;
+        cursor: pointer;
+        border: none;
+    }
+</style>
+
+<script>
+// Calculator functionality
+function updateCashbackCalculator() {
+    const slider = document.getElementById('property-price-slider-main');
+    const priceDisplay = document.getElementById('property-price-display-main');
+    const cashbackDisplay = document.getElementById('cashback-amount-main');
+    
+    if (slider && priceDisplay && cashbackDisplay) {
+        const price = parseInt(slider.value);
+        const cashback = Math.round(price * 0.025); // 2.5% кэшбек
+        
+        priceDisplay.textContent = formatNumber(price) + ' ₽';
+        cashbackDisplay.textContent = 'до ' + formatNumber(cashback) + ' ₽';
+    }
+}
+
+function formatNumber(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+}
+
+// FAQ Toggle function
+function toggleFAQ(id) {
+    const content = document.getElementById(`faq-content-${id}`);
+    const icon = document.getElementById(`faq-icon-${id}`);
+    
+    if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        icon.style.transform = 'rotate(180deg)';
+    } else {
+        content.classList.add('hidden');
+        icon.style.transform = 'rotate(0deg)';
+    }
+}
+
+// Initialize calculator
+document.addEventListener('DOMContentLoaded', function() {
+    updateCashbackCalculator();
+    
+    const slider = document.getElementById('property-price-slider-main');
+    if (slider) {
+        slider.addEventListener('input', updateCashbackCalculator);
+    }
+});
+</script>
+
+{% endblock %}

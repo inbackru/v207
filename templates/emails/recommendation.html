@@ -1,0 +1,50 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Новая рекомендация | InBack{% endblock %}
+
+{% block content %}
+<h1>Новая рекомендация</h1>
+
+<p>Здравствуйте{% if user and user.full_name %}, {{ user.full_name.split()[0] }}{% endif %}!</p>
+
+<div style="background: #f0f9ff; border-left: 4px solid #0088CC; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 24px 0;">
+    <strong>{{ manager_name }}</strong> рекомендует вам рассмотреть следующий объект:
+</div>
+
+<div style="border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; margin: 24px 0; background: white;">
+    <div style="padding: 24px;">
+        <h2 style="margin: 0 0 8px 0; font-size: 20px; font-weight: 600; color: #1d1d1f;">
+            {{ title }}
+        </h2>
+        <p style="margin: 0 0 16px 0; color: #6b7280; font-size: 15px;">{{ item_name }}</p>
+        
+        {% if description %}
+        <p style="margin: 0 0 16px 0; color: #424245; line-height: 1.6;">{{ description }}</p>
+        {% endif %}
+        
+        <span style="display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600;
+            {% if priority_text == 'Срочно' %}background: #fef2f2; color: #dc2626;
+            {% elif priority_text == 'Высокий' %}background: #fff7ed; color: #ea580c;
+            {% else %}background: #f0fdf4; color: #16a34a;{% endif %}">
+            {{ priority_text }}
+        </span>
+    </div>
+</div>
+
+<p style="color: #424245;">Этот объект был выбран специально для вас на основе ваших предпочтений.</p>
+
+<div style="text-align: center; margin: 32px 0;">
+    <a href="{{ base_url }}/properties" class="btn-primary">
+        Посмотреть объект
+    </a>
+</div>
+
+<div style="background: #fef3c7; border: 1px solid #fde68a; border-radius: 8px; padding: 16px 20px; margin: 24px 0;">
+    <p style="margin: 0; font-size: 14px; color: #92400e; line-height: 1.6;">
+        <strong>Следующие шаги:</strong><br>
+        1. Изучите детали объекта по ссылке выше<br>
+        2. Свяжитесь с менеджером для уточнения деталей<br>
+        3. Запишитесь на просмотр, если объект заинтересовал
+    </p>
+</div>
+{% endblock %}

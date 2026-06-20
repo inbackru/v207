@@ -1,0 +1,149 @@
+<!doctype html>
+<html ⚡ lang="ru">
+<head>
+  <meta charset="utf-8">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <title>ЖК {{ complex.name }}{% if min_price %} — от {{ '{:,.0f}'.format(min_price|float).replace(',', ' ') }} ₽{% endif %} | InBack</title>
+  <link rel="canonical" href="https://inback.ru/{{ city_slug }}/zk/{{ complex.slug }}">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <meta name="description" content="ЖК {{ complex.name }} в {{ city_name }}: квартиры{% if min_price %} от {{ '{:,.0f}'.format(min_price|float).replace(',', ' ') }} ₽{% endif %}{% if available_count %}, {{ available_count }} предложений{% endif %}. Кэшбек до {{ (complex.cashback_percent or 3)|int }}%. Застройщик: {{ complex.developer_name or 'проверенный застройщик' }}.">
+  <meta property="og:title" content="ЖК {{ complex.name }}{% if min_price %} — от {{ '{:,.0f}'.format(min_price|float).replace(',', ' ') }} ₽{% endif %}">
+  <meta property="og:description" content="Кэшбек до {{ (complex.cashback_percent or 3)|int }}%. Застройщик: {{ complex.developer_name or 'проверенный застройщик' }}. Сдача {{ complex.end_build_quarter or 3 }} кв. {{ complex.end_build_year or 2025 }}.">
+  {% if og_image %}<meta property="og:image" content="{{ og_image }}">{% endif %}
+
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style>
+  <noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+
+  <style amp-custom>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8fafc;color:#1e293b;font-size:15px;line-height:1.5}
+    .header{background:#0058a0;padding:14px 16px;display:flex;align-items:center;gap:10px}
+    .logo{width:32px;height:32px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;color:#0058a0;font-size:13px;flex-shrink:0}
+    .logo-txt{color:#fff;font-weight:800;font-size:16px}
+    .logo-txt span{color:#7dd3fc}
+    .hero{background:#fff;padding:16px}
+    .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;background:#dbeafe;color:#1e40af;margin-bottom:10px}
+    h1{font-size:22px;font-weight:800;color:#1e293b;margin-bottom:6px;line-height:1.25}
+    .subtitle{font-size:14px;color:#64748b;margin-bottom:14px}
+    .price-bar{background:#eff6ff;border-radius:10px;padding:12px 16px;margin-bottom:12px}
+    .price-val{font-size:20px;font-weight:800;color:#0058a0}
+    .price-lbl{font-size:12px;color:#64748b;margin-top:1px}
+    .stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+    .stat{background:#f1f5f9;border-radius:8px;padding:9px 12px;flex:1;min-width:100px}
+    .stat-val{font-size:16px;font-weight:700;color:#1e293b}
+    .stat-lbl{font-size:11px;color:#64748b;margin-top:2px}
+    .cta{display:block;text-align:center;background:#0088CC;color:#fff;padding:14px;border-radius:12px;font-weight:700;font-size:16px;text-decoration:none;margin:0 16px 16px}
+    .section{background:#fff;margin:8px 0;padding:16px}
+    .sec-title{font-size:15px;font-weight:700;color:#1e293b;margin-bottom:10px}
+    .info-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:14px}
+    .info-row:last-child{border-bottom:none}
+    .info-key{color:#64748b}
+    .info-val{font-weight:600;color:#1e293b;text-align:right;max-width:60%}
+    .cashback-block{background:linear-gradient(135deg,#0088CC,#0058a0);color:#fff;border-radius:12px;padding:16px;margin:8px 16px}
+    .cb-title{font-size:14px;font-weight:700;margin-bottom:4px}
+    .cb-amount{font-size:26px;font-weight:900}
+    .cb-sub{font-size:12px;opacity:0.85;margin-top:3px}
+    .footer{background:#fff;border-top:1px solid #e2e8f0;padding:16px;text-align:center}
+    .footer a{color:#0088CC;text-decoration:none;font-size:14px;font-weight:600}
+    .img-wrap{width:100%;height:220px;overflow:hidden;border-radius:0}
+    amp-img{width:100%;height:100%;object-fit:cover}
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <div class="logo">In</div>
+  <div class="logo-txt">In<span>Back</span></div>
+</header>
+
+<!-- Hero image -->
+{% if og_image %}
+<div class="img-wrap">
+  <amp-img src="{{ og_image }}" width="800" height="220" layout="responsive" alt="ЖК {{ complex.name }}"></amp-img>
+</div>
+{% endif %}
+
+<!-- Hero info -->
+<div class="hero">
+  <div class="badge">{{ complex.object_class_display_name or 'Комфорт' }} класс</div>
+  <h1>ЖК {{ complex.name }}</h1>
+  <div class="subtitle">{{ city_name }}{% if complex.district_name %}, {{ complex.district_name }}{% endif %}{% if complex.address %} · {{ complex.address }}{% endif %}</div>
+
+  {% if min_price %}
+  <div class="price-bar">
+    <div class="price-val">от {{ '{:,.0f}'.format(min_price|float).replace(',', ' ') }} ₽</div>
+    <div class="price-lbl">Цена квартиры{% if available_count %} · {{ available_count }} вариантов{% endif %}</div>
+  </div>
+  {% endif %}
+
+  <div class="stats">
+    {% if complex.end_build_year %}
+    <div class="stat">
+      <div class="stat-val">{{ complex.end_build_quarter or 3 }} кв. {{ complex.end_build_year }}</div>
+      <div class="stat-lbl">Срок сдачи</div>
+    </div>
+    {% endif %}
+    {% if complex.developer_name %}
+    <div class="stat">
+      <div class="stat-val">{{ complex.developer_name }}</div>
+      <div class="stat-lbl">Застройщик</div>
+    </div>
+    {% endif %}
+    {% if available_count %}
+    <div class="stat">
+      <div class="stat-val">{{ available_count }}</div>
+      <div class="stat-lbl">Предложений</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Cashback -->
+{% set cb_pct = (complex.cashback_percent or 3)|float %}
+{% if min_price %}
+{% set cb_amount = ((min_price|float) * cb_pct / 100)|int %}
+<div class="cashback-block">
+  <div class="cb-title">💰 Кэшбек InBack</div>
+  <div class="cb-amount">до {{ '{:,.0f}'.format(cb_amount|float).replace(',', ' ') }} ₽</div>
+  <div class="cb-sub">{{ cb_pct }}% от стоимости квартиры при покупке через InBack</div>
+</div>
+{% endif %}
+
+<a class="cta" href="https://inback.ru/{{ city_slug }}/zk/{{ complex.slug }}">Смотреть все квартиры →</a>
+
+<!-- Details -->
+<div class="section">
+  <div class="sec-title">О комплексе</div>
+  {% if complex.wall_material %}
+  <div class="info-row"><span class="info-key">Материал стен</span><span class="info-val">{{ complex.wall_material }}</span></div>
+  {% endif %}
+  {% if complex.finishing_type %}
+  <div class="info-row"><span class="info-key">Отделка</span><span class="info-val">{{ complex.finishing_type }}</span></div>
+  {% endif %}
+  {% if complex.ceiling_height %}
+  <div class="info-row"><span class="info-key">Высота потолков</span><span class="info-val">{{ complex.ceiling_height }} м</span></div>
+  {% endif %}
+  {% if complex.parking_type %}
+  <div class="info-row"><span class="info-key">Парковка</span><span class="info-val">{{ complex.parking_type }}</span></div>
+  {% endif %}
+  {% if complex.distance_to_center %}
+  <div class="info-row"><span class="info-key">До центра</span><span class="info-val">{{ complex.distance_to_center }} км</span></div>
+  {% endif %}
+</div>
+
+<!-- Description -->
+{% if complex.description %}
+<div class="section">
+  <div class="sec-title">Описание</div>
+  <p style="font-size:14px;color:#475569;line-height:1.6;">{{ complex.description[:600] }}{% if complex.description|length > 600 %}...{% endif %}</p>
+</div>
+{% endif %}
+
+<!-- Footer -->
+<footer class="footer">
+  <a href="https://inback.ru/{{ city_slug }}/zk/{{ complex.slug }}">Полная версия страницы</a>
+</footer>
+
+</body>
+</html>

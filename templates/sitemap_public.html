@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% block title %}Карта сайта InBack — все разделы | InBack{% endblock %}
+{% block description %}Карта сайта InBack: новостройки, ЖК, ипотека, застройщики, блог и полезные разделы для покупателей недвижимости в Краснодаре.{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8 px-4">
+  <div class="max-w-5xl mx-auto">
+
+    <!-- Header -->
+    <div class="mb-8">
+      <nav class="text-sm text-gray-500 mb-3">
+        <a href="{{ url_for('index') }}" class="hover:text-[#0088CC]">Главная</a>
+        <span class="mx-2">›</span>
+        <span class="text-gray-900">Карта сайта</span>
+      </nav>
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">Карта сайта</h1>
+      <p class="text-gray-500">Все разделы и страницы сервиса InBack</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      <!-- Главное -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-9 h-9 bg-[#0088CC]/10 rounded-xl flex items-center justify-center">
+            <i class="fas fa-home text-[#0088CC] text-sm"></i>
+          </div>
+          <h2 class="font-bold text-gray-900 text-lg">Главное</h2>
+        </div>
+        <ul class="space-y-2 text-sm">
+          <li><a href="{{ url_for('index') }}" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Главная страница</a></li>
+          <li><a href="{{ url_for('main.how_it_works') }}" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Как получить кэшбек</a></li>
+          <li><a href="/cashback-calculator" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Калькулятор кэшбека</a></li>
+          <li><a href="{{ url_for('main.about') }}" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> О сервисе</a></li>
+          <li><a href="{{ url_for('main.reviews') }}" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Отзывы клиентов</a></li>
+          <li><a href="{{ url_for('main.contacts') }}" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Контакты</a></li>
+          <li><a href="{{ url_for('careers') }}" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Карьера</a></li>
+        </ul>
+      </div>
+
+      <!-- Новостройки Краснодар -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-9 h-9 bg-[#0088CC]/10 rounded-xl flex items-center justify-center">
+            <i class="fas fa-building text-[#0088CC] text-sm"></i>
+          </div>
+          <h2 class="font-bold text-gray-900 text-lg">Новостройки Краснодара</h2>
+        </div>
+        <ul class="space-y-2 text-sm">
+          <li><a href="/krasnodar/novostrojki" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Все новостройки</a></li>
+          <li><a href="/krasnodar/novostrojki-studiyo" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Студии</a></li>
+          <li><a href="/krasnodar/novostrojki-1-komnatnye" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> 1-комнатные квартиры</a></li>
+          <li><a href="/krasnodar/novostrojki-2-komnatnye" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> 2-комнатные квартиры</a></li>
+          <li><a href="/krasnodar/novostrojki-3-komnatnye" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> 3-комнатные квартиры</a></li>
+          <li><a href="/krasnodar/novostrojki-4-komnatnye" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> 4-комнатные квартиры</a></li>
+          <li><a href="/krasnodar/novostrojki-biznes-klass" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Бизнес-класс</a></li>
+          <li><a href="/krasnodar/novostrojki-komfort-klass" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Комфорт-класс</a></li>
+          <li><a href="/krasnodar/novostrojki-ekonom-klass" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Эконом-класс</a></li>
+          <li><a href="/krasnodar/novostrojki-premium-klass" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Премиум-класс</a></li>
+          <li><a href="/krasnodar/novostrojki-sdany" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Сданные дома</a></li>
+          <li><a href="/krasnodar/novostrojki-s-otdelkoy" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> С отделкой</a></li>
+          <li><a href="/krasnodar/novostrojki-v-ipoteku" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> В ипотеку</a></li>
+          <li><a href="/krasnodar/novostrojki-v-rassrochku" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> В рассрочку</a></li>
+          <li><a href="/krasnodar/novostrojki-do-5-mln" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> До 5 млн ₽</a></li>
+          <li><a href="/krasnodar/novostrojki-do-8-mln" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> До 8 млн ₽</a></li>
+          <li><a href="/krasnodar/novostrojki-do-10-mln" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> До 10 млн ₽</a></li>
+          <li><a href="/krasnodar/novostrojki-do-15-mln" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> До 15 млн ₽</a></li>
+          <li><a href="/krasnodar/novostrojki-s-keshbekom" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> С кэшбеком</a></li>
+          <li><a href="/krasnodar/investicii-v-nedvizhimost" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Инвестиции в недвижимость</a></li>
+          <li><a href="/krasnodar/kupit-kvartiru-v-novostroyke" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Купить квартиру в новостройке</a></li>
+        </ul>
+      </div>
+
+      {% if cities and cities|length > 1 %}
+      <!-- Другие города -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-9 h-9 bg-[#0088CC]/10 rounded-xl flex items-center justify-center">
+            <i class="fas fa-map-marker-alt text-[#0088CC] text-sm"></i>
+          </div>
+          <h2 class="font-bold text-gray-900 text-lg">Другие города</h2>
+        </div>
+        <ul class="space-y-2 text-sm">
+          {% for city in cities %}
+          <li>
+            <a href="/{{ city.slug }}/novostrojki" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5">
+              <i class="fas fa-chevron-right text-[8px] text-gray-400"></i>
+              Новостройки {{ city.name_genitive or city.name }}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <!-- Жилые комплексы -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-9 h-9 bg-[#0088CC]/10 rounded-xl flex items-center justify-center">
+            <i class="fas fa-city text-[#0088CC] text-sm"></i>
+          </div>
+          <h2 class="font-bold text-gray-900 text-lg">Жилые комплексы</h2>
+        </div>
+        <ul class="space-y-2 text-sm">
+          <li><a href="/krasnodar/zhilye-kompleksy" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> ЖК Краснодара</a></li>
+          {% if cities %}{% for city in cities %}{% if city.slug != 'krasnodar' %}
+          <li><a href="/{{ city.slug }}/zhilye-kompleksy" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> ЖК {{ city.name_genitive or city.name }}</a></li>
+          {% endif %}{% endfor %}{% endif %}
+          <li><a href="/krasnodar/zastrojshchiki" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Застройщики</a></li>
+          <li><a href="{{ url_for('mortgage.map_view') }}" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Карта новостроек</a></li>
+        </ul>
+      </div>
+
+      <!-- Ипотека -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-9 h-9 bg-[#0088CC]/10 rounded-xl flex items-center justify-center">
+            <i class="fas fa-percent text-[#0088CC] text-sm"></i>
+          </div>
+          <h2 class="font-bold text-gray-900 text-lg">Ипотека</h2>
+        </div>
+        <ul class="space-y-2 text-sm">
+          <li><a href="{{ url_for('mortgage.ipoteka') }}" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Ипотечные программы</a></li>
+          <li><a href="{{ url_for('mortgage.family_mortgage') }}" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Семейная ипотека</a></li>
+          <li><a href="{{ url_for('mortgage.it_mortgage') }}" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> IT-ипотека</a></li>
+          <li><a href="{{ url_for('mortgage.military_mortgage') }}" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Военная ипотека</a></li>
+          <li><a href="{{ url_for('mortgage.developer_mortgage') }}" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Ипотека от застройщика</a></li>
+          <li><a href="{{ url_for('mortgage.maternal_capital') }}" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Материнский капитал</a></li>
+          <li><a href="{{ url_for('mortgage.tax_deduction') }}" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Налоговый вычет</a></li>
+          <li><a href="{{ url_for('mortgage.insurance') }}" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Страхование</a></li>
+          <li><a href="{{ url_for('mortgage.appraisal') }}" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Оценка недвижимости</a></li>
+        </ul>
+      </div>
+
+      <!-- Полезное -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-9 h-9 bg-[#0088CC]/10 rounded-xl flex items-center justify-center">
+            <i class="fas fa-lightbulb text-[#0088CC] text-sm"></i>
+          </div>
+          <h2 class="font-bold text-gray-900 text-lg">Полезное</h2>
+        </div>
+        <ul class="space-y-2 text-sm">
+          <li><a href="{{ url_for('blog.blog') }}" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Блог о недвижимости</a></li>
+          <li><a href="{{ url_for('security') }}" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Безопасность сделок</a></li>
+          <li><a href="{{ url_for('mortgage.cashback_terms') }}" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Условия кэшбека</a></li>
+          <li><a href="{{ url_for('main.referral_landing') }}" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Реферальная программа</a></li>
+          <li><a href="{{ url_for('legal.privacy_policy') }}" class="text-gray-700 hover:text-[#0088CC] transition flex items-center gap-1.5"><i class="fas fa-chevron-right text-[8px] text-gray-400"></i> Политика конфиденциальности</a></li>
+        </ul>
+      </div>
+
+      <!-- Популярные запросы -->
+      {% if top_complexes %}
+      <div class="bg-white rounded-2xl p-6 shadow-sm md:col-span-2 lg:col-span-3">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-9 h-9 bg-[#0088CC]/10 rounded-xl flex items-center justify-center">
+            <i class="fas fa-star text-[#0088CC] text-sm"></i>
+          </div>
+          <h2 class="font-bold text-gray-900 text-lg">Популярные жилые комплексы</h2>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+          {% for rc in top_complexes %}
+          <a href="/krasnodar/zk/{{ rc.slug }}" class="text-sm text-gray-700 hover:text-[#0088CC] transition py-1 flex items-center gap-1.5">
+            <i class="fas fa-chevron-right text-[8px] text-gray-400 flex-shrink-0"></i>
+            <span class="truncate">{{ rc.name }}</span>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+
+    <!-- XML Sitemap link -->
+    <div class="mt-8 bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-start gap-3">
+      <i class="fas fa-code text-[#0088CC] mt-0.5"></i>
+      <div>
+        <p class="text-sm text-gray-700 font-medium mb-1">Карта сайта для поисковых систем</p>
+        <a href="/sitemap.xml" class="text-[#0088CC] text-sm hover:underline">sitemap.xml</a>
+        <span class="text-gray-400 text-sm mx-2">·</span>
+        <a href="/sitemap-index.xml" class="text-[#0088CC] text-sm hover:underline">sitemap-index.xml</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,509 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Аналитика цен — InBack Admin{% endblock %}
+{% block page_title %}Аналитика цен{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+.tab-btn { transition: all .2s; }
+.tab-btn.active { background:#0088CC; color:#fff; box-shadow:0 2px 8px rgba(0,136,204,.35); }
+.tab-btn:not(.active):hover { background:#f0f9ff; color:#0088CC; }
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+.kpi-card { transition:box-shadow .2s,transform .15s; }
+.kpi-card:hover { box-shadow:0 8px 24px rgba(0,0,0,.1); transform:translateY(-1px); }
+.trend-up   { color:#16a34a; }
+.trend-down { color:#dc2626; }
+.trend-flat { color:#6b7280; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Gradient header with KPI bar -->
+<div class="bg-gradient-to-r from-[#0088CC] to-[#005f99] rounded-2xl p-6 text-white mb-6">
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-5">
+        <div>
+            <h1 class="text-2xl font-bold">Аналитика цен по ЖК</h1>
+            <p class="text-blue-100 text-sm mt-0.5" id="analytics-subtitle">Динамика стоимости новостроек</p>
+        </div>
+        <div class="flex items-center gap-3 flex-wrap">
+            <button onclick="runPriceUpdate()" id="btn-update"
+                    class="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                <i class="fas fa-sync-alt"></i> Запустить обход
+            </button>
+            <a href="/admin/dashboard" class="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                <i class="fas fa-arrow-left"></i> Дашборд
+            </a>
+        </div>
+    </div>
+    <!-- KPI cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white/15 backdrop-blur-sm rounded-xl p-4">
+            <div class="text-3xl font-extrabold" id="stat-complexes">—</div>
+            <div class="text-blue-100 text-sm mt-0.5">ЖК отслеживается</div>
+            <div class="text-xs text-blue-200 mt-1 flex items-center gap-1">
+                <i class="fas fa-circle text-green-300" style="font-size:6px"></i>
+                активных данных
+            </div>
+        </div>
+        <div class="bg-white/15 backdrop-blur-sm rounded-xl p-4">
+            <div class="text-3xl font-extrabold" id="stat-records">—</div>
+            <div class="text-blue-100 text-sm mt-0.5">Записей в базе</div>
+            <div class="text-xs text-blue-200 mt-1" id="stat-months-inline">— месяцев данных</div>
+        </div>
+        <div class="bg-white/15 backdrop-blur-sm rounded-xl p-4">
+            <div class="text-3xl font-extrabold" id="stat-avg-price">—</div>
+            <div class="text-blue-100 text-sm mt-0.5">Средняя цена рынка</div>
+            <div class="text-xs text-blue-200 mt-1">текущий период</div>
+        </div>
+        <div class="bg-white/15 backdrop-blur-sm rounded-xl p-4">
+            <div class="text-sm font-semibold" id="stat-last-run">—</div>
+            <div class="text-blue-100 text-sm mt-0.5">Последний обход</div>
+            <div class="text-xs text-blue-200 mt-1">автообновление 1-го числа</div>
+        </div>
+    </div>
+</div>
+
+<!-- Alert banner -->
+<div id="update-result" class="hidden mb-4">
+    <div class="rounded-xl p-4 flex items-center gap-3">
+        <i class="fas fa-check-circle text-xl"></i>
+        <span class="font-medium" id="update-message"></span>
+    </div>
+</div>
+
+<!-- Tabs -->
+<div class="flex flex-wrap gap-2 mb-6">
+    <button class="tab-btn active px-5 py-2 rounded-xl text-sm font-semibold border border-transparent" onclick="switchTab('dynamics', this)">
+        <i class="fas fa-chart-line mr-1.5"></i>Динамика по ЖК
+    </button>
+    <button class="tab-btn px-5 py-2 rounded-xl text-sm font-semibold border border-gray-200 text-gray-700 bg-white" onclick="switchTab('market', this)">
+        <i class="fas fa-chart-bar mr-1.5"></i>Рынок в целом
+    </button>
+    <button class="tab-btn px-5 py-2 rounded-xl text-sm font-semibold border border-gray-200 text-gray-700 bg-white" onclick="switchTab('table', this)">
+        <i class="fas fa-table mr-1.5"></i>Таблица цен
+    </button>
+</div>
+
+<!-- Tab: Dynamics -->
+<div id="tab-dynamics" class="tab-panel active">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+        <div class="px-6 py-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3">
+            <h3 class="text-base font-semibold text-gray-800 flex items-center gap-2">
+                <i class="fas fa-chart-line text-[#0088CC]"></i>
+                Динамика цен по ЖК
+            </h3>
+            <div class="flex gap-2">
+                <button onclick="switchAnalyticsChart('avg_price')" id="abtn-avg"
+                        class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#0088CC] text-white transition-colors">
+                    Средняя цена
+                </button>
+                <button onclick="switchAnalyticsChart('avg_psm')" id="abtn-psm"
+                        class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
+                    Цена за м²
+                </button>
+            </div>
+        </div>
+        <div class="p-6">
+            <div id="analytics-chart-loading" class="flex items-center justify-center py-16">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0088CC]"></div>
+                <span class="ml-3 text-gray-400 text-sm">Загрузка данных...</span>
+            </div>
+            <div id="analytics-chart-empty" class="hidden text-center py-16">
+                <i class="fas fa-chart-area text-5xl text-gray-200 mb-4"></i>
+                <p class="text-gray-500 font-medium">Недостаточно данных</p>
+                <p class="text-gray-400 text-sm mt-1">Нужно минимум 2 месяца снимков цен</p>
+                <button onclick="runPriceUpdate()" class="mt-4 px-5 py-2 bg-[#0088CC] text-white rounded-xl text-sm font-semibold hover:bg-[#006699] transition-colors">
+                    Снять цены сейчас
+                </button>
+            </div>
+            <div id="analytics-chart-container" class="hidden">
+                <div style="height:420px;position:relative">
+                    <canvas id="analyticsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tab: Market -->
+<div id="tab-market" class="tab-panel">
+    <!-- Trend cards row -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div class="kpi-card bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Средняя по рынку</span>
+                <span class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center">
+                    <i class="fas fa-home text-[#0088CC] text-sm"></i>
+                </span>
+            </div>
+            <div class="text-2xl font-bold text-gray-900" id="mkt-avg-price">—</div>
+            <div class="text-xs text-gray-400 mt-1">текущий месяц</div>
+        </div>
+        <div class="kpi-card bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Средняя за м²</span>
+                <span class="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center">
+                    <i class="fas fa-ruler-combined text-green-600 text-sm"></i>
+                </span>
+            </div>
+            <div class="text-2xl font-bold text-gray-900" id="mkt-avg-psm">—</div>
+            <div class="text-xs text-gray-400 mt-1">за квадратный метр</div>
+        </div>
+        <div class="kpi-card bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Кол-во ЖК</span>
+                <span class="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center">
+                    <i class="fas fa-building text-orange-500 text-sm"></i>
+                </span>
+            </div>
+            <div class="text-2xl font-bold text-gray-900" id="mkt-complexes">—</div>
+            <div class="text-xs text-gray-400 mt-1">с данными о ценах</div>
+        </div>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+        <div class="px-6 py-4 border-b border-gray-100">
+            <h3 class="text-base font-semibold text-gray-800 flex items-center gap-2">
+                <i class="fas fa-chart-bar text-[#0088CC]"></i>
+                Средняя стоимость по рынку
+            </h3>
+        </div>
+        <div class="p-6">
+            <div id="market-chart-loading" class="flex items-center justify-center py-12">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-[#0088CC]"></div>
+                <span class="ml-3 text-gray-400 text-sm">Загрузка...</span>
+            </div>
+            <div id="market-chart-container" class="hidden">
+                <div style="height:340px;position:relative">
+                    <canvas id="marketChart"></canvas>
+                </div>
+            </div>
+            <div id="market-chart-empty" class="hidden text-center py-10">
+                <p class="text-gray-400 text-sm">Данные появятся после накопления нескольких месяцев</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tab: Table -->
+<div id="tab-table" class="tab-panel">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+        <div class="px-6 py-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3">
+            <h3 class="text-base font-semibold text-gray-800 flex items-center gap-2">
+                <i class="fas fa-list text-[#0088CC]"></i>
+                Текущие цены по ЖК
+            </h3>
+            <div class="relative">
+                <input type="text" id="table-search" placeholder="Поиск ЖК..."
+                       oninput="filterTable(this.value)"
+                       class="pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#0088CC] w-48">
+                <i class="fas fa-search absolute left-2.5 top-2 text-gray-400 text-xs"></i>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm" id="analytics-prices-table">
+                <thead>
+                    <tr class="bg-gray-50 text-left border-b border-gray-100">
+                        <th class="px-4 py-3 font-semibold text-gray-600 cursor-pointer hover:text-[#0088CC] select-none whitespace-nowrap" onclick="sortTable('name')">
+                            ЖК <i class="fas fa-sort text-gray-300 ml-1" id="sort-icon-name"></i>
+                        </th>
+                        <th class="px-4 py-3 font-semibold text-gray-600 cursor-pointer hover:text-[#0088CC] select-none whitespace-nowrap" onclick="sortTable('city')">
+                            Город <i class="fas fa-sort text-gray-300 ml-1" id="sort-icon-city"></i>
+                        </th>
+                        <th class="px-4 py-3 font-semibold text-gray-600 text-center cursor-pointer hover:text-[#0088CC] select-none whitespace-nowrap" onclick="sortTable('properties_count')">
+                            Квартир <i class="fas fa-sort text-gray-300 ml-1" id="sort-icon-properties_count"></i>
+                        </th>
+                        <th class="px-4 py-3 font-semibold text-gray-600 text-right cursor-pointer hover:text-[#0088CC] select-none whitespace-nowrap" onclick="sortTable('latest_avg')">
+                            Средняя цена <i class="fas fa-sort text-gray-300 ml-1" id="sort-icon-latest_avg"></i>
+                        </th>
+                        <th class="px-4 py-3 font-semibold text-gray-600 text-right cursor-pointer hover:text-[#0088CC] select-none whitespace-nowrap" onclick="sortTable('latest_psm')">
+                            Цена за м² <i class="fas fa-sort text-gray-300 ml-1" id="sort-icon-latest_psm"></i>
+                        </th>
+                        <th class="px-4 py-3 font-semibold text-gray-600 text-center whitespace-nowrap">Тренд</th>
+                    </tr>
+                </thead>
+                <tbody id="analytics-table">
+                    <tr><td colspan="6" class="text-center py-10 text-gray-400">
+                        <i class="fas fa-spinner fa-spin mr-2"></i>Загрузка...
+                    </td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="px-6 py-3 border-t border-gray-100 text-xs text-gray-400" id="table-footer"></div>
+    </div>
+</div>
+
+<script>
+var analyticsData = null;
+var analyticsChart = null;
+var marketChart = null;
+var currentChartType = 'avg_price';
+var currentSort = { field: 'latest_avg', dir: 'desc' };
+var tableSearch = '';
+
+var chartColors = [
+    '#0088CC','#e74c3c','#2ecc71','#f39c12','#e91e63',
+    '#1abc9c','#e67e22','#3498db','#9c27b0','#00bcd4',
+    '#ff5722','#607d8b','#795548','#4caf50','#ff9800'
+];
+
+function switchTab(name, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('active');
+        b.classList.add('border-gray-200','text-gray-700','bg-white');
+        b.classList.remove('border-transparent');
+    });
+    document.getElementById('tab-' + name).classList.add('active');
+    btn.classList.add('active');
+    btn.classList.remove('border-gray-200','text-gray-700','bg-white');
+    btn.classList.add('border-transparent');
+
+    if (name === 'market' && analyticsData && !marketChart) renderMarketChart();
+    if (name === 'table' && analyticsData) renderTable();
+}
+
+function fmtPrice(val) {
+    if (!val) return '—';
+    if (val >= 1000000) return (val / 1000000).toFixed(1) + ' млн ₽';
+    if (val >= 1000) return Math.round(val / 1000) + ' тыс ₽';
+    return val.toLocaleString('ru-RU') + ' ₽';
+}
+
+function fmtPsm(val) {
+    if (!val) return '—';
+    return Math.round(val).toLocaleString('ru-RU') + ' ₽/м²';
+}
+
+function switchAnalyticsChart(type) {
+    currentChartType = type;
+    var isAvg = type === 'avg_price';
+    document.getElementById('abtn-avg').className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ' +
+        (isAvg ? 'bg-[#0088CC] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200');
+    document.getElementById('abtn-psm').className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ' +
+        (!isAvg ? 'bg-[#0088CC] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200');
+    renderAnalyticsChart();
+}
+
+function renderAnalyticsChart() {
+    if (!analyticsData || !analyticsData.labels || analyticsData.labels.length < 2) return;
+    if (analyticsChart) analyticsChart.destroy();
+
+    var datasets = analyticsData.datasets.map(function(ds, i) {
+        var values = currentChartType === 'avg_price' ? ds.avg_prices : ds.avg_psm;
+        return {
+            label: ds.name,
+            data: values,
+            borderColor: chartColors[i % chartColors.length],
+            backgroundColor: chartColors[i % chartColors.length] + '18',
+            borderWidth: 2,
+            pointRadius: 3,
+            pointHoverRadius: 6,
+            tension: 0.35,
+            fill: false
+        };
+    });
+
+    var ctx = document.getElementById('analyticsChart').getContext('2d');
+    analyticsChart = new Chart(ctx, {
+        type: 'line',
+        data: { labels: analyticsData.labels, datasets: datasets },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } },
+                tooltip: { callbacks: { label: function(c) {
+                    return c.dataset.label + ': ' + (currentChartType === 'avg_price' ? fmtPrice(c.parsed.y) : fmtPsm(c.parsed.y));
+                }}}
+            },
+            scales: {
+                y: { ticks: { callback: function(v) { return currentChartType === 'avg_price' ? fmtPrice(v) : fmtPsm(v); }, font: { size: 11 } }, grid: { color: 'rgba(0,0,0,0.04)' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+}
+
+function renderMarketChart() {
+    document.getElementById('market-chart-loading').classList.add('hidden');
+    if (!analyticsData || !analyticsData.labels || analyticsData.labels.length < 2) {
+        document.getElementById('market-chart-empty').classList.remove('hidden');
+        return;
+    }
+    if (marketChart) marketChart.destroy();
+    document.getElementById('market-chart-container').classList.remove('hidden');
+    var ctx = document.getElementById('marketChart').getContext('2d');
+    marketChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: analyticsData.labels,
+            datasets: [
+                { label: 'Средняя цена по рынку', data: analyticsData.market_avg_prices,
+                  backgroundColor: '#0088CC28', borderColor: '#0088CC', borderWidth: 2, borderRadius: 6, yAxisID: 'y' },
+                { label: 'Цена за м²', data: analyticsData.market_avg_psm, type: 'line',
+                  borderColor: '#e74c3c', backgroundColor: '#e74c3c18', borderWidth: 2, pointRadius: 4, tension: 0.3, yAxisID: 'y1' }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 16 } },
+                tooltip: { callbacks: { label: function(c) { return c.dataset.label + ': ' + fmtPrice(c.parsed.y); } } }
+            },
+            scales: {
+                y: { position: 'left', ticks: { callback: function(v) { return fmtPrice(v); }, font: { size: 11 } }, grid: { color: 'rgba(0,0,0,0.04)' } },
+                y1: { position: 'right', ticks: { callback: function(v) { return fmtPsm(v); }, font: { size: 11 } }, grid: { display: false } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+}
+
+function trendIcon(ds) {
+    if (!ds.avg_prices || ds.avg_prices.length < 2) return '<span class="trend-flat">—</span>';
+    var vals = ds.avg_prices.filter(function(v) { return v != null; });
+    if (vals.length < 2) return '<span class="trend-flat">—</span>';
+    var first = vals[0], last = vals[vals.length - 1];
+    if (last > first * 1.005) return '<span class="trend-up text-xs font-semibold"><i class="fas fa-arrow-up mr-0.5"></i>' + ((last/first-1)*100).toFixed(1) + '%</span>';
+    if (last < first * 0.995) return '<span class="trend-down text-xs font-semibold"><i class="fas fa-arrow-down mr-0.5"></i>' + ((1-last/first)*100).toFixed(1) + '%</span>';
+    return '<span class="trend-flat text-xs">0%</span>';
+}
+
+function sortTable(field) {
+    if (currentSort.field === field) currentSort.dir = currentSort.dir === 'asc' ? 'desc' : 'asc';
+    else { currentSort.field = field; currentSort.dir = (field === 'name' || field === 'city') ? 'asc' : 'desc'; }
+    document.querySelectorAll('[id^="sort-icon-"]').forEach(function(ic) { ic.className = 'fas fa-sort text-gray-300 ml-1'; });
+    var icon = document.getElementById('sort-icon-' + field);
+    if (icon) icon.className = 'fas fa-sort-' + (currentSort.dir === 'asc' ? 'up' : 'down') + ' text-[#0088CC] ml-1';
+    renderTable();
+}
+
+function filterTable(q) {
+    tableSearch = q.toLowerCase();
+    renderTable();
+}
+
+function renderTable() {
+    if (!analyticsData || !analyticsData.datasets) return;
+    var rows = analyticsData.datasets.slice();
+
+    if (tableSearch) {
+        rows = rows.filter(function(ds) {
+            return (ds.name || '').toLowerCase().includes(tableSearch) ||
+                   (ds.city || '').toLowerCase().includes(tableSearch);
+        });
+    }
+
+    rows.sort(function(a, b) {
+        var f = currentSort.field, va, vb;
+        if (f === 'name' || f === 'city') {
+            va = (a[f] || '').toLowerCase(); vb = (b[f] || '').toLowerCase();
+            if (va < vb) return currentSort.dir === 'asc' ? -1 : 1;
+            if (va > vb) return currentSort.dir === 'asc' ? 1 : -1;
+            return 0;
+        }
+        va = a[f] || 0; vb = b[f] || 0;
+        return currentSort.dir === 'asc' ? va - vb : vb - va;
+    });
+
+    var html = '';
+    rows.forEach(function(ds) {
+        html += '<tr class="border-b border-gray-50 hover:bg-blue-50/40 cursor-pointer transition-colors" onclick="window.open(\'/residential_complex/' + ds.id + '\', \'_blank\')">';
+        html += '<td class="px-4 py-3 font-medium text-[#0088CC] hover:underline">' + (ds.name || '—') + '</td>';
+        html += '<td class="px-4 py-3 text-gray-500 text-xs">' + (ds.city || '—') + '</td>';
+        html += '<td class="px-4 py-3 text-center text-gray-700">' + (ds.properties_count ? ds.properties_count.toLocaleString('ru-RU') : '—') + '</td>';
+        html += '<td class="px-4 py-3 text-right font-semibold text-gray-900">' + fmtPrice(ds.latest_avg) + '</td>';
+        html += '<td class="px-4 py-3 text-right text-gray-600">' + fmtPsm(ds.latest_psm) + '</td>';
+        html += '<td class="px-4 py-3 text-center">' + trendIcon(ds) + '</td>';
+        html += '</tr>';
+    });
+    if (!html) html = '<tr><td colspan="6" class="text-center py-10 text-gray-400">Ничего не найдено</td></tr>';
+    document.getElementById('analytics-table').innerHTML = html;
+    document.getElementById('table-footer').textContent = 'Показано ' + rows.length + ' ЖК из ' + analyticsData.datasets.length;
+}
+
+function runPriceUpdate() {
+    var btn = document.getElementById('btn-update');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Выполняется обход...';
+    fetch('/api/admin/run-price-snapshot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-sync-alt mr-2"></i>Запустить обход';
+        var result = document.getElementById('update-result');
+        var box = result.querySelector('div');
+        var icon = box.querySelector('i');
+        var msg = document.getElementById('update-message');
+        if (res.success) {
+            box.className = 'bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3';
+            icon.className = 'fas fa-check-circle text-green-600 text-lg';
+            msg.className = 'text-green-800 font-medium';
+            msg.textContent = 'Обход завершён. Записей: ' + res.total_records + ', дата: ' + res.last_recorded;
+            loadAnalytics();
+        } else {
+            box.className = 'bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3';
+            icon.className = 'fas fa-times-circle text-red-600 text-lg';
+            msg.className = 'text-red-800 font-medium';
+            msg.textContent = 'Ошибка: ' + (res.error || 'неизвестная ошибка');
+        }
+        result.classList.remove('hidden');
+        setTimeout(function() { result.classList.add('hidden'); }, 8000);
+    })
+    .catch(function() {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-sync-alt mr-2"></i>Запустить обход';
+    });
+}
+
+function loadAnalytics() {
+    fetch('/api/admin/price-analytics')
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+            document.getElementById('analytics-chart-loading').classList.add('hidden');
+            if (!res.success) return;
+            analyticsData = res;
+
+            // Fill KPI header
+            document.getElementById('stat-complexes').textContent = res.stats.complexes_tracked;
+            document.getElementById('stat-records').textContent = (res.stats.total_records || 0).toLocaleString('ru-RU');
+            document.getElementById('stat-months-inline').textContent = (res.stats.unique_months || 0) + ' месяцев данных';
+            document.getElementById('stat-last-run').textContent = res.stats.last_recorded || 'Ещё не запускался';
+            document.getElementById('analytics-subtitle').textContent =
+                'Отслеживание ' + res.stats.complexes_tracked + ' ЖК · ' + (res.stats.total_records || 0).toLocaleString('ru-RU') + ' снимков';
+
+            // Fill market KPI cards
+            if (res.market_avg_prices && res.market_avg_prices.length > 0) {
+                var lastAvg = res.market_avg_prices.filter(function(v){ return v != null; }).slice(-1)[0];
+                var lastPsm = res.market_avg_psm && res.market_avg_psm.filter(function(v){ return v != null; }).slice(-1)[0];
+                document.getElementById('mkt-avg-price').textContent = fmtPrice(lastAvg);
+                document.getElementById('mkt-avg-psm').textContent = fmtPsm(lastPsm);
+            }
+            document.getElementById('mkt-complexes').textContent = res.stats.complexes_tracked;
+
+            if (res.labels && res.labels.length >= 2) {
+                document.getElementById('analytics-chart-container').classList.remove('hidden');
+                renderAnalyticsChart();
+            } else {
+                document.getElementById('analytics-chart-empty').classList.remove('hidden');
+            }
+
+            // If table tab is active, render it
+            if (document.getElementById('tab-table').classList.contains('active')) renderTable();
+        })
+        .catch(function() {
+            document.getElementById('analytics-chart-loading').classList.add('hidden');
+            document.getElementById('analytics-chart-empty').classList.remove('hidden');
+        });
+}
+
+document.addEventListener('DOMContentLoaded', loadAnalytics);
+</script>
+{% endblock %}

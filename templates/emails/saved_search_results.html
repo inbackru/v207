@@ -1,0 +1,64 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Новые результаты поиска | InBack{% endblock %}
+
+{% block content %}
+<h1>Новые результаты поиска</h1>
+
+<p>Здравствуйте{% if user and user.full_name %}, {{ user.full_name.split()[0] }}{% endif %}!</p>
+
+<div class="highlight-box" style="text-align: center;">
+    <div style="font-size: 20px; font-weight: 600; color: #0088CC; margin-bottom: 8px;">"{{ search_name }}"</div>
+    <div style="font-size: 18px; font-weight: 700; color: #16a34a;">Найдено: {{ properties_count }} объектов</div>
+</div>
+
+<div style="background: #fef3c7; border: 1px solid #fde68a; border-radius: 8px; padding: 16px 20px; margin: 24px 0;">
+    <p style="margin: 0; font-size: 15px; color: #92400e;">
+        По вашему сохраненному поиску появились новые объекты, которые соответствуют вашим критериям.
+    </p>
+</div>
+
+{% if properties_list %}
+<h2>Новые объекты:</h2>
+{% for property in properties_list[:5] %}
+<div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px 20px; margin: 12px 0; background: #fafafa;">
+    <div style="font-weight: 600; color: #1d1d1f; margin-bottom: 6px;">{{ property.title or property.name }}</div>
+    <div style="color: #6b7280; font-size: 14px; margin-bottom: 8px;">
+        {% if property.rooms %}{{ property.rooms }}-комн{% endif %}
+        {% if property.area %} &middot; {{ property.area }} м²{% endif %}
+        {% if property.district or property.complex_name %} &middot; {{ property.district or property.complex_name }}{% endif %}
+    </div>
+    {% if property.price %}
+    <div style="font-size: 18px; font-weight: 700; color: #0088CC;">
+        {{ "{:,}".format(property.price|int).replace(',', ' ') }} ₽
+    </div>
+    {% endif %}
+</div>
+{% endfor %}
+
+{% if properties_count > 5 %}
+<p style="text-align: center; color: #6b7280; font-size: 14px;">
+    ... и еще {{ properties_count - 5 }} объектов
+</p>
+{% endif %}
+{% endif %}
+
+<div style="text-align: center; margin: 32px 0;">
+    <a href="{{ search_url or (base_url + '/properties') }}" class="btn-primary">
+        Посмотреть все результаты
+    </a>
+</div>
+
+<div style="background: #f0f9ff; border-left: 4px solid #0088CC; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 24px 0;">
+    <p style="margin: 0; font-size: 14px; color: #424245; line-height: 1.6;">
+        Рынок недвижимости динамичен. Понравившиеся объекты могут быть быстро проданы, поэтому рекомендуем не затягивать с просмотром.
+    </p>
+</div>
+
+<div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #e5e7eb; text-align: center;">
+    <p style="font-size: 13px; color: #9ca3af; margin: 0;">
+        Чтобы отписаться от уведомлений, перейдите в
+        <a href="{{ base_url }}/saved-searches" style="color: #6b7280; text-decoration: underline;">настройки поисков</a>.
+    </p>
+</div>
+{% endblock %}
